@@ -10,17 +10,9 @@ interface CategoryPageProps {
   params: Promise<CategoryPageParams>;
 }
 
-export async function generateStaticParams() {
-  const categories = ['tutorials', 'news', 'reviews'];
-  const locales = ['en', 'th'];
-
-  return locales.flatMap(locale =>
-    categories.map(category => ({
-      slug: category,
-      locale,
-    }))
-  );
-}
+// ลบ generateStaticParams ออกไปเลย
+// เมื่อไม่มี generateStaticParams Next.js จะใช้ dynamic rendering
+// หรือ on-demand static generation ตามการตั้งค่า
 
 export async function generateMetadata({ params }: { params: Promise<CategoryPageParams> }): Promise<Metadata> {
   return generateDynamicMetadata({ params, filterType: 'category' });
