@@ -1,23 +1,20 @@
 # Multi-stage build สำหรับ Railway
-# Stage 1: Build stage
-FROM oven/bun:1-alpine AS builder
+# Stage 1: Build stage (ใช้ Node.js สำหรับ build)
+FROM node:18-alpine AS builder
 
 WORKDIR /app
 
-# คัดลอกไฟล์ package.json และ bun.lockb
-COPY package.json bun.lockb* ./
+# คัดลอกไฟล์ package.json และ package-lock.json
+COPY package.json package-lock.json* ./
 
 # ติดตั้ง dependencies รวมทั้ง devDependencies
-RUN bun install --frozen-lockfile
+RUN npm ci
 
 # คัดลอก source code และ config files
 COPY . .
 
-# Debug: แสดงรายการ dependencies ที่ติดตั้ง
-RUN bun list | grep -E "(next-intl|typescript)"
-
 # Build Next.js application
-RUN bun run build
+RUN npm run build
 
 # Stage 2: Production stage
 FROM oven/bun:1-alpine AS runner
@@ -36,7 +33,7 @@ COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public
 
 # ติดตั้งเฉพาะ production dependencies
-RUN bun install --frozen-lockfile --production
+RUN npm ci --only=production
 
 # ตั้งค่าการเป็นเจ้าของไฟล์
 RUN chown -R nextjs:bunjs /app
