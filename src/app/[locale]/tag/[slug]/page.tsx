@@ -10,17 +10,9 @@ interface TagPageProps {
   params: Promise<TagPageParams>;
 }
 
-export async function generateStaticParams() {
-  const tags = ['beginner', 'advanced', 'tips'];
-  const locales = ['en', 'th'];
-
-  return locales.flatMap(locale =>
-    tags.map(tag => ({
-      slug: tag,
-      locale,
-    }))
-  );
-}
+// ลบ generateStaticParams ออกไปเลย
+// เมื่อไม่มี generateStaticParams Next.js จะใช้ dynamic rendering
+// หรือ on-demand static generation ตามการตั้งค่า
 
 export async function generateMetadata({ params }: { params: Promise<TagPageParams> }): Promise<Metadata> {
   return generateDynamicMetadata({ params, filterType: 'tag' });
