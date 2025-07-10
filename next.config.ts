@@ -1,7 +1,7 @@
 import type { NextConfig } from 'next';
 import withMDX from '@next/mdx';
 import createNextIntlPlugin from 'next-intl/plugin';
-import path from 'path';
+
 
 const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
 

@@ -170,6 +170,8 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
 
   const debouncedSetFontSize = useDebounce(setFontSize, 300);
 
+  // Find this useEffect around line 120 and update the dependency array:
+
   useEffect(() => {
     setIsClient(true);
     setIsMobile(window.innerWidth <= 768);
@@ -232,7 +234,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
       window.removeEventListener("resize", handleResize);
       window.removeEventListener("scroll", handleScroll);
     };
-  }, [article.id, slug, showAlert, article.author.username]);
+  }, [article.id, slug, showAlert, article.author.username, t]); // Add 't' here
 
   // Update editor font size
   useEffect(() => {

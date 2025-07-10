@@ -1,6 +1,6 @@
 // DownloadModal.tsx
 "use client";
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import { useTranslations } from "next-intl";
 import { DownloadFile, TranslationFile } from "./Interfaces";
 import {
@@ -81,7 +81,7 @@ const DownloadModal: React.FC<DownloadModalProps> = ({
     return `${fileSize.toFixed(1)} ${units[index]}`;
   };
 
-  const sortItems = <T extends DownloadFile | TranslationFile>(items: T[]): T[] => {
+  const sortItems = useCallback(<T extends DownloadFile | TranslationFile>(items: T[]): T[] => {
     return [...items].sort((a, b) => {
       let comparison = 0;
 
@@ -93,7 +93,7 @@ const DownloadModal: React.FC<DownloadModalProps> = ({
 
       return sortOrder === "asc" ? comparison : -comparison;
     });
-  };
+  }, [sortBy, sortOrder]);
 
   const filteredDownloads = useMemo(() => {
     const filtered = downloads.filter((item) =>
@@ -101,7 +101,7 @@ const DownloadModal: React.FC<DownloadModalProps> = ({
       ("description" in item && typeof item.description === 'string' && item.description?.toLowerCase().includes(searchQuery.toLowerCase()))
     );
     return sortItems(filtered);
-  }, [downloads, searchQuery, sortBy, sortOrder]);
+  }, [downloads, searchQuery, sortItems]);
 
   const filteredTranslationFiles = useMemo(() => {
     const filtered = translationFiles.filter((item) =>
@@ -109,7 +109,7 @@ const DownloadModal: React.FC<DownloadModalProps> = ({
       ("translator" in item && item.translator?.name.toLowerCase().includes(searchQuery.toLowerCase()))
     );
     return sortItems(filtered);
-  }, [translationFiles, searchQuery, sortBy, sortOrder]);
+  }, [translationFiles, searchQuery, sortItems]);
 
   const FileCard = ({ item, index }: { item: DownloadFile | TranslationFile; index: number }) => (
     <motion.div
