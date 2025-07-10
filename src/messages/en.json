@@ -1,0 +1,456 @@
+{
+  "DownloadModal": {
+    "title": "Download Files",
+    "close": "Close",
+    "searchPlaceholder": "Search files...",
+    "download": "Download",
+    "copy": "Copy",
+    "copied": "Copied",
+    "copyLink": "Copy Link",
+    "noSearchResults": "No files found matching your search",
+    "tryDifferentSearch": "Try a different search term",
+    "noFiles": "No files available",
+    "downloadFiles": "Download Files",
+    "translationFiles": "Translation Files",
+    "sortByDate": "Sort by date",
+    "sortByName": "Sort by name",
+    "translatedBy": "Translated by {name} ({language})"
+  },
+  "homePage": {
+    "welcomeTo": "Welcome to Chanom",
+    "hub": "Hub",
+    "heroDescription": "Join a rapidly growing community of H-game developers and creators, sharing ideas and crafting thrilling experiences together!",
+    "forumStats": {
+      "activeMembers": "Active Members",
+      "totalPosts": "Total Posts",
+      "categories": "Categories",
+      "onlineNow": "Online Now"
+    },
+    "liveActivity": "Live Activity",
+    "quickNavigation": "Quick Navigation",
+    "communityGuidelines": "Community Guidelines",
+    "communityGuidelinesDescription": "Join our thriving community of passionate developers. Follow our guidelines to keep discussions productive and welcoming for everyone.",
+    "readGuidelines": "Read Guidelines",
+    "recentActivity": {
+      "repliedTo": "replied to",
+      "created": "created",
+      "liked": "liked",
+      "pinned": "pinned",
+      "answered": "answered"
+    },
+    "quickLinks": {
+      "latestPosts": "Latest Posts",
+      "popularTopics": "Popular Topics",
+      "allCategories": "All Categories",
+      "memberDirectory": "Member Directory",
+      "communityGuidelinesLink": "Community Guidelines",
+      "helpSupport": "Help & Support"
+    },
+    "forumCategoriesTitle": "Forum Categories",
+    "lockedCategoryMessage": "This category is locked",
+    "lockedCategoryTooltip": "Locked category - cannot be accessed",
+    "lockedCategoryAriaLabel": "This category is locked",
+    "externalLinkMessage": "External links open in a new tab | Locked categories cannot be accessed",
+    "categories": {
+      "announcements": {
+        "name": "Announcements",
+        "description": "News and important announcements from admins"
+      },
+      "generalDiscussion": {
+        "name": "General Discussion",
+        "description": "For discussing general topics that don’t fit other categories"
+      },
+      "hGames": {
+        "name": "H-Games",
+        "description": "Collection of adult games and visual novels"
+      },
+      "tools": {
+        "name": "Tools",
+        "description": "Tools created by the community"
+      },
+      "videos": {
+        "name": "Videos",
+        "description": "H-Videos"
+      },
+      "vipRoom": {
+        "name": "VIP Room",
+        "description": "For VIP members"
+      }
+    }
+  },
+
+  "SearchFilters": {
+    "gameSearch": "Game Search",
+    "searchGame": "Search for your favorite games...",
+    "search": "Search term",
+    "sequentialCode": "Game Sequential Code",
+    "activeFilters": "Active Filters",
+    "clearAll": "Clear All",
+    "allCategories": "All Categories",
+    "allTags": "All Tags",
+    "allPlatforms": "All Platforms"
+  },
+
+  "PrivacyPolicy": {
+    "title": "Privacy Policy",
+    "description": "Your privacy matters to us. Learn how we protect and handle your personal information.",
+    "lastUpdated": "Last updated: {date}",
+    "about": {
+      "title": "About This Policy",
+      "description": "This Privacy Policy describes our policies and procedures regarding the collection, use, and disclosure of your information when you use our Service. By using our Service, you acknowledge that you have read and understood this Privacy Policy."
+    },
+    "definitions": {
+      "title": "Key Definitions",
+      "service": {
+        "title": "Service",
+        "description": "Refers to the Chanomhub website accessible at https://chanomhub.online/"
+      },
+      "personalData": {
+        "title": "Personal Data",
+        "description": "Any information relating to an identified or identifiable individual"
+      },
+      "usageData": {
+        "title": "Usage Data",
+        "description": "Data collected automatically through your use of the Service"
+      },
+      "cookies": {
+        "title": "Cookies",
+        "description": "Small data files stored on your device by websites"
+      },
+      "user": {
+        "title": "You/User",
+        "description": "The individual or entity accessing or using the Service"
+      }
+    },
+    "collection": {
+      "title": "Information We Collect",
+      "personal": {
+        "title": "Personal Information",
+        "description": "We may collect personally identifiable information that you voluntarily provide:",
+        "items": {
+          "email": "Email address",
+          "name": "Name (first and last)",
+          "profile": "Profile information from social media",
+          "preferences": "Communication preferences",
+          "other": "Any other information you provide"
+        }
+      },
+      "automatic": {
+        "title": "Automatically Collected Information",
+        "description": "When you use our Service, we may automatically collect:",
+        "items": {
+          "device": "Device information (IP, browser, OS)",
+          "usage": "Usage patterns and interactions",
+          "log": "Log files and analytics data",
+          "location": "Location data (if permitted)",
+          "cookies": "Cookies and tracking technologies"
+        }
+      },
+      "social": {
+        "title": "Third-Party Social Media Integration",
+        "description": "If you choose to connect your account through social media platforms (Google, Facebook, Instagram, Twitter, LinkedIn), we may access information associated with those accounts in accordance with their respective privacy policies and your authorization settings."
+      }
+    },
+    "usage": {
+      "title": "How We Use Your Information",
+      "description": "We may use your information for various legitimate business purposes:",
+      "items": {
+        "provide": "Providing, maintaining, and improving our Service",
+        "manage": "Managing your account and user experience",
+        "process": "Processing transactions and fulfilling contracts",
+        "communicate": "Communicating about services and updates",
+        "analyze": "Analyzing usage patterns to enhance Service",
+        "security": "Ensuring security and preventing fraud",
+        "comply": "Complying with legal obligations",
+        "business": "Business operations and partnerships"
+      }
+    },
+    "sharing": {
+      "title": "Information Sharing and Disclosure",
+      "description": "We may share your information in the following circumstances:",
+      "items": {
+        "providers": {
+          "title": "Service Providers",
+          "description": "With trusted third-party vendors who assist in operating our Service"
+        },
+        "legal": {
+          "title": "Legal Requirements",
+          "description": "When required by law, court order, or government authority"
+        },
+        "transfers": {
+          "title": "Business Transfers",
+          "description": "In connection with mergers, acquisitions, or asset sales"
+        },
+        "consent": {
+          "title": "Consent",
+          "description": "When you have given explicit permission"
+        },
+        "public": {
+          "title": "Public Areas",
+          "description": "Information you choose to share publicly may be visible to other users"
+        },
+        "safety": {
+          "title": "Safety and Security",
+          "description": "To protect rights, property, or safety of users and the public"
+        }
+      }
+    },
+    "cookies": {
+      "title": "Cookies and Tracking Technologies",
+      "description": "We use cookies and similar technologies to enhance your experience:",
+      "items": {
+        "essential": {
+          "title": "Essential Cookies",
+          "description": "Required for basic website functionality and security."
+        },
+        "functional": {
+          "title": "Functional Cookies",
+          "description": "Remember your preferences and settings for a personalized experience."
+        },
+        "analytics": {
+          "title": "Analytics Cookies",
+          "description": "Help us understand how visitors interact with our website."
+        }
+      },
+      "note": {
+        "title": "Note",
+        "description": "You can control cookie settings through your browser preferences. However, disabling certain cookies may affect website functionality."
+      }
+    },
+    "security": {
+      "title": "Data Security",
+      "description": "We implement appropriate technical and organizational measures to protect your personal information. However, no method of transmission over the internet or electronic storage is completely secure."
+    },
+    "retention": {
+      "title": "Data Retention",
+      "description": "We retain your personal information only as long as necessary for the purposes outlined in this policy, to comply with legal obligations, resolve disputes, and enforce our agreements."
+    },
+    "contact": {
+      "title": "Contact Information",
+      "description": "If you have questions, concerns, or requests regarding this Privacy Policy or our data practices, please contact us:",
+      "website": "Website Contact",
+      "response": "We will respond to your inquiries within a reasonable timeframe and in accordance with applicable law."
+    },
+    "compliance": {
+      "title": "Legal Compliance",
+      "description": "This Privacy Policy is designed to comply with various privacy laws and regulations. The specific rights and protections available to you may vary depending on your location and the applicable legal framework."
+    }
+  },
+  "Navbar": {
+    "extensions": "Extensions",
+    "loadApp": "Download App",
+    "webStatus": "Web Status",
+    "contact": "Contact",
+    "search": "Search",
+    "member": "Member",
+    "dashboard": "Dashboard",
+    "profile": "Profile",
+    "settings": "Settings",
+    "logout": "Logout",
+    "language": "Language",
+    "english": "English",
+    "thai": "Thai",
+    "toggleTheme": "Toggle theme",
+    "toggleMenu": "Toggle menu",
+    "signUp": "Sign Up"
+
+  },
+  "SearchResults": {
+    "found": "Found",
+    "items": "items",
+    "for": "for",
+    "searchCompleted": "Search completed in",
+    "filtersActive": "Filters active",
+    "list": "List",
+    "grid": "Grid",
+    "showing": "Showing",
+    "to": "to",
+    "of": "of",
+    "previous": "Previous",
+    "next": "Next",
+    "noGamesFound": "No games found",
+    "tryAdjusting": "Try adjusting your search criteria or clearing some filters",
+    "loading": "Loading..."
+  },
+  "dynamicFilterPage": {
+    "home": "Home",
+    "title_platforms": "{slug} Articles | Chanomhub",
+    "title_tag": "{slug} Tag | Chanomhub",
+    "title_category": "{slug} Category | Chanomhub",
+    "description_platforms": "Browse our collection of articles about {slug}",
+    "description_tag": "Explore articles tagged with {slug}",
+    "description_category": "Explore articles in the {slug} category",
+    "rss_title_platforms": "RSS Feed for {slug} articles",
+    "rss_title_tag": "RSS Feed for {slug} tag articles",
+    "rss_feed": "RSS Feed",
+    "description": "Discover {count} articles in {slug}",
+    "filter_types": {
+      "platforms": "Platforms",
+      "tag": "Tag",
+      "category": "Category"
+    },
+    "stats": {
+      "articles": "Articles",
+      "likes": "Likes",
+      "authors": "Authors",
+      "tags": "Tags",
+      "categories": "Categories",
+      "engines": "Engines",
+      "popular_tags": "Popular Tags",
+      "top_authors": "Top Authors",
+      "additional_stats": "Additional Stats",
+      "total_platforms": "Total Platforms",
+      "game_engines": "Game Engines",
+      "avg_likes": "Avg Likes",
+      "recent_articles": "Recent Articles",
+      "most_popular": "Most Popular"
+    },
+    "author_stats": "{articleCount} articles • {favoritesCount} likes",
+    "by_author": "by {username}",
+    "sort": {
+      "label": "Sort",
+      "latest": "Latest",
+      "oldest": "Oldest",
+      "most_popular": "Most Popular"
+    },
+    "no_articles_title": "No Articles Found",
+    "no_articles": "No articles found for {filterType} \"{slug}\" at the moment."
+  },
+  "rss": {
+    "tag": {
+      "channel_title": "Articles tagged \"{tag}\" | Chanomhub",
+      "channel_description": "Latest articles tagged with \"{tag}\"",
+      "error": "Failed to generate RSS feed"
+    },
+    "platforms": {
+      "channel_title": "{platform} Articles | Chanomhub",
+      "channel_description": "Latest articles about {platform}",
+      "error": "Failed to generate RSS feed"
+    },
+    "tagFeedTitle": "Articles tagged \"{tagName}\" | Chanomhub",
+    "tagFeedDescription": "Latest articles tagged with \"{tagName}\"",
+    "platformFeedTitle": "{platformName} Articles | Chanomhub",
+    "platformFeedDescription": "Latest articles about {platformName}"
+  },
+  "GamesPage": {
+    "title": "Games - ChanomHub",
+    "description": "Browse our collection of adult games and visual novels. Download free games, mods, and translations.",
+    "discovery": {
+      "title": "Games Discovery",
+      "description": "Find and explore amazing games and articles"
+    },
+    "error": {
+      "title": "Unable to Load Games",
+      "description": "There was an error loading the games page. Please try again later.",
+      "retry": "Retry"
+    },
+    "metadata": {
+      "title": "Games - ChanomHub",
+      "description": "Browse our collection of adult games and visual novels. Download free games, mods, and translations."
+    },
+    "debug": {
+      "title": "🐛 Debug Info (Page {0}) - CLIENT SIDE",
+      "urlParams": "URL Search Params",
+      "pageParam": "Page Param",
+      "parsedPage": "Parsed Page",
+      "expectedOffset": "Expected MeiliSearch Offset",
+      "actualOffset": "Actual Offset from Response",
+      "searchQuery": "Search Query",
+      "sequentialCode": "Sequential Code",
+      "pageSize": "Page Size",
+      "totalResults": "Total Results",
+      "resultsCount": "Results Count",
+      "processingTime": "Processing Time",
+      "filters": "Filters",
+      "firstResultId": "First Result ID"
+    }
+  },
+  "ArticleBody": {
+    "copySuccess": "Code copied successfully",
+    "copyButtonTitle": "Click to copy",
+    "translateLink": "Translate this article"
+  },
+  "ArticleContent": {
+    "download_error": "Failed to fetch download files"
+    
+  },
+  "Register": {
+    "title": "Register",
+    "username": "Username",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "usernamePlaceholder": "Enter your username",
+    "emailPlaceholder": "Enter your email",
+    "passwordPlaceholder": "Enter your password",
+    "confirmPasswordPlaceholder": "Confirm your password",
+    "registerButton": "Register",
+    "loginLink": "Already have an account?",
+    "loginLinkText": "Login here",
+    "successMessage": "Registration successful! Redirecting...",
+    "fillAllFieldsMessage": "Please fill in all fields",
+    "passwordsDoNotMatchMessage": "Passwords do not match",
+    "invalidResponseMessage": "Registration failed: Invalid response",
+    "registrationFailedMessage": "Registration failed",
+    "unexpectedErrorMessage": "Registration failed due to an unexpected error"
+  },
+  "Login": {
+    "title": "Login",
+    "email": "Email",
+    "password": "Password",
+    "emailPlaceholder": "Enter your email",
+    "passwordPlaceholder": "Enter your password",
+    "loginButton": "Login",
+    "registerLink": "Create an account",
+    "homeLink": "Back to Home",
+    "successMessage": "Login successful! Redirecting...",
+    "invalidResponseMessage": "Login failed: Invalid response",
+    "invalidCredentialsMessage": "Invalid credentials",
+    "unexpectedErrorMessage": "Login failed due to an unexpected error",
+    "loading": "Logging in..."
+  },
+  "sidebar": {
+    "author": {
+      "noBio": "No history yet",
+      "follow": "Following author",
+      "following": "Following"
+    },
+    "bookmark": {
+      "bookmark": "Bookmarked article",
+      "bookmarked": "Bookmarked"
+    },
+    "status": {
+      "published": "Published",
+      "draft": "Draft",
+      "archived": "Archived"
+    },
+    "articleInfo": {
+      "title": "Article information",
+      "published": "Published",
+      "updated": "Updated",
+      "engine": "Engine",
+      "status": "Status",
+      "version": "Edited"
+    },
+    "downloads": {
+      "title": "Downloads and translations",
+      "viewFiles": "View files ({count})"
+    },
+    "platforms": {
+      "title": "Platforms"
+    },
+    "tags": {
+      "title": "Tags"
+    },
+    "categories": {
+      "title": "Categories"
+    }
+  },
+  "ad-redirect": {
+    "Loading": "Loading...",
+    "Redirecting": "Redirecting...",
+    "countdown": "seconds...",
+    "Decrypting": "Decrypting link...",
+    "Continue": "Continue to Content"
+  }
+}

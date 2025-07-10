@@ -1,0 +1,63 @@
+{
+  "key": "application",
+  "content": {
+    "nav": {
+      "home": "Home",
+      "downloads": "Downloads",
+      "docs": "Documentation",
+      "api": "API"
+    },
+    "hero": {
+      "versionBadge": "✨ Latest Version v0.9.2 ✨",
+      "welcome": "Welcome to",
+      "future": "the Future",
+      "description": "Discover the program that will revolutionize your workflow with cutting-edge technology and top performance.",
+      "downloadButton": "Downloads",
+      "howToUseButton": "How to Use"
+    },
+    "techStack": {
+      "title": "Technologies Used"
+    },
+    "search": {
+      "title": "Search Everything Quickly",
+      "placeholder": "Search for content...",
+      "description": "Connected to a high-performance search engine"
+    },
+    "cta": {
+      "title": "Get Started Today",
+      "description": "Download and install the application for free",
+      "windows": "Windows",
+      "macos": "macOS",
+      "linux": "Linux"
+    },
+    "footer": {
+      "copyright": "© 2025 ChanomHub. All rights reserved."
+    },
+    "features": {
+      "lightningFast": {
+        "title": "Lightning Fast",
+        "description": "Built with Rust and Tauri for maximum performance"
+      },
+      "secureReliable": {
+        "title": "Secure & Reliable",
+        "description": "Enterprise-grade security with continuous updates"
+      },
+      "developerFriendly": {
+        "title": "Developer Friendly",
+        "description": "Clean APIs and comprehensive documentation"
+      }
+    },
+    "themeSelector": {
+      "title": "Choose Your Theme",
+      "description": "Customize the application to match your style",
+      "themes": {
+        "cyber": "Cyber",
+        "neon": "Neon",
+        "matrix": "Matrix",
+        "sunset": "Sunset",
+        "arctic": "Arctic"
+      }
+    }
+  },
+  "locale": "en"
+}

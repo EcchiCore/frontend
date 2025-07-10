@@ -1,0 +1,53 @@
+import type { NextConfig } from 'next';
+import withMDX from '@next/mdx';
+import createNextIntlPlugin from 'next-intl/plugin';
+import path from 'path';
+
+const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
+
+// Configure MDX
+const withMDXEnhanced = withMDX({
+  extension: /\.mdx?$/,
+  options: { remarkPlugins: [], rehypePlugins: [] },
+});
+
+// Next.js configuration
+const nextConfig: NextConfig = {
+  output: 'standalone',
+  distDir: '.next',
+  images: {
+    loader: 'custom',
+    loaderFile: './src/app/[locale]/lib/imageLoader.ts',
+    remotePatterns: [
+      { protocol: 'http', hostname: 'res.cloudinary.com', pathname: '/**' },
+      { protocol: 'https', hostname: 'resize.chanomhub.online', pathname: '/**' },
+      {
+        protocol: 'https',
+        hostname: 'icons.duckduckgo.com',
+        pathname: '/ip3/**',
+      },
+    ],
+  },
+  compiler: { removeConsole: process.env.NODE_ENV === 'production' },
+  poweredByHeader: false,
+  reactStrictMode: true,
+  compress: true,
+  pageExtensions: ['js', 'jsx', 'ts', 'tsx', 'md', 'mdx'],
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          { key: 'Access-Control-Allow-Origin', value: '*' },
+          { key: 'Access-Control-Allow-Methods', value: 'GET,POST,PUT,DELETE,OPTIONS' },
+          { key: 'Access-Control-Allow-Headers', value: 'X-Requested-With, Content-Type, Authorization' },
+        ],
+      },
+    ];
+  },
+  turbopack: {
+  },
+};
+
+// Apply both withNextIntl and withMDXEnhanced
+export default withNextIntl(withMDXEnhanced(nextConfig));

@@ -1,0 +1,10 @@
+# ไฟล์และโฟลเดอร์ที่ไม่ต้องการรวมใน Docker image
+Dockerfile
+.dockerignore
+node_modules
+npm-debug.log
+README.md
+
+.git
+.env
+.env.local

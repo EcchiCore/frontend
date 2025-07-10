@@ -1,0 +1,63 @@
+version: '3.4'
+services:
+  nextjs:
+    image: nextjs-frontend
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      args:
+        NEXT_PUBLIC_STRAPI_BASE_URL: ${NEXT_PUBLIC_STRAPI_BASE_URL}
+    env_file:
+      - .env
+    environment:
+      NEXT_PUBLIC_STRAPI_BASE_URL: ${NEXT_PUBLIC_STRAPI_BASE_URL}
+    expose:
+      - 3000
+    restart: unless-stopped
+    networks:
+      - frontend
+      - proxy_internal
+    depends_on:
+      - proxy
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+ 
+  proxy:
+    image: 'jc21/nginx-proxy-manager:latest'
+    restart: unless-stopped
+    ports:
+      - '80:80'
+      - '443:443'
+      - '81:81'
+    volumes:
+      - npm_data:/data
+      - npm_letsencrypt:/etc/letsencrypt
+    networks:
+      - frontend
+      - proxy_internal
+      - backend  # เพิ่ม network backend เพื่อให้เข้าถึง strapi ได้
+    logging:
+      driver: "json-files"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  npm_data:
+    driver: local
+  npm_letsencrypt:
+    driver: local
+
+networks:
+  frontend:
+    name: chanom_frontend
+    driver: bridge
+  proxy_internal:
+    name: chanom_proxy
+    driver: bridge
+    internal: true
+  backend:
+    name: chanom_backend
+    external: true  # สำคัญ! เพื่อใช้ network ที่สร้างจาก backend compose

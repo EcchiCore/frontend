@@ -1,0 +1,120 @@
+{
+  "pageTitle": "ดาวน์โหลดโปรแกรม",
+  "helpText": "ต้องการความช่วยเหลือในการติดตั้ง? ดูคู่มือการติดตั้งของเรา",
+  "helpLink": "/docs",
+
+  "defaultSystemRequirements": {
+    "os": ["Windows 10/11", "macOS 11.0+", "Ubuntu 20.04+"],
+    "processor": "Intel Core i3 หรือ AMD Ryzen 3 ขึ้นไป",
+    "ram": "4 GB",
+    "storage": "120 MB พื้นที่ว่าง",
+    "graphics": "การ์ดจอที่รองรับ OpenGL 3.3 ขึ้นไป"
+  },
+
+  "additionalRequirements": [
+    "การเชื่อมต่ออินเทอร์เน็ต",
+    "ความละเอียดหน้าจอขั้นต่ำ 1280 x 720"
+  ],
+
+  "latestVersion": "0.8.0-beta",
+
+  "experimental": {
+    "version": "0.8.0-beta",
+    "date": "17/5/2025",
+    "size": "27 MB",
+    "notes": "ตรวจสอบใน Github Chanomhub Desktop 0.8.0",
+    "warning": "รุ่นทดลองนี้อาจมีความไม่เสถียรและข้อผิดพลาด ใช้ในการทดสอบเท่านั้น ไม่แนะนำให้ใช้งานในสภาพแวดล้อมการผลิต",
+    "systemRequirements": {
+      "processor": "Intel Core i5 หรือ AMD Ryzen 5 ขึ้นไป",
+      "ram": "4 GB",
+      "storage": "120 MB พื้นที่ว่าง",
+      "graphics": "การ์ดจอที่รองรับ OpenGL 4.0 ขึ้นไป"
+    },
+    "downloads": {
+      "windows": "https://github.com/Chanomhub/Chanomhub-Desktop/releases/tag/0.8.0"
+    }
+  },
+
+  "versions": [
+    {
+      "version": "0.8.0-beta",
+      "date": "17/5/2025",
+      "size": "27 MB",
+      "notes": "ตรวจสอบใน Github Chanomhub Desktop 0.8.0",
+      "status": "ทดลอง",
+      "downloads": {
+        "windows": "https://github.com/Chanomhub/Chanomhub-Desktop/releases/tag/0.8.0"
+      }
+    },
+    {
+      "version": "0.7.0-beta",
+      "date": "3/5/2025",
+      "size": "26 MB",
+      "notes": "ยกเลิกการดาวโหลด, แตกไฟล์, จัดเก็บเกมที่โหลด",
+      "status": "ทดลอง",
+      "downloads": {
+        "windows": "https://github.com/Chanomhub/Chanomhub-Desktop/releases/tag/0.7.0"
+      }
+    },
+    {
+      "version": "0.6.0-beta",
+      "date": "21/4/2025",
+      "size": "30 MB",
+      "notes": "ปรับปรุง UI หน้าเขียน articles, แก้ปัญหาดาวน์โหลดไฟล์, ย้าย Plug-ins ไปทำงานส่วนอื่นแทน",
+      "status": "ทดลอง",
+      "downloads": {
+        "windows": "https://github.com/Chanomhub/Chanomhub-Desktop/releases/tag/0.6.0"
+      }
+    },
+    {
+      "version": "0.5.0-beta",
+      "date": "15/4/2025",
+      "size": "21 MB",
+      "notes": "เพิ่ม Hybrid Search, แก้บัคบางส่วน, ปรับปรุง UI เล็กน้อย",
+      "status": "ทดลอง",
+      "downloads": {
+        "windows": "https://www.mediafire.com/file/elacpk979eoeuz9/%255Bx32-x64_Chanomhub%255D_Windows.7z/file"
+      }
+    },
+    {
+      "version": "0.4.0-beta",
+      "date": "14/4/2025",
+      "size": "8 MB",
+      "notes": "เพิ่มหน้ารวมเกม, แตกไฟล์เกม",
+      "status": "ทดลอง",
+      "downloads": {
+        "windows": "https://gofile.io/d/ol4kdR"
+      }
+    },
+    {
+      "version": "0.3.0-beta",
+      "date": "13/4/2025",
+      "size": "7 MB",
+      "notes": "เพิ่มฟีเจอร์ใหม่ Plug-ins, แก้ไขข้อผิดพลาด, ปรับระบบการดาวน์โหลด",
+      "status": "ทดลอง",
+      "downloads": {
+        "windows": "https://www.mediafire.com/file/tb3akbicnf5iyvn/%255BChanomhub_0.3.0%255D_Windows.7z/file"
+      }
+    },
+    {
+      "version": "0.2.0-beta",
+      "date": "12/4/2025",
+      "size": "6 MB",
+      "notes": "แก้ไขปัญหาการตั้งค่าและปรับ UI เกม",
+      "status": "ทดลอง",
+      "downloads": {
+        "windows": "https://www.mediafire.com/file/08nv144nrvhg6hj/%255BChanomhub%255D_0.2.0_Windows.7z/file"
+      }
+    },
+    {
+      "version": "0.1.0-beta",
+      "date": "10/4/2025",
+      "size": "5 MB",
+      "notes": "เปิดตัว ChanomHub 0.1.0",
+      "status": "ทดลอง",
+      "downloads": {
+        "windows": "https://www.mediafire.com/file/o9pa9t74ga2ic3b/[Chanomhub]+Windows.7z/file"
+      }
+    }
+  ]
+}

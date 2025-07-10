@@ -1,0 +1,44 @@
+# ฟีเจอร์ขั้นสูง
+
+คู่มือนี้จะแนะนำฟีเจอร์ขั้นสูงที่ช่วยให้คุณใช้ประโยชน์จากโปรเจกต์ได้เต็มที่
+
+## การกำหนดค่าแบบกำหนดเอง
+
+คุณสามารถปรับแต่งการตั้งค่าได้ผ่านไฟล์ `config.json`:
+
+```json
+{
+  "theme": "dark",
+  "apiEndpoint": "https://api.example.com",
+  "debug": true
+}
+```
+
+## การใช้ปลั๊กอิน
+
+โปรเจกต์รองรับปลั๊กอินเพื่อเพิ่มฟังก์ชันการทำงาน:
+
+1. **ติดตั้งปลั๊กอิน**:
+```bash
+npm install plugin-name
+   ```
+2. **เพิ่มใน config**:
+```json
+{
+  "plugins": ["plugin-name"]
+}
+   ```
+
+## การรวมกับ API ภายนอก
+
+ตัวอย่างการเรียก API:
+
+```jsx
+async function fetchData() {
+  const response = await fetch("https://api.example.com/data");
+  const data = await response.json();
+  console.log(data);
+}
+```
+
+> **คำเตือน**: ตรวจสอบให้แน่ใจว่า API key ได้รับการกำหนดค่าอย่างถูกต้องก่อนใช้งาน
