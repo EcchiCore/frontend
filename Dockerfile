@@ -10,8 +10,11 @@ COPY package.json bun.lockb* ./
 # ติดตั้ง dependencies รวมทั้ง devDependencies
 RUN bun install --frozen-lockfile
 
-# คัดลอก source code
+# คัดลอก source code และ config files
 COPY . .
+
+# Debug: แสดงรายการ dependencies ที่ติดตั้ง
+RUN bun list | grep -E "(next-intl|typescript)"
 
 # Build Next.js application
 RUN bun run build
