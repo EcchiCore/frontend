@@ -10,17 +10,9 @@ interface PlatformPageProps {
   params: Promise<PlatformPageParams>;
 }
 
-export async function generateStaticParams() {
-  const platforms = ['Windows', 'Android', 'Linux', 'macOS'];
-  const locales = ['en', 'th'];
-
-  return locales.flatMap(locale =>
-    platforms.map(platform => ({
-      slug: platform,
-      locale,
-    }))
-  );
-}
+// ลบ generateStaticParams ออกไปเลย
+// เมื่อไม่มี generateStaticParams Next.js จะใช้ dynamic rendering
+// หรือ on-demand static generation ตามการตั้งค่า
 
 export async function generateMetadata({ params }: { params: Promise<PlatformPageParams> }): Promise<Metadata> {
   return generateDynamicMetadata({ params, filterType: 'platforms' });
