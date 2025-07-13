@@ -3,6 +3,7 @@ import { Metadata } from 'next';
 import { getTranslations } from 'next-intl/server';
 import { fetchCategories, fetchTags, fetchPlatforms } from '../lib/searchUtils';
 import ClientGamesWrapper from './components/ClientGamesWrapper';
+import Navber from './../components/Navbar'
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -62,11 +63,13 @@ export default async function GamesPage({
     console.log('💻 Platforms count:', platforms.length);
 
     return (
+
       <Suspense fallback={
         <div className="min-h-screen bg-gray-50 flex items-center justify-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
         </div>
       }>
+        <Navber />
         <ClientGamesWrapper
           locale={resolvedParams.locale}
           initialCategories={categories}
