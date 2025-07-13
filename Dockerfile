@@ -22,4 +22,5 @@ COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public
 COPY --from=deps /app/.env ./
 EXPOSE 3000
-CMD ["bun", "run", "start"]
+# Run the standalone server.js with Bun
+CMD ["bun", "server.js"]
