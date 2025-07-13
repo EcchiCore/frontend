@@ -2,7 +2,6 @@ import type { NextConfig } from 'next';
 import withMDX from '@next/mdx';
 import createNextIntlPlugin from 'next-intl/plugin';
 
-
 const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
 
 // Configure MDX
@@ -21,11 +20,7 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       { protocol: 'http', hostname: 'res.cloudinary.com', pathname: '/**' },
       { protocol: 'https', hostname: 'resize.chanomhub.online', pathname: '/**' },
-      {
-        protocol: 'https',
-        hostname: 'icons.duckduckgo.com',
-        pathname: '/ip3/**',
-      },
+      { protocol: 'https', hostname: 'icons.duckduckgo.com', pathname: '/ip3/**' },
     ],
   },
   compiler: { removeConsole: process.env.NODE_ENV === 'production' },
@@ -44,8 +39,6 @@ const nextConfig: NextConfig = {
         ],
       },
     ];
-  },
-  turbopack: {
   },
 };
 

@@ -1,7 +1,7 @@
 # Stage 1: Dependencies
 FROM oven/bun:alpine AS deps
 WORKDIR /app
-COPY package.json ./
+COPY package.json bun.lockb ./
 RUN bun install --frozen-lockfile
 
 # Stage 2: Building the App
@@ -15,13 +15,17 @@ RUN bun run build
 FROM oven/bun:alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
+ENV PORT=8080
 
-# Copy necessary files from the build stage for standalone deployment
+# Copy necessary files
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public
+COPY --from=builder /app/src/i18n/request.ts ./src/i18n/request.ts
+COPY --from=builder /app/src/app/[locale]/lib/imageLoader.ts ./src/app/[locale]/lib/imageLoader.ts
+
+# Debug: List copied files
+RUN ls -la /app
 
 EXPOSE 8080
-
-# Use node to run the standalone server.js instead of next start
 CMD ["node", "server.js"]
