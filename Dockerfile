@@ -1,7 +1,7 @@
 # Stage 1: Dependencies
 FROM oven/bun:alpine AS deps
 WORKDIR /app
-COPY package.json bun.lockb ./
+COPY package.json ./
 RUN bun install --frozen-lockfile
 
 # Stage 2: Building the App
