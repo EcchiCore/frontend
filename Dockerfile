@@ -1,7 +1,7 @@
 # Stage 1: Dependencies
 FROM oven/bun:alpine AS deps
 WORKDIR /app
-COPY package.json ./
+COPY package.json  ./
 RUN bun install --frozen-lockfile
 
 # Stage 2: Building the App
@@ -16,6 +16,7 @@ FROM oven/bun:alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=8080
+ENV HOST=0.0.0.0
 
 # Copy necessary files
 COPY --from=builder /app/.next/standalone ./
