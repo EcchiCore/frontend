@@ -64,7 +64,7 @@ function ResultsHeader({
                 {query && (
                   <span className="text-gray-700 dark:text-gray-200">
                     {' '}
-                    {t('for')} "<span className="text-blue-500 font-semibold">{query}</span>"
+                    {t('for')} &#34;<span className="text-blue-500 font-semibold">{query}</span>&#34;
                   </span>
                 )}
               </h2>
@@ -452,7 +452,6 @@ function TranslationTarget({ children }: { children: React.ReactNode }) {
 export default function SearchResults({ results, currentPage, query, locale, filters, loading }: SearchResultsProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const t = useTranslations('SearchResults');
   const [viewMode, setViewMode] = useState<ViewMode>(() => {
     const savedMode = Cookies.get('viewMode');
     return savedMode === 'list' || savedMode === 'grid' ? savedMode : 'list';
