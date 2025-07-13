@@ -1,6 +1,6 @@
 // การกำหนด environment variables สำหรับ MeiliSearch
-const MEILISEARCH_URL = process.env.NEXT_MEILISEARCH_HOST_INTERNAL;
-const MEILISEARCH_API_KEY = process.env.NEXT_MEILISEARCH_API_KEY_INTERNAL;
+const MEILISEARCH_URL = "https://search.necroz.site";
+const MEILISEARCH_API_KEY = "369773e2f7cbf64df2cbf12702103d0df6d1b25acaa7fef95c8b1f6bcddf1510";
 
 // อินเตอร์เฟซสำหรับ filters และ search params
 interface SearchFilters {
