@@ -21,7 +21,7 @@ COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public
 
-EXPOSE 3000
+EXPOSE 8080
 
 # Use node to run the standalone server.js instead of next start
 CMD ["node", "server.js"]
