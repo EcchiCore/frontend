@@ -70,11 +70,11 @@ export default function TrendingPosts() {
       setLoading(true);
       setError(null);
 
-      const response = await fetch('https://search.chanomhub.online/indexes/article/search', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_MEILISEARCH_HOST_EXTERNAL}/indexes/article/search`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer d7fc12050f11a0b6a069ec2b40570e83fca767d76a72a05e5bb3c0378fab2355'
+          'Authorization': `Bearer ${process.env.NEXT_PUBLIC_MEILISEARCH_API_KEY_EXTERNAL}`,
         },
         body: JSON.stringify({
           q: '', // Empty query to get all articles
