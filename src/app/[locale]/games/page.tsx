@@ -23,6 +23,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   };
 }
 
+// 2. แก้ไข page.tsx เพื่อให้ debug ได้ดีขึ้น
 export default async function GamesPage({
                                           params,
                                           searchParams,
@@ -33,37 +34,57 @@ export default async function GamesPage({
   const resolvedParams = await params;
   const resolvedSearchParams = await searchParams;
 
-  const t = await getTranslations({ locale: resolvedParams.locale, namespace: 'GamesPage' });
 
-  console.log('🎮 Server GamesPage - searchParams:', resolvedSearchParams);
-  console.log('🌍 Server GamesPage - params:', resolvedParams);
-  console.log('🔍 Server GamesPage - searchParams keys:', Object.keys(resolvedSearchParams));
+
+  console.log('🎮 Server GamesPage - Starting...');
+  console.log('🌍 Environment:', process.env.NODE_ENV);
+  console.log('🔧 MeiliSearch Config Check:', {
+    internal_url: !!process.env.MEILISEARCH_HOST_INTERNAL,
+    external_url: !!process.env.NEXT_PUBLIC_MEILISEARCH_HOST_EXTERNAL,
+    internal_key: !!process.env.MEILISEARCH_API_KEY_INTERNAL,
+    external_key: !!process.env.NEXT_PUBLIC_MEILISEARCH_API_KEY_EXTERNAL,
+  });
 
   try {
     console.log('⏳ Server - Starting initial data fetch...');
+    const startTime = Date.now();
 
-    const [categories, tags, platforms] = await Promise.all([
-      fetchCategories().catch(error => {
-        console.error('❌ Categories fetch error:', error);
-        return [];
-      }),
-      fetchTags().catch(error => {
-        console.error('❌ Tags fetch error:', error);
-        return [];
-      }),
-      fetchPlatforms().catch(error => {
-        console.error('❌ Platforms fetch error:', error);
-        return [];
-      }),
+    const [categories, tags, platforms] = await Promise.allSettled([
+      fetchCategories(),
+      fetchTags(),
+      fetchPlatforms(),
     ]);
 
-    console.log('✅ Server - Initial data fetch completed!');
-    console.log('📁 Categories count:', categories.length);
-    console.log('🏷️ Tags count:', tags.length);
-    console.log('💻 Platforms count:', platforms.length);
+    const endTime = Date.now();
+    console.log(`⏱️ Server - Data fetch completed in ${endTime - startTime}ms`);
+
+    // ตรวจสอบผลลัพธ์ของแต่ละการ fetch
+    const categoriesResult = categories.status === 'fulfilled' ? categories.value : [];
+    const tagsResult = tags.status === 'fulfilled' ? tags.value : [];
+    const platformsResult = platforms.status === 'fulfilled' ? platforms.value : [];
+
+    console.log('📊 Server - Fetch Results:');
+    console.log('📁 Categories:', categories.status, categoriesResult.length);
+    console.log('🏷️ Tags:', tags.status, tagsResult.length);
+    console.log('💻 Platforms:', platforms.status, platformsResult.length);
+
+    // Log errors if any
+    if (categories.status === 'rejected') {
+      console.error('❌ Categories fetch failed:', categories.reason);
+    }
+    if (tags.status === 'rejected') {
+      console.error('❌ Tags fetch failed:', tags.reason);
+    }
+    if (platforms.status === 'rejected') {
+      console.error('❌ Platforms fetch failed:', platforms.reason);
+    }
+
+    // ถ้าข้อมูลทั้งหมดเป็นว่างเปล่า ให้แสดง warning
+    if (categoriesResult.length === 0 && tagsResult.length === 0 && platformsResult.length === 0) {
+      console.warn('⚠️ All filter options are empty! This will affect user experience.');
+    }
 
     return (
-
       <Suspense fallback={
         <div className="min-h-screen bg-gray-50 flex items-center justify-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
@@ -72,9 +93,9 @@ export default async function GamesPage({
         <Navber />
         <ClientGamesWrapper
           locale={resolvedParams.locale}
-          initialCategories={categories}
-          initialTags={tags}
-          initialPlatforms={platforms}
+          initialCategories={categoriesResult}
+          initialTags={tagsResult}
+          initialPlatforms={platformsResult}
           searchParams={resolvedSearchParams}
         />
       </Suspense>
@@ -82,36 +103,22 @@ export default async function GamesPage({
   } catch (error) {
     console.error('💥 Critical error loading games page:', error);
 
+    // ในกรณีที่ fetch ล้มเหลว ให้ส่งข้อมูลเปล่าแทน
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="max-w-md w-full text-center p-6">
-          <div className="bg-red-50 border border-red-200 rounded-lg p-6">
-            <svg className="w-12 h-12 text-red-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-            </svg>
-            <h1 className="text-xl font-bold text-red-800 mb-2">
-              {t('error.title')}
-            </h1>
-            <p className="text-red-700 mb-4">
-              {t('error.description')}
-            </p>
-
-            <details className="text-left text-sm text-red-600 bg-red-100 p-3 rounded mt-4">
-              <summary className="cursor-pointer">{t('error.details')}</summary>
-              <pre className="mt-2 whitespace-pre-wrap">
-                {error instanceof Error ? error.message : String(error)}
-              </pre>
-            </details>
-
-            <button
-              onClick={() => window.location.reload()}
-              className="mt-4 bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition-colors"
-            >
-              {t('error.retry')}
-            </button>
-          </div>
+      <Suspense fallback={
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
         </div>
-      </div>
+      }>
+        <Navber />
+        <ClientGamesWrapper
+          locale={resolvedParams.locale}
+          initialCategories={[]}
+          initialTags={[]}
+          initialPlatforms={[]}
+          searchParams={resolvedSearchParams}
+        />
+      </Suspense>
     );
   }
 }

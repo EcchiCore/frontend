@@ -115,9 +115,29 @@ export const searchArticles = async ({ query, page, filters, pageSize = 10 }: Se
 };
 
 // ฟังก์ชันสำหรับ fetch ตัวเลือก (categories, tags, platforms)
-const fetchOptions = async (index: string) => {
+export const fetchOptions = async (index: string) => {
+  // ตรวจสอบว่าเป็น server หรือ client environment
+  const isServer = typeof window === 'undefined';
+
+  // ใช้ environment variables ที่เหมาะสม
+  const MEILISEARCH_URL = isServer
+    ? process.env.MEILISEARCH_HOST_INTERNAL || process.env.NEXT_PUBLIC_MEILISEARCH_HOST_EXTERNAL
+    : process.env.NEXT_PUBLIC_MEILISEARCH_HOST_EXTERNAL;
+
+  const MEILISEARCH_API_KEY = isServer
+    ? process.env.MEILISEARCH_API_KEY_INTERNAL || process.env.NEXT_PUBLIC_MEILISEARCH_API_KEY_EXTERNAL
+    : process.env.NEXT_PUBLIC_MEILISEARCH_API_KEY_EXTERNAL;
+
+  console.log(`🔍 Fetching ${index} options from ${isServer ? 'SERVER' : 'CLIENT'}`);
+  console.log(`🌐 Using URL: ${MEILISEARCH_URL}`);
+  console.log(`🔑 API Key present: ${!!MEILISEARCH_API_KEY}`);
+
   if (!MEILISEARCH_URL || !MEILISEARCH_API_KEY) {
-    console.error('MeiliSearch configuration is missing for fetching options');
+    console.error(`❌ MeiliSearch configuration missing for ${index}:`, {
+      url: !!MEILISEARCH_URL,
+      key: !!MEILISEARCH_API_KEY,
+      isServer
+    });
     return [];
   }
 
@@ -136,8 +156,11 @@ const fetchOptions = async (index: string) => {
       }),
     });
 
+    console.log(`📥 ${index} response status:`, response.status, response.statusText);
+
     if (!response.ok) {
-      console.error(`Failed to fetch ${index}: ${response.status} ${response.statusText}`);
+      const errorText = await response.text();
+      console.error(`❌ Failed to fetch ${index}: ${response.status} ${response.statusText}`, errorText);
       return [];
     }
 
@@ -148,10 +171,10 @@ const fetchOptions = async (index: string) => {
       articleCount: item.articleCount || 0,
     }));
 
-    console.log(`Fetched ${index} options:`, options.length, 'items');
+    console.log(`✅ Fetched ${index} options:`, options.length, 'items');
     return options;
   } catch (error) {
-    console.error(`Error fetching ${index}:`, error);
+    console.error(`💥 Error fetching ${index}:`, error);
     return [];
   }
 };
