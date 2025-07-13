@@ -15,9 +15,13 @@ RUN bun run build
 FROM oven/bun:alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
+
 # Copy necessary files from the build stage for standalone deployment
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public
+
 EXPOSE 3000
-CMD ["bun", "run", "start"]
+
+# Use node to run the standalone server.js instead of next start
+CMD ["node", "server.js"]
