@@ -199,7 +199,7 @@ const ArticleEditor: React.FC = () => {
                   </div>
                 </TabsContent>
 
-                {/* Metadata Tab */}
+
                 <TabsContent value="metadata" className="space-y-6">
                   <MetadataFields
                     articleData={articleData}
