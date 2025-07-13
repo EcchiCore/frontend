@@ -88,9 +88,19 @@
     "clearAll": "Clear All",
     "allCategories": "All Categories",
     "allTags": "All Tags",
-    "allPlatforms": "All Platforms"
+    "allPlatforms": "All Platforms",
+    "filters": "Filters",
+    "all": "All",
+    "category": "Category",
+    "tag": "Tag",
+    "platform": "Platform"
   },
-
+  "status": {
+    "published": "Published",
+    "draft": "Draft",
+    "archived": "Archived"
+  },
+  "untitled": "Untitled",
   "PrivacyPolicy": {
     "title": "Privacy Policy",
     "description": "Your privacy matters to us. Learn how we protect and handle your personal information.",

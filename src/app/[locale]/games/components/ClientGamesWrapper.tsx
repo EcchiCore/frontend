@@ -1,3 +1,4 @@
+// app/[locale]/games/ClientGamesWrapper.tsx
 'use client';
 
 import { useEffect, useState, useMemo } from 'react';
@@ -5,7 +6,7 @@ import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import Head from 'next/head';
 import { fetchCategories, fetchTags, fetchPlatforms } from '../../lib/searchUtils';
-import SearchFilters from './SearchFilters';
+import TopFilters from './TopFilters';
 import SearchResults, { SearchFilters as ResultsFilters } from './SearchResults';
 import SearchSkeleton from './SearchSkeleton';
 
@@ -32,7 +33,12 @@ interface SearchResult {
   processingTimeMs: number;
 }
 
-const searchArticlesClient = async ({ query, page = 1, filters, pageSize = 12 }: SearchParams): Promise<SearchResult> => {
+const searchArticlesClient = async ({
+                                      query,
+                                      page = 1,
+                                      filters,
+                                      pageSize = 12,
+                                    }: SearchParams): Promise<SearchResult> => {
   const MEILISEARCH_URL = process.env.NEXT_PUBLIC_MEILISEARCH_HOST_EXTERNAL;
   const MEILISEARCH_API_KEY = process.env.NEXT_PUBLIC_MEILISEARCH_API_KEY_EXTERNAL;
 
@@ -42,16 +48,20 @@ const searchArticlesClient = async ({ query, page = 1, filters, pageSize = 12 }:
 
   const offset = (page - 1) * pageSize;
   const filterConditions = [];
-  if (filters?.categoryIds?.[0]) filterConditions.push(`categories.id = "${filters.categoryIds[0]}"`);
-  if (filters?.tagIds?.[0]) filterConditions.push(`tags.id = "${filters.tagIds[0]}"`);
-  if (filters?.platformsIds?.[0]) filterConditions.push(`platforms.id = "${filters.platformsIds[0]}"`);
-  if (filters?.sequentialCode && filters.sequentialCode.trim()) {
+
+  if (filters?.categoryIds?.[0])
+    filterConditions.push(`categories.id = "${filters.categoryIds[0]}"`);
+  if (filters?.tagIds?.[0])
+    filterConditions.push(`tags.id = "${filters.tagIds[0]}"`);
+  if (filters?.platformsIds?.[0])
+    filterConditions.push(`platforms.id = "${filters.platformsIds[0]}"`);
+  if (filters?.sequentialCode?.trim()) {
     filterConditions.push(`sequentialCode = "${filters.sequentialCode.trim()}"`);
   }
 
   const requestBody = {
     q: query || '',
-    offset: offset,
+    offset,
     limit: pageSize,
     filter: filterConditions.length ? filterConditions : undefined,
     sort: ['updatedAt:desc'],
@@ -81,10 +91,6 @@ const searchArticlesClient = async ({ query, page = 1, filters, pageSize = 12 }:
   };
 };
 
-interface ClientGamesWrapperProps {
-  locale: string;
-}
-
 const defaultSearchResult: SearchResult = {
   hits: [],
   estimatedTotalHits: 0,
@@ -93,7 +99,7 @@ const defaultSearchResult: SearchResult = {
   processingTimeMs: 0,
 };
 
-export default function ClientGamesWrapper({ locale }: ClientGamesWrapperProps) {
+export default function ClientGamesWrapper({ locale }: { locale: string }) {
   const searchParams = useSearchParams();
   const [searchResults, setSearchResults] = useState<SearchResult | null>(null);
   const [categories, setCategories] = useState<any[]>([]);
@@ -105,7 +111,7 @@ export default function ClientGamesWrapper({ locale }: ClientGamesWrapperProps) 
 
   const t = useTranslations('GamesPage');
 
-  // Fetch filter options (categories, tags, platforms) on mount
+  // Fetch filter options
   useEffect(() => {
     const fetchOptions = async () => {
       try {
@@ -126,23 +132,29 @@ export default function ClientGamesWrapper({ locale }: ClientGamesWrapperProps) 
     fetchOptions();
   }, []);
 
-  // Fetch search results based on URL parameters
   const query = searchParams.get('q')?.trim() || '';
   const currentPage = Number(searchParams.get('page')) || 1;
 
-  const clientFilters = useMemo(() => ({
-    categoryIds: searchParams.get('category')?.split(',').filter(Boolean) || [],
-    tagIds: searchParams.get('tag')?.split(',').filter(Boolean) || [],
-    platformsIds: searchParams.get('platform')?.split(',').filter(Boolean) || [],
-    sequentialCode: searchParams.get('code')?.trim() || null,
-  }), [searchParams]);
+  const clientFilters = useMemo(
+    () => ({
+      categoryIds: searchParams.get('category')?.split(',').filter(Boolean) || [],
+      tagIds: searchParams.get('tag')?.split(',').filter(Boolean) || [],
+      platformsIds: searchParams.get('platform')?.split(',').filter(Boolean) || [],
+      sequentialCode: searchParams.get('code')?.trim() || null,
+    }),
+    [searchParams]
+  );
 
-  const searchResultsFilters: ResultsFilters = useMemo(() => ({
-    categories: clientFilters.categoryIds,
-    tags: clientFilters.tagIds,
-    platforms: clientFilters.platformsIds,
-  }), [clientFilters]);
+  const searchResultsFilters: ResultsFilters = useMemo(
+    () => ({
+      categories: clientFilters.categoryIds,
+      tags: clientFilters.tagIds,
+      platforms: clientFilters.platformsIds,
+    }),
+    [clientFilters]
+  );
 
+  // Fetch results
   useEffect(() => {
     const fetchResults = async () => {
       setLoading(true);
@@ -172,20 +184,32 @@ export default function ClientGamesWrapper({ locale }: ClientGamesWrapperProps) 
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-base-100 flex items-center justify-center">
         <div className="max-w-md w-full text-center p-6">
-          <div className="bg-red-50 border border-red-200 rounded-lg p-6">
-            <svg className="w-12 h-12 text-red-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-            </svg>
-            <h1 className="text-xl font-bold text-red-800 mb-2">{t('error.title')}</h1>
-            <p className="text-red-700 mb-4">{t('error.description')}</p>
-            <button
-              onClick={() => window.location.reload()}
-              className="mt-4 bg-red-600 text-white px-6 py-2 rounded-lg hover:bg-red-700 transition-colors"
-            >
-              {t('error.retry')}
-            </button>
+          <div className="alert alert-error shadow-lg">
+            <div>
+              <svg
+                className="w-12 h-12 mx-auto mb-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
+                />
+              </svg>
+              <h1 className="text-xl font-bold mb-2">{t('error.title')}</h1>
+              <p className="text-sm mb-4">{t('error.description')}</p>
+              <button
+                onClick={() => window.location.reload()}
+                className="btn btn-error btn-outline mt-4"
+              >
+                {t('error.retry')}
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -193,38 +217,43 @@ export default function ClientGamesWrapper({ locale }: ClientGamesWrapperProps) 
   }
 
   return (
-    <>
+    <div data-theme="system">
       <Head>
         <title>{t('metadata.title')}</title>
         <meta name="description" content={t('metadata.description')} />
       </Head>
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-base-100">
         <div className="container mx-auto px-4 py-8">
           <header className="mb-8 text-center">
-            <h1 className="text-4xl font-bold text-gray-900 mb-2">{t('title')}</h1>
-            <p className="text-lg text-gray-600">{t('description')}</p>
+            <h1 className="text-4xl font-bold mb-2 text-base-content">{t('title')}</h1>
+            <p className="text-lg text-base-content/70">{t('description')}</p>
           </header>
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-            <aside className="lg:col-span-1">
-              <SearchFilters
-                categories={categories}
-                tags={tags}
-                platforms={platforms}
-                locale={locale}
-              />
-            </aside>
-            <main className="lg:col-span-3">
-              <SearchResults
-                results={searchResults || defaultSearchResult}
-                currentPage={currentPage}
-                query={query}
-                filters={searchResultsFilters}
-                locale={locale}
-              />
-            </main>
+
+          {/* Filter Section with DaisyUI card styling */}
+          <div className="mb-8">
+            <div className="card bg-base-200 shadow-lg">
+              <div className="card-body">
+                <TopFilters
+                  categories={categories}
+                  tags={tags}
+                  platforms={platforms}
+                  loading={loadingOptions}
+                />
+              </div>
+            </div>
           </div>
+
+          <main className="mt-6">
+            <SearchResults
+              results={searchResults || defaultSearchResult}
+              currentPage={currentPage}
+              query={query}
+              filters={searchResultsFilters}
+              locale={locale}
+            />
+          </main>
         </div>
       </div>
-    </>
+    </div>
   );
 }
