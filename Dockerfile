@@ -2,6 +2,7 @@
 FROM oven/bun:alpine AS deps
 WORKDIR /app
 COPY package.json ./
+COPY .env ./
 RUN bun install --frozen-lockfile
 
 # Stage 2: Building the App
@@ -19,6 +20,6 @@ ENV NODE_ENV=production
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public
-COPY --from=builder /app/.env ./
+COPY --from=deps /app/.env ./
 EXPOSE 3000
 CMD ["bun", "run", "start"]
