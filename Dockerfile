@@ -22,13 +22,10 @@ RUN addgroup -S -g 1001 bunjs && \
 WORKDIR /app
 
 # คัดลอกไฟล์ที่จำเป็นจาก builder stage
-COPY --from=builder /app/.next ./.next
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public
-COPY --from=builder /app/package.json ./
 COPY --from=builder /app/.env ./
-
-# คัดลอก node_modules สำหรับ bun run start
-COPY --from=builder /app/node_modules ./node_modules
 
 # ตั้งค่าการเป็นเจ้าของไฟล์ให้กับผู้ใช้ที่ไม่ใช่ root
 RUN chown -R nextjs:bunjs /app
@@ -41,5 +38,5 @@ ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
 ENV NODE_ENV=production
 
-# เรียกใช้ bun run start
-CMD ["bun", "run", "start"]
+# เรียกใช้ server.js (ต้องมีใน standalone build)
+CMD ["bun", "server.js"]
