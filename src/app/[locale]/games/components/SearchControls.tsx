@@ -11,19 +11,23 @@ export default function SearchControls() {
   const pathname = usePathname();
   const sp = useSearchParams();
 
-  // Use searchParams from Next.js navigation hook as the source of truth
-  const [tag, setTag] = useState<string>('');
-  const [category, setCategory] = useState<string>('');
-  const [platform, setPlatform] = useState<string>('');
-  const [author, setAuthor] = useState<string>('');
-  const [pageSize, setPageSize] = useState<string>('12');
+  const [queryText, setQueryText] = useState<string>('');
+  const pageSize = '12'; // กำหนดตายตัว
 
+  // โหลดค่าจาก URL → queryText
   useEffect(() => {
-    setTag(sp.get('tag') ?? '');
-    setCategory(sp.get('category') ?? '');
-    setPlatform(sp.get('platform') ?? '');
-    setAuthor(sp.get('author') ?? '');
-    setPageSize(sp.get('pageSize') ?? '12');
+    const parts: string[] = [];
+    const tag = sp.get('tag');
+    const category = sp.get('category');
+    const platform = sp.get('platform');
+    const author = sp.get('author');
+
+    if (tag) parts.push(`tag:${tag}`);
+    if (category) parts.push(`category:${category}`);
+    if (platform) parts.push(`platform:${platform}`);
+    if (author) parts.push(`author:${author}`);
+
+    setQueryText(parts.join(' '));
   }, [sp]);
 
   const update = useCallback(
@@ -33,53 +37,43 @@ export default function SearchControls() {
         if (v === null || v === '') params.delete(k);
         else params.set(k, v);
       }
-      // Reset to first page if filters change
-      params.set('page', '1');
+      params.set('page', '1'); // reset หน้า
+      params.set('pageSize', pageSize); // fix pageSize
       router.push(`${pathname}?${params.toString()}`);
     },
-    [router, pathname, sp]
+    [router, pathname, sp, pageSize]
   );
+
+  // แปลง queryText → object ของ params
+  const parseQuery = useCallback(() => {
+    const params: Record<string, string | null> = {
+      tag: null,
+      category: null,
+      platform: null,
+      author: null,
+    };
+
+    queryText.split(/\s+/).forEach((part) => {
+      const [key, ...rest] = part.split(':');
+      const value = rest.join(':');
+      if (params.hasOwnProperty(key)) {
+        params[key as keyof typeof params] = value || null;
+      }
+    });
+
+    update(params);
+  }, [queryText, update]);
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-6 gap-3">
       <input
-        value={tag}
-        onChange={(e) => setTag(e.target.value)}
-        placeholder="ค้นหาตามแท็ก..."
-        className="md:col-span-2 px-4 py-2 rounded-2xl border"
+        value={queryText}
+        onChange={(e) => setQueryText(e.target.value)}
+        placeholder="ค้นหา เช่น category:action platform:windows author:jane"
+        className="md:col-span-5 px-4 py-2 rounded-2xl border"
       />
-      <input
-        value={category}
-        onChange={(e) => setCategory(e.target.value)}
-        placeholder="ค้นหาตามหมวดหมู่..."
-        className="md:col-span-2 px-4 py-2 rounded-2xl border"
-      />
-      <input
-        value={platform}
-        onChange={(e) => setPlatform(e.target.value)}
-        placeholder="ค้นหาตามแพลตฟอร์ม..."
-        className="px-4 py-2 rounded-2xl border"
-      />
-      <input
-        value={author}
-        onChange={(e) => setAuthor(e.target.value)}
-        placeholder="ค้นหาตามผู้เขียน..."
-        className="px-4 py-2 rounded-2xl border"
-      />
-      <select
-        value={pageSize}
-        onChange={(e) => {
-          setPageSize(e.target.value);
-          update({ pageSize: e.target.value });
-        }}
-        className="px-4 py-2 rounded-2xl border"
-      >
-        {[12, 24, 36, 48].map((n) => (
-          <option key={n} value={n}>{n} ต่อหน้า</option>
-        ))}
-      </select>
       <button 
-        onClick={() => update({ tag, category, platform, author })} 
+        onClick={parseQuery} 
         className="px-4 py-2 rounded-2xl border"
       >
         ค้นหา
