@@ -77,10 +77,10 @@ export default function TrendingPosts() {
           'Authorization': `Bearer ${process.env.NEXT_PUBLIC_MEILISEARCH_API_KEY_EXTERNAL}`,
         },
         body: JSON.stringify({
-          q: '', // Empty query to get all articles
-          limit: 8, // Get top 8 trending articles
-          sort: ['favoriteCount:desc', 'commentCount:desc', 'createdAt:desc'], // Sort by popularity
-          filter: 'status = PUBLISHED', // Only published articles
+          q: '',
+          limit: 8,
+          sort: ['favoriteCount:desc', 'commentCount:desc', 'createdAt:desc'],
+          filter: 'status = PUBLISHED',
           attributesToRetrieve: [
             'id',
             'title',
@@ -93,9 +93,9 @@ export default function TrendingPosts() {
             'mainImage',
             'author',
             'categories',
-            'tags'
-          ]
-        })
+            'tags',
+          ],
+        }),
       });
 
       if (!response.ok) {
@@ -104,7 +104,6 @@ export default function TrendingPosts() {
 
       const data = await response.json();
 
-      // Transform the data to match our component structure
       const transformedPosts: TrendingPost[] = data.hits.map((article: Article) => {
         const timeDiff = Date.now() - article.createdAt;
         const hours = Math.floor(timeDiff / (1000 * 60 * 60));
@@ -119,7 +118,6 @@ export default function TrendingPosts() {
           timeString = 'Just now';
         }
 
-        // Determine if post is "hot" based on recent activity
         const isHot = (article.favoriteCount > 5 || article.commentCount > 10) && days < 3;
 
         return {
@@ -129,13 +127,13 @@ export default function TrendingPosts() {
           authorImage: article.author.image || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=50&h=50&fit=crop&crop=face',
           category: article.categories[0]?.name || 'General',
           replies: article.commentCount,
-          views: Math.floor(Math.random() * 5000) + 100, // Mock views since not in data
+          views: Math.floor(Math.random() * 5000) + 100,
           favorites: article.favoriteCount,
           time: timeString,
           isHot,
           slug: article.slug,
           sequentialCode: article.sequentialCode,
-          mainImage: article.mainImage
+          mainImage: article.mainImage,
         };
       });
 
@@ -144,7 +142,6 @@ export default function TrendingPosts() {
       console.error('Error fetching trending posts:', err);
       setError('Failed to load trending posts');
 
-      // Fallback to mock data on error
       setTrendingPosts([
         {
           id: 1,
@@ -159,8 +156,8 @@ export default function TrendingPosts() {
           isHot: false,
           slug: '',
           sequentialCode: '',
-          mainImage: ''
-        }
+          mainImage: '',
+        },
       ]);
     } finally {
       setLoading(false);
@@ -178,25 +175,25 @@ export default function TrendingPosts() {
 
   if (loading) {
     return (
-      <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-white/20 p-8">
+      <div className="bg-gray-800/90 backdrop-blur-md rounded-2xl shadow-2xl border border-gray-600 p-8">
         <div className="flex items-center justify-between mb-8">
-          <h2 className="text-3xl font-bold text-gray-900 flex items-center">
-            <TrendingUp className="w-8 h-8 mr-3 text-red-500" />
+          <h2 className="text-3xl font-extrabold text-gray-100 flex items-center tracking-tight">
+            <TrendingUp className="w-8 h-8 mr-3 text-teal-400" />
             Trending Discussions
           </h2>
         </div>
         <div className="space-y-4">
           {[...Array(4)].map((_, index) => (
-            <div key={index} className="p-6 rounded-2xl border border-gray-100 bg-gradient-to-r from-white to-gray-50/50 animate-pulse">
+            <div key={index} className="p-6 rounded-xl border border-gray-600 bg-gray-700/50 animate-pulse">
               <div className="flex items-start space-x-4">
-                <div className="w-12 h-12 bg-gray-200 rounded-full"></div>
+                <div className="w-12 h-12 bg-gray-600 rounded-full"></div>
                 <div className="flex-1 space-y-3">
-                  <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                  <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                  <div className="h-4 bg-gray-600 rounded w-3/4"></div>
+                  <div className="h-3 bg-gray-600 rounded w-1/2"></div>
                   <div className="flex space-x-4">
-                    <div className="h-3 bg-gray-200 rounded w-16"></div>
-                    <div className="h-3 bg-gray-200 rounded w-12"></div>
-                    <div className="h-3 bg-gray-200 rounded w-12"></div>
+                    <div className="h-3 bg-gray-600 rounded w-16"></div>
+                    <div className="h-3 bg-gray-600 rounded w-12"></div>
+                    <div className="h-3 bg-gray-600 rounded w-12"></div>
                   </div>
                 </div>
               </div>
@@ -208,26 +205,26 @@ export default function TrendingPosts() {
   }
 
   return (
-    <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-white/20 p-8">
+    <div className="bg-gray-800/90 backdrop-blur-md rounded-2xl shadow-2xl border border-gray-600 p-8">
       <div className="flex items-center justify-between mb-8">
-        <h2 className="text-3xl font-bold text-gray-900 flex items-center">
-          <TrendingUp className="w-8 h-8 mr-3 text-red-500" />
+        <h2 className="text-3xl font-extrabold text-gray-100 flex items-center tracking-tight">
+          <TrendingUp className="w-8 h-8 mr-3 text-teal-400" />
           Trending Articles
         </h2>
         <button
           onClick={() => window.location.href = '/games'}
-          className="text-indigo-600 hover:text-purple-600 font-semibold flex items-center transition-colors"
+          className="text-teal-400 hover:text-teal-300 font-semibold flex items-center transition-colors"
         >
           View All <ChevronRight className="w-5 h-5 ml-1" />
         </button>
       </div>
 
       {error && (
-        <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-          <p className="text-yellow-800">{error}</p>
+        <div className="mb-6 p-4 bg-yellow-900/30 border border-yellow-600 rounded-lg">
+          <p className="text-yellow-400">{error}</p>
           <button
             onClick={fetchTrendingPosts}
-            className="mt-2 text-yellow-600 hover:text-yellow-800 font-medium underline"
+            className="mt-2 text-yellow-400 hover:text-yellow-300 font-medium underline"
           >
             Try Again
           </button>
@@ -239,7 +236,7 @@ export default function TrendingPosts() {
           <div
             key={post.id}
             onClick={() => window.location.href = `/articles/${post.slug}`}
-            className="p-6 rounded-2xl border border-gray-100 hover:border-indigo-200 hover:shadow-lg hover:shadow-indigo-500/10 transition-all duration-300 group cursor-pointer bg-gradient-to-r from-white to-gray-50/50"
+            className="p-6 rounded-xl border border-gray-600 hover:border-teal-500/50 hover:shadow-2xl hover:shadow-teal-500/20 transition-all duration-300 group cursor-pointer bg-gradient-to-r from-gray-800 to-gray-700"
           >
             <div className="flex items-start space-x-4">
               <div className="relative">
@@ -248,13 +245,13 @@ export default function TrendingPosts() {
                   alt={post.author}
                   width={50}
                   height={50}
-                  className="rounded-full object-cover ring-2 ring-white shadow-lg"
+                  className="rounded-full object-cover ring-2 ring-teal-500/50 shadow-lg group-hover:ring-teal-400 transition-all"
                   onError={(e) => {
                     e.currentTarget.src = 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=50&h=50&fit=crop&crop=face';
                   }}
                 />
                 {post.isHot && (
-                  <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center">
+                  <div className="absolute -top-1 -right-1 w-4 h-4 bg-gradient-to-r from-red-500 to-pink-500 rounded-full flex items-center justify-center">
                     <Star className="w-2 h-2 text-white fill-current" />
                   </div>
                 )}
@@ -268,25 +265,25 @@ export default function TrendingPosts() {
                       Hot
                     </span>
                   )}
-                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700 group-hover:bg-indigo-100 group-hover:text-indigo-700 transition-colors">
+                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-700 text-gray-300 group-hover:bg-teal-600/30 group-hover:text-teal-300 transition-colors">
                     <Tag className="w-3 h-3 mr-1" />
                     {post.category}
                   </span>
                   {post.sequentialCode && (
-                    <span className="inline-flex items-center px-2 py-1 rounded text-xs font-mono bg-blue-100 text-blue-700">
+                    <span className="inline-flex items-center px-2 py-1 rounded text-xs font-mono bg-teal-600/30 text-teal-300">
                       {post.sequentialCode}
                     </span>
                   )}
                 </div>
 
-                <h3 className="text-lg font-bold text-gray-900 group-hover:text-indigo-600 transition-colors mb-3 line-clamp-2 leading-tight">
+                <h3 className="text-lg font-bold text-gray-100 group-hover:text-teal-300 transition-colors mb-3 line-clamp-2 leading-tight">
                   {post.title}
                 </h3>
 
-                <div className="flex items-center justify-between text-sm text-gray-500">
+                <div className="flex items-center justify-between text-sm text-gray-400">
                   <div className="flex items-center space-x-4">
                     <span>
-                      by <span className="font-semibold text-gray-700">{post.author}</span>
+                      by <span className="font-semibold text-gray-300">{post.author}</span>
                     </span>
                     <span className="flex items-center">
                       <MessageSquare className="w-4 h-4 mr-1" />

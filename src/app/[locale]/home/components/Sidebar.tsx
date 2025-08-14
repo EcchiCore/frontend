@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Link } from "../../lib/navigation"; // ใช้ Link จาก next-intl
+import { Link } from "../../lib/navigation";
 import { useTranslations } from 'next-intl';
 import {
   MessageSquare,
@@ -35,35 +35,35 @@ export default function Sidebar() {
       action: t('recentActivity.repliedTo'),
       topic: 'Advanced React Patterns & Best Practices',
       time: '5 min ago',
-      actionColor: 'text-blue-600'
+      actionColor: 'text-teal-400',
     },
     {
       user: 'mike_tech',
       action: t('recentActivity.created'),
       topic: 'Feature Request: Dark Mode Enhancement',
       time: '12 min ago',
-      actionColor: 'text-green-600'
+      actionColor: 'text-indigo-400',
     },
     {
       user: 'sarah_dev',
       action: t('recentActivity.liked'),
       topic: 'Code Review Guidelines & Standards',
       time: '18 min ago',
-      actionColor: 'text-pink-600'
+      actionColor: 'text-pink-400',
     },
     {
       user: 'alex_admin',
       action: t('recentActivity.pinned'),
       topic: 'Community Guidelines - Important Update',
       time: '25 min ago',
-      actionColor: 'text-purple-600'
+      actionColor: 'text-purple-400',
     },
     {
       user: 'dev_mentor',
       action: t('recentActivity.answered'),
       topic: 'How to Structure Large Scale Applications',
       time: '32 min ago',
-      actionColor: 'text-indigo-600'
+      actionColor: 'text-teal-400',
     },
   ];
 
@@ -79,23 +79,23 @@ export default function Sidebar() {
   return (
     <div className="space-y-6">
       {/* Recent Activity */}
-      <Card className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-6">
-        <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center">
-          <Activity className="w-6 h-6 mr-2 text-green-500" />
+      <Card className="bg-gray-800/90 backdrop-blur-md rounded-2xl shadow-2xl border border-gray-600 p-6">
+        <h3 className="text-xl font-extrabold text-gray-100 mb-6 flex items-center tracking-tight">
+          <Activity className="w-6 h-6 mr-2 text-teal-400" />
           {t('liveActivity')}
         </h3>
 
         <div className="space-y-4">
           {recentActivity.map((activity, index) => (
-            <div key={index} className="text-sm group hover:bg-gray-50 p-3 rounded-lg transition-colors">
+            <div key={index} className="text-sm group hover:bg-gray-700/50 p-3 rounded-lg transition-all duration-300">
               <div className="flex items-center space-x-2 mb-1">
-                <span className="font-semibold text-gray-900">{activity.user}</span>
-                <span className={`${activity.actionColor} font-medium`}>{activity.action}</span>
+                <span className="font-semibold text-gray-200">{activity.user}</span>
+                <span className={`font-medium ${activity.actionColor}`}>{activity.action}</span>
               </div>
-              <div className="text-indigo-600 hover:text-indigo-800 cursor-pointer font-medium mb-2 line-clamp-2">
+              <div className="text-gray-200 hover:text-teal-300 cursor-pointer font-medium mb-2 line-clamp-2 transition-colors">
                 {activity.topic}
               </div>
-              <div className="text-gray-500 text-xs flex items-center">
+              <div className="text-gray-400 text-xs flex items-center">
                 <Clock className="w-3 h-3 mr-1" />
                 {activity.time}
               </div>
@@ -105,9 +105,9 @@ export default function Sidebar() {
       </Card>
 
       {/* Quick Links */}
-      <Card className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 p-6">
-        <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center">
-          <Globe className="w-6 h-6 mr-2 text-blue-500" />
+      <Card className="bg-gray-800/90 backdrop-blur-md rounded-2xl shadow-2xl border border-gray-600 p-6">
+        <h3 className="text-xl font-extrabold text-gray-100 mb-4 flex items-center tracking-tight">
+          <Globe className="w-6 h-6 mr-2 text-teal-400" />
           {t('quickNavigation')}
         </h3>
 
@@ -115,35 +115,35 @@ export default function Sidebar() {
           {quickLinks.map((link, index) => (
             <Link
               key={index}
-              href={link.path} // next-intl Link จะจัดการ locale อัตโนมัติ
-              className="flex items-center px-4 py-3 rounded-xl text-gray-700 hover:bg-gradient-to-r hover:from-indigo-50 hover:to-purple-50 hover:text-indigo-600 transition-all duration-200 group"
+              href={link.path}
+              className="flex items-center px-4 py-3 rounded-xl text-gray-200 hover:bg-gradient-to-r hover:from-teal-600/30 hover:to-indigo-600/30 hover:text-teal-300 transition-all duration-300 group"
             >
-              <span className="mr-3 text-gray-400 group-hover:text-indigo-500 transition-colors">
+              <span className="mr-3 text-teal-400 group-hover:text-teal-300 transition-colors">
                 {link.icon}
               </span>
               {link.name}
-              <ChevronRight className="w-4 h-4 ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
+              <ChevronRight className="w-4 h-4 ml-auto opacity-0 group-hover:opacity-100 transition-opacity text-teal-400" />
             </Link>
           ))}
         </div>
       </Card>
 
       {/* Community Guidelines */}
-      <Card className="bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-2xl p-6 text-white relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -mr-12 -mt-12"></div>
-        <div className="absolute bottom-0 left-0 w-32 h-32 bg-white/5 rounded-full -ml-16 -mb-16"></div>
+      <Card className="bg-gradient-to-br from-indigo-900/70 via-gray-800/90 to-teal-900/70 backdrop-blur-md rounded-2xl p-6 text-white relative overflow-hidden border border-gray-600">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-teal-500/10 rounded-full -mr-16 -mt-16"></div>
+        <div className="absolute bottom-0 left-0 w-40 h-40 bg-indigo-500/10 rounded-full -ml-20 -mb-20"></div>
 
         <div className="relative">
-          <h3 className="text-xl font-bold mb-3 flex items-center">
-            <Shield className="w-6 h-6 mr-2" />
+          <h3 className="text-xl font-extrabold mb-3 flex items-center tracking-tight">
+            <Shield className="w-6 h-6 mr-2 text-teal-400" />
             {t('communityGuidelines')}
           </h3>
-          <p className="text-white/90 mb-4 text-sm leading-relaxed">
+          <p className="text-gray-200 mb-4 text-sm leading-relaxed">
             {t('communityGuidelinesDescription')}
           </p>
           <Link
-            href="/guidelines" // next-intl Link จะจัดการ locale อัตโนมัติ
-            className="bg-white/20 hover:bg-white/30 backdrop-blur-sm px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200 flex items-center"
+            href="/guidelines"
+            className="bg-teal-500/20 hover:bg-teal-500/30 backdrop-blur-sm px-4 py-2 rounded-lg font-semibold text-sm text-teal-300 hover:text-teal-200 transition-all duration-300 flex items-center"
           >
             {t('readGuidelines')}
             <ArrowRight className="w-4 h-4 ml-2" />

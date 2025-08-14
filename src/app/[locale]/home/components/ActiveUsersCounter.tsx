@@ -10,13 +10,10 @@ export default function ActiveUsersCounter({ initialCount }: ActiveUsersCounterP
   const [count, setCount] = useState(initialCount);
 
   useEffect(() => {
-    // Simulate real-time updates
     const interval = setInterval(() => {
-      // Random fluctuation between -5 to +5
       const change = Math.floor(Math.random() * 11) - 5;
       setCount(prevCount => {
         const newCount = prevCount + change;
-        // Keep count within reasonable bounds (minimum 10, maximum 200)
         return Math.max(10, Math.min(200, newCount));
       });
     }, 30000); // Update every 30 seconds
@@ -24,5 +21,10 @@ export default function ActiveUsersCounter({ initialCount }: ActiveUsersCounterP
     return () => clearInterval(interval);
   }, []);
 
-  return <span>{count}</span>;
+  return (
+    <span className="relative inline-block">
+      <span className="absolute -inset-1 bg-gradient-to-r from-teal-500 to-indigo-500 blur opacity-30"></span>
+      <span className="relative text-teal-300 font-semibold">{count}</span>
+    </span>
+  );
 }
