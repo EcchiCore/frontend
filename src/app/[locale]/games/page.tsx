@@ -5,6 +5,7 @@ import { Suspense } from "react";
 import Results from "./components/Results";
 import SearchControls from "./components/SearchControls";
 import ResultsSkeleton from "./components/ResultsSkeleton";
+import Navbar from "../components/Navbar";
 
 export const metadata = {
   title: "Games | ChanomHub",
@@ -26,18 +27,21 @@ export default async function GamesPage({ searchParams }: PageProps) {
 
   // Note: static shell (header/filters), dynamic list streams inside Suspense
   return (
-    <div className="container mx-auto px-4 py-6 space-y-6">
-      <header className="flex items-center justify-between">
-        <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Games</h1>
-      </header>
+    <>
+      <Navbar />
+      <div className="container mx-auto px-4 py-6 space-y-6">
+        <header className="flex items-center justify-between">
+          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Games</h1>
+        </header>
 
-      {/* Client-side filters that update the URL (and thus stream new results) */}
-      <SearchControls />
+        {/* Client-side filters that update the URL (and thus stream new results) */}
+        <SearchControls />
 
-      <Suspense fallback={<ResultsSkeleton />}> 
-        {/* Server Component that fetches using current search params */}
-        <Results searchParams={params} />
-      </Suspense>
-    </div>
+        <Suspense fallback={<ResultsSkeleton />}> 
+          {/* Server Component that fetches using current search params */}
+          <Results searchParams={params} />
+        </Suspense>
+      </div>
+    </>
   );
 }
