@@ -3,10 +3,13 @@
 // ===============================
 import type { Article } from "@/lib/api";
 
+import Link from "next/link";
+
 export default function GameCard({ article }: { article: Article }) {
   return (
-    <article className="rounded-2xl border overflow-hidden hover:shadow-sm transition">
-      {article.mainImage ? (
+    <Link href={`/articles/${article.slug}`}>
+      <article className="rounded-2xl border overflow-hidden hover:shadow-sm transition">
+        {article.mainImage ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img src={article.mainImage} alt={article.title} className="w-full h-40 object-cover" />
       ) : (
@@ -31,5 +34,6 @@ export default function GameCard({ article }: { article: Article }) {
         </div>
       </div>
     </article>
+    </Link>
   );
 }
