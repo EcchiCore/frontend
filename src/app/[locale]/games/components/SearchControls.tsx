@@ -13,10 +13,16 @@ export default function SearchControls() {
 
   // Use searchParams from Next.js navigation hook as the source of truth
   const [tag, setTag] = useState<string>('');
+  const [category, setCategory] = useState<string>('');
+  const [platform, setPlatform] = useState<string>('');
+  const [author, setAuthor] = useState<string>('');
   const [pageSize, setPageSize] = useState<string>('12');
 
   useEffect(() => {
     setTag(sp.get('tag') ?? '');
+    setCategory(sp.get('category') ?? '');
+    setPlatform(sp.get('platform') ?? '');
+    setAuthor(sp.get('author') ?? '');
     setPageSize(sp.get('pageSize') ?? '12');
   }, [sp]);
 
@@ -35,12 +41,30 @@ export default function SearchControls() {
   );
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
+    <div className="grid grid-cols-1 md:grid-cols-6 gap-3">
       <input
         value={tag}
         onChange={(e) => setTag(e.target.value)}
         placeholder="ค้นหาตามแท็ก..."
-        className="md:col-span-3 px-4 py-2 rounded-2xl border"
+        className="md:col-span-2 px-4 py-2 rounded-2xl border"
+      />
+      <input
+        value={category}
+        onChange={(e) => setCategory(e.target.value)}
+        placeholder="ค้นหาตามหมวดหมู่..."
+        className="md:col-span-2 px-4 py-2 rounded-2xl border"
+      />
+      <input
+        value={platform}
+        onChange={(e) => setPlatform(e.target.value)}
+        placeholder="ค้นหาตามแพลตฟอร์ม..."
+        className="px-4 py-2 rounded-2xl border"
+      />
+      <input
+        value={author}
+        onChange={(e) => setAuthor(e.target.value)}
+        placeholder="ค้นหาตามผู้เขียน..."
+        className="px-4 py-2 rounded-2xl border"
       />
       <select
         value={pageSize}
@@ -54,7 +78,12 @@ export default function SearchControls() {
           <option key={n} value={n}>{n} ต่อหน้า</option>
         ))}
       </select>
-      <button onClick={() => update({ tag })} className="px-4 py-2 rounded-2xl border">ค้นหา</button>
+      <button 
+        onClick={() => update({ tag, category, platform, author })} 
+        className="px-4 py-2 rounded-2xl border"
+      >
+        ค้นหา
+      </button>
     </div>
   );
 }

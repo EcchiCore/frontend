@@ -17,6 +17,18 @@ export default function GameCard({ article }: { article: Article }) {
         {article.description && (
           <p className="text-sm opacity-80 line-clamp-2">{article.description}</p>
         )}
+        <div className="flex flex-wrap gap-1 mt-1">
+          {article.tagList.map((tag) => (
+            <span key={tag} className="text-xs bg-muted/50 px-2 py-1 rounded-full">
+              {tag}
+            </span>
+          ))}
+        </div>
+        <div className="flex items-center justify-between text-xs opacity-70 mt-1">
+          <span>โดย {article.author.username}</span>
+          <span>{article.platformList.join(', ')}</span>
+          <span>❤️ {article.favoritesCount}</span>
+        </div>
       </div>
     </article>
   );

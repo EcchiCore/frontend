@@ -2,13 +2,35 @@
 // lib/api.ts
 // ===============================
 export type Article = {
-  id: string | number;
+  id: number;
   title: string;
-  description?: string;
-  coverImage?: string;
-  mainImage?: string;
-  createdAt?: string;
-  updatedAt?: string;
+  slug: string;
+  description: string;
+  body: string;
+  ver: string;
+  version: number;
+  createdAt: string;
+  updatedAt: string;
+  status: 'DRAFT' | 'PENDING_REVIEW' | 'PUBLISHED' | 'ARCHIVED' | 'NOT_APPROVED' | 'NEEDS_REVISION';
+  engine: 'RENPY' | 'RPGM' | 'UNITY' | 'UNREAL' | 'GODOT' | 'TyranoBuilder' | 'WOLFRPG' | 'KIRIKIRI' | 'FLASH' | 'BakinPlayer';
+  mainImage: string | null;
+  backgroundImage: string | null;
+  coverImage: string | null;
+  images: string[];
+  tagList: string[];
+  categoryList: string[];
+  platformList: string[];
+  author: {
+    username: string;
+    bio: string | null;
+    image: string | null;
+    backgroundImage: string | null;
+    following: boolean;
+    socialMediaLinks: { platform: string; url: string }[];
+  };
+  favorited: boolean;
+  favoritesCount: number;
+  sequentialCode: string | null;
 };
 
 export type PagedResponse<T> = {
