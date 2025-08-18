@@ -3,6 +3,7 @@ import React, { ReactNode } from 'react';
 import { redirect } from 'next/navigation';
 import { routing } from '@/i18n/routing';
 import { NextIntlClientProvider } from 'next-intl';
+import { ThemeProvider } from '@/components/theme-provider';
 
 // Infer the locale type from routing.locales
 type Locale = typeof routing.locales[number]; // "en" | "de"
@@ -13,9 +14,9 @@ interface LocaleSegmentLayoutProps {
 }
 
 export default async function LocaleSegmentLayout({
-                                                    children,
-                                                    params,
-                                                  }: LocaleSegmentLayoutProps) {
+  children,
+  params,
+}: LocaleSegmentLayoutProps) {
   // Await the params Promise to get the actual parameters object
   const resolvedParams = await params;
   const currentLocale = resolvedParams.locale;
@@ -43,8 +44,10 @@ export default async function LocaleSegmentLayout({
   }
 
   return (
-    <NextIntlClientProvider locale={validLocale} messages={messages}>
-      {children}
-    </NextIntlClientProvider>
+    <ThemeProvider defaultTheme="light" storageKey="chanomhub-theme">
+      <NextIntlClientProvider locale={validLocale} messages={messages}>
+        {children}
+      </NextIntlClientProvider>
+    </ThemeProvider>
   );
 }

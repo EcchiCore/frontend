@@ -1,305 +1,202 @@
 "use client"
-import React, { useState } from 'react';
-import { ChevronRight, Download, Code, Zap, Shield, Search, Star, Menu, X, Github, Twitter, MessageCircle } from 'lucide-react';
-import Link from 'next/link';
-
-export default function ModernEdgyUI() {
-  const [currentTheme, setCurrentTheme] = useState('cyber');
+import React, { useState, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { ChevronRight, Download, Code, Zap, Shield, Search, Menu, X, Github, Twitter, MessageCircle, Sun, Moon } from 'lucide-react';
+import Navbar from '../components/Navbar';
+export default function BunStyleChanomHub() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [theme, setTheme] = useState('light');
 
-  const themes = [
-    { id: 'cyber', name: 'Cyber', gradient: 'from-cyan-500 to-blue-600' },
-    { id: 'neon', name: 'Neon', gradient: 'from-pink-500 to-purple-600' },
-    { id: 'matrix', name: 'Matrix', gradient: 'from-green-400 to-emerald-600' },
-    { id: 'sunset', name: 'Sunset', gradient: 'from-orange-500 to-red-600' },
-    { id: 'arctic', name: 'Arctic', gradient: 'from-blue-400 to-indigo-600' }
-  ];
+  useEffect(() => {
+    document.documentElement.className = theme;
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(theme === 'light' ? 'dark' : 'light');
+  };
 
   const techStack = [
-    { name: 'Rust', color: 'from-orange-500 to-red-500', icon: '🦀' },
-    { name: 'Tauri', color: 'from-yellow-500 to-orange-500', icon: '⚡' },
-    { name: 'Vite', color: 'from-purple-500 to-pink-500', icon: '🔥' },
-    { name: 'TypeScript', color: 'from-blue-500 to-cyan-500', icon: '💎' },
-    { name: 'React', color: 'from-cyan-500 to-blue-500', icon: '⚛️' }
+    { name: 'Rust', icon: '🦀' },
+    { name: 'Tauri', icon: '⚡' },
+    { name: 'Vite', icon: '🔥' },
+    { name: 'TypeScript', icon: '💎' },
+    { name: 'React', icon: '⚛️' }
   ];
 
   const features = [
     {
-      icon: <Zap className="w-8 h-8" />,
+      icon: <Zap className="w-6 h-6" />,
       title: 'Lightning Fast',
       description: 'Built with Rust and Tauri for maximum performance'
     },
     {
-      icon: <Shield className="w-8 h-8" />,
+      icon: <Shield className="w-6 h-6" />,
       title: 'Secure & Reliable',
       description: 'Enterprise-grade security with continuous updates'
     },
     {
-      icon: <Code className="w-8 h-8" />,
+      icon: <Code className="w-6 h-6" />,
       title: 'Developer Friendly',
       description: 'Clean APIs and comprehensive documentation'
     }
   ];
 
   return (
-    <div className="min-h-screen bg-black text-white overflow-hidden">
-      {/* Animated Background */}
-      <div className="fixed inset-0 opacity-20">
-        <div className="absolute inset-0 bg-gradient-to-br from-cyan-900/20 via-purple-900/20 to-pink-900/20"></div>
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
-      </div>
-
-      {/* Navigation */}
-      <nav className="relative z-50 bg-black/80 backdrop-blur-md border-b border-gray-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-cyan-500 to-purple-600 rounded-lg flex items-center justify-center">
-                <span className="text-sm font-bold">C</span>
-              </div>
-              <span className="text-xl font-bold bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">
-                ChanomHub
-              </span>
-            </div>
-
-            <div className="hidden md:flex items-center space-x-8">
-              <a href="#" className="text-gray-300 hover:text-cyan-400 transition-colors">หน้าแรก</a>
-              <a href="#" className="text-gray-300 hover:text-cyan-400 transition-colors">ดาวน์โหลด</a>
-              <a href="#" className="text-gray-300 hover:text-cyan-400 transition-colors">เอกสาร</a>
-              <a href="#" className="text-gray-300 hover:text-cyan-400 transition-colors">API</a>
-            </div>
-
-            <button
-              className="md:hidden"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-            >
-              {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </button>
-          </div>
-        </div>
-      </nav>
-
-      {/* Mobile Menu */}
-      {isMenuOpen && (
-        <div className="md:hidden fixed inset-0 z-40 bg-black/95 backdrop-blur-lg">
-          <div className="flex flex-col items-center justify-center h-full space-y-8 text-xl">
-            <a href="#" className="text-gray-300 hover:text-cyan-400 transition-colors">หน้าแรก</a>
-            <a href="#" className="text-gray-300 hover:text-cyan-400 transition-colors">ดาวน์โหลด</a>
-            <a href="#" className="text-gray-300 hover:text-cyan-400 transition-colors">เอกสาร</a>
-            <a href="#" className="text-gray-300 hover:text-cyan-400 transition-colors">API</a>
-          </div>
-        </div>
-      )}
+    <div className="min-h-screen bg-background text-foreground">
+      <Navbar/>
 
       {/* Hero Section */}
-      <section className="relative z-10 min-h-screen flex items-center justify-center px-4">
-        <div className="max-w-4xl mx-auto text-center">
-          <div className="inline-block p-1 bg-gradient-to-r from-cyan-500 to-purple-600 rounded-full mb-8">
-            <div className="bg-black px-6 py-2 rounded-full">
-              <span className="text-sm font-medium bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">
-                ✨ เวอร์ชั่นใหม่ล่าสุด v0.9.2 ✨
-              </span>
-            </div>
+      <section className="py-24 px-4">
+        <div className="max-w-5xl mx-auto text-center">
+          <div className="inline-flex items-center px-4 py-2 bg-muted rounded-full mb-8">
+            <span className="text-sm font-medium text-muted-foreground">
+              ✨ เวอร์ชั่นใหม่ล่าสุด v0.9.2
+            </span>
           </div>
 
-          <h1 className="text-5xl md:text-7xl font-black mb-6 leading-tight">
-            <span className="bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
-              ยินดีต้อนรับสู่
-            </span>
+          <h1 className="text-5xl md:text-7xl font-bold mb-8 leading-tight">
+            ยินดีต้อนรับสู่
             <br />
-            <span className="text-white">อนาคต</span>
+            <span className="text-foreground">อนาคต</span>
           </h1>
 
-          <p className="text-xl md:text-2xl text-gray-300 mb-12 max-w-3xl mx-auto leading-relaxed">
-            ค้นพบโปรแกรมที่จะปฏิวัติการทำงานของคุณ<br />
+          <p className="text-xl md:text-2xl text-muted-foreground mb-12 max-w-3xl mx-auto leading-relaxed">
+            ค้นพบโปรแกรมที่จะปฏิวัติการทำงานของคุณ
+            <br />
             ด้วยเทคโนโลยีล้ำสมัยและประสิทธิภาพสูงสุด
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <button className="group relative px-8 py-4 bg-gradient-to-r from-cyan-500 to-purple-600 rounded-xl font-bold text-lg hover:shadow-2xl hover:shadow-cyan-500/25 transition-all duration-300 hover:scale-105">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button size="lg" className="h-12 px-8 text-base font-medium group">
+              <Download className="w-5 h-5 mr-2" />
+              Downloads
+              <ChevronRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
+            </Button>
 
-
-
-              <span className="flex items-center space-x-2">
-
-                <Download className="w-5 h-5" />
-
-                <Link href="/application/downloads">Downloads</Link>
-                <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-              </span>
-            </button>
-
-            <button className="px-8 py-4 border-2 border-gray-700 rounded-xl font-bold text-lg hover:border-cyan-500 hover:shadow-xl hover:shadow-cyan-500/10 transition-all duration-300 hover:bg-cyan-500/5">
-              <Link href="/docs">How to use</Link>
-            </button>
+            <Button variant="outline" size="lg" className="h-12 px-8 text-base font-medium">
+              How to use
+            </Button>
           </div>
         </div>
       </section>
 
       {/* Tech Stack */}
-      <section className="relative z-10 py-20 px-4">
+      <section className="py-20 px-4 bg-muted/30">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">
-            <span className="bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">
-              เทคโนโลยีที่ใช้
-            </span>
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-16">
+            เทคโนโลยีที่ใช้
           </h2>
 
-          <div className="flex flex-wrap justify-center gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
             {techStack.map((tech) => (
-              <div
-                key={tech.name}
-                className="group relative p-6 bg-gray-900/50 backdrop-blur-sm border border-gray-800 rounded-2xl hover:border-cyan-500/50 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-cyan-500/10"
-              >
-                <div className={`absolute inset-0 bg-gradient-to-br ${tech.color} opacity-0 group-hover:opacity-10 rounded-2xl transition-opacity duration-300`}></div>
-                <div className="relative z-10 text-center">
-                  <div className="text-3xl mb-2">{tech.icon}</div>
-                  <div className="text-lg font-bold">{tech.name}</div>
-                </div>
-              </div>
+              <Card key={tech.name} className="hover:shadow-sm transition-all duration-200">
+                <CardContent className="pt-8 pb-6 text-center">
+                  <div className="text-3xl mb-3">{tech.icon}</div>
+                  <div className="font-semibold">{tech.name}</div>
+                </CardContent>
+              </Card>
             ))}
           </div>
         </div>
       </section>
 
       {/* Features */}
-      <section className="relative z-10 py-20 px-4">
+      <section className="py-20 px-4">
         <div className="max-w-6xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {features.map((feature, index) => (
-              <div
-                key={index}
-                className="group relative p-8 bg-gray-900/30 backdrop-blur-sm border border-gray-800 rounded-2xl hover:border-cyan-500/50 transition-all duration-300 hover:scale-105"
-              >
-                <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 rounded-2xl transition-opacity duration-300"></div>
-                <div className="relative z-10">
-                  <div className="text-cyan-400 mb-4 group-hover:scale-110 transition-transform duration-300">
+              <Card key={index} className="hover:shadow-sm transition-all duration-200">
+                <CardHeader className="pb-4">
+                  <div className="mb-4">
                     {feature.icon}
                   </div>
-                  <h3 className="text-xl font-bold mb-3 text-white">{feature.title}</h3>
-                  <p className="text-gray-300 leading-relaxed">{feature.description}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Theme Selector */}
-      <section className="relative z-10 py-20 px-4">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-6">
-            <span className="bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">
-              เลือกธีมที่ใช่สำหรับคุณ
-            </span>
-          </h2>
-          <p className="text-gray-300 text-lg mb-12">
-            ปรับแต่งแอพพลิเคชันให้เข้ากับสไตล์ของคุณ
-          </p>
-
-          <div className="flex flex-wrap justify-center gap-6">
-            {themes.map((theme) => (
-              <div
-                key={theme.id}
-                className="group cursor-pointer"
-                onClick={() => setCurrentTheme(theme.id)}
-              >
-                <div className={`w-20 h-20 rounded-2xl bg-gradient-to-br ${theme.gradient} mb-3 group-hover:scale-110 transition-all duration-300 ${currentTheme === theme.id ? 'ring-4 ring-cyan-400 ring-offset-4 ring-offset-black' : ''}`}>
-                  <div className="w-full h-full rounded-2xl bg-black/20 flex items-center justify-center">
-                    <Star className={`w-6 h-6 ${currentTheme === theme.id ? 'text-white' : 'text-white/50'}`} />
-                  </div>
-                </div>
-                <span className="text-sm font-medium text-gray-300 group-hover:text-white transition-colors">
-                  {theme.name}
-                </span>
-              </div>
+                  <CardTitle className="text-xl">{feature.title}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <CardDescription className="text-base leading-relaxed">
+                    {feature.description}
+                  </CardDescription>
+                </CardContent>
+              </Card>
             ))}
           </div>
         </div>
       </section>
 
       {/* Search Section */}
-      <section className="relative z-10 py-20 px-4">
+      <section className="py-20 px-4 bg-muted/30">
         <div className="max-w-4xl mx-auto">
-          <div className="bg-gray-900/30 backdrop-blur-sm border border-gray-800 rounded-3xl p-8 md:p-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-center mb-6">
-              <span className="bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">
+          <Card className="p-12">
+            <div className="text-center mb-10">
+              <h2 className="text-3xl md:text-4xl font-bold mb-6">
                 ค้นหาทุกอย่างได้อย่างรวดเร็ว
-              </span>
-            </h2>
-
-            <div className="relative max-w-2xl mx-auto">
-              <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 to-purple-600 rounded-xl blur opacity-25"></div>
-              <div className="relative bg-gray-900 border border-gray-700 rounded-xl p-2 flex">
-                <input
-                  type="text"
-                  placeholder="ค้นหาคอนเทนท์ที่ต้องการ..."
-                  className="flex-1 bg-transparent px-4 py-3 text-white placeholder-gray-400 focus:outline-none"
-                />
-                <button className="px-6 py-3 bg-gradient-to-r from-cyan-500 to-purple-600 rounded-lg font-bold hover:shadow-lg hover:shadow-cyan-500/25 transition-all duration-300 hover:scale-105">
-                  <Search className="w-5 h-5" />
-                </button>
-              </div>
+              </h2>
+              <p className="text-lg text-muted-foreground">
+                เชื่อมต่อกับระบบ search engine ประสิทธิภาพสูง
+              </p>
             </div>
 
-            <p className="text-center text-gray-400 mt-6">
-              เชื่อมต่อกับระบบ search engine ประสิทธิภาพสูง
-            </p>
-          </div>
+            <div className="flex max-w-2xl mx-auto">
+              <Input
+                type="text"
+                placeholder="ค้นหาคอนเทนท์ที่ต้องการ..."
+                className="rounded-r-none h-12 text-base"
+              />
+              <Button className="rounded-l-none h-12 px-6">
+                <Search className="w-5 h-5" />
+              </Button>
+            </div>
+          </Card>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="relative z-10 py-20 px-4">
+      <section className="py-20 px-4">
         <div className="max-w-4xl mx-auto">
-          <div className="relative overflow-hidden bg-gradient-to-br from-cyan-900/50 to-purple-900/50 backdrop-blur-sm border border-gray-800 rounded-3xl p-8 md:p-12 text-center">
-            <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/10 to-purple-500/10"></div>
-            <div className="relative z-10">
-              <h2 className="text-3xl md:text-4xl font-bold mb-6">
-                เริ่มต้นใช้งานวันนี้
-              </h2>
-              <p className="text-xl text-gray-300 mb-10">
-                ดาวน์โหลดและติดตั้งแอพพลิเคชันฟรี
-              </p>
+          <Card className="bg-primary text-primary-foreground p-12 text-center">
+            <h2 className="text-3xl md:text-4xl font-bold mb-6">
+              เริ่มต้นใช้งานวันนี้
+            </h2>
+            <p className="text-xl opacity-90 mb-10">
+              ดาวน์โหลดและติดตั้งแอพพลิเคชันฟรี
+            </p>
 
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <button className="px-8 py-4 bg-white text-black rounded-xl font-bold hover:bg-gray-100 transition-colors hover:scale-105 transform duration-300">
-                  Windows
-                </button>
-                <button className="px-8 py-4 bg-white text-black rounded-xl font-bold hover:bg-gray-100 transition-colors hover:scale-105 transform duration-300">
-                  macOS
-                </button>
-                <button className="px-8 py-4 bg-white text-black rounded-xl font-bold hover:bg-gray-100 transition-colors hover:scale-105 transform duration-300">
-                  Linux
-                </button>
-              </div>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Button variant="outline" size="lg" className="bg-transparent border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground hover:text-primary h-12 px-8 text-base font-medium">
+                Windows
+              </Button>
+              <Button variant="outline" size="lg" className="bg-transparent border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground hover:text-primary h-12 px-8 text-base font-medium">
+                macOS
+              </Button>
+              <Button variant="outline" size="lg" className="bg-transparent border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground hover:text-primary h-12 px-8 text-base font-medium">
+                Linux
+              </Button>
             </div>
-          </div>
+          </Card>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="relative z-10 border-t border-gray-800 py-12 px-4">
+      <footer className="border-t py-16 px-4 bg-muted/20">
         <div className="max-w-6xl mx-auto">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="flex items-center space-x-2 mb-4 md:mb-0">
-              <div className="w-8 h-8 bg-gradient-to-br from-cyan-500 to-purple-600 rounded-lg flex items-center justify-center">
-                <span className="text-sm font-bold">C</span>
+          <div className="flex flex-col md:flex-row justify-between items-center mb-8">
+            <div className="flex items-center space-x-3 mb-6 md:mb-0">
+              <div className="w-9 h-9 bg-primary rounded-xl flex items-center justify-center">
+                <span className="text-sm font-bold text-primary-foreground">C</span>
               </div>
-              <span className="text-xl font-bold bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">
-                ChanomHub
-              </span>
+              <span className="text-xl font-bold">ChanomHub</span>
             </div>
 
             <div className="flex space-x-6">
-              <Github className="w-6 h-6 text-gray-400 hover:text-cyan-400 cursor-pointer transition-colors" />
-              <Twitter className="w-6 h-6 text-gray-400 hover:text-cyan-400 cursor-pointer transition-colors" />
-              <MessageCircle className="w-6 h-6 text-gray-400 hover:text-cyan-400 cursor-pointer transition-colors" />
+              <Github className="w-6 h-6 text-muted-foreground hover:text-foreground cursor-pointer transition-colors" />
+              <Twitter className="w-6 h-6 text-muted-foreground hover:text-foreground cursor-pointer transition-colors" />
+              <MessageCircle className="w-6 h-6 text-muted-foreground hover:text-foreground cursor-pointer transition-colors" />
             </div>
           </div>
 
-          <div className="mt-8 pt-8 border-t border-gray-800 text-center text-gray-400">
+          <div className="pt-8 border-t text-center text-muted-foreground">
             <p>&copy; 2025 ChanomHub. All rights reserved.</p>
           </div>
         </div>

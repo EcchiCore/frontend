@@ -54,9 +54,21 @@ interface RootLayoutProps {
 
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
-    <html>
+    <html lang="th" suppressHydrationWarning>
     <head>
       <meta charSet="utf-8" />
+
+      {/* Prevent flash of unstyled content */}
+      <script
+        dangerouslySetInnerHTML={{
+          __html: `
+            try {
+              const theme = localStorage.getItem('chanomhub-theme') || 'light';
+              document.documentElement.classList.add(theme);
+            } catch (e) {}
+          `
+        }}
+      />
 
       {/* Structured Data */}
       <script
