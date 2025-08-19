@@ -1,76 +1,28 @@
+// pages/index.tsx or app/page.tsx
 "use client";
-// pages/index.tsx หรือ app/page.tsx (สำหรับ App Router)
-import Head from 'next/head'
-import { Inter } from 'next/font/google'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Input } from '@/components/ui/input'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
-import { 
-  Search, 
-  TrendingUp, 
-  MessageSquare, 
-  Users, 
-  Star,
-  Clock,
-  Eye,
-  Heart,
-  Share
-} from 'lucide-react'
+import Head from 'next/head';
+import { Inter } from 'next/font/google';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Input } from '@/components/ui/input';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Search, TrendingUp, MessageSquare, Users, Star, Clock, Eye, Heart, Share } from 'lucide-react';
 import Navbar from '../components/Navbar';
+import FeaturedPosts from './components/FeaturedPosts';
 
-const inter = Inter({ subsets: ['latin'] })
+const inter = Inter({ subsets: ['latin'] });
 
-// Mock data
-const featuredPosts = [
-  {
-    id: 1,
-    title: "เทคนิคการลงทุนหุ้นไทยสำหรับมือใหม่ ปี 2025",
-    description: "แนวทางการเริ่มต้นลงทุนในตลาดหุ้นไทยอย่างปลอดภัย",
-    author: "นักลงทุนมือโปร",
-    category: "การเงิน",
-    views: 15420,
-    comments: 89,
-    likes: 234,
-    timeAgo: "2 ชั่วโมงที่แล้ว",
-    image: "/api/placeholder/400/200"
-  },
-  {
-    id: 2,
-    title: "รีวิว iPhone 16 Pro Max หลังใช้งาน 3 เดือน",
-    description: "ประสบการณ์การใช้งาน iPhone รุ่นล่าสุดในมุมมองผู้ใช้จริง",
-    author: "TechReviewer",
-    category: "เทคโนโลยี",
-    views: 8930,
-    comments: 156,
-    likes: 445,
-    timeAgo: "5 ชั่วโมงที่แล้ว",
-    image: "/api/placeholder/400/200"
-  },
-  {
-    id: 3,
-    title: "สูตรอาหารไทยโบราณที่กำลังจะสูญหาย",
-    description: "รวมสูตรอาหารไทยดั้งเดิมที่ควรอนุรักษ์ไว้ให้ลูกหลาน",
-    author: "เชฟบ้านๆ",
-    category: "อาหาร",
-    views: 12340,
-    comments: 78,
-    likes: 189,
-    timeAgo: "1 วันที่แล้ว",
-    image: "/api/placeholder/400/200"
-  }
-]
-
+// Mock data for other sections
 const trendingTopics = [
   { name: "การลงทุน", count: 1250 },
   { name: "เทคโนโลยี", count: 980 },
   { name: "ท่องเที่ยว", count: 856 },
   { name: "สุขภาพ", count: 742 },
-  { name: "อาหาร", count: 698 }
-]
+  { name: "อาหาร", count: 698 },
+];
 
 const categories = [
   { name: "ข่าวสาร", icon: "📰", count: 5420 },
@@ -78,16 +30,16 @@ const categories = [
   { name: "กีฬา", icon: "⚽", count: 2340 },
   { name: "เทคโนโลยี", icon: "💻", count: 4560 },
   { name: "การเงิน", icon: "💰", count: 2890 },
-  { name: "ท่องเที่ยว", icon: "✈️", count: 1890 }
-]
+  { name: "ท่องเที่ยว", icon: "✈️", count: 1890 },
+];
 
 export default function HomePage() {
   return (
     <>
       <Head>
         <title>Pantip - เว็บบอร์ดชั้นนำของไทย | ถาม-ตอบ แลกเปลี่ยนความรู้</title>
-        <meta 
-          name="description" 
+        <meta
+          name="description"
           content="Pantip เว็บบอร์ดชั้นนำของไทย ที่รวมคนไทยเข้ามาถาม-ตอบ แลกเปลี่ยนความรู้ ความคิดเห็น ในหัวข้อที่หลากหลาย ทั้งข่าวสาร บันเทิง เทคโนโลยี การเงิน ท่องเที่ยว"
         />
         <meta name="keywords" content="pantip, เว็บบอร์ด, ถาม-ตอบ, ชุมชนออนไลน์, ข่าวสาร, บันเทิง, เทคโนโลยี" />
@@ -102,7 +54,7 @@ export default function HomePage() {
       </Head>
 
       <div className={`min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 ${inter.className}`}>
-        <Navbar/>
+        <Navbar />
 
         <main className="bg-background">
           {/* Image Carousel Section - Pure CSS */}
@@ -247,11 +199,11 @@ export default function HomePage() {
                   </div>
                 </div>
 
-                {/* Static Navigation (สำหรับ SEO) */}
                 <button className="nav-btn nav-btn-left" aria-label="ภาพก่อนหน้า">
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                   </svg>
+.dou
                 </button>
                 
                 <button className="nav-btn nav-btn-right" aria-label="ภาพถัดไป">
@@ -271,105 +223,59 @@ export default function HomePage() {
             </div>
           </section>
 
-          <div className="grid lg:grid-cols-4 gap-8">
+          <div className="grid lg:grid-cols-4 gap-8 container mx-auto px-4">
             {/* Main Content */}
             <div className="lg:col-span-3">
-  {/* Tabs Navigation */}
-  <Tabs defaultValue="featured" className="mb-8">
-    <TabsList className="grid w-full grid-cols-4">
-      <TabsTrigger value="featured">แนะนำ</TabsTrigger>
-      <TabsTrigger value="latest">ล่าสุด</TabsTrigger>
-      <TabsTrigger value="trending">ยอดนิยม</TabsTrigger>
-      <TabsTrigger value="myFeed">ฟีดของฉัน</TabsTrigger>
-    </TabsList>
+              {/* Tabs Navigation */}
+              <Tabs defaultValue="featured" className="mb-8">
+                <TabsList className="grid w-full grid-cols-4">
+                  <TabsTrigger value="featured">แนะนำ</TabsTrigger>
+                  <TabsTrigger value="latest">ล่าสุด</TabsTrigger>
+                  <TabsTrigger value="trending">ยอดนิยม</TabsTrigger>
+                  <TabsTrigger value="myFeed">ฟีดของฉัน</TabsTrigger>
+                </TabsList>
 
-    <TabsContent value="featured" className="space-y-6">
-      <h3 className="text-sm leading-none font-medium text-foreground">กระทู้แนะนำ</h3>
-      {featuredPosts.map((post) => (
-        <Card key={post.id} className="hover:shadow-lg transition-shadow cursor-pointer">
-          <CardContent className="p-6">
-            <div className="flex space-x-4">
-              <div className="w-32 h-20 bg-muted rounded-lg flex-shrink-0 overflow-hidden">
-                <div className="w-full h-full bg-gradient-to-br from-purple-400 to-blue-500"></div>
-              </div>
-              <div className="flex-grow">
-                <div className="flex items-start justify-between mb-2">
-                  <Badge variant="secondary">{post.category}</Badge>
-                  <div className="flex items-center space-x-4 text-sm text-muted-foreground">
-                    <div className="flex items-center space-x-1">
-                      <Eye className="h-4 w-4" />
-                      <span>{post.views.toLocaleString()}</span>
-                    </div>
-                    <div className="flex items-center space-x-1">
-                      <MessageSquare className="h-4 w-4" />
-                      <span>{post.comments}</span>
-                    </div>
-                    <div className="flex items-center space-x-1">
-                      <Heart className="h-4 w-4" />
-                      <span>{post.likes}</span>
-                    </div>
+                <TabsContent value="featured" className="space-y-6">
+                  <FeaturedPosts platform="windows" />
+                </TabsContent>
+
+                <TabsContent value="latest" className="space-y-6">
+                  <h3 className="text-2xl font-semibold text-foreground mb-6">กระทู้ล่าสุด</h3>
+                  <div className="space-y-4">
+                    {[1, 2, 3, 4, 5].map((i) => (
+                      <Card key={i} className="hover:shadow-md transition-shadow">
+                        <CardContent className="p-4">
+                          <div className="flex items-center space-x-3">
+                            <Avatar className="h-10 w-10">
+                              <AvatarFallback>U{i}</AvatarFallback>
+                            </Avatar>
+                            <div className="flex-grow">
+                              <h4 className="font-medium text-foreground">หัวข้อกระทู้ตัวอย่างที่ {i}</h4>
+                              <div className="flex items-center space-x-4 text-sm text-muted-foreground mt-1">
+                                <span>โดย: ผู้ใช้{i}</span>
+                                <span>5 นาทีที่แล้ว</span>
+                                <span>12 ตอบ</span>
+                              </div>
+                            </div>
+                            <Badge variant="outline">ทั่วไป</Badge>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
                   </div>
-                </div>
-                <h4 className="text-lg font-semibold text-foreground mb-2 hover:text-primary transition-colors">
-                  {post.title}
-                </h4>
-                <p className="text-muted-foreground mb-3">{post.description}</p>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-2">
-                    <Avatar className="h-8 w-8">
-                      <AvatarFallback>{post.author[0]}</AvatarFallback>
-                    </Avatar>
-                    <span className="text-sm text-foreground">{post.author}</span>
-                  </div>
-                  <div className="flex items-center space-x-1 text-sm text-muted-foreground">
-                    <Clock className="h-4 w-4" />
-                    <span>{post.timeAgo}</span>
-                  </div>
-                </div>
-              </div>
+                </TabsContent>
+
+                <TabsContent value="trending" className="space-y-6">
+                  <h3 className="text-2xl font-semibold text-foreground mb-6">กระทู้ยอดนิยม</h3>
+                  <p className="text-muted-foreground">กระทู้ที่ได้รับความสนใจมากที่สุดในวันนี้</p>
+                </TabsContent>
+
+                <TabsContent value="myFeed" className="space-y-6">
+                  <h3 className="text-2xl font-semibold text-foreground mb-6">ฟีดของฉัน</h3>
+                  <p className="text-muted-foreground">เข้าสู่ระบบเพื่อดูกระทู้ที่คุณติดตาม</p>
+                </TabsContent>
+              </Tabs>
             </div>
-          </CardContent>
-        </Card>
-      ))}
-    </TabsContent>
-
-    <TabsContent value="latest" className="space-y-6">
-      <h3 className="text-2xl font-semibold text-foreground mb-6">กระทู้ล่าสุด</h3>
-      <div className="space-y-4">
-        {[1, 2, 3, 4, 5].map((i) => (
-          <Card key={i} className="hover:shadow-md transition-shadow">
-            <CardContent className="p-4">
-              <div className="flex items-center space-x-3">
-                <Avatar className="h-10 w-10">
-                  <AvatarFallback>U{i}</AvatarFallback>
-                </Avatar>
-                <div className="flex-grow">
-                  <h4 className="font-medium text-foreground">หัวข้อกระทู้ตัวอย่างที่ {i}</h4>
-                  <div className="flex items-center space-x-4 text-sm text-muted-foreground mt-1">
-                    <span>โดย: ผู้ใช้{i}</span>
-                    <span>5 นาทีที่แล้ว</span>
-                    <span>12 ตอบ</span>
-                  </div>
-                </div>
-                <Badge variant="outline">ทั่วไป</Badge>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    </TabsContent>
-
-    <TabsContent value="trending" className="space-y-6">
-      <h3 className="text-2xl font-semibold text-foreground mb-6">กระทู้ยอดนิยม</h3>
-      <p className="text-muted-foreground">กระทู้ที่ได้รับความสนใจมากที่สุดในวันนี้</p>
-    </TabsContent>
-
-    <TabsContent value="myFeed" className="space-y-6">
-      <h3 className="text-2xl font-semibold text-foreground mb-6">ฟีดของฉัน</h3>
-      <p className="text-muted-foreground">เข้าสู่ระบบเพื่อดูกระทู้ที่คุณติดตาม</p>
-    </TabsContent>
-  </Tabs>
-</div>
 
             {/* Sidebar */}
             <div className="space-y-6">
@@ -380,7 +286,10 @@ export default function HomePage() {
                 </CardHeader>
                 <CardContent className="space-y-3">
                   {categories.map((category, index) => (
-                    <div key={index} className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors">
+                    <div
+                      key={index}
+                      className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors"
+                    >
                       <div className="flex items-center space-x-3">
                         <span className="text-xl">{category.icon}</span>
                         <span className="font-medium">{category.name}</span>
@@ -401,7 +310,10 @@ export default function HomePage() {
                 </CardHeader>
                 <CardContent className="space-y-2">
                   {trendingTopics.map((topic, index) => (
-                    <div key={index} className="flex items-center justify-between p-2 hover:bg-gray-50 rounded cursor-pointer transition-colors">
+                    <div
+                      key={index}
+                      className="flex items-center justify-between p-2 hover:bg-gray-50 rounded cursor-pointer transition-colors"
+                    >
                       <span className="text-sm font-medium">#{topic.name}</span>
                       <span className="text-xs text-gray-500">{topic.count} กระทู้</span>
                     </div>
@@ -497,10 +409,11 @@ export default function HomePage() {
             </div>
             <div className="border-t border-gray-800 mt-8 pt-8 text-center text-sm text-gray-400">
               <p>&copy; 2025 Pantip. สงวนลิขสิทธิ์ทุกประการ</p>
+
             </div>
           </div>
         </footer>
       </div>
     </>
-  )
+  );
 }

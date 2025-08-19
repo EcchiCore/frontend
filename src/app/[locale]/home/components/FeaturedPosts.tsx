@@ -1,0 +1,149 @@
+"use client";
+
+import { useEffect, useState } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Eye, MessageSquare, Heart, Clock } from 'lucide-react';
+
+// Define the structure of an article from the API
+interface Article {
+  id: number;
+  title: string;
+  description: string;
+  author: {
+    username: string;
+  };
+  categoryList: string[];
+  favoritesCount: number;
+  createdAt: string;
+  mainImage: string;
+}
+
+interface FeaturedPostsProps {
+  platform?: 'windows' | 'android';
+}
+
+export default function FeaturedPosts({ platform = 'windows' }: FeaturedPostsProps) {
+  const [posts, setPosts] = useState<Article[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchPosts = async () => {
+      const cacheKey = `posts_${platform}`;
+      const cachedData = localStorage.getItem(cacheKey);
+      const cacheTime = localStorage.getItem(`${cacheKey}_time`);
+      const now = Date.now();
+      const cacheDuration = 1000 * 60 * 30; // Cache for 30 minutes
+
+      // Check if cache exists and is not expired
+      if (cachedData && cacheTime && now - parseInt(cacheTime) < cacheDuration) {
+        setPosts(JSON.parse(cachedData));
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const response = await fetch(
+          `https://api.chanomhub.online/api/articles?platform=${platform}&status=PUBLISHED`,
+          {
+            headers: {
+              accept: 'application/json',
+            },
+          }
+        );
+        if (!response.ok) {
+          throw new Error('Failed to fetch articles');
+        }
+        const data = await response.json();
+        setPosts(data.articles || []);
+        // Store data and cache time in localStorage
+        localStorage.setItem(cacheKey, JSON.stringify(data.articles));
+        localStorage.setItem(`${cacheKey}_time`, now.toString());
+      } catch (err) {
+        setError('เกิดข้อผิดพลาดในการโหลดกระทู้แนะนำ');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPosts();
+  }, [platform]);
+
+  // Function to calculate time ago
+  const getTimeAgo = (dateString: string) => {
+    const now = new Date();
+    const created = new Date(dateString);
+    const diffInMs = now.getTime() - created.getTime();
+    const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
+    if (diffInHours < 1) return 'เมื่อไม่กี่นาทีที่แล้ว';
+    if (diffInHours < 24) return `${diffInHours} ชั่วโมงที่แล้ว`;
+    const diffInDays = Math.floor(diffInHours / 24);
+    return `${diffInDays} วันที่แล้ว`;
+  };
+
+  if (loading) {
+    return <div className="text-center">กำลังโหลดกระทู้แนะนำ...</div>;
+  }
+
+  if (error) {
+    return <div className="text-center text-red-500">{error}</div>;
+  }
+
+  return (
+    <div className="space-y-6">
+      <h3 className="text-sm leading-none font-medium text-foreground">กระทู้แนะนำ</h3>
+      {posts.map((post) => (
+        <Card key={post.id} className="hover:shadow-lg transition-shadow cursor-pointer">
+          <CardContent className="p-6">
+            <div className="flex space-x-4">
+              <div className="w-32 h-20 bg-muted rounded-lg flex-shrink-0 overflow-hidden">
+                <img
+                  src={post.mainImage || '/api/placeholder/400/200'}
+                  alt={post.title}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="flex-grow">
+                <div className="flex items-start justify-between mb-2">
+                  <Badge variant="secondary">{post.categoryList[0] || 'ทั่วไป'}</Badge>
+                  <div className="flex items-center space-x-4 text-sm text-muted-foreground">
+                    <div className="flex items-center space-x-1">
+                      <Eye className="h-4 w-4" />
+                      <span>0</span> {/* Views not in API, fake or omit */}
+                    </div>
+                    <div className="flex items-center space-x-1">
+                      <MessageSquare className="h-4 w-4" />
+                      <span>0</span> {/* Comments not in API */}
+                    </div>
+                    <div className="flex items-center space-x-1">
+                      <Heart className="h-4 w-4" />
+                      <span>{post.favoritesCount}</span>
+                    </div>
+                  </div>
+                </div>
+                <h4 className="text-lg font-semibold text-foreground mb-2 hover:text-primary transition-colors">
+                  {post.title}
+                </h4>
+                <p className="text-muted-foreground mb-3">{post.description}</p>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <Avatar className="h-8 w-8">
+                      <AvatarFallback>{post.author.username[0]}</AvatarFallback>
+                    </Avatar>
+                    <span className="text-sm text-foreground">{post.author.username}</span>
+                  </div>
+                  <div className="flex items-center space-x-1 text-sm text-muted-foreground">
+                    <Clock className="h-4 w-4" />
+                    <span>{getTimeAgo(post.createdAt)}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+}
