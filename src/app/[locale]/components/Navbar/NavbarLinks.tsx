@@ -18,11 +18,14 @@ interface NavLink {
 }
 
 interface NavbarLinksProps {
+  section: 'left' | 'right';
   onCloseMenu?: () => void;
+  isMobile?: boolean;
 }
 
-export default function NavbarLinks({ onCloseMenu = () => {} }: NavbarLinksProps) {
-  const [navLinks, setNavLinks] = useState<NavLink[]>([]);
+export default function NavbarLinks({ section, onCloseMenu = () => {}, isMobile = false }: NavbarLinksProps) {
+  const [leftNavLinks, setLeftNavLinks] = useState<NavLink[]>([]);
+  const [rightNavLinks, setRightNavLinks] = useState<NavLink[]>([]);
   const [isClient, setIsClient] = useState(false);
   const params = useParams();
   const pathname = usePathname();
@@ -71,83 +74,142 @@ export default function NavbarLinks({ onCloseMenu = () => {} }: NavbarLinksProps
 
     const token = Cookies.get("token");
 
-    const baseLinks: NavLink[] = [
-      { id: "3", name: t("search"), transKey: "search", link: getLocalizedHref("/search") },
+    // Left navigation links (Search, Extensions)
+    const leftLinks: NavLink[] = [
+      { 
+        id: "search", 
+        name: t("search"), 
+        transKey: "search", 
+        link: getLocalizedHref("/search") 
+      },
       {
-        id: "2",
+        id: "extensions",
         name: t("extensions"),
         transKey: "extensions",
         subLinks: [
-          { id: "2-1", name: t("loadApp"), transKey: "loadApp", link: getLocalizedHref("/application") },
+          { 
+            id: "extensions-app", 
+            name: t("loadApp"), 
+            transKey: "loadApp", 
+            link: getLocalizedHref("/application") 
+          },
           {
-            id: "2-2",
+            id: "extensions-status",
             name: t("webStatus"),
             transKey: "webStatus",
             link: "https://status.chanomhub.online/status/all",
           },
         ],
       },
+    ];
+
+    // Right navigation links (Language, Member if authenticated)
+    const rightLinks: NavLink[] = [
       {
-        id: "5-lang",
+        id: "language",
         name: t("language"),
         transKey: "language",
         subLinks: [
-          { id: "5-1", name: t("english"), transKey: "english", link: "#" },
-          { id: "5-2", name: t("thai"), transKey: "thai", link: "#" },
+          { 
+            id: "lang-en", 
+            name: t("english"), 
+            transKey: "english", 
+            link: "#" 
+          },
+          { 
+            id: "lang-th", 
+            name: t("thai"), 
+            transKey: "thai", 
+            link: "#" 
+          },
         ],
       },
     ];
 
     if (token) {
-      setNavLinks([
-        ...baseLinks,
-        {
-          id: "4-member",
-          name: t("member"),
-          transKey: "member",
-          subLinks: [
-            { id: "4-1", name: t("dashboard"), transKey: "dashboard", link: getLocalizedHref("/member/dashboard") },
-            { id: "4-2", name: t("profile"), transKey: "profile", link: getLocalizedHref("/member/profile") },
-            { id: "4-3", name: t("settings"), transKey: "settings", link: getLocalizedHref("/member/settings") },
-            { id: "4-4", name: t("contact"), transKey: "contact", link: getLocalizedHref("/contact") },
-            { id: "4-5", name: t("logout"), transKey: "logout", link: getLocalizedHref("/logout") },
-          ],
-        },
-      ]);
-    } else {
-      setNavLinks(baseLinks);
+      rightLinks.push({
+        id: "member",
+        name: t("member"),
+        transKey: "member",
+        subLinks: [
+          { 
+            id: "member-dashboard", 
+            name: t("dashboard"), 
+            transKey: "dashboard", 
+            link: getLocalizedHref("/member/dashboard") 
+          },
+          { 
+            id: "member-profile", 
+            name: t("profile"), 
+            transKey: "profile", 
+            link: getLocalizedHref("/member/profile") 
+          },
+          { 
+            id: "member-settings", 
+            name: t("settings"), 
+            transKey: "settings", 
+            link: getLocalizedHref("/member/settings") 
+          },
+          { 
+            id: "member-contact", 
+            name: t("contact"), 
+            transKey: "contact", 
+            link: getLocalizedHref("/contact") 
+          },
+          { 
+            id: "member-logout", 
+            name: t("logout"), 
+            transKey: "logout", 
+            link: getLocalizedHref("/logout") 
+          },
+        ],
+      });
     }
+
+    setLeftNavLinks(leftLinks);
+    setRightNavLinks(rightLinks);
   }, [isClient, locale, pathname, t, getLocalizedHref]);
 
   if (!isClient) {
-    return <div className="flex flex-col md:flex-row md:items-center md:gap-4 space-y-2 md:space-y-0" />;
+    return <div className={isMobile ? "space-y-2" : "flex items-center gap-4"} />;
   }
 
+  const linksToRender = section === 'left' ? leftNavLinks : rightNavLinks;
+
   return (
-    <div className="flex flex-col md:flex-row md:items-center md:gap-4 space-y-2 md:space-y-0">
-      {navLinks.map((item) => (
-        <div key={item.id} className="w-full md:w-auto">
+    <div className={isMobile ? "space-y-2" : "flex items-center gap-4"}>
+      {linksToRender.map((item) => (
+        <div key={item.id} className={isMobile ? "w-full" : "w-auto"}>
           {item.subLinks ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
-                  className="flex items-center justify-between md:justify-start w-full md:w-auto gap-2 text-sm lg:text-base hover:bg-accent"
+                  className={`
+                    flex items-center gap-2 text-sm lg:text-base hover:bg-accent
+                    ${isMobile 
+                      ? "justify-between w-full h-10 px-3" 
+                      : "justify-start w-auto px-3 py-2"
+                    }
+                  `}
                 >
                   <span className="flex items-center gap-2">
-                    {item.name === t("member") && <User size={16} className="mr-1" />}
+                    {item.name === t("member") && <User size={16} />}
                     {item.name}
                   </span>
-                  <ChevronDown size={16} className="ml-1" />
+                  <ChevronDown size={16} />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-full md:w-56">
+              <DropdownMenuContent 
+                className={`w-full ${isMobile ? "min-w-[200px]" : "md:w-56"}`}
+                align={isMobile ? "start" : section === 'right' ? "end" : "start"}
+              >
                 {item.subLinks.map((sub) => (
-                  item.id === "5-lang" ? (
+                  item.id === "language" ? (
                     <DropdownMenuItem
                       key={sub.id}
                       className="text-sm cursor-pointer hover:bg-accent"
-                      onClick={() => changeLanguage(sub.id === "5-1" ? "en" : "th")}
+                      onClick={() => changeLanguage(sub.id === "lang-en" ? "en" : "th")}
                     >
                       {sub.name}
                     </DropdownMenuItem>
@@ -170,7 +232,13 @@ export default function NavbarLinks({ onCloseMenu = () => {} }: NavbarLinksProps
           ) : (
             <Link
               href={item.link || "#"}
-              className="flex items-center gap-2 px-4 py-2 text-sm lg:text-base hover:bg-accent rounded-md w-full md:w-auto"
+              className={`
+                flex items-center gap-2 text-sm lg:text-base hover:bg-accent rounded-md transition-colors
+                ${isMobile 
+                  ? "w-full px-3 py-2 h-10" 
+                  : "px-3 py-2"
+                }
+              `}
               onClick={onCloseMenu}
             >
               {item.name}

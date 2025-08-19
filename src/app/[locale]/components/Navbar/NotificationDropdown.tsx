@@ -1,8 +1,7 @@
-// NotificationDropdown.tsx
 "use client";
 import { useState, useEffect, useRef, useCallback } from "react";
 import Cookies from "js-cookie";
-import { Bell, Trash2, AlertCircle, X } from "lucide-react";
+import { Bell, Trash2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
@@ -50,13 +49,8 @@ export default function NotificationDropdown({ isMobile = false }: NotificationD
   const [error, setError] = useState<string | null>(null);
   const [isMarkingAsRead, setIsMarkingAsRead] = useState<number | null>(null);
   const [isMarkingAllAsRead, setIsMarkingAllAsRead] = useState(false);
-  const [isClient, setIsClient] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const pollingRef = useRef<NodeJS.Timeout | null>(null);
-
-  // Fix hydration issues
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
 
   const getAuthHeaders = useCallback(() => {
     const token = Cookies.get("token");
@@ -70,9 +64,21 @@ export default function NotificationDropdown({ isMobile = false }: NotificationD
     };
   }, []);
 
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isOpen]);
+
   const fetchNotifications = useCallback(async (showLoader = false) => {
-    if (!isClient) return;
-    
     try {
       if (showLoader) setLoading(true);
       setError(null);
@@ -113,7 +119,6 @@ export default function NotificationDropdown({ isMobile = false }: NotificationD
       const errorMessage = err instanceof Error ? err.message : "ไม่สามารถโหลดการแจ้งเตือนได้";
       setError(errorMessage);
 
-      // Stop polling on auth errors
       if (err instanceof Error && err.message.includes("เข้าสู่ระบบ")) {
         if (pollingRef.current) {
           clearInterval(pollingRef.current);
@@ -123,9 +128,9 @@ export default function NotificationDropdown({ isMobile = false }: NotificationD
     } finally {
       if (showLoader) setLoading(false);
     }
-  }, [getAuthHeaders, isClient]);
+  }, [getAuthHeaders]);
 
-  const markAsRead = useCallback(async (notificationId: number) => {
+  const markAsRead = async (notificationId: number) => {
     if (isMarkingAsRead === notificationId) return;
 
     try {
@@ -133,7 +138,6 @@ export default function NotificationDropdown({ isMobile = false }: NotificationD
       const originalNotifications = [...notifications];
       const originalUnreadCount = unreadCount;
 
-      // Optimistic update
       setNotifications(prev =>
         prev.map(notif =>
           notif.id === notificationId ? { ...notif, isRead: true } : notif
@@ -151,7 +155,6 @@ export default function NotificationDropdown({ isMobile = false }: NotificationD
       );
 
       if (!response.ok) {
-        // Revert optimistic update
         setNotifications(originalNotifications);
         setUnreadCount(originalUnreadCount);
         throw new Error(`ไม่สามารถอัปเดตสถานะการอ่านได้: ${response.status}`);
@@ -162,9 +165,9 @@ export default function NotificationDropdown({ isMobile = false }: NotificationD
     } finally {
       setIsMarkingAsRead(null);
     }
-  }, [isMarkingAsRead, notifications, unreadCount, getAuthHeaders]);
+  };
 
-  const markAllAsRead = useCallback(async () => {
+  const markAllAsRead = async () => {
     if (isMarkingAllAsRead || unreadCount === 0) return;
 
     try {
@@ -172,7 +175,6 @@ export default function NotificationDropdown({ isMobile = false }: NotificationD
       const originalNotifications = [...notifications];
       const originalUnreadCount = unreadCount;
 
-      // Optimistic update
       setNotifications(prev => prev.map(notif => ({ ...notif, isRead: true })));
       setUnreadCount(0);
 
@@ -183,7 +185,6 @@ export default function NotificationDropdown({ isMobile = false }: NotificationD
       });
 
       if (!response.ok) {
-        // Revert optimistic update
         setNotifications(originalNotifications);
         setUnreadCount(originalUnreadCount);
         throw new Error(`ไม่สามารถอัปเดตสถานะการอ่านทั้งหมดได้: ${response.status}`);
@@ -194,9 +195,9 @@ export default function NotificationDropdown({ isMobile = false }: NotificationD
     } finally {
       setIsMarkingAllAsRead(false);
     }
-  }, [isMarkingAllAsRead, unreadCount, notifications, getAuthHeaders]);
+  };
 
-  const deleteNotification = useCallback(async (notificationId: number) => {
+  const deleteNotification = async (notificationId: number) => {
     try {
       const headers = getAuthHeaders();
       const response = await fetch(
@@ -208,28 +209,21 @@ export default function NotificationDropdown({ isMobile = false }: NotificationD
       );
 
       if (response.ok) {
-        const deletedNotification = notifications.find(n => n.id === notificationId);
         setNotifications(prev => prev.filter(notif => notif.id !== notificationId));
-        
-        if (deletedNotification && !deletedNotification.isRead) {
-          setUnreadCount(prev => Math.max(0, prev - 1));
-        }
-      } else {
-        throw new Error(`ไม่สามารถลบการแจ้งเตือนได้: ${response.status}`);
+        setUnreadCount(prev => {
+          const notification = notifications.find(n => n.id === notificationId);
+          return notification && !notification.isRead ? Math.max(0, prev - 1) : prev;
+        });
       }
     } catch (err) {
       console.error("Failed to delete notification:", err);
       setError("ไม่สามารถลบการแจ้งเตือนได้");
     }
-  }, [getAuthHeaders, notifications]);
+  };
 
-  const formatDate = useCallback((dateString: string) => {
+  const formatDate = (dateString: string) => {
     try {
       const date = new Date(dateString);
-      if (isNaN(date.getTime())) {
-        return "ไม่ทราบวันที่";
-      }
-
       const now = new Date();
       const diff = now.getTime() - date.getTime();
       const minutes = Math.floor(diff / (1000 * 60));
@@ -250,30 +244,33 @@ export default function NotificationDropdown({ isMobile = false }: NotificationD
       console.error("Error formatting date:", error);
       return "ไม่ทราบวันที่";
     }
-  }, []);
+  };
 
-  const getTypeInfo = useCallback((type: string) => {
+  const getTypeInfo = (type: string) => {
     switch (type) {
       case "MODERATION_UPDATE":
-        return { variant: "default" as const, label: NOTIFICATION_TYPES.MODERATION_UPDATE };
+        return { variant: "secondary" as const, label: NOTIFICATION_TYPES.MODERATION_UPDATE };
       case "WARNING":
-        return { variant: "secondary" as const, label: NOTIFICATION_TYPES.WARNING };
+        return { variant: "outline" as const, label: NOTIFICATION_TYPES.WARNING };
       case "ERROR":
         return { variant: "destructive" as const, label: NOTIFICATION_TYPES.ERROR };
       case "SUCCESS":
-        return { variant: "default" as const, label: NOTIFICATION_TYPES.SUCCESS };
+        return { variant: "secondary" as const, label: NOTIFICATION_TYPES.SUCCESS };
       case "INFO":
       default:
-        return { variant: "outline" as const, label: NOTIFICATION_TYPES.INFO };
+        return { variant: "default" as const, label: NOTIFICATION_TYPES.INFO };
     }
-  }, []);
+  };
 
-  // Setup polling effect
+  const toggleDropdown = () => {
+    if (!isOpen) {
+      fetchNotifications(true);
+    }
+    setIsOpen(!isOpen);
+  };
+
   useEffect(() => {
-    if (!isClient) return;
-
     fetchNotifications(false);
-    
     pollingRef.current = setInterval(() => {
       fetchNotifications(false);
     }, POLLING_INTERVAL);
@@ -284,9 +281,8 @@ export default function NotificationDropdown({ isMobile = false }: NotificationD
         pollingRef.current = null;
       }
     };
-  }, [fetchNotifications, isClient]);
+  }, [fetchNotifications]);
 
-  // Auto-clear error after 5 seconds
   useEffect(() => {
     if (error) {
       const timer = setTimeout(() => {
@@ -296,29 +292,14 @@ export default function NotificationDropdown({ isMobile = false }: NotificationD
     }
   }, [error]);
 
-  if (!isClient) {
-    return (
-      <div className={`relative ${isMobile ? 'mr-2' : 'ml-2'}`}>
-        <Button variant="ghost" size="icon" disabled className="relative">
-          <Bell className="h-5 w-5" />
-        </Button>
-      </div>
-    );
-  }
-
   return (
-    <div className={`relative ${isMobile ? 'mr-2' : 'ml-2'}`}>
+    <div className={`relative ${isMobile ? 'mr-2' : 'ml-2'}`} ref={dropdownRef}>
       <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
         <DropdownMenuTrigger asChild>
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => {
-              if (!isOpen) {
-                fetchNotifications(true);
-              }
-              setIsOpen(!isOpen);
-            }}
+            onClick={toggleDropdown}
             disabled={loading}
             className="relative"
           >
@@ -333,7 +314,7 @@ export default function NotificationDropdown({ isMobile = false }: NotificationD
             )}
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-80 max-h-96" align="end">
+        <DropdownMenuContent className="w-80 max-h-96">
           <div className="p-4 border-b">
             <div className="flex items-center justify-between">
               <h3 className="font-semibold text-lg">แจ้งเตือน</h3>
@@ -346,7 +327,7 @@ export default function NotificationDropdown({ isMobile = false }: NotificationD
                   className="text-xs"
                 >
                   {isMarkingAllAsRead && (
-                    <div className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin mr-1" />
+                    <span className="loading loading-spinner loading-xs mr-1"></span>
                   )}
                   อ่านทั้งหมด
                 </Button>
@@ -362,15 +343,17 @@ export default function NotificationDropdown({ isMobile = false }: NotificationD
           {error && (
             <div className="p-3 border-b bg-destructive/10">
               <div className="flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 text-destructive flex-shrink-0" />
-                <span className="text-xs text-destructive flex-1">{error}</span>
+                <AlertCircle className="w-4 h-4 text-destructive" />
+                <span className="text-xs text-destructive">{error}</span>
                 <Button
                   variant="ghost"
                   size="icon"
                   onClick={() => setError(null)}
-                  className="h-6 w-6 text-destructive hover:text-destructive-foreground"
+                  className="ml-auto text-destructive hover:text-destructive-foreground"
                 >
-                  <X className="w-3 h-3" />
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                  </svg>
                 </Button>
               </div>
             </div>
@@ -379,7 +362,7 @@ export default function NotificationDropdown({ isMobile = false }: NotificationD
           <ScrollArea className="max-h-64">
             {loading ? (
               <div className="p-4 text-center">
-                <div className="w-6 h-6 border-2 border-current border-t-transparent rounded-full animate-spin mx-auto" />
+                <span className="loading loading-spinner loading-md"></span>
                 <p className="text-sm text-muted-foreground mt-2">กำลังโหลด...</p>
               </div>
             ) : notifications.length === 0 ? (
@@ -401,18 +384,18 @@ export default function NotificationDropdown({ isMobile = false }: NotificationD
                 return (
                   <div
                     key={notification.id}
-                    className={`group p-3 border-b last:border-b-0 cursor-pointer transition-colors ${
+                    className={`p-3 border-b last:border-b-0 cursor-pointer transition-colors ${
                       !notification.isRead ? 'bg-accent/50 hover:bg-accent' : 'hover:bg-accent'
                     }`}
                     onClick={() => !notification.isRead && markAsRead(notification.id)}
                   >
                     <div className="flex items-start gap-3">
-                      <div className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${
+                      <div className={`w-2 h-2 rounded-full mt-2 ${
                         !notification.isRead ? 'bg-primary' : 'bg-muted'
                       }`} />
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between mb-1">
-                          <div className="flex items-center gap-2 flex-wrap">
+                          <div className="flex items-center gap-2">
                             <Badge variant={typeInfo.variant} className="text-xs">
                               {typeInfo.label}
                             </Badge>
@@ -427,7 +410,7 @@ export default function NotificationDropdown({ isMobile = false }: NotificationD
                               e.stopPropagation();
                               deleteNotification(notification.id);
                             }}
-                            className="opacity-0 group-hover:opacity-100 hover:text-destructive h-6 w-6 flex-shrink-0"
+                            className="opacity-0 group-hover:opacity-100 hover:text-destructive"
                             title="ลบการแจ้งเตือน"
                           >
                             <Trash2 className="w-3 h-3" />
@@ -443,7 +426,7 @@ export default function NotificationDropdown({ isMobile = false }: NotificationD
                         )}
                       </div>
                       {isMarkingAsRead === notification.id && (
-                        <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin flex-shrink-0" />
+                        <span className="loading loading-spinner loading-xs"></span>
                       )}
                     </div>
                   </div>
@@ -457,10 +440,7 @@ export default function NotificationDropdown({ isMobile = false }: NotificationD
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => {
-                  window.location.href = '/notifications';
-                  setIsOpen(false);
-                }}
+                onClick={() => window.location.href = '/notifications'}
                 className="text-xs"
               >
                 ดูทั้งหมด
@@ -471,4 +451,4 @@ export default function NotificationDropdown({ isMobile = false }: NotificationD
       </DropdownMenu>
     </div>
   );
-}
+};

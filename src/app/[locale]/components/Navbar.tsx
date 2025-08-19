@@ -69,8 +69,8 @@ const Navbar = () => {
     // Render minimal navbar during SSR
     return (
       <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-14 items-center px-4">
-          <div className="mr-4 flex">
+        <div className="container mx-auto flex h-14 items-center justify-between px-4 lg:px-6">
+          <div className="flex items-center">
             <Link
               href="/"
               className="text-2xl font-bold tracking-tight transition-colors hover:text-primary"
@@ -78,7 +78,7 @@ const Navbar = () => {
               Chanomhub
             </Link>
           </div>
-          <div className="flex-1" />
+          <div className="flex items-center gap-4" />
         </div>
       </nav>
     );
@@ -86,55 +86,90 @@ const Navbar = () => {
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-14 items-center px-4">
-        <div className="mr-4 flex">
+      <div className="container mx-auto flex h-14 items-center justify-between px-4 lg:px-6">
+        {/* Left Section: Logo + Left Navigation */}
+        <div className="flex items-center gap-8">
           <Link
             href="/"
-            className="text-2xl font-bold tracking-tight transition-colors hover:text-primary"
+            className="text-2xl font-bold tracking-tight transition-colors hover:text-primary flex-shrink-0"
             onClick={closeMenu}
           >
             Chanomhub
           </Link>
+
+          {/* Left Navigation Links (Desktop Only) */}
+          <div className="hidden lg:flex items-center">
+            <NavbarLinks section="left" onCloseMenu={closeMenu} />
+          </div>
         </div>
 
-        <div className="flex-1" />
+        {/* Right Section: Right Navigation */}
+        <div className="flex items-center gap-2">
+          {/* Right Navigation Links (Desktop Only) */}
+          <div className="hidden md:flex items-center gap-4">
+            <NavbarLinks section="right" onCloseMenu={closeMenu} />
+            
+            {hasToken && <NotificationDropdown />}
 
-        <div className="hidden md:flex items-center gap-4">
-          <NavbarLinks onCloseMenu={closeMenu} />
-          
-          {hasToken && <NotificationDropdown />}
+            {!hasToken && (
+              <Link href="/login">
+                <Button variant="outline" size="sm" className="h-8">
+                  {t('signUp')}
+                </Button>
+              </Link>
+            )}
+          </div>
 
-          {!hasToken && (
-            <Link href="/login">
-              <Button variant="outline" size="sm" className="h-8">
-                {t('signUp')}
-              </Button>
-            </Link>
-          )}
-        </div>
+          {/* Mobile Section */}
+          <div className="flex md:hidden items-center gap-2">
+            {hasToken && <NotificationDropdown isMobile />}
 
-        <div className="md:hidden flex items-center gap-2">
-          {hasToken && <NotificationDropdown isMobile />}
+            <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-9 w-9">
+                  <Menu className="h-5 w-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-[85vw] sm:w-[350px] p-0">
+                <div className="flex flex-col h-full">
+                  <div className="p-6 border-b">
+                    <h2 className="text-lg font-semibold">เมนู</h2>
+                  </div>
+                  
+                  <div className="flex-1 overflow-y-auto">
+                    <div className="p-4 space-y-6">
+                      {/* Left Section Links */}
+                      <div>
+                        <h3 className="text-sm font-medium text-muted-foreground mb-3 uppercase tracking-wider">
+                          หลัก
+                        </h3>
+                        <NavbarLinks section="left" onCloseMenu={closeMenu} isMobile />
+                      </div>
 
-          <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-9 w-9">
-                <Menu className="h-5 w-5" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="right" className="w-[80vw] sm:w-[350px]">
-              <div className="flex flex-col gap-4 py-4">
-                <NavbarLinks onCloseMenu={closeMenu} />
-                {!hasToken && (
-                  <Link href="/login" onClick={closeMenu}>
-                    <Button variant="outline" className="w-full">
-                      {t('signUp')}
-                    </Button>
-                  </Link>
-                )}
-              </div>
-            </SheetContent>
-          </Sheet>
+                      {/* Right Section Links */}
+                      <div>
+                        <h3 className="text-sm font-medium text-muted-foreground mb-3 uppercase tracking-wider">
+                          บัญชี
+                        </h3>
+                        <NavbarLinks section="right" onCloseMenu={closeMenu} isMobile />
+                      </div>
+
+                      {/* Login Button for non-authenticated users */}
+                      {!hasToken && (
+                        <div className="pt-4 border-t">
+                          <Link href="/login" onClick={closeMenu} className="block">
+                            <Button variant="outline" className="w-full">
+                              {t('signUp')}
+                            </Button>
+                          </Link>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </SheetContent>
+            </Sheet>
+          </div>
         </div>
       </div>
     </nav>
