@@ -9,9 +9,9 @@ export default async function Results({ searchParams }: { searchParams: Record<s
   const pages = Math.max(1, Math.ceil(total / pageSize));
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 ">
       <div className="text-sm opacity-80">ทั้งหมด {total.toLocaleString()} รายการ</div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 ">
         {items.map((a: Article) => (
           <GameCard key={String(a.id)} article={a} />
         ))}
