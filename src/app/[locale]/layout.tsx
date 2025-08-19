@@ -44,7 +44,7 @@ export default async function LocaleSegmentLayout({
   }
 
   return (
-    <ThemeProvider defaultTheme="light" storageKey="chanomhub-theme">
+    <ThemeProvider defaultTheme="dark" storageKey="chanomhub-theme">
       <NextIntlClientProvider locale={validLocale} messages={messages}>
         {children}
       </NextIntlClientProvider>

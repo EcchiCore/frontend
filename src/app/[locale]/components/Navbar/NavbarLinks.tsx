@@ -77,10 +77,16 @@ export default function NavbarLinks({ section, onCloseMenu = () => {}, isMobile 
     // Left navigation links (Search, Extensions)
     const leftLinks: NavLink[] = [
       { 
+        id: "games", 
+        name: "games", 
+        transKey: "games", 
+        link: getLocalizedHref("games") 
+      },
+      { 
         id: "search", 
         name: t("search"), 
         transKey: "search", 
-        link: getLocalizedHref("/search") 
+        link: getLocalizedHref("search") 
       },
       {
         id: "extensions",
@@ -91,7 +97,7 @@ export default function NavbarLinks({ section, onCloseMenu = () => {}, isMobile 
             id: "extensions-app", 
             name: t("loadApp"), 
             transKey: "loadApp", 
-            link: getLocalizedHref("/application") 
+            link: getLocalizedHref("application") 
           },
           {
             id: "extensions-status",

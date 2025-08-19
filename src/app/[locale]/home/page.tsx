@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Input } from '@/components/ui/input'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Separator } from "@/components/ui/separator"
+
 import { 
   Search, 
   TrendingUp, 
@@ -20,6 +20,7 @@ import {
   Heart,
   Share
 } from 'lucide-react'
+import Navbar from '../components/Navbar';
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -101,39 +102,11 @@ export default function HomePage() {
       </Head>
 
       <div className={`min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 ${inter.className}`}>
-        {/* Header */}
-        <header className="bg-white shadow-sm border-b sticky top-0 z-50">
-          <div className="container mx-auto px-4 py-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <h1 className="text-2xl font-bold text-purple-600">Pantip</h1>
-                <nav className="hidden md:flex space-x-6">
-                  <a href="#" className="text-gray-700 hover:text-purple-600 transition-colors">หน้าแรก</a>
-                  <a href="#" className="text-gray-700 hover:text-purple-600 transition-colors">ล่าสุด</a>
-                  <a href="#" className="text-gray-700 hover:text-purple-600 transition-colors">แท็ก</a>
-                  <a href="#" className="text-gray-700 hover:text-purple-600 transition-colors">กิจกรรม</a>
-                </nav>
-              </div>
-              
-              <div className="flex items-center space-x-4">
-                <div className="relative hidden md:block">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                  <Input 
-                    type="search" 
-                    placeholder="ค้นหาข้อมูล..." 
-                    className="pl-10 w-80"
-                  />
-                </div>
-                <Button variant="outline">เข้าสู่ระบบ</Button>
-                <Button>สมัครสมาชิก</Button>
-              </div>
-            </div>
-          </div>
-        </header>
+        <Navbar/>
 
-        <main className="container mx-auto px-4 py-8 bg-background">
+        <main className="bg-background">
           {/* Image Carousel Section - Pure CSS */}
-          <section className="mb-12">
+          <section className="container mx-auto px-4 py-8 mb-12">
             <div className="relative bg-white rounded-xl shadow-lg overflow-hidden">
               <div className="relative h-96 md:h-[500px]">
                 <style jsx>{`
@@ -485,7 +458,7 @@ export default function HomePage() {
         </main>
 
         {/* Footer */}
-        <footer className="bg-gray-900 text-white py-12 mt-16">
+        <footer className="bg-gray-900 text-white py-12">
           <div className="container mx-auto px-4">
             <div className="grid md:grid-cols-4 gap-8">
               <div>
