@@ -5,6 +5,19 @@ import { Search, Eye, Check, X, Clock, Trash2, AlertTriangle, FileText, Link, Me
 import { useAuthContext } from '../providers/AuthProvider';
 import { ArticleStatus } from '../utils/types';
 
+// shadcn/ui imports
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Textarea } from '@/components/ui/textarea';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Loader2 } from 'lucide-react';
+
 // Define types
 type RequestStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'NEEDS_REVISION';
 type EntityType = 'ARTICLE' | 'DOWNLOAD_LINK' | 'COMMENT';
@@ -55,27 +68,27 @@ interface Statistics {
 const API_BASE_URL = 'https://api.chanomhub.online/api';
 
 const StatusBadge = ({ status }: { status: RequestStatus | EntityStatus }) => {
-  const getStatusStyle = (status: string) => {
+  const getStatusVariant = (status: string) => {
     switch (status) {
       case 'PENDING':
-        return 'badge-warning';
+        return 'secondary';
       case 'APPROVED':
       case 'PUBLISHED':
-        return 'badge-success';
+        return 'default';
       case 'REJECTED':
       case 'DELETED':
-        return 'badge-error';
+        return 'destructive';
       case 'NEEDS_REVISION':
-        return 'badge-info';
+        return 'outline';
       default:
-        return 'badge-neutral';
+        return 'secondary';
     }
   };
 
   return (
-    <div className={`badge ${getStatusStyle(status)} badge-sm`}>
+    <Badge variant={getStatusVariant(status) as any}>
       {status.replace('_', ' ')}
-    </div>
+    </Badge>
   );
 };
 
@@ -198,7 +211,6 @@ export const ModerationPage: React.FC = () => {
   };
 
   // Check user role
-  // Inside ModerationPage component
   const checkUserRole = useCallback(async () => {
     try {
       const token = document.cookie
@@ -206,9 +218,9 @@ export const ModerationPage: React.FC = () => {
         .find(row => row.startsWith('token='))
         ?.split('=')[1];
       if (token && user?.rank) {
-        setUserRole(user.rank === 'ADMIN' ? 'ADMIN' : 'MODERATOR'); // Changed to use user.rank
+        setUserRole(user.rank === 'ADMIN' ? 'ADMIN' : 'MODERATOR');
       } else {
-        setUserRole('MODERATOR'); // Default to MODERATOR if no rank or token
+        setUserRole('MODERATOR');
       }
     } catch (err) {
       console.error('Failed to check user role:', err);
@@ -349,7 +361,7 @@ export const ModerationPage: React.FC = () => {
   if (authLoading) {
     return (
       <div className="flex justify-center items-center h-full">
-        <div className="loading loading-spinner loading-lg text-primary"></div>
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -357,328 +369,362 @@ export const ModerationPage: React.FC = () => {
   if (authError) {
     return (
       <div className="flex justify-center items-center h-full">
-        <div className="alert alert-error">
-          <AlertCircle className="w-5 h-5" />
-          <span>{authError}</span>
-        </div>
+        <Alert variant="destructive">
+          <AlertCircle className="w-4 h-4" />
+          <AlertDescription>{authError}</AlertDescription>
+        </Alert>
       </div>
     );
   }
 
   return (
-    <div className="bg-base-200 p-4">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-8 flex justify-between items-center">
-          <div>
-            <h1 className="text-4xl font-bold text-base-content mb-2">Moderation Dashboard</h1>
-            <p className="text-base-content/70">Manage and review content submissions</p>
-          </div>
-          <button
-            className={`btn btn-circle ${refreshing ? 'loading' : ''}`}
-            onClick={handleRefresh}
-            disabled={refreshing}
-            title="Refresh data"
-          >
-            {!refreshing && <RefreshCw className="w-5 h-5" />}
-          </button>
+    <div className="p-4 max-w-7xl mx-auto">
+      {/* Header */}
+      <div className="mb-8 flex justify-between items-center">
+        <div>
+          <h1 className="text-4xl font-bold mb-2">Moderation Dashboard</h1>
+          <p className="text-muted-foreground">Manage and review content submissions</p>
         </div>
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={handleRefresh}
+          disabled={refreshing}
+          title="Refresh data"
+        >
+          <RefreshCw className={`w-5 h-5 ${refreshing ? 'animate-spin' : ''}`} />
+        </Button>
+      </div>
 
-        {/* Alerts */}
-        {error && (
-          <div className="alert alert-error mb-6">
-            <AlertCircle className="w-5 h-5" />
-            <span>{error}</span>
-            <button className="btn btn-sm btn-ghost" onClick={() => setError(null)}>
+      {/* Alerts */}
+      {error && (
+        <Alert variant="destructive" className="mb-6">
+          <AlertCircle className="w-4 h-4" />
+          <AlertDescription>
+            {error}
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => setError(null)}
+              className="ml-2"
+            >
               <X className="w-4 h-4" />
-            </button>
-          </div>
-        )}
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
 
-        {success && (
-          <div className="alert alert-success mb-6">
-            <Check className="w-5 h-5" />
-            <span>{success}</span>
-            <button className="btn btn-sm btn-ghost" onClick={() => setSuccess(null)}>
+      {success && (
+        <Alert className="mb-6 border-green-200 bg-green-50 text-green-800">
+          <Check className="w-4 h-4" />
+          <AlertDescription>
+            {success}
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={() => setSuccess(null)}
+              className="ml-2"
+            >
               <X className="w-4 h-4" />
-            </button>
-          </div>
-        )}
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
 
-        {/* Statistics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
-          <div className="stats shadow bg-base-100">
-            <div className="stat">
-              <div className="stat-figure text-warning">
-                <Clock className="w-8 h-8" />
+      {/* Statistics Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center">
+              <Clock className="h-8 w-8 text-yellow-500" />
+              <div className="ml-4">
+                <p className="text-sm font-medium text-muted-foreground">Pending</p>
+                <p className="text-2xl font-bold text-yellow-500">{stats.pendingRequests}</p>
               </div>
-              <div className="stat-title">Pending</div>
-              <div className="stat-value text-warning">{stats.pendingRequests}</div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center">
+              <AlertTriangle className="h-8 w-8 text-blue-500" />
+              <div className="ml-4">
+                <p className="text-sm font-medium text-muted-foreground">Needs Revision</p>
+                <p className="text-2xl font-bold text-blue-500">{stats.needsRevisionRequests}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center">
+              <FileText className="h-8 w-8 text-purple-500" />
+              <div className="ml-4">
+                <p className="text-sm font-medium text-muted-foreground">Articles</p>
+                <p className="text-2xl font-bold text-purple-500">{stats.articleRequests}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center">
+              <Link className="h-8 w-8 text-green-500" />
+              <div className="ml-4">
+                <p className="text-sm font-medium text-muted-foreground">Links</p>
+                <p className="text-2xl font-bold text-green-500">{stats.downloadLinkRequests}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center">
+              <MessageCircle className="h-8 w-8 text-pink-500" />
+              <div className="ml-4">
+                <p className="text-sm font-medium text-muted-foreground">Comments</p>
+                <p className="text-2xl font-bold text-pink-500">{stats.commentRequests}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Filters and Search */}
+      <Card className="mb-6">
+        <CardContent className="p-6">
+          <div className="flex flex-col lg:flex-row gap-4 items-center">
+            <div className="flex-1">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  type="text"
+                  placeholder="Search requests..."
+                  className="pl-10"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              <Button
+                variant={activeFilter === 'ALL' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setActiveFilter('ALL')}
+              >
+                All ({requests.length})
+              </Button>
+              <Button
+                variant={activeFilter === 'ARTICLE' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setActiveFilter('ARTICLE')}
+              >
+                <FileText className="w-4 h-4 mr-1" />
+                Articles ({stats.articleRequests})
+              </Button>
+              <Button
+                variant={activeFilter === 'DOWNLOAD_LINK' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setActiveFilter('DOWNLOAD_LINK')}
+              >
+                <Link className="w-4 h-4 mr-1" />
+                Links ({stats.downloadLinkRequests})
+              </Button>
+              <Button
+                variant={activeFilter === 'COMMENT' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setActiveFilter('COMMENT')}
+              >
+                <MessageCircle className="w-4 h-4 mr-1" />
+                Comments ({stats.commentRequests})
+              </Button>
             </div>
           </div>
+        </CardContent>
+      </Card>
 
-          <div className="stats shadow bg-base-100">
-            <div className="stat">
-              <div className="stat-figure text-info">
-                <AlertTriangle className="w-8 h-8" />
-              </div>
-              <div className="stat-title">Needs Revision</div>
-              <div className="stat-value text-info">{stats.needsRevisionRequests}</div>
-            </div>
-          </div>
-
-          <div className="stats shadow bg-base-100">
-            <div className="stat">
-              <div className="stat-figure text-primary">
-                <FileText className="w-8 h-8" />
-              </div>
-              <div className="stat-title">Articles</div>
-              <div className="stat-value text-primary">{stats.articleRequests}</div>
-            </div>
-          </div>
-
-          <div className="stats shadow bg-base-100">
-            <div className="stat">
-              <div className="stat-figure text-secondary">
-                <Link className="w-8 h-8" />
-              </div>
-              <div className="stat-title">Links</div>
-              <div className="stat-value text-secondary">{stats.downloadLinkRequests}</div>
-            </div>
-          </div>
-
-          <div className="stats shadow bg-base-100">
-            <div className="stat">
-              <div className="stat-figure text-accent">
-                <MessageCircle className="w-8 h-8" />
-              </div>
-              <div className="stat-title">Comments</div>
-              <div className="stat-value text-accent">{stats.commentRequests}</div>
-            </div>
-          </div>
+      {/* Loading overlay */}
+      {loading && !refreshing && (
+        <div className="flex justify-center items-center py-8">
+          <Loader2 className="h-8 w-8 animate-spin" />
         </div>
+      )}
 
-        {/* Filters and Search */}
-        <div className="card bg-base-100 shadow-xl mb-6">
-          <div className="card-body">
-            <div className="flex flex-col lg:flex-row gap-4 items-center">
-              <div className="form-control flex-1">
-                <div className="input-group">
-                  <span className="bg-base-200">
-                    <Search className="w-4 h-4" />
-                  </span>
-                  <input
-                    type="text"
-                    placeholder="Search requests..."
-                    className="input input-bordered flex-1"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                  />
-                </div>
-              </div>
+      {/* Requests Table */}
+      <Card>
+        <CardContent className="p-0">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>ID</TableHead>
+                <TableHead>Type</TableHead>
+                <TableHead>Content</TableHead>
+                <TableHead>Requester</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Created</TableHead>
+                <TableHead>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {!loading && currentRequests.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center py-8">
+                    <div className="text-muted-foreground">
+                      {filteredRequests.length === 0 && requests.length === 0
+                        ? 'No moderation requests found'
+                        : 'No requests found matching your criteria'}
+                    </div>
+                  </TableCell>
+                </TableRow>
+              )}
+              {currentRequests.map((request) => (
+                <TableRow key={request.id} className="hover:bg-muted/50">
+                  <TableCell className="font-mono text-sm">#{request.id}</TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <EntityIcon type={request.entityType} />
+                      <span className="text-sm">{request.entityType.replace('_', ' ')}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="max-w-xs">
+                      <div className="font-medium truncate">
+                        {request.entityType === 'ARTICLE' && (request.entityDetails.title || 'Untitled Article')}
+                        {request.entityType === 'DOWNLOAD_LINK' && (request.entityDetails.name || 'Unnamed Link')}
+                        {request.entityType === 'COMMENT' &&
+                          (request.entityDetails.content?.substring(0, 50) || 'No content') +
+                          (request.entityDetails.content && request.entityDetails.content.length > 50 ? '...' : '')}
+                      </div>
+                      <div className="text-sm text-muted-foreground truncate">
+                        {request.requestNote}
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={request.requester.image || undefined} />
+                        <AvatarFallback className="text-xs">
+                          {request.requester.name.charAt(0)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="text-sm">{request.requester.name}</div>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <StatusBadge status={request.status} />
+                  </TableCell>
+                  <TableCell className="text-sm text-muted-foreground">
+                    {formatDate(request.createdAt)}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex gap-2">
+                      {(request.status === 'PENDING' || request.status === 'NEEDS_REVISION') && (
+                        <Button
+                          size="sm"
+                          onClick={() => handleReviewRequest(request)}
+                          disabled={loading}
+                        >
+                          <Eye className="w-4 h-4 mr-1" />
+                          Review
+                        </Button>
+                      )}
+                      {userRole === 'ADMIN' && (
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => handleDeleteRequest(request.id)}
+                          disabled={loading}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      )}
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
 
-              <div className="flex flex-wrap gap-2">
-                <button
-                  className={`btn btn-sm ${activeFilter === 'ALL' ? 'btn-primary' : 'btn-outline'}`}
-                  onClick={() => setActiveFilter('ALL')}
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex justify-center p-4">
+              <div className="flex gap-1">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={currentPage === 1}
+                  onClick={() => setCurrentPage(currentPage - 1)}
                 >
-                  All ({requests.length})
-                </button>
-                <button
-                  className={`btn btn-sm ${activeFilter === 'ARTICLE' ? 'btn-primary' : 'btn-outline'}`}
-                  onClick={() => setActiveFilter('ARTICLE')}
+                  «
+                </Button>
+                {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+                  let page;
+                  if (totalPages <= 5) {
+                    page = i + 1;
+                  } else if (currentPage <= 3) {
+                    page = i + 1;
+                  } else if (currentPage >= totalPages - 2) {
+                    page = totalPages - 4 + i;
+                  } else {
+                    page = currentPage - 2 + i;
+                  }
+                  return (
+                    <Button
+                      key={page}
+                      variant={currentPage === page ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => setCurrentPage(page)}
+                    >
+                      {page}
+                    </Button>
+                  );
+                })}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={currentPage === totalPages}
+                  onClick={() => setCurrentPage(currentPage + 1)}
                 >
-                  <FileText className="w-4 h-4 mr-1" />
-                  Articles ({stats.articleRequests})
-                </button>
-                <button
-                  className={`btn btn-sm ${activeFilter === 'DOWNLOAD_LINK' ? 'btn-primary' : 'btn-outline'}`}
-                  onClick={() => setActiveFilter('DOWNLOAD_LINK')}
-                >
-                  <Link className="w-4 h-4 mr-1" />
-                  Links ({stats.downloadLinkRequests})
-                </button>
-                <button
-                  className={`btn btn-sm ${activeFilter === 'COMMENT' ? 'btn-primary' : 'btn-outline'}`}
-                  onClick={() => setActiveFilter('COMMENT')}
-                >
-                  <MessageCircle className="w-4 h-4 mr-1" />
-                  Comments ({stats.commentRequests})
-                </button>
+                  »
+                </Button>
               </div>
             </div>
-          </div>
-        </div>
+          )}
+        </CardContent>
+      </Card>
 
-        {/* Loading overlay */}
-        {loading && !refreshing && (
-          <div className="flex justify-center items-center py-8">
-            <div className="loading loading-spinner loading-lg"></div>
-          </div>
-        )}
+      {/* Review Modal */}
+      <Dialog open={showReviewModal} onOpenChange={setShowReviewModal}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>
+              Review {selectedRequest?.entityType.replace('_', ' ')} Request
+            </DialogTitle>
+          </DialogHeader>
 
-        {/* Requests Table */}
-        <div className="card bg-base-100 shadow-xl">
-          <div className="card-body p-0">
-            <div className="overflow-x-auto">
-              <table className="table table-zebra">
-                <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Type</th>
-                  <th>Content</th>
-                  <th>Requester</th>
-                  <th>Status</th>
-                  <th>Created</th>
-                  <th>Actions</th>
-                </tr>
-                </thead>
-                <tbody>
-                {!loading && currentRequests.length === 0 && (
-                  <tr>
-                    <td colSpan={7} className="text-center py-8">
-                      <div className="text-base-content/50">
-                        {filteredRequests.length === 0 && requests.length === 0
-                          ? 'No moderation requests found'
-                          : 'No requests found matching your criteria'}
-                      </div>
-                    </td>
-                  </tr>
-                )}
-                {currentRequests.map((request) => (
-                  <tr key={request.id} className="hover">
-                    <td className="font-mono text-sm">#{request.id}</td>
-                    <td>
-                      <div className="flex items-center gap-2">
-                        <EntityIcon type={request.entityType} />
-                        <span className="text-sm">{request.entityType.replace('_', ' ')}</span>
-                      </div>
-                    </td>
-                    <td>
-                      <div className="max-w-xs">
-                        <div className="font-medium truncate">
-                          {request.entityType === 'ARTICLE' && (request.entityDetails.title || 'Untitled Article')}
-                          {request.entityType === 'DOWNLOAD_LINK' && (request.entityDetails.name || 'Unnamed Link')}
-                          {request.entityType === 'COMMENT' &&
-                            (request.entityDetails.content?.substring(0, 50) || 'No content') +
-                            (request.entityDetails.content && request.entityDetails.content.length > 50 ? '...' : '')}
-                        </div>
-                        <div className="text-sm text-base-content/70 truncate">
-                          {request.requestNote}
-                        </div>
-                      </div>
-                    </td>
-                    <td>
-                      <div className="flex items-center gap-2">
-                        <div className="avatar placeholder">
-                          <div className="bg-neutral text-neutral-content rounded-full w-8 h-8">
-                            <span className="text-xs">{request.requester.name.charAt(0)}</span>
-                          </div>
-                        </div>
-                        <div className="text-sm">{request.requester.name}</div>
-                      </div>
-                    </td>
-                    <td>
-                      <StatusBadge status={request.status} />
-                    </td>
-                    <td className="text-sm text-base-content/70">
-                      {formatDate(request.createdAt)}
-                    </td>
-                    <td>
-                      <div className="flex gap-2">
-                        {(request.status === 'PENDING' || request.status === 'NEEDS_REVISION') && (
-                          <button
-                            className="btn btn-primary btn-sm"
-                            onClick={() => handleReviewRequest(request)}
-                            disabled={loading}
-                          >
-                            <Eye className="w-4 h-4" />
-                            Review
-                          </button>
-                        )}
-                        {userRole === 'ADMIN' && (
-                          <button
-                            className="btn btn-error btn-sm"
-                            onClick={() => handleDeleteRequest(request.id)}
-                            disabled={loading}
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-                </tbody>
-              </table>
-            </div>
-
-            {/* Pagination */}
-            {totalPages > 1 && (
-              <div className="flex justify-center p-4">
-                <div className="btn-group">
-                  <button
-                    className="btn btn-sm"
-                    disabled={currentPage === 1}
-                    onClick={() => setCurrentPage(currentPage - 1)}
-                  >
-                    «
-                  </button>
-                  {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
-                    let page;
-                    if (totalPages <= 5) {
-                      page = i + 1;
-                    } else if (currentPage <= 3) {
-                      page = i + 1;
-                    } else if (currentPage >= totalPages - 2) {
-                      page = totalPages - 4 + i;
-                    } else {
-                      page = currentPage - 2 + i;
-                    }
-                    return (
-                      <button
-                        key={page}
-                        className={`btn btn-sm ${currentPage === page ? 'btn-active' : ''}`}
-                        onClick={() => setCurrentPage(page)}
-                      >
-                        {page}
-                      </button>
-                    );
-                  })}
-                  <button
-                    className="btn btn-sm"
-                    disabled={currentPage === totalPages}
-                    onClick={() => setCurrentPage(currentPage + 1)}
-                  >
-                    »
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Review Modal */}
-        {showReviewModal && selectedRequest && (
-          <div className="modal modal-open">
-            <div className="modal-box max-w-2xl">
-              <h3 className="font-bold text-lg mb-4">
-                Review {selectedRequest.entityType.replace('_', ' ')} Request
-              </h3>
-
-              <div className="space-y-4">
-                <div className="bg-base-200 p-4 rounded-lg">
-                  <h4 className="font-semibold mb-2">Content Details</h4>
+          {selectedRequest && (
+            <div className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-base">Content Details</CardTitle>
+                </CardHeader>
+                <CardContent>
                   {selectedRequest.entityType === 'ARTICLE' && (
-                    <div>
+                    <div className="space-y-2">
                       <p><strong>Title:</strong> {selectedRequest.entityDetails.title || 'Untitled'}</p>
                       <p><strong>Status:</strong> <StatusBadge status={selectedRequest.entityDetails.status} /></p>
                     </div>
                   )}
                   {selectedRequest.entityType === 'DOWNLOAD_LINK' && (
-                    <div>
+                    <div className="space-y-2">
                       <p><strong>Name:</strong> {selectedRequest.entityDetails.name || 'Unnamed'}</p>
-                      <p><strong>URL:</strong> <a href={selectedRequest.entityDetails.url} target="_blank" rel="noopener noreferrer" className="link link-primary">{selectedRequest.entityDetails.url}</a></p>
+                      <p><strong>URL:</strong> <a href={selectedRequest.entityDetails.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">{selectedRequest.entityDetails.url}</a></p>
                     </div>
                   )}
                   {selectedRequest.entityType === 'COMMENT' && (
@@ -686,84 +732,86 @@ export const ModerationPage: React.FC = () => {
                       <p><strong>Comment:</strong> {selectedRequest.entityDetails.content}</p>
                     </div>
                   )}
-                </div>
+                </CardContent>
+              </Card>
 
-                <div>
-                  <h4 className="font-semibold mb-2">Request Note</h4>
-                  <p className="text-base-content/70">{selectedRequest.requestNote || 'No note provided'}</p>
-                </div>
+              <div>
+                <h4 className="font-semibold mb-2">Request Note</h4>
+                <p className="text-muted-foreground">{selectedRequest.requestNote || 'No note provided'}</p>
+              </div>
 
-                {selectedRequest.status === 'NEEDS_REVISION' && (
-                  <div className="alert alert-info">
+              {selectedRequest.status === 'NEEDS_REVISION' && (
+                <Alert>
+                  <AlertTriangle className="w-4 h-4" />
+                  <AlertDescription>
+                    This request is marked as NEEDS_REVISION. You can reject it or update the review note, but direct approval is not allowed.
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              {selectedRequest.entityType === 'ARTICLE' &&
+                selectedRequest.entityDetails.status !== ArticleStatus.PENDING_REVIEW &&
+                selectedRequest.status === 'PENDING' && (
+                  <Alert variant="destructive">
                     <AlertTriangle className="w-4 h-4" />
-                    <span>This request is marked as NEEDS_REVISION. You can reject it or update the review note, but direct approval is not allowed.</span>
-                  </div>
+                    <AlertDescription>
+                      This article is currently {selectedRequest.entityDetails.status}. It must be in PENDING_REVIEW status to be approved.
+                    </AlertDescription>
+                  </Alert>
                 )}
 
-                {selectedRequest.entityType === 'ARTICLE' &&
-                  selectedRequest.entityDetails.status !== ArticleStatus.PENDING_REVIEW &&
-                  selectedRequest.status === 'PENDING' && (
-                    <div className="alert alert-warning">
-                      <AlertTriangle className="w-4 h-4" />
-                      <span>This article is currently {selectedRequest.entityDetails.status}. It must be in PENDING_REVIEW status to be approved.</span>
-                    </div>
-                  )}
-
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text font-semibold">Review Comment</span>
-                  </label>
-                  <textarea
-                    className="textarea textarea-bordered h-24"
-                    placeholder="Add your review comment..."
-                    value={reviewComment}
-                    onChange={(e) => setReviewComment(e.target.value)}
-                  ></textarea>
-                </div>
-              </div>
-
-              <div className="modal-action">
-                <button
-                  className="btn"
-                  onClick={() => setShowReviewModal(false)}
-                  disabled={loading}
-                >
-                  Cancel
-                </button>
-                <button
-                  className={`btn btn-error ${loading ? 'loading' : ''}`}
-                  onClick={() => handleSubmitReview('REJECTED')}
-                  disabled={loading}
-                >
-                  {!loading && <X className="w-4 h-4 mr-1" />}
-                  Reject
-                </button>
-                <button
-                  className={`btn btn-warning ${loading ? 'loading' : ''}`}
-                  onClick={() => handleSubmitReview('NEEDS_REVISION')}
-                  disabled={loading}
-                >
-                  {!loading && <AlertTriangle className="w-4 h-4 mr-1" />}
-                  Needs Revision
-                </button>
-                <button
-                  className={`btn btn-success ${loading ? 'loading' : ''}`}
-                  onClick={() => handleSubmitReview('APPROVED')}
-                  disabled={
-                    loading ||
-                    selectedRequest.status === 'NEEDS_REVISION' ||
-                    (selectedRequest.entityType === 'ARTICLE' &&
-                      selectedRequest.entityDetails.status !== ArticleStatus.PENDING_REVIEW)
-                  }
-                >
-                  {!loading && <Check className="w-4 h-4 mr-1" />}
-                  Approve
-                </button>
+              <div className="space-y-2">
+                <Label htmlFor="review-comment" className="font-semibold">Review Comment</Label>
+                <Textarea
+                  id="review-comment"
+                  placeholder="Add your review comment..."
+                  value={reviewComment}
+                  onChange={(e) => setReviewComment(e.target.value)}
+                  className="min-h-[100px]"
+                />
               </div>
             </div>
-          </div>
-        )}
-      </div>
+          )}
+
+          <DialogFooter className="gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setShowReviewModal(false)}
+              disabled={loading}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => handleSubmitReview('REJECTED')}
+              disabled={loading}
+            >
+              {loading ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <X className="w-4 h-4 mr-1" />}
+              Reject
+            </Button>
+            <Button
+              variant="secondary"
+              onClick={() => handleSubmitReview('NEEDS_REVISION')}
+              disabled={loading}
+            >
+              {loading ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <AlertTriangle className="w-4 h-4 mr-1" />}
+              Needs Revision
+            </Button>
+            <Button
+              onClick={() => handleSubmitReview('APPROVED')}
+              disabled={
+                loading ||
+                selectedRequest?.status === 'NEEDS_REVISION' ||
+                (selectedRequest?.entityType === 'ARTICLE' &&
+                  selectedRequest?.entityDetails.status !== ArticleStatus.PENDING_REVIEW)
+              }
+            >
+              {loading ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Check className="w-4 h-4 mr-1" />}
+              Approve
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

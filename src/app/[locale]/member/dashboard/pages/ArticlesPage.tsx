@@ -1,4 +1,3 @@
-// dashboard/pages/ArticlesPage.tsx
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -15,11 +14,22 @@ import {
 import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
 import { useUserData } from '../hooks/useUserData';
 import { useAuthContext } from '../providers/AuthProvider';
-import { Article } from '../utils/types';
+import { Article, ArticleStatus } from '../utils/types';
 import { ARTICLE_STATUS, ITEMS_PER_PAGE_OPTIONS } from '../utils/constants';
 import Image from 'next/image';
-import myImageLoader from "../../../lib/imageLoader";
+import myImageLoader from '../../../lib/imageLoader';
 
+// shadcn/ui imports
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Switch } from '@/components/ui/switch';
+import { Loader2 } from 'lucide-react';
 
 export const ArticlesPage: React.FC = () => {
   const { user } = useAuthContext();
@@ -33,9 +43,9 @@ export const ArticlesPage: React.FC = () => {
     deleteArticle
   } = useUserData();
 
-  // Local state
+  // Local state with explicit typing
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState<ArticleStatus | 'all'>('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [showFilters, setShowFilters] = useState(false);
@@ -100,8 +110,8 @@ export const ArticlesPage: React.FC = () => {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
-          <div className="loading loading-spinner loading-lg text-primary"></div>
-          <p className="mt-4 text-base-content/70">Loading articles...</p>
+          <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
+          <p className="mt-4 text-muted-foreground">Loading articles...</p>
         </div>
       </div>
     );
@@ -112,129 +122,125 @@ export const ArticlesPage: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-base-content flex items-center gap-2">
+          <h1 className="text-2xl font-bold flex items-center gap-2">
             <DocumentTextIcon className="h-6 w-6" />
             {feedMode ? 'Article Feed' : 'My Articles'}
           </h1>
-          <p className="text-base-content/70 mt-1">
+          <p className="text-muted-foreground mt-1">
             {feedMode ? 'Discover articles from other writers' : 'Manage your published content'}
           </p>
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex items-center gap-4">
           {/* Toggle Feed Mode */}
-          <div className="form-control">
-            <label className="label cursor-pointer">
-              <span className="label-text mr-2">Feed Mode</span>
-              <input
-                type="checkbox"
-                className="toggle toggle-primary"
-                checked={feedMode}
-                onChange={(e) => setFeedMode(e.target.checked)}
-              />
-            </label>
+          <div className="flex items-center space-x-2">
+            <Label htmlFor="feed-mode">Feed Mode</Label>
+            <Switch
+              id="feed-mode"
+              checked={feedMode}
+              onCheckedChange={setFeedMode}
+            />
           </div>
 
           {!feedMode && (
-            <button className="btn btn-primary">
-              <PlusIcon className="h-4 w-4" />
+            <Button>
+              <PlusIcon className="h-4 w-4 mr-2" />
               New Article
-            </button>
+            </Button>
           )}
         </div>
       </div>
 
       {/* Search and Filters */}
-      <div className="card bg-base-200">
-        <div className="card-body p-4">
+      <Card>
+        <CardContent className="p-4">
           <div className="flex flex-col sm:flex-row gap-4">
             {/* Search */}
             <div className="flex-1">
-              <div className="form-control">
-                <div className="input-group">
-                  <input
-                    type="text"
-                    placeholder="Search articles..."
-                    className="input input-bordered flex-1"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                  />
-                  <button className="btn btn-square">
-                    <MagnifyingGlassIcon className="h-4 w-4" />
-                  </button>
-                </div>
+              <div className="relative">
+                <Input
+                  type="text"
+                  placeholder="Search articles..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pr-10"
+                />
+                <MagnifyingGlassIcon className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               </div>
             </div>
 
             {/* Filter Toggle */}
-            <button
-              className="btn btn-outline"
+            <Button
+              variant="outline"
               onClick={() => setShowFilters(!showFilters)}
             >
-              <FunnelIcon className="h-4 w-4" />
+              <FunnelIcon className="h-4 w-4 mr-2" />
               Filters
-            </button>
+            </Button>
           </div>
 
           {/* Expandable Filters */}
           {showFilters && (
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4 pt-4 border-t border-base-300">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4 pt-4 border-t">
               {/* Status Filter */}
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text">Status</span>
-                </label>
-                <select
-                  className="select select-bordered"
+              <div className="space-y-2">
+                <Label>Status</Label>
+                <Select
                   value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
+                  onValueChange={(value) => setStatusFilter(value as ArticleStatus | 'all')}
                   disabled={feedMode}
                 >
-                  <option value="all">All Status</option>
-                  <option value={ARTICLE_STATUS.PUBLISHED}>Published</option>
-                  <option value={ARTICLE_STATUS.DRAFT}>Draft</option>
-                  <option value={ARTICLE_STATUS.PENDING}>Pending</option>
-                </select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Status</SelectItem>
+                    <SelectItem value={ArticleStatus.PUBLISHED}>Published</SelectItem>
+                    <SelectItem value={ArticleStatus.DRAFT}>Draft</SelectItem>
+                    <SelectItem value={ArticleStatus.PENDING_REVIEW}>Pending Review</SelectItem>
+                    <SelectItem value={ArticleStatus.ARCHIVED}>Archived</SelectItem>
+                    <SelectItem value={ArticleStatus.DELETED}>Deleted</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               {/* Items per page */}
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text">Items per page</span>
-                </label>
-                <select
-                  className="select select-bordered"
-                  value={itemsPerPage}
-                  onChange={(e) => setItemsPerPage(Number(e.target.value))}
+              <div className="space-y-2">
+                <Label>Items per page</Label>
+                <Select
+                  value={itemsPerPage.toString()}
+                  onValueChange={(value) => setItemsPerPage(Number(value))}
                 >
-                  {ITEMS_PER_PAGE_OPTIONS.map(option => (
-                    <option key={option} value={option}>{option}</option>
-                  ))}
-                </select>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {ITEMS_PER_PAGE_OPTIONS.map(option => (
+                      <SelectItem key={option} value={option.toString()}>{option}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
           )}
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
       {/* Error State */}
       {error && (
-        <div className="alert alert-error">
-          <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <span>{error}</span>
-        </div>
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       )}
 
       {/* Articles List */}
       {filteredArticles.length === 0 ? (
         <div className="text-center py-12">
-          <DocumentTextIcon className="h-12 w-12 text-base-content/30 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-base-content mb-2">
+          <DocumentTextIcon className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+          <h3 className="text-lg font-medium mb-2">
             {searchTerm ? 'No articles found' : (feedMode ? 'No articles in feed' : 'No articles yet')}
           </h3>
-          <p className="text-base-content/70">
+          <p className="text-muted-foreground">
             {searchTerm
               ? 'Try adjusting your search terms or filters'
               : (feedMode
@@ -247,51 +253,49 @@ export const ArticlesPage: React.FC = () => {
       ) : (
         <div className="space-y-4">
           {filteredArticles.map((article) => (
-            <div key={article.slug} className="card bg-base-100 shadow-md hover:shadow-lg transition-shadow">
-              <div className="card-body">
+            <Card key={article.slug} className="hover:shadow-lg transition-shadow">
+              <CardContent className="p-6">
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
                     {/* Article Header */}
                     <div className="flex items-center gap-2 mb-2">
-                      <div className="avatar avatar-xs">
-                        <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center text-white text-xs">
-                          {article.author.image ? (
-                            <Image
-                              src={article.author.image}
-                              alt={article.author.username}
-                              width={24}
-                              height={24}
-                              loader={myImageLoader}
-                              className="w-full h-full rounded-full object-cover"
-                            />
-                          ) : (
-                            article.author.username.charAt(0).toUpperCase()
-                          )}
-                        </div>
-                      </div>
-                      <span className="text-sm text-base-content/70">
+                      <Avatar className="h-6 w-6">
+                        <AvatarImage 
+                          src={article.author.image ?? ''} 
+                          alt={article.author.username}
+                        />
+                        <AvatarFallback className="text-xs">
+                          {article.author.username.charAt(0).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span className="text-sm text-muted-foreground">
                         {article.author.username}
                       </span>
-                      <span className="text-xs text-base-content/50">•</span>
-                      <span className="text-xs text-base-content/50">
+                      <span className="text-xs text-muted-foreground">•</span>
+                      <span className="text-xs text-muted-foreground">
                         {formatDate(article.createdAt)}
                       </span>
 
                       {/* Status Badge */}
-                      <div className={`badge badge-sm ${
-                        article.status === (ARTICLE_STATUS.PUBLISHED as Article['status']) ? 'badge-success' :
-                          article.status === (ARTICLE_STATUS.DRAFT as Article['status']) ? 'badge-warning' :
-                            'badge-info'
-                      }`}>
+                      <Badge 
+                        variant={
+                          article.status === ArticleStatus.PUBLISHED ? 'default' :
+                          article.status === ArticleStatus.DRAFT ? 'secondary' :
+                          article.status === ArticleStatus.PENDING_REVIEW ? 'outline' :
+                          article.status === ArticleStatus.ARCHIVED ? 'secondary' :
+                          'destructive'
+                        }
+                        className="text-xs"
+                      >
                         {article.status}
-                      </div>
+                      </Badge>
                     </div>
 
                     {/* Title and Description */}
-                    <h3 className="card-title text-lg mb-2 line-clamp-2">
+                    <h3 className="text-lg font-semibold mb-2 line-clamp-2">
                       {article.title}
                     </h3>
-                    <p className="text-base-content/70 mb-3 line-clamp-3">
+                    <p className="text-muted-foreground mb-3 line-clamp-3">
                       {article.description}
                     </p>
 
@@ -299,20 +303,20 @@ export const ArticlesPage: React.FC = () => {
                     {article.tagList.length > 0 && (
                       <div className="flex flex-wrap gap-1 mb-3">
                         {article.tagList.slice(0, 5).map((tag, index) => (
-                          <span key={index} className="badge badge-outline badge-sm">
+                          <Badge key={index} variant="outline" className="text-xs">
                             {tag}
-                          </span>
+                          </Badge>
                         ))}
                         {article.tagList.length > 5 && (
-                          <span className="badge badge-outline badge-sm">
+                          <Badge variant="outline" className="text-xs">
                             +{article.tagList.length - 5} more
-                          </span>
+                          </Badge>
                         )}
                       </div>
                     )}
 
                     {/* Stats */}
-                    <div className="flex items-center gap-4 text-sm text-base-content/60">
+                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
                       <span className="flex items-center gap-1">
                         <HeartIcon className="h-4 w-4" />
                         {article.favoritesCount}
@@ -336,43 +340,46 @@ export const ArticlesPage: React.FC = () => {
                 </div>
 
                 {/* Actions */}
-                <div className="card-actions justify-end mt-4">
-                  <button
-                    className={`btn btn-sm ${article.favorited ? 'btn-error' : 'btn-outline'}`}
+                <div className="flex justify-end gap-2 mt-4">
+                  <Button
+                    variant={article.favorited ? "destructive" : "outline"}
+                    size="sm"
                     onClick={() => handleToggleFavorite(article)}
                   >
                     {article.favorited ? (
-                      <HeartSolidIcon className="h-4 w-4" />
+                      <HeartSolidIcon className="h-4 w-4 mr-2" />
                     ) : (
-                      <HeartIcon className="h-4 w-4" />
+                      <HeartIcon className="h-4 w-4 mr-2" />
                     )}
                     {article.favorited ? 'Unfavorite' : 'Favorite'}
-                  </button>
+                  </Button>
 
-                  <button className="btn btn-sm btn-outline">
-                    <EyeIcon className="h-4 w-4" />
+                  <Button variant="outline" size="sm">
+                    <EyeIcon className="h-4 w-4 mr-2" />
                     View
-                  </button>
+                  </Button>
 
                   {/* Show edit/delete only for own articles */}
                   {!feedMode && article.author.username === user?.username && (
                     <>
-                      <button className="btn btn-sm btn-outline">
-                        <PencilIcon className="h-4 w-4" />
+                      <Button variant="outline" size="sm">
+                        <PencilIcon className="h-4 w-4 mr-2" />
                         Edit
-                      </button>
-                      <button
-                        className="btn btn-sm btn-outline btn-error"
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
                         onClick={() => handleDeleteArticle(article)}
+                        className="text-destructive hover:text-destructive"
                       >
-                        <TrashIcon className="h-4 w-4" />
+                        <TrashIcon className="h-4 w-4 mr-2" />
                         Delete
-                      </button>
+                      </Button>
                     </>
                   )}
                 </div>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           ))}
         </div>
       )}
@@ -380,39 +387,42 @@ export const ArticlesPage: React.FC = () => {
       {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-          <div className="text-sm text-base-content/70">
+          <div className="text-sm text-muted-foreground">
             Showing {startIndex}-{endIndex} of {articlesCount} articles
           </div>
 
-          <div className="join">
-            <button
-              className="join-item btn btn-sm"
+          <div className="flex gap-1">
+            <Button
+              variant="outline"
+              size="sm"
               disabled={currentPage === 1}
               onClick={() => setCurrentPage(currentPage - 1)}
             >
               Previous
-            </button>
+            </Button>
 
             {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
               const pageNum = Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + i;
               return (
-                <button
+                <Button
                   key={pageNum}
-                  className={`join-item btn btn-sm ${currentPage === pageNum ? 'btn-active' : ''}`}
+                  variant={currentPage === pageNum ? "default" : "outline"}
+                  size="sm"
                   onClick={() => setCurrentPage(pageNum)}
                 >
                   {pageNum}
-                </button>
+                </Button>
               );
             })}
 
-            <button
-              className="join-item btn btn-sm"
+            <Button
+              variant="outline"
+              size="sm"
               disabled={currentPage === totalPages}
               onClick={() => setCurrentPage(currentPage + 1)}
             >
               Next
-            </button>
+            </Button>
           </div>
         </div>
       )}
@@ -420,7 +430,7 @@ export const ArticlesPage: React.FC = () => {
       {/* Loading overlay */}
       {loading && articles.length > 0 && (
         <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50">
-          <div className="loading loading-spinner loading-lg text-primary"></div>
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
       )}
     </div>

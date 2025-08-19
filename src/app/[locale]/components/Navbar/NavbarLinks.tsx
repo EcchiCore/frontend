@@ -1,10 +1,13 @@
+// NavbarLinks.tsx
 "use client";
-import { useState, useEffect, useRef, useCallback } from "react"; // Add useCallback
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { ChevronDown, ChevronUp, User } from "lucide-react";
+import { ChevronDown, User } from "lucide-react";
 import Cookies from "js-cookie";
 import { useParams, usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
 
 interface NavLink {
   id: string;
@@ -16,26 +19,25 @@ interface NavLink {
 
 interface NavbarLinksProps {
   onCloseMenu?: () => void;
-  theme?: string;
 }
 
 export default function NavbarLinks({ onCloseMenu = () => {} }: NavbarLinksProps) {
   const [navLinks, setNavLinks] = useState<NavLink[]>([]);
-  const [openSubmenu, setOpenSubmenu] = useState<string | null>(null);
-  const menuRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
-
+  const [isClient, setIsClient] = useState(false);
   const params = useParams();
   const pathname = usePathname();
   const router = useRouter();
   const t = useTranslations("Navbar");
-
-  // Get current locale from URL
   const locale = (params?.locale as string) || "th";
 
-  // Memoize getLocalizedHref to prevent recreation on every render
+  // Fix hydration issues
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
   const getLocalizedHref = useCallback(
     (path: string, targetLocale?: string) => {
-      if (path.startsWith("http")) return path; // External links stay as is
+      if (path.startsWith("http")) return path;
       if (path === "/") return `/${targetLocale || locale}`;
       const newLocale = targetLocale || locale;
       if (path.startsWith("/")) {
@@ -49,14 +51,10 @@ export default function NavbarLinks({ onCloseMenu = () => {} }: NavbarLinksProps
       }
       return `/${newLocale}/${path}`;
     },
-    [locale], // Dependency: locale
+    [locale]
   );
 
-  const toggleSubmenu = (id: string) => {
-    setOpenSubmenu((prev) => (prev === id ? null : id));
-  };
-
-  const changeLanguage = (lang: string) => {
+  const changeLanguage = useCallback((lang: string) => {
     let targetPath = pathname || "";
     if (pathname && pathname.startsWith(`/${locale}/`)) {
       targetPath = pathname.substring(locale.length + 2);
@@ -66,10 +64,11 @@ export default function NavbarLinks({ onCloseMenu = () => {} }: NavbarLinksProps
     const newPath = getLocalizedHref(targetPath, lang);
     router.push(newPath);
     onCloseMenu();
-  };
+  }, [pathname, locale, getLocalizedHref, router, onCloseMenu]);
 
-  // Generate navigation links based on authentication status
   useEffect(() => {
+    if (!isClient) return;
+
     const token = Cookies.get("token");
 
     const baseLinks: NavLink[] = [
@@ -118,72 +117,60 @@ export default function NavbarLinks({ onCloseMenu = () => {} }: NavbarLinksProps
     } else {
       setNavLinks(baseLinks);
     }
-  }, [locale, pathname, t, getLocalizedHref]);
+  }, [isClient, locale, pathname, t, getLocalizedHref]);
+
+  if (!isClient) {
+    return <div className="flex flex-col md:flex-row md:items-center md:gap-4 space-y-2 md:space-y-0" />;
+  }
 
   return (
-    <div className="flex flex-col md:flex-row md:items-center md:gap-4 lg:gap-6 space-y-2 md:space-y-0">
+    <div className="flex flex-col md:flex-row md:items-center md:gap-4 space-y-2 md:space-y-0">
       {navLinks.map((item) => (
-        <div
-          key={item.id}
-          ref={(el) => {
-            menuRefs.current[item.id] = el;
-          }}
-          className="relative w-full md:w-auto whitespace-nowrap"
-        >
+        <div key={item.id} className="w-full md:w-auto">
           {item.subLinks ? (
-            <div className="w-full">
-              <button
-                onClick={() => toggleSubmenu(item.id)}
-                className={`flex items-center justify-between md:justify-start w-full md:w-auto gap-2 px-4 py-2 rounded-lg
-                  text-sm lg:text-base whitespace-nowrap
-                  hover:bg-base-200 hover:text-base-content transition duration-200`}
-              >
-                <span className="flex items-center gap-2">
-                  {item.name === t("member") && <User size={16} className="mr-1" />}
-                  {item.name}
-                </span>
-                {openSubmenu === item.id ? (
-                  <ChevronUp size={16} className="ml-1" />
-                ) : (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  className="flex items-center justify-between md:justify-start w-full md:w-auto gap-2 text-sm lg:text-base hover:bg-accent"
+                >
+                  <span className="flex items-center gap-2">
+                    {item.name === t("member") && <User size={16} className="mr-1" />}
+                    {item.name}
+                  </span>
                   <ChevronDown size={16} className="ml-1" />
-                )}
-              </button>
-              {openSubmenu === item.id && (
-                <div className="w-full md:absolute md:left-0 md:mt-2 pl-4 md:pl-0 space-y-2 bg-base-200 md:shadow rounded-box md:p-3 z-[1000]">
-                  {item.subLinks.map((sub) => (
-                    item.id === "5-lang" ? (
-                      <button
-                        key={sub.id}
-                        className="block w-full text-left px-4 py-2 rounded-lg text-sm whitespace-nowrap
-                          hover:bg-base-300
-                          transition duration-150 ease-in-out"
-                        onClick={() => changeLanguage(sub.id === "5-1" ? "en" : "th")}
-                      >
-                        {sub.name}
-                      </button>
-                    ) : (
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-full md:w-56">
+                {item.subLinks.map((sub) => (
+                  item.id === "5-lang" ? (
+                    <DropdownMenuItem
+                      key={sub.id}
+                      className="text-sm cursor-pointer hover:bg-accent"
+                      onClick={() => changeLanguage(sub.id === "5-1" ? "en" : "th")}
+                    >
+                      {sub.name}
+                    </DropdownMenuItem>
+                  ) : (
+                    <DropdownMenuItem key={sub.id} asChild>
                       <Link
-                        key={sub.id}
                         href={sub.link || "#"}
-                        className="block w-full px-4 py-2 rounded-lg text-sm whitespace-nowrap
-                          hover:bg-base-300
-                          transition duration-150 ease-in-out"
+                        className="text-sm w-full hover:bg-accent"
                         onClick={onCloseMenu}
+                        target={sub.link?.startsWith("http") ? "_blank" : undefined}
+                        rel={sub.link?.startsWith("http") ? "noopener noreferrer" : undefined}
                       >
                         {sub.name}
                       </Link>
-                    )
-                  ))}
-                </div>
-              )}
-            </div>
+                    </DropdownMenuItem>
+                  )
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
           ) : (
             <Link
               href={item.link || "#"}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg
-                text-sm lg:text-base whitespace-nowrap
-                w-full md:w-auto
-                hover:bg-base-200 hover:text-base-content transition duration-200`}
+              className="flex items-center gap-2 px-4 py-2 text-sm lg:text-base hover:bg-accent rounded-md w-full md:w-auto"
               onClick={onCloseMenu}
             >
               {item.name}

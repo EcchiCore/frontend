@@ -18,6 +18,26 @@ import { DashboardUser, SocialMediaLink, Token } from '../utils/types';
 import Image from 'next/image';
 import Link from 'next/link';
 
+// shadcn/ui components
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Switch } from '@/components/ui/switch';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { Label } from '@/components/ui/label';
+
 interface SettingsFormData {
   username: string;
   email: string;
@@ -120,7 +140,7 @@ const SettingsPage: React.FC = () => {
   }, []);
 
   const hasTokenAccess = useCallback(() => {
-    return user?.rank && ['USER', 'MODERATOR', 'ADMIN'].includes(user.rank); // Changed to use user.rank
+    return user?.rank && ['USER', 'MODERATOR', 'ADMIN'].includes(user.rank);
   }, [user]);
 
   useEffect(() => {
@@ -157,14 +177,12 @@ const SettingsPage: React.FC = () => {
     }
   }, [user, fetchTokens, hasTokenAccess]);
 
-  // Update URL hash when activeTab changes
   useEffect(() => {
     if (typeof window !== 'undefined') {
       window.location.hash = activeTab;
     }
   }, [activeTab]);
 
-  // Handle hash change to set active tab
   useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash.replace('#', '');
@@ -185,7 +203,7 @@ const SettingsPage: React.FC = () => {
     };
 
     window.addEventListener('hashchange', handleHashChange);
-    handleHashChange(); // Set initial tab from hash
+    handleHashChange();
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
@@ -210,8 +228,6 @@ const SettingsPage: React.FC = () => {
     setMessage({ type, text });
     setTimeout(() => setMessage(null), 5000);
   };
-
-
 
   const getHighestRank = () => {
     if (!user?.rank) return null;
@@ -264,7 +280,7 @@ const SettingsPage: React.FC = () => {
       await userApi.deleteToken(id);
       setTokens(tokens.filter((t) => t.id !== id));
       showMessage('success', 'Token deleted successfully!');
-    } catch  {
+    } catch {
       showMessage('error', 'Failed to delete token');
     }
   };
@@ -363,7 +379,6 @@ const SettingsPage: React.FC = () => {
       setLoading(true);
       await userApi.deleteAccount();
       showMessage('success', 'Account deleted successfully. Logging out...');
-      // Redirect to logout or homepage
     } catch (error) {
       const errorMessage = error instanceof ApiError ? error.message : 'Failed to delete account';
       showMessage('error', errorMessage);
@@ -422,7 +437,10 @@ const SettingsPage: React.FC = () => {
   if (!user) {
     return (
       <div className="flex items-center justify-center py-12">
-        <span className="loading loading-spinner loading-lg text-primary"></span>
+        <svg className="animate-spin h-8 w-8 text-primary" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+          <path fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+        </svg>
       </div>
     );
   }
@@ -434,94 +452,81 @@ const SettingsPage: React.FC = () => {
         <div className="lg:col-span-1">
           <div className="sticky top-4">
             <h2 className="text-lg font-bold mb-4">Settings</h2>
-            <ul className="menu bg-base-200 rounded-box shadow-lg p-2">
-              {tabs.map((tab) => {
-                const Icon = tab.icon;
-                return (
-                  <li key={tab.id}>
-                    <button
-                      className={activeTab === tab.id ? 'active' : ''}
-                      onClick={() => setActiveTab(tab.id as 'profile' | 'security' | 'notifications' | 'privacy' | 'appearance' | 'tokens' | 'danger')}
-                    >
-                      <Icon className="h-4 w-4 mr-2" />
-                      {tab.label}
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
+            <Card>
+              <CardContent className="p-2">
+                <nav className="space-y-1">
+                  {tabs.map((tab) => {
+                    const Icon = tab.icon;
+                    return (
+                      <Button
+                        key={tab.id}
+                        variant={activeTab === tab.id ? 'secondary' : 'ghost'}
+                        className="w-full justify-start"
+                        onClick={() => setActiveTab(tab.id as typeof activeTab)}
+                      >
+                        <Icon className="h-4 w-4 mr-2" />
+                        {tab.label}
+                      </Button>
+                    );
+                  })}
+                </nav>
+              </CardContent>
+            </Card>
             {/* Preview Section */}
-            <div className="mt-8 bg-base-200 p-6 rounded-box">
-              <h3 className="text-lg font-semibold mb-4">Preview</h3>
-              {activeTab === 'profile' && (
-                <div className="card bg-base-100 shadow-xl">
-                  {profileForm.backgroundImage && (
-                    <figure className="relative h-32 overflow-hidden">
-                      <Image
-                        src={profileForm.backgroundImage}
-                        alt="Profile background"
-                        fill
-                        style={{ objectFit: 'cover' }}
-                      />
-                    </figure>
-                  )}
-                  <div className="card-body">
-                    <div className="flex flex-col items-center mb-4">
-                      {profileForm.image ? (
-                        <div
-                          className={`avatar ${profileForm.backgroundImage ? 'mt-[-48px]' : ''} mb-4`}
+            <Card className="mt-8">
+              <CardHeader>
+                <h3 className="text-lg font-semibold">Preview</h3>
+              </CardHeader>
+              <CardContent>
+                {activeTab === 'profile' && (
+                  <Card>
+                    {profileForm.backgroundImage && (
+                      <div className="relative h-32 overflow-hidden">
+                        <Image
+                          src={profileForm.backgroundImage}
+                          alt="Profile background"
+                          fill
+                          style={{ objectFit: 'cover' }}
+                        />
+                      </div>
+                    )}
+                    <CardContent className="pt-6">
+                      <div className="flex flex-col items-center mb-4">
+                        <Avatar
+                          className={`h-24 w-24 ${profileForm.backgroundImage ? '-mt-12' : ''}`}
                         >
-                          <div className="w-24 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
-                            <Image
-                              src={profileForm.image}
-                              alt={profileForm.username}
-                              width={96}
-                              height={96}
-                            />
-                          </div>
-                        </div>
-                      ) : (
-                        <div
-                          className={`avatar placeholder ${profileForm.backgroundImage ? 'mt-[-48px]' : ''} mb-4`}
-                        >
-                          <div className="bg-neutral text-neutral-content rounded-full w-24">
-                            <span className="text-2xl">
+                          {profileForm.image ? (
+                            <AvatarImage src={profileForm.image} alt={profileForm.username} />
+                          ) : (
+                            <AvatarFallback>
                               {profileForm.username.charAt(0).toUpperCase()}
-                            </span>
-                          </div>
-                        </div>
-                      )}
-                      <h2 className="card-title">{profileForm.username || 'Username'}</h2>
-                      <p className="text-sm opacity-70">{profileForm.email || 'email@example.com'}</p>
+                            </AvatarFallback>
+                          )}
+                        </Avatar>
+                        <h2 className="text-xl font-bold mt-4">{profileForm.username || 'Username'}</h2>
+                        <p className="text-sm text-muted-foreground">{profileForm.email || 'email@example.com'}</p>
+                      </div>
+                      <div className="divider">Bio</div>
+                      <p className="whitespace-pre-line">{profileForm.bio || 'No bio provided yet.'}</p>
+                    </CardContent>
+                  </Card>
+                )}
+                {activeTab === 'appearance' && (
+                  <div className="space-y-4">
+                    <h4 className="text-lg font-semibold">Theme Preview</h4>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="bg-primary text-primary-foreground p-2 rounded text-center">Primary</div>
+                      <div className="bg-secondary text-secondary-foreground p-2 rounded text-center">Secondary</div>
+                      <div className="bg-accent text-accent-foreground p-2 rounded text-center">Accent</div>
+                      <div className="bg-muted text-muted-foreground p-2 rounded text-center">Neutral</div>
                     </div>
-                    <div className="divider">Bio</div>
-                    <p className="whitespace-pre-line">{profileForm.bio || 'No bio provided yet.'}</p>
+                    <p><strong>Theme:</strong> {appearanceSettings.theme}</p>
+                    <p><strong>Font Size:</strong> {appearanceSettings.fontSize}</p>
+                    <p><strong>Language:</strong> {languages.find((l) => l.code === appearanceSettings.language)?.name}</p>
                   </div>
-                </div>
-              )}
-              {activeTab === 'appearance' && (
-                <div className="prose">
-                  <h4>Theme Preview</h4>
-                  <div className="grid grid-cols-2 gap-2 mb-4">
-                    <div className="bg-primary text-primary-content p-2 rounded text-center">
-                      Primary
-                    </div>
-                    <div className="bg-secondary text-secondary-content p-2 rounded text-center">
-                      Secondary
-                    </div>
-                    <div className="bg-accent text-accent-content p-2 rounded text-center">
-                      Accent
-                    </div>
-                    <div className="bg-neutral text-neutral-content p-2 rounded text-center">
-                      Neutral
-                    </div>
-                  </div>
-                  <p><strong>Theme:</strong> {appearanceSettings.theme}</p>
-                  <p><strong>Font Size:</strong> {appearanceSettings.fontSize}</p>
-                  <p><strong>Language:</strong> {languages.find((l) => l.code === appearanceSettings.language)?.name}</p>
-                </div>
-              )}
-            </div>
+                )}
+              </CardContent>
+            </Card>
           </div>
         </div>
 
@@ -530,208 +535,195 @@ const SettingsPage: React.FC = () => {
           <h1 className="text-2xl font-bold mb-6">Your Settings</h1>
 
           {/* Mobile Tabs */}
-          <div className="tabs tabs-boxed mb-6 lg:hidden">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                className={`tab ${activeTab === tab.id ? 'tab-active' : ''}`}
-                onClick={() => setActiveTab(tab.id as 'profile' | 'security' | 'notifications' | 'privacy' | 'appearance' | 'tokens' | 'danger')}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
+          <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as typeof activeTab)} className="lg:hidden mb-6">
+            <TabsList className="grid grid-cols-2 lg:grid-cols-4">
+              {tabs.map((tab) => (
+                <TabsTrigger key={tab.id} value={tab.id}>
+                  {tab.label}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </Tabs>
 
           {/* Message Alert */}
           {message && (
-            <div className={`alert ${message.type === 'success' ? 'alert-success' : 'alert-error'} mb-6`}>
+            <Alert variant={message.type === 'success' ? 'default' : 'destructive'} className="mb-6">
               {message.type === 'success' ? (
                 <CheckIcon className="h-6 w-6" />
               ) : (
                 <XMarkIcon className="h-6 w-6" />
               )}
-              <span>{message.text}</span>
-            </div>
+              <AlertDescription>{message.text}</AlertDescription>
+            </Alert>
           )}
 
           {/* Profile Tab */}
           {activeTab === 'profile' && (
-            <form onSubmit={handleProfileUpdate} className="space-y-4">
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text">Profile Picture URL</span>
-                </label>
-                <input
+            <form onSubmit={handleProfileUpdate} className="space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="image">Profile Picture URL</Label>
+                <Input
+                  id="image"
                   type="url"
-                  className="input input-bordered"
                   value={profileForm.image}
                   onChange={(e) => setProfileForm((prev) => ({ ...prev, image: e.target.value }))}
                   placeholder="https://example.com/avatar.jpg"
                 />
               </div>
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text">Background Image URL</span>
-                </label>
-                <input
+              <div className="space-y-2">
+                <Label htmlFor="backgroundImage">Background Image URL</Label>
+                <Input
+                  id="backgroundImage"
                   type="url"
-                  className="input input-bordered"
                   value={profileForm.backgroundImage}
-                  onChange={(e) =>
-                    setProfileForm((prev) => ({ ...prev, backgroundImage: e.target.value }))
-                  }
+                  onChange={(e) => setProfileForm((prev) => ({ ...prev, backgroundImage: e.target.value }))}
                   placeholder="https://example.com/background.jpg"
                 />
               </div>
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text">Username</span>
-                </label>
-                <input
+              <div className="space-y-2">
+                <Label htmlFor="username">Username</Label>
+                <Input
+                  id="username"
                   type="text"
-                  className="input input-bordered"
                   value={profileForm.username}
                   onChange={(e) => setProfileForm((prev) => ({ ...prev, username: e.target.value }))}
                   required
                 />
               </div>
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text">Email</span>
-                </label>
-                <input
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
                   type="email"
-                  className="input input-bordered"
                   value={profileForm.email}
                   onChange={(e) => setProfileForm((prev) => ({ ...prev, email: e.target.value }))}
                   required
                 />
               </div>
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text">Bio</span>
-                </label>
-                <textarea
-                  className="textarea textarea-bordered h-24"
+              <div className="space-y-2">
+                <Label htmlFor="bio">Bio</Label>
+                <Textarea
+                  id="bio"
                   value={profileForm.bio}
                   onChange={(e) => setProfileForm((prev) => ({ ...prev, bio: e.target.value }))}
                   placeholder="Tell us about yourself..."
+                  className="h-24"
                 />
               </div>
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text">ShrtFly API Key</span>
-                </label>
-                <input
+              <div className="space-y-2">
+                <Label htmlFor="shrtflyApiKey">ShrtFly API Key</Label>
+                <Input
+                  id="shrtflyApiKey"
                   type="text"
-                  className="input input-bordered"
                   value={profileForm.shrtflyApiKey}
-                  onChange={(e) =>
-                    setProfileForm((prev) => ({ ...prev, shrtflyApiKey: e.target.value }))
-                  }
+                  onChange={(e) => setProfileForm((prev) => ({ ...prev, shrtflyApiKey: e.target.value }))}
                   placeholder="ShrtFly API Key"
                 />
               </div>
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text">Social Media Links</span>
-                </label>
+              <div className="space-y-2">
+                <Label>Social Media Links</Label>
                 {profileForm.socialMediaLinks.map((link, index) => (
-                  <div key={index} className="flex gap-2 mb-2">
-                    <input
-                      type="text"
-                      value={link.platform}
-                      onChange={(e) => handleSocialMediaChange(index, 'platform', e.target.value)}
-                      className="input input-bordered w-1/3"
-                      placeholder="Platform (e.g., Twitter)"
-                    />
-                    <input
-                      type="url"
-                      value={link.url}
-                      onChange={(e) => handleSocialMediaChange(index, 'url', e.target.value)}
-                      className="input input-bordered w-2/3"
-                      placeholder="URL (e.g., https://twitter.com/username)"
-                    />
-                    <button
-                      type="button"
+                  <div key={index} className="flex gap-2 items-end">
+                    <div className="w-1/3">
+                      <Input
+                        value={link.platform}
+                        onChange={(e) => handleSocialMediaChange(index, 'platform', e.target.value)}
+                        placeholder="Platform (e.g., Twitter)"
+                      />
+                    </div>
+                    <div className="w-2/3">
+                      <Input
+                        type="url"
+                        value={link.url}
+                        onChange={(e) => handleSocialMediaChange(index, 'url', e.target.value)}
+                        placeholder="URL (e.g., https://twitter.com/username)"
+                      />
+                    </div>
+                    <Button
+                      variant="destructive"
+                      size="sm"
                       onClick={() => removeSocialMediaLink(index)}
-                      className="btn btn-error btn-sm"
                     >
                       Remove
-                    </button>
+                    </Button>
                   </div>
                 ))}
-                <button
-                  type="button"
+                <Button
+                  variant="secondary"
+                  size="sm"
                   onClick={addSocialMediaLink}
-                  className="btn btn-secondary btn-sm mt-2"
+                  className="mt-2"
                 >
                   Add Social Media Link
-                </button>
+                </Button>
               </div>
               <div className="flex justify-between items-center mt-6">
-                <button type="submit" className="btn btn-primary" disabled={loading}>
-                  {loading ? <span className="loading loading-spinner loading-sm"></span> : 'Save Profile'}
-                </button>
-                <Link href="/dashboard/profile" className="btn btn-ghost">
-                  Cancel
-                </Link>
+                <Button type="submit" disabled={loading}>
+                  {loading ? (
+                    <svg className="animate-spin h-5 w-5 mr-2" viewBox="0 0 24 24">
+                      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                      <path fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                    </svg>
+                  ) : (
+                    'Save Profile'
+                  )}
+                </Button>
+                <Button variant="ghost" asChild>
+                  <Link href="/dashboard/profile">Cancel</Link>
+                </Button>
               </div>
             </form>
           )}
 
           {/* Security Tab */}
           {activeTab === 'security' && (
-            <form onSubmit={handlePasswordChange} className="space-y-4">
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text">Current Password</span>
-                </label>
-                <input
+            <form onSubmit={handlePasswordChange} className="space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="currentPassword">Current Password</Label>
+                <Input
+                  id="currentPassword"
                   type="password"
-                  className="input input-bordered"
                   value={profileForm.password}
                   onChange={(e) => setProfileForm((prev) => ({ ...prev, password: e.target.value }))}
                   required
                 />
               </div>
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text">New Password</span>
-                </label>
-                <input
+              <div className="space-y-2">
+                <Label htmlFor="newPassword">New Password</Label>
+                <Input
+                  id="newPassword"
                   type="password"
-                  className="input input-bordered"
                   value={profileForm.newPassword}
-                  onChange={(e) =>
-                    setProfileForm((prev) => ({ ...prev, newPassword: e.target.value }))
-                  }
+                  onChange={(e) => setProfileForm((prev) => ({ ...prev, newPassword: e.target.value }))}
                   minLength={8}
                   required
                 />
               </div>
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text">Confirm New Password</span>
-                </label>
-                <input
+              <div className="space-y-2">
+                <Label htmlFor="confirmPassword">Confirm New Password</Label>
+                <Input
+                  id="confirmPassword"
                   type="password"
-                  className="input input-bordered"
                   value={profileForm.confirmPassword}
-                  onChange={(e) =>
-                    setProfileForm((prev) => ({ ...prev, confirmPassword: e.target.value }))
-                  }
+                  onChange={(e) => setProfileForm((prev) => ({ ...prev, confirmPassword: e.target.value }))}
                   minLength={8}
                   required
                 />
               </div>
               <div className="flex justify-between items-center mt-6">
-                <button type="submit" className="btn btn-primary" disabled={loading}>
-                  {loading ? <span className="loading loading-spinner loading-sm"></span> : 'Update Password'}
-                </button>
-                <Link href="/dashboard/profile" className="btn btn-ghost">
-                  Cancel
-                </Link>
+                <Button type="submit" disabled={loading}>
+                  {loading ? (
+                    <svg className="animate-spin h-5 w-5 mr-2" viewBox="0 0 24 24">
+                      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                      <path fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                    </svg>
+                  ) : (
+                    'Update Password'
+                  )}
+                </Button>
+                <Button variant="ghost" asChild>
+                  <Link href="/dashboard/profile">Cancel</Link>
+                </Button>
               </div>
             </form>
           )}
@@ -739,50 +731,32 @@ const SettingsPage: React.FC = () => {
           {/* Notifications Tab */}
           {activeTab === 'notifications' && (
             <div className="space-y-6">
-              <h3 className="text-lg font-medium mb-3">Email Notifications</h3>
+              <h3 className="text-lg font-medium">Email Notifications</h3>
               {Object.entries(notificationSettings)
                 .filter(([key]) => key.startsWith('email'))
                 .map(([key, value]) => (
-                  <div key={key} className="form-control">
-                    <label className="label cursor-pointer">
-                      <span className="label-text">
-                        {key.replace('email', '').replace(/([A-Z])/g, ' $1').trim()}
-                      </span>
-                      <input
-                        type="checkbox"
-                        className="toggle toggle-primary"
-                        checked={value}
-                        onChange={(e) =>
-                          setNotificationSettings((prev) => ({
-                            ...prev,
-                            [key]: e.target.checked,
-                          }))
-                        }
-                      />
-                    </label>
+                  <div key={key} className="flex items-center justify-between">
+                    <Label>{key.replace('email', '').replace(/([A-Z])/g, ' $1').trim()}</Label>
+                    <Switch
+                      checked={value}
+                      onCheckedChange={(checked) =>
+                        setNotificationSettings((prev) => ({ ...prev, [key]: checked }))
+                      }
+                    />
                   </div>
                 ))}
-              <h3 className="text-lg font-medium mb-3">Push Notifications</h3>
+              <h3 className="text-lg font-medium mt-6">Push Notifications</h3>
               {Object.entries(notificationSettings)
                 .filter(([key]) => key.startsWith('push'))
                 .map(([key, value]) => (
-                  <div key={key} className="form-control">
-                    <label className="label cursor-pointer">
-                      <span className="label-text">
-                        {key.replace('push', '').replace(/([A-Z])/g, ' $1').trim()}
-                      </span>
-                      <input
-                        type="checkbox"
-                        className="toggle toggle-primary"
-                        checked={value}
-                        onChange={(e) =>
-                          setNotificationSettings((prev) => ({
-                            ...prev,
-                            [key]: e.target.checked,
-                          }))
-                        }
-                      />
-                    </label>
+                  <div key={key} className="flex items-center justify-between">
+                    <Label>{key.replace('push', '').replace(/([A-Z])/g, ' $1').trim()}</Label>
+                    <Switch
+                      checked={value}
+                      onCheckedChange={(checked) =>
+                        setNotificationSettings((prev) => ({ ...prev, [key]: checked }))
+                      }
+                    />
                   </div>
                 ))}
             </div>
@@ -790,181 +764,167 @@ const SettingsPage: React.FC = () => {
 
           {/* Privacy Tab */}
           {activeTab === 'privacy' && (
-            <div className="space-y-4">
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text">Profile Visibility</span>
-                </label>
-                <select
-                  className="select select-bordered"
+            <div className="space-y-6">
+              <div className="space-y-2">
+                <Label>Profile Visibility</Label>
+                <Select
                   value={privacySettings.profileVisibility}
-                  onChange={(e) =>
+                  onValueChange={(value) =>
                     setPrivacySettings((prev) => ({
                       ...prev,
-                      profileVisibility: e.target.value as 'public' | 'private',
+                      profileVisibility: value as 'public' | 'private',
                     }))
                   }
                 >
-                  <option value="public">Public</option>
-                  <option value="private">Private</option>
-                </select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select visibility" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="public">Public</SelectItem>
+                    <SelectItem value="private">Private</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
-              <div className="form-control">
-                <label className="label cursor-pointer">
-                  <span className="label-text">Show Email Address</span>
-                  <input
-                    type="checkbox"
-                    className="toggle toggle-primary"
-                    checked={privacySettings.showEmail}
-                    onChange={(e) =>
-                      setPrivacySettings((prev) => ({
-                        ...prev,
-                        showEmail: e.target.checked,
-                      }))
-                    }
-                  />
-                </label>
+              <div className="flex items-center justify-between">
+                <Label>Show Email Address</Label>
+                <Switch
+                  checked={privacySettings.showEmail}
+                  onCheckedChange={(checked) =>
+                    setPrivacySettings((prev) => ({ ...prev, showEmail: checked }))
+                  }
+                />
               </div>
-              <div className="form-control">
-                <label className="label cursor-pointer">
-                  <span className="label-text">Show Bio</span>
-                  <input
-                    type="checkbox"
-                    className="toggle toggle-primary"
-                    checked={privacySettings.showBio}
-                    onChange={(e) =>
-                      setPrivacySettings((prev) => ({
-                        ...prev,
-                        showBio: e.target.checked,
-                      }))
-                    }
-                  />
-                </label>
+              <div className="flex items-center justify-between">
+                <Label>Show Bio</Label>
+                <Switch
+                  checked={privacySettings.showBio}
+                  onCheckedChange={(checked) =>
+                    setPrivacySettings((prev) => ({ ...prev, showBio: checked }))
+                  }
+                />
               </div>
-              <div className="form-control">
-                <label className="label cursor-pointer">
-                  <span className="label-text">Allow Others to Follow</span>
-                  <input
-                    type="checkbox"
-                    className="toggle toggle-primary"
-                    checked={privacySettings.allowFollows}
-                    onChange={(e) =>
-                      setPrivacySettings((prev) => ({
-                        ...prev,
-                        allowFollows: e.target.checked,
-                      }))
-                    }
-                  />
-                </label>
+              <div className="flex items-center justify-between">
+                <Label>Allow Others to Follow</Label>
+                <Switch
+                  checked={privacySettings.allowFollows}
+                  onCheckedChange={(checked) =>
+                    setPrivacySettings((prev) => ({ ...prev, allowFollows: checked }))
+                  }
+                />
               </div>
             </div>
           )}
 
           {/* Appearance Tab */}
           {activeTab === 'appearance' && (
-            <form onSubmit={handleAppearanceUpdate} className="space-y-4">
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text">Theme</span>
-                </label>
-                <select
-                  className="select select-bordered"
+            <form onSubmit={handleAppearanceUpdate} className="space-y-6">
+              <div className="space-y-2">
+                <Label>Theme</Label>
+                <Select
                   value={appearanceSettings.theme}
-                  onChange={(e) =>
+                  onValueChange={(value) =>
                     setAppearanceSettings((prev) => ({
                       ...prev,
-                      theme: e.target.value as 'light' | 'dark' | 'auto',
+                      theme: value as 'light' | 'dark' | 'auto',
                     }))
                   }
                 >
-                  <option value="light">Light</option>
-                  <option value="dark">Dark</option>
-                  <option value="auto">Auto</option>
-                </select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select theme" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="light">Light</SelectItem>
+                    <SelectItem value="dark">Dark</SelectItem>
+                    <SelectItem value="auto">Auto</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text">Font Size</span>
-                </label>
-                <select
-                  className="select select-bordered"
+              <div className="space-y-2">
+                <Label>Font Size</Label>
+                <Select
                   value={appearanceSettings.fontSize}
-                  onChange={(e) =>
+                  onValueChange={(value) =>
                     setAppearanceSettings((prev) => ({
                       ...prev,
-                      fontSize: e.target.value as 'small' | 'medium' | 'large',
+                      fontSize: value as 'small' | 'medium' | 'large',
                     }))
                   }
                 >
-                  <option value="small">Small</option>
-                  <option value="medium">Medium</option>
-                  <option value="large">Large</option>
-                </select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select font size" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="small">Small</SelectItem>
+                    <SelectItem value="medium">Medium</SelectItem>
+                    <SelectItem value="large">Large</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text">Language</span>
-                </label>
-                <select
-                  className="select select-bordered"
+              <div className="space-y-2">
+                <Label>Language</Label>
+                <Select
                   value={appearanceSettings.language}
-                  onChange={(e) =>
+                  onValueChange={(value) =>
+                    setAppearanceSettings((prev) => ({ ...prev, language: value }))
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select language" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {languages.map((lang) => (
+                      <SelectItem key={lang.code} value={lang.code}>
+                        {lang.name} ({lang.nativeName})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Articles Per Page</Label>
+                <Select
+                  value={appearanceSettings.articlesPerPage.toString()}
+                  onValueChange={(value) =>
                     setAppearanceSettings((prev) => ({
                       ...prev,
-                      language: e.target.value,
+                      articlesPerPage: parseInt(value),
                     }))
                   }
                 >
-                  {languages.map((lang) => (
-                    <option key={lang.code} value={lang.code}>
-                      {lang.name} ({lang.nativeName})
-                    </option>
-                  ))}
-                </select>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select articles per page" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="5">5</SelectItem>
+                    <SelectItem value="10">10</SelectItem>
+                    <SelectItem value="20">20</SelectItem>
+                    <SelectItem value="50">50</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text">Articles Per Page</span>
-                </label>
-                <select
-                  className="select select-bordered"
-                  value={appearanceSettings.articlesPerPage}
-                  onChange={(e) =>
-                    setAppearanceSettings((prev) => ({
-                      ...prev,
-                      articlesPerPage: parseInt(e.target.value),
-                    }))
+              <div className="flex items-center justify-between">
+                <Label>Compact View</Label>
+                <Switch
+                  checked={appearanceSettings.compactView}
+                  onCheckedChange={(checked) =>
+                    setAppearanceSettings((prev) => ({ ...prev, compactView: checked }))
                   }
-                >
-                  <option value={5}>5</option>
-                  <option value={10}>10</option>
-                  <option value={20}>20</option>
-                  <option value={50}>50</option>
-                </select>
-              </div>
-              <div className="form-control">
-                <label className="label cursor-pointer">
-                  <span className="label-text">Compact View</span>
-                  <input
-                    type="checkbox"
-                    className="toggle toggle-primary"
-                    checked={appearanceSettings.compactView}
-                    onChange={(e) =>
-                      setAppearanceSettings((prev) => ({
-                        ...prev,
-                        compactView: e.target.checked,
-                      }))
-                    }
-                  />
-                </label>
+                />
               </div>
               <div className="flex justify-between items-center mt-6">
-                <button type="submit" className="btn btn-primary" disabled={loading}>
-                  {loading ? <span className="loading loading-spinner loading-sm"></span> : 'Save Settings'}
-                </button>
-                <Link href="/dashboard/profile" className="btn btn-ghost">
-                  Cancel
-                </Link>
+                <Button type="submit" disabled={loading}>
+                  {loading ? (
+                    <svg className="animate-spin h-5 w-5 mr-2" viewBox="0 0 24 24">
+                      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                      <path fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                    </svg>
+                  ) : (
+                    'Save Settings'
+                  )}
+                </Button>
+                <Button variant="ghost" asChild>
+                  <Link href="/dashboard/profile">Cancel</Link>
+                </Button>
               </div>
             </form>
           )}
@@ -972,170 +932,182 @@ const SettingsPage: React.FC = () => {
           {/* Tokens Tab */}
           {activeTab === 'tokens' && hasTokenAccess() && (
             <div className="space-y-6">
-              <h2 className="text-xl font-bold mb-4">API Tokens</h2>
-              <div className="bg-base-200 rounded-lg p-4 mb-8">
-                <h3 className="font-semibold mb-3">Create New Token</h3>
-                <div className="flex flex-col md:flex-row gap-4 mb-4">
-                  <div className="form-control w-full md:w-1/3">
-                    <label className="label">
-                      <span className="label-text">Duration</span>
-                    </label>
-                    <select
-                      className="select select-bordered"
-                      value={newTokenDuration}
-                      onChange={(e) => setNewTokenDuration(e.target.value)}
-                    >
-                      {durations.map((option) => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="form-control w-full md:w-1/3">
-                    <label className="label">
-                      <span className="label-text">Permission Level</span>
-                    </label>
-                    <select
-                      className="select select-bordered"
-                      value={newTokenRank}
-                      onChange={(e) => setNewTokenRank(e.target.value)}
-                    >
-                      {getFilteredRankOptions().map((option) => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="form-control w-full md:w-1/3 md:self-end">
-                    <button
-                      className="btn btn-primary w-full"
-                      onClick={createToken}
-                      disabled={isCreatingToken}
-                    >
-                      {isCreatingToken ? (
-                        <>
-                          <span className="loading loading-spinner loading-sm mr-2"></span>
-                          Creating...
-                        </>
-                      ) : (
-                        'Create Token'
-                      )}
-                    </button>
-                  </div>
-                </div>
-                {newCreatedToken && (
-                  <div className="mt-4 p-3 bg-base-300 rounded-lg">
-                    <span className="text-sm text-base-content/70 mb-1">Your new API token:</span>
-                    <div className="flex items-center">
-                      <code className="text-sm bg-base-100 p-2 rounded flex-1 overflow-x-auto">
-                        {newCreatedToken}
-                      </code>
-                      <button
-                        className="btn btn-ghost btn-sm ml-2"
-                        onClick={() => {
-                          navigator.clipboard.writeText(newCreatedToken);
-                          showMessage('success', 'Token copied to clipboard!');
-                        }}
-                      >
-                        Copy
-                      </button>
+              <h2 className="text-xl font-bold">API Tokens</h2>
+              <Card>
+                <CardContent className="pt-6">
+                  <h3 className="font-semibold mb-3">Create New Token</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <div className="space-y-2">
+                      <Label>Duration</Label>
+                      <Select value={newTokenDuration} onValueChange={setNewTokenDuration}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select duration" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {durations.map((option) => (
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
-                    <p className="text-sm text-warning mt-2">
-                      Copy your token now. You won&#39;t see it again!
-                    </p>
+                    <div className="space-y-2">
+                      <Label>Permission Level</Label>
+                      <Select value={newTokenRank} onValueChange={setNewTokenRank}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select permission" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {getFilteredRankOptions().map((option) => (
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Button
+                        className="w-full"
+                        onClick={createToken}
+                        disabled={isCreatingToken}
+                      >
+                        {isCreatingToken ? (
+                          <>
+                            <svg className="animate-spin h-5 w-5 mr-2" viewBox="0 0 24 24">
+                              <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                              <path fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                            </svg>
+                            Creating...
+                          </>
+                        ) : (
+                          'Create Token'
+                        )}
+                      </Button>
+                    </div>
                   </div>
-                )}
-              </div>
-              <h3 className="font-semibold mb-3">Your Tokens</h3>
+                  {newCreatedToken && (
+                    <div className="mt-4 p-3 bg-muted rounded-lg">
+                      <span className="text-sm text-muted-foreground mb-1 block">Your new API token:</span>
+                      <div className="flex items-center">
+                        <code className="text-sm bg-background p-2 rounded flex-1 overflow-x-auto">
+                          {newCreatedToken}
+                        </code>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="ml-2"
+                          onClick={() => {
+                            navigator.clipboard.writeText(newCreatedToken);
+                            showMessage('success', 'Token copied to clipboard!');
+                          }}
+                        >
+                          Copy
+                        </Button>
+                      </div>
+                      <p className="text-sm text-warning mt-2">
+                        Copy your token now. You won’t see it again!
+                      </p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+              <h3 className="font-semibold mt-6 mb-3">Your Tokens</h3>
               {loading ? (
                 <div className="flex items-center justify-center p-8">
-                  <span className="loading loading-spinner loading-lg text-primary"></span>
+                  <svg className="animate-spin h-8 w-8 text-primary" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                    <path fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                  </svg>
                 </div>
               ) : tokens.length > 0 ? (
-                <div className="overflow-x-auto">
-                  <table className="table w-full">
-                    <thead>
-                    <tr>
-                      <th>ID</th>
-                      <th>Token</th>
-                      <th>Permissions</th>
-                      <th>Expires</th>
-                      <th>Actions</th>
-                    </tr>
-                    </thead>
-                    <tbody>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>ID</TableHead>
+                      <TableHead>Token</TableHead>
+                      <TableHead>Permissions</TableHead>
+                      <TableHead>Expires</TableHead>
+                      <TableHead>Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
                     {tokens.map((token) => (
-                      <tr key={token.id}>
-                        <td>{token.id}</td>
-                        <td>
+                      <TableRow key={token.id}>
+                        <TableCell>{token.id}</TableCell>
+                        <TableCell>
                           <code className="text-xs">
                             {token.token.substring(0, 10)}...
                             {token.token.substring(token.token.length - 10)}
                           </code>
-                        </td>
-                        <td>
+                        </TableCell>
+                        <TableCell>
                           {token.ranks.map((rank) => (
-                            <span key={rank.id} className="badge badge-primary badge-sm mr-1">
-                                {rank.rank}
-                              </span>
+                            <span key={rank.id} className="inline-block bg-primary text-primary-foreground text-xs px-2 py-1 rounded mr-1">
+                              {rank.rank}
+                            </span>
                           ))}
-                        </td>
-                        <td>
+                        </TableCell>
+                        <TableCell>
                           {new Date(token.expiresAt).toLocaleDateString(undefined, {
                             year: 'numeric',
                             month: 'short',
                             day: 'numeric',
                           })}
-                        </td>
-                        <td>
-                          <button
-                            className="btn btn-error btn-xs"
+                        </TableCell>
+                        <TableCell>
+                          <Button
+                            variant="destructive"
+                            size="sm"
                             onClick={() => deleteToken(token.id)}
                           >
                             Delete
-                          </button>
-                        </td>
-                      </tr>
+                          </Button>
+                        </TableCell>
+                      </TableRow>
                     ))}
-                    </tbody>
-                  </table>
-                </div>
+                  </TableBody>
+                </Table>
               ) : (
-                <div className="bg-base-200 p-6 rounded-lg text-center">
-                  <p className="text-base-content/70">You don&#39;t have any API tokens yet.</p>
-                </div>
+                <Card>
+                  <CardContent className="pt-6 text-center">
+                    <p className="text-muted-foreground">You don’t have any API tokens yet.</p>
+                  </CardContent>
+                </Card>
               )}
             </div>
           )}
 
           {/* Danger Zone Tab */}
           {activeTab === 'danger' && (
-            <div>
-              <h2 className="text-xl font-semibold mb-4 flex items-center gap-2 text-error">
-                <ExclamationTriangleIcon className="h-5 w-5" />
-                Danger Zone
-              </h2>
-              <div className="bg-error/10 border border-error/20 rounded-lg p-4">
-                <h3 className="text-lg font-medium text-error mb-2">Delete Account</h3>
-                <p className="text-base-content/70 mb-4">
+            <Card className="border-destructive/20">
+              <CardContent className="pt-6">
+                <h2 className="text-xl font-semibold mb-4 flex items-center gap-2 text-destructive">
+                  <ExclamationTriangleIcon className="h-5 w-5" />
+                  Danger Zone
+                </h2>
+                <h3 className="text-lg font-medium text-destructive mb-2">Delete Account</h3>
+                <p className="text-muted-foreground mb-4">
                   Once you delete your account, there is no going back. All your data will be
                   permanently removed.
                 </p>
-                <button
+                <Button
+                  variant="destructive"
                   onClick={handleDeleteAccount}
-                  className="btn btn-error"
                   disabled={loading}
                 >
                   {loading ? (
-                    <span className="loading loading-spinner loading-sm"></span>
+                    <svg className="animate-spin h-5 w-5 mr-2" viewBox="0 0 24 24">
+                      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                      <path fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                    </svg>
                   ) : (
                     'Delete Account'
                   )}
-                </button>
-              </div>
-            </div>
+                </Button>
+              </CardContent>
+            </Card>
           )}
         </div>
       </div>

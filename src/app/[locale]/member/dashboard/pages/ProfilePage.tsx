@@ -14,6 +14,17 @@ import { userApi, ApiError } from '../utils/api';
 import Image from 'next/image';
 import myImageLoader from "../../../lib/imageLoader";
 
+// shadcn/ui imports
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Textarea } from '@/components/ui/textarea';
+import { Loader2 } from 'lucide-react';
+
 export const ProfilePage: React.FC = () => {
   const { user, updateUser } = useAuthContext();
   const [isEditing, setIsEditing] = useState(false);
@@ -75,8 +86,8 @@ export const ProfilePage: React.FC = () => {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
-          <div className="loading loading-spinner loading-lg text-primary"></div>
-          <p className="mt-4 text-base-content/70">Loading profile...</p>
+          <Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" />
+          <p className="mt-4 text-muted-foreground">Loading profile...</p>
         </div>
       </div>
     );
@@ -87,40 +98,36 @@ export const ProfilePage: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-base-content">Profile</h1>
-          <p className="text-base-content/70">Manage your account settings and profile information</p>
+          <h1 className="text-2xl font-bold">Profile</h1>
+          <p className="text-muted-foreground">Manage your account settings and profile information</p>
         </div>
         <div className="flex gap-2">
           {!isEditing ? (
-            <button
-              className="btn btn-primary"
-              onClick={() => setIsEditing(true)}
-            >
-              <PencilIcon className="h-4 w-4" />
+            <Button onClick={() => setIsEditing(true)}>
+              <PencilIcon className="h-4 w-4 mr-2" />
               Edit Profile
-            </button>
+            </Button>
           ) : (
             <div className="flex gap-2">
-              <button
-                className="btn btn-success"
+              <Button
                 onClick={handleSave}
                 disabled={loading}
               >
                 {loading ? (
-                  <span className="loading loading-spinner loading-sm"></span>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                 ) : (
-                  <CheckIcon className="h-4 w-4" />
+                  <CheckIcon className="h-4 w-4 mr-2" />
                 )}
                 Save
-              </button>
-              <button
-                className="btn btn-ghost"
+              </Button>
+              <Button
+                variant="outline"
                 onClick={handleCancel}
                 disabled={loading}
               >
-                <XMarkIcon className="h-4 w-4" />
+                <XMarkIcon className="h-4 w-4 mr-2" />
                 Cancel
-              </button>
+              </Button>
             </div>
           )}
         </div>
@@ -128,64 +135,48 @@ export const ProfilePage: React.FC = () => {
 
       {/* Alerts */}
       {error && (
-        <div className="alert alert-error">
-          <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <span>{error}</span>
-        </div>
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       )}
 
       {success && (
-        <div className="alert alert-success">
-          <svg xmlns="http://www.w3.org/2000/svg" className="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <span>{success}</span>
-        </div>
+        <Alert className="border-green-200 bg-green-50 text-green-800">
+          <AlertDescription>{success}</AlertDescription>
+        </Alert>
       )}
 
       {/* Profile Card */}
-      <div className="card bg-base-200 shadow-xl">
-        <div className="card-body">
+      <Card>
+        <CardContent className="p-6">
           <div className="flex flex-col lg:flex-row gap-6">
             {/* Avatar Section */}
             <div className="flex flex-col items-center lg:items-start space-y-4">
-              <div className="avatar">
-                <div className="w-32 h-32 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
-                  {user.image ? (
-                    <Image
-                      src={user.image}
-                      alt={user.username}
-                      loader={myImageLoader}
-                      width={128}
-                      height={128}
-                      className="w-full h-full rounded-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full rounded-full bg-primary flex items-center justify-center text-white text-4xl font-bold">
-                      {user.username.charAt(0).toUpperCase()}
-                    </div>
-                  )}
-                </div>
-              </div>
+              <Avatar className="w-32 h-32">
+                <AvatarImage 
+                  src={user.image || undefined} 
+                  alt={user.username || undefined}
+                />
+                <AvatarFallback className="text-4xl">
+                  {user.username.charAt(0).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
 
               {isEditing && (
-                <div className="form-control w-full max-w-xs">
-                  <label className="label">
-                    <span className="label-text">Profile Image URL</span>
-                  </label>
-                  <div className="input-group">
-                    <span className="bg-base-300">
+                <div className="w-full max-w-xs space-y-2">
+                  <Label htmlFor="image">Profile Image URL</Label>
+                  <div className="flex">
+                    <div className="flex items-center justify-center px-3 border border-r-0 rounded-l-md bg-muted">
                       <PhotoIcon className="h-4 w-4" />
-                    </span>
-                    <input
+                    </div>
+                    <Input
+                      id="image"
                       type="url"
                       name="image"
                       value={formData.image}
                       onChange={handleInputChange}
                       placeholder="https://example.com/image.jpg"
-                      className="input input-bordered flex-1"
+                      className="rounded-l-none"
                     />
                   </div>
                 </div>
@@ -196,53 +187,51 @@ export const ProfilePage: React.FC = () => {
             <div className="flex-1 space-y-6">
               {/* Basic Info */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text font-medium">Username</span>
-                  </label>
+                <div className="space-y-2">
+                  <Label htmlFor="username" className="font-medium">Username</Label>
                   {isEditing ? (
-                    <div className="input-group">
-                      <span className="bg-base-300">
+                    <div className="flex">
+                      <div className="flex items-center justify-center px-3 border border-r-0 rounded-l-md bg-muted">
                         <UserIcon className="h-4 w-4" />
-                      </span>
-                      <input
+                      </div>
+                      <Input
+                        id="username"
                         type="text"
                         name="username"
                         value={formData.username}
                         onChange={handleInputChange}
-                        className="input input-bordered flex-1"
+                        className="rounded-l-none"
                         required
                       />
                     </div>
                   ) : (
-                    <div className="flex items-center gap-2 p-3 bg-base-300 rounded-lg">
-                      <UserIcon className="h-4 w-4 text-base-content/70" />
+                    <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
+                      <UserIcon className="h-4 w-4 text-muted-foreground" />
                       <span>{user.username}</span>
                     </div>
                   )}
                 </div>
 
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text font-medium">Email</span>
-                  </label>
+                <div className="space-y-2">
+                  <Label htmlFor="email" className="font-medium">Email</Label>
                   {isEditing ? (
-                    <div className="input-group">
-                      <span className="bg-base-300">
+                    <div className="flex">
+                      <div className="flex items-center justify-center px-3 border border-r-0 rounded-l-md bg-muted">
                         <EnvelopeIcon className="h-4 w-4" />
-                      </span>
-                      <input
+                      </div>
+                      <Input
+                        id="email"
                         type="email"
                         name="email"
                         value={formData.email}
                         onChange={handleInputChange}
-                        className="input input-bordered flex-1"
+                        className="rounded-l-none"
                         required
                       />
                     </div>
                   ) : (
-                    <div className="flex items-center gap-2 p-3 bg-base-300 rounded-lg">
-                      <EnvelopeIcon className="h-4 w-4 text-base-content/70" />
+                    <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
+                      <EnvelopeIcon className="h-4 w-4 text-muted-foreground" />
                       <span>{user.email}</span>
                     </div>
                   )}
@@ -250,21 +239,20 @@ export const ProfilePage: React.FC = () => {
               </div>
 
               {/* Bio */}
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text font-medium">Bio</span>
-                </label>
+              <div className="space-y-2">
+                <Label htmlFor="bio" className="font-medium">Bio</Label>
                 {isEditing ? (
-                  <textarea
+                  <Textarea
+                    id="bio"
                     name="bio"
                     value={formData.bio}
                     onChange={handleInputChange}
-                    className="textarea textarea-bordered h-24"
+                    className="min-h-[100px]"
                     placeholder="Tell us about yourself..."
                   />
                 ) : (
-                  <div className="p-3 bg-base-300 rounded-lg min-h-[6rem]">
-                    <p className="text-base-content/90">
+                  <div className="p-3 bg-muted rounded-lg min-h-[6rem]">
+                    <p className="text-foreground">
                       {user.bio || 'No bio provided'}
                     </p>
                   </div>
@@ -273,30 +261,24 @@ export const ProfilePage: React.FC = () => {
 
               {/* Account Info */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text font-medium">Account Rank</span>
-                  </label>
-                  <div className="flex items-center gap-2 p-3 bg-base-300 rounded-lg">
-                    <div className={`badge ${
-                      user.rank
-                        ? user.rank === 'ADMIN'
-                          ? 'badge-error'
-                          : user.rank === 'MODERATOR'
-                            ? 'badge-warning'
-                            : 'badge-info'
-                        : 'badge-info'
-                    }`}>
-                      {user.rank || 'No rank'} {/* Changed to use user.rank */}
-                    </div>
+                <div className="space-y-2">
+                  <Label className="font-medium">Account Rank</Label>
+                  <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
+                    <Badge 
+                      variant={
+                        user.rank === 'ADMIN' ? 'destructive' :
+                        user.rank === 'MODERATOR' ? 'secondary' :
+                        'default'
+                      }
+                    >
+                      {user.rank || 'No rank'}
+                    </Badge>
                   </div>
                 </div>
 
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text font-medium">Member Since</span>
-                  </label>
-                  <div className="p-3 bg-base-300 rounded-lg">
+                <div className="space-y-2">
+                  <Label className="font-medium">Member Since</Label>
+                  <div className="p-3 bg-muted rounded-lg">
                     <span>
                       {user.createdAt
                         ? new Date(user.createdAt).toLocaleDateString()
@@ -308,8 +290,8 @@ export const ProfilePage: React.FC = () => {
               </div>
             </div>
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };

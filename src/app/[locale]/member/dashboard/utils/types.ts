@@ -1,4 +1,3 @@
-// dashboard/utils/types.ts
 export interface DashboardUser {
   id: string;
   username: string;
@@ -8,7 +7,7 @@ export interface DashboardUser {
   backgroundImage?: string | null;
   shrtflyApiKey?: string | null;
   socialMediaLinks?: SocialMediaLink[];
-  rank?: string; // Changed from ranks?: string[]
+  rank?: string;
   createdAt: string;
 }
 
@@ -21,7 +20,7 @@ export interface Token {
   id: number;
   token: string;
   expiresAt: string;
-  ranks: { id: number; rank: string }[]; // Token still uses multiple ranks
+  ranks: { id: number; rank: string }[];
 }
 
 export interface Author {
@@ -63,7 +62,7 @@ export interface NavigationItem {
   label: string;
   icon: string;
   path: string;
-  requiredRanks?: string[]; // NavigationItem may still use multiple ranks for access control
+  requiredRanks?: string[];
 }
 
 export interface DashboardContextType {
@@ -87,7 +86,7 @@ export interface AuthContextType {
 export interface User {
   username: string;
   image?: string;
-  rank: string; // Changed from ranks: string[]
+  rank: string;
 }
 
 export interface UserDataContextType {

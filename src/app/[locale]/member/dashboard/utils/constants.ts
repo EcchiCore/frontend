@@ -1,4 +1,3 @@
-// dashboard/utils/constants.ts
 import { NavigationItem } from './types';
 
 export const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:3000';
@@ -34,9 +33,11 @@ export const NAVIGATION_ITEMS: NavigationItem[] = [
 export const ITEMS_PER_PAGE_OPTIONS = [5, 10, 20, 50];
 
 export const ARTICLE_STATUS = {
-  PUBLISHED: 'published',
-  DRAFT: 'draft',
-  PENDING: 'pending'
+  PUBLISHED: 'PUBLISHED',
+  DRAFT: 'DRAFT',
+  PENDING_REVIEW: 'PENDING_REVIEW',
+  ARCHIVED: 'ARCHIVED',
+  DELETED: 'DELETED'
 } as const;
 
 export const USER_RANKS = {

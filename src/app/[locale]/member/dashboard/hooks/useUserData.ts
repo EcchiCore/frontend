@@ -1,6 +1,5 @@
-// dashboard/hooks/useUserData.ts
 import { useState, useCallback } from 'react';
-import { Article, ArticlesResponse } from '../utils/types';
+import { Article, ArticleStatus, ArticlesResponse } from '../utils/types';
 import { articlesApi, ApiError } from '../utils/api';
 
 export const useUserData = () => {
@@ -10,7 +9,7 @@ export const useUserData = () => {
   const [error, setError] = useState<string | null>(null);
 
   const fetchArticles = useCallback(async (params?: {
-    status?: string;
+    status?: ArticleStatus;
     limit?: number;
     offset?: number;
     feedMode?: boolean;
@@ -29,7 +28,14 @@ export const useUserData = () => {
         : await articlesApi.getMyArticles(queryParams) as ArticlesResponse;
 
       const responseTyped = response as ArticlesResponse;
-      setArticles(responseTyped.articles);
+
+      // Transform API response if backend returns lowercase status values
+      const transformedArticles = responseTyped.articles.map(article => ({
+        ...article,
+        status: article.status.toUpperCase() as ArticleStatus
+      }));
+
+      setArticles(transformedArticles);
       setArticlesCount(responseTyped.articlesCount);
     } catch (err) {
       const errorMessage = err instanceof ApiError
@@ -74,12 +80,13 @@ export const useUserData = () => {
         ? await articlesApi.unfavoriteArticle(slug)
         : await articlesApi.favoriteArticle(slug);
 
+      const updatedArticle = (response as { article: Article }).article;
       updateArticle(slug, {
-        favorited: (response as { article: Article }).article.favorited,
-        favoritesCount: (response as { article: Article }).article.favoritesCount
+        favorited: updatedArticle.favorited,
+        favoritesCount: updatedArticle.favoritesCount
       });
 
-      return (response as { article: Article }).article;
+      return updatedArticle;
     } catch (err) {
       const errorMessage = err instanceof ApiError
         ? err.message
