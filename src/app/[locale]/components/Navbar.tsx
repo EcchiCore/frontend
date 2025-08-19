@@ -98,13 +98,13 @@ const Navbar = () => {
           </Link>
 
           {/* Left Navigation Links (Desktop Only) */}
-          <div className="hidden lg:flex items-center">
+          <div className="hidden lg:flex items-center text-foreground">
             <NavbarLinks section="left" onCloseMenu={closeMenu} />
           </div>
         </div>
 
         {/* Right Section: Right Navigation */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 text-foreground">
           {/* Right Navigation Links (Desktop Only) */}
           <div className="hidden md:flex items-center gap-4">
             <NavbarLinks section="right" onCloseMenu={closeMenu} />
@@ -121,7 +121,7 @@ const Navbar = () => {
           </div>
 
           {/* Mobile Section */}
-          <div className="flex md:hidden items-center gap-2">
+          <div className="flex md:hidden items-center gap-2 ">
             {hasToken && <NotificationDropdown isMobile />}
 
             <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
@@ -130,7 +130,7 @@ const Navbar = () => {
                   <Menu className="h-5 w-5" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="w-[85vw] sm:w-[350px] p-0">
+              <SheetContent side="right" className="w-[85vw] sm:w-[350px] p-0 text-foreground">
                 <div className="flex flex-col h-full">
                   <div className="p-6 border-b">
                     <h2 className="text-lg font-semibold">เมนู</h2>

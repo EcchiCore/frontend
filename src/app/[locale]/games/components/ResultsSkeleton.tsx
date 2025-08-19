@@ -4,10 +4,10 @@
 
 export default function ResultsSkeleton() {
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 ">
       <div className="text-sm opacity-80 bg-gray-200 animate-pulse w-32 h-6 rounded"></div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {[...Array(6)].map((_, i) => (
+        {[...Array(12)].map((_, i) => (
           <div key={i} className="rounded-lg overflow-hidden border border-gray-200">
             <div className="bg-gray-200 animate-pulse w-full h-48"></div>
             <div className="p-4 space-y-2">

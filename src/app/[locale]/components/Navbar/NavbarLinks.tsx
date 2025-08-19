@@ -192,7 +192,7 @@ export default function NavbarLinks({ section, onCloseMenu = () => {}, isMobile 
                 <Button
                   variant="ghost"
                   className={`
-                    flex items-center gap-2 text-sm lg:text-base hover:bg-accent
+                    flex items-center gap-2 text-sm lg:text-base hover:bg-accent 
                     ${isMobile 
                       ? "justify-between w-full h-10 px-3" 
                       : "justify-start w-auto px-3 py-2"
