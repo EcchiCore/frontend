@@ -2,6 +2,10 @@
 
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent } from '@/components/ui/card';
+import { Search } from 'lucide-react';
 
 export default function SearchControls() {
   const router = useRouter();
@@ -86,44 +90,51 @@ export default function SearchControls() {
     syncQueryText();
   }, [category, platform, author, syncQueryText]);
 
-  return (
-    <div className="space-y-3">
-      <div className="grid grid-cols-1 md:grid-cols-6 gap-3">
-        <input
-          value={queryText}
-          onChange={(e) => setQueryText(e.target.value)}
-          placeholder="ค้นหา เช่น category:action platform:windows author:jane"
-          className="md:col-span-5 px-4 py-2 rounded-2xl border"
-        />
-        <button
-          onClick={parseQuery}
-          className="px-4 py-2 rounded-2xl border"
-        >
-          ค้นหา
-        </button>
-      </div>
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      parseQuery();
+    }
+  };
 
-      {/* ช่องแยก */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-        <input
-          value={category}
-          onChange={(e) => setCategory(e.target.value)}
-          placeholder="หมวดหมู่"
-          className="px-4 py-2 rounded-2xl border"
-        />
-        <input
-          value={platform}
-          onChange={(e) => setPlatform(e.target.value)}
-          placeholder="แพลตฟอร์ม"
-          className="px-4 py-2 rounded-2xl border"
-        />
-        <input
-          value={author}
-          onChange={(e) => setAuthor(e.target.value)}
-          placeholder="ผู้เขียน"
-          className="px-4 py-2 rounded-2xl border"
-        />
-      </div>
-    </div>
+  return (
+    <Card>
+      <CardContent className="p-4 space-y-4">
+        {/* Search Bar */}
+        <div className="flex gap-2">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+            <Input
+              value={queryText}
+              onChange={(e) => setQueryText(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder="ค้นหา เช่น category:action platform:windows author:jane"
+              className="pl-10"
+            />
+          </div>
+          <Button onClick={parseQuery}>
+            ค้นหา
+          </Button>
+        </div>
+
+        {/* Filter Inputs */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <Input
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            placeholder="หมวดหมู่"
+          />
+          <Input
+            value={platform}
+            onChange={(e) => setPlatform(e.target.value)}
+            placeholder="แพลตฟอร์ม"
+          />
+          <Input
+            value={author}
+            onChange={(e) => setAuthor(e.target.value)}
+            placeholder="ผู้เขียน"
+          />
+        </div>
+      </CardContent>
+    </Card>
   );
 }
