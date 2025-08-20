@@ -22,9 +22,6 @@ const Navbar = () => {
     setIsClient(true);
     const token = Cookies.get("token");
     setHasToken(!!token);
-    
-    // Force dark theme
-    document.documentElement.setAttribute("data-theme", "dark");
   }, []);
 
   // Handle resize for mobile menu with proper cleanup
@@ -68,7 +65,7 @@ const Navbar = () => {
   if (!isClient) {
     // Render minimal navbar during SSR
     return (
-      <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+      <nav className="sticky top-0 z-50 w-full border-b bg-gray-900/95">
         <div className="container mx-auto flex h-14 items-center justify-between px-4 lg:px-6">
           <div className="flex items-center">
             <Link
@@ -85,7 +82,7 @@ const Navbar = () => {
   }
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <nav className="sticky top-0 z-50 w-full border-b bg-background">
       <div className="container mx-auto flex h-14 items-center justify-between px-4 lg:px-6">
         {/* Left Section: Logo + Left Navigation */}
         <div className="flex items-center gap-8">

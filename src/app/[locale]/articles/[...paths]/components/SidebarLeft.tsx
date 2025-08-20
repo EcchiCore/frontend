@@ -1,143 +1,157 @@
 "use client";
 import React from "react";
 import Image from "next/image";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Separator } from "@/components/ui/separator";
+import { MessageCircle, Trophy, Medal, Award } from "lucide-react";
 import { SidebarLeftProps } from "./Interfaces";
 import myImageLoader from "../../../lib/imageLoader";
 
 const SidebarLeft: React.FC<SidebarLeftProps> = ({
-                                                   article,
-                                                   topCommenters,
-                                                   isDarkBackground,
-                                                 }) => {
+  article,
+  topCommenters,
+  isDarkBackground,
+}) => {
   const mainImageUrl =
     typeof article.mainImage === "string"
       ? article.mainImage
       : article.mainImage?.url || "/default-image.jpg";
 
+  const getRankingIcon = (index: number) => {
+    switch (index) {
+      case 0:
+        return <Trophy className="w-3 h-3 text-yellow-500" />;
+      case 1:
+        return <Medal className="w-3 h-3 text-gray-500" />;
+      case 2:
+        return <Award className="w-3 h-3 text-amber-600" />;
+      default:
+        return <span className="text-xs font-bold">{index + 1}</span>;
+    }
+  };
+
+  const getRankingColors = (index: number) => {
+    switch (index) {
+      case 0:
+        return "from-yellow-400 to-orange-500";
+      case 1:
+        return "from-gray-300 to-gray-500";
+      case 2:
+        return "from-amber-600 to-amber-800";
+      default:
+        return "from-primary to-secondary";
+    }
+  };
+
   return (
     <aside className="hidden md:block">
-      <div
-        className={`rounded-2xl shadow-xl overflow-hidden sticky top-20 backdrop-blur-sm border transition-all duration-300 hover:shadow-2xl hover:scale-[1.02] ${
-          isDarkBackground
-            ? "bg-gradient-to-br from-base-100/95 to-base-100/90 border-base-300/20"
-            : "bg-gradient-to-br from-base-200/95 to-base-100/90 border-base-300/30"
-        }`}
-      >
-        {/* Decorative gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/5 pointer-events-none" />
-
-        <div className="relative p-6">
-          {/* Image section with enhanced styling */}
-          <div className="relative w-full aspect-video rounded-xl overflow-hidden mb-6 group">
-            <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-            <Image
-              loader={myImageLoader}
-              src={mainImageUrl}
-              alt="ภาพหลักของบทความ"
-              fill
-              className="object-cover transition-transform duration-500 group-hover:scale-105"
-              sizes="(max-width: 768px) 100vw, 300px"
-              loading="eager"
-            />
-            {/* Decorative corner accents */}
-            <div className="absolute top-3 right-3 w-8 h-8 bg-primary/20 rounded-full backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
-              <div className="w-3 h-3 bg-primary rounded-full animate-pulse" />
-            </div>
-          </div>
-
-          {/* Description with enhanced typography */}
-          <div className="relative mb-8">
-            <p className={`text-sm leading-relaxed text-base-content/80 relative z-10`}>
-              {article.description}
-            </p>
-            {/* Subtle accent line */}
-            <div className="absolute -left-3 top-0 w-1 h-full bg-gradient-to-b from-primary/60 to-secondary/60 rounded-full" />
-          </div>
-
-          {/* Top commenters section */}
-          {topCommenters.length > 0 && (
-            <div className="relative">
-              {/* Section header with enhanced styling */}
-              <div className="flex items-center gap-3 mb-6">
-                <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center shadow-lg">
-                  <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <h3 className="text-lg font-semibold text-base-content bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                  ผู้แสดงความคิดเห็นสูงสุด
-                </h3>
+      <Card className="sticky top-20 overflow-hidden shadow-xl backdrop-blur-sm border transition-all duration-300 hover:shadow-2xl hover:scale-[1.02]">
+        <CardContent className="p-0">
+          {/* Decorative gradient overlay */}
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/5 pointer-events-none" />
+          
+          <div className="relative p-6">
+            {/* Enhanced Image Section */}
+            <div className="relative w-full aspect-video rounded-lg overflow-hidden mb-6 group">
+              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <Image
+                loader={myImageLoader}
+                src={mainImageUrl}
+                alt="ภาพหลักของบทความ"
+                fill
+                className="object-cover transition-transform duration-500 group-hover:scale-105"
+                sizes="(max-width: 768px) 100vw, 300px"
+                loading="eager"
+              />
+              
+              {/* Decorative corner accent */}
+              <div className="absolute top-3 right-3 w-8 h-8 bg-primary/20 rounded-full backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
+                <div className="w-3 h-3 bg-primary rounded-full animate-pulse" />
               </div>
+            </div>
 
-              {/* Commenters list with enhanced cards */}
-              <div className="space-y-4">
-                {topCommenters.map((commenter, index) => (
-                  <div
-                    key={index}
-                    className={`flex items-center gap-4 p-3 rounded-xl transition-all duration-300 hover:scale-105 cursor-pointer group ${
-                      isDarkBackground
-                        ? "hover:bg-base-300/20 hover:shadow-lg"
-                        : "hover:bg-base-300/30 hover:shadow-lg"
-                    }`}
-                  >
-                    {/* Enhanced avatar with ranking */}
-                    <div className="relative">
-                      <div
-                        className={`relative flex size-12 items-center justify-center rounded-full shadow-lg transition-all duration-300 group-hover:shadow-xl ${
-                          index === 0
-                            ? "bg-gradient-to-br from-yellow-400 to-orange-500"
-                            : index === 1
-                              ? "bg-gradient-to-br from-gray-300 to-gray-500"
-                              : index === 2
-                                ? "bg-gradient-to-br from-amber-600 to-amber-800"
-                                : isDarkBackground
-                                  ? "bg-gradient-to-br from-primary/30 to-secondary/30"
-                                  : "bg-gradient-to-br from-primary/20 to-secondary/20"
-                        }`}
-                      >
-                        <span className={`font-bold text-lg ${index < 3 ? "text-white" : "text-primary"}`}>
-                          {commenter.username[0].toUpperCase()}
-                        </span>
-                      </div>
-                      {/* Ranking badge */}
-                      <div className="absolute -top-1 -right-1 w-6 h-6 bg-gradient-to-br from-primary to-secondary rounded-full flex items-center justify-center text-xs font-bold text-white shadow-lg">
-                        {index + 1}
-                      </div>
-                    </div>
+            {/* Article Description */}
+            <div className="relative mb-6">
+              <div className="absolute -left-3 top-0 w-1 h-full bg-gradient-to-b from-primary/60 to-secondary/60 rounded-full" />
+              <p className="text-sm leading-relaxed text-muted-foreground relative z-10 pl-1">
+                {article.description}
+              </p>
+            </div>
 
-                    {/* User info with enhanced styling */}
-                    <div className="min-w-0 flex-1">
-                      <p className="font-semibold text-base-content group-hover:text-primary transition-colors duration-300">
-                        {commenter.username}
-                      </p>
-                      <div className="flex items-center gap-2">
-                        <div className="flex items-center gap-1">
-                          <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
-                          <p className="text-sm text-base-content/70">
-                            {commenter.count} ความคิดเห็น
-                          </p>
-                        </div>
-                      </div>
+            {/* Top Commenters Section */}
+            {topCommenters.length > 0 && (
+              <>
+                <Separator className="mb-6" />
+                
+                <div className="space-y-4">
+                  {/* Section Header */}
+                  <div className="flex items-center gap-3">
+                    <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center shadow-lg">
+                      <MessageCircle className="w-4 h-4 text-white" />
                     </div>
-
-                    {/* Hover arrow indicator */}
-                    <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
-                    </div>
+                    <h3 className="text-lg font-semibold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                      ผู้แสดงความคิดเห็นสูงสุด
+                    </h3>
                   </div>
-                ))}
-              </div>
 
-              {/* Decorative bottom accent */}
-              <div className="mt-6 flex justify-center">
-                <div className="w-16 h-1 bg-gradient-to-r from-primary to-secondary rounded-full opacity-30" />
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
+                  {/* Commenters List */}
+                  <div className="space-y-3">
+                    {topCommenters.map((commenter, index) => (
+                      <Card
+                        key={index}
+                        className="p-3 transition-all duration-300 hover:scale-105 cursor-pointer group border-none shadow-sm hover:shadow-md bg-muted/30 hover:bg-muted/50"
+                      >
+                        <div className="flex items-center gap-4">
+                          {/* Enhanced Avatar with Ranking */}
+                          <div className="relative">
+                            <Avatar className={`h-12 w-12 bg-gradient-to-br ${getRankingColors(index)} shadow-lg transition-all duration-300 group-hover:shadow-xl`}>
+                              <AvatarFallback className={`font-bold text-lg ${index < 3 ? "text-white" : "text-primary"} bg-transparent`}>
+                                {commenter.username[0].toUpperCase()}
+                              </AvatarFallback>
+                            </Avatar>
+                            
+                            {/* Ranking Badge */}
+                            <div className="absolute -top-1 -right-1 w-6 h-6 bg-gradient-to-br from-primary to-secondary rounded-full flex items-center justify-center shadow-lg">
+                              {getRankingIcon(index)}
+                            </div>
+                          </div>
+
+                          {/* User Information */}
+                          <div className="flex-1 min-w-0">
+                            <p className="font-semibold text-foreground group-hover:text-primary transition-colors duration-300 truncate">
+                              {commenter.username}
+                            </p>
+                            <div className="flex items-center gap-2 mt-1">
+                              <Badge variant="secondary" className="text-xs px-2 py-0.5">
+                                <MessageCircle className="w-3 h-3 mr-1" />
+                                {commenter.count} ความคิดเห็น
+                              </Badge>
+                            </div>
+                          </div>
+
+                          {/* Hover Indicator */}
+                          <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                            <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                          </div>
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
+
+                  {/* Decorative Bottom Accent */}
+                  <div className="flex justify-center pt-4">
+                    <Separator className="w-16 bg-gradient-to-r from-primary to-secondary" />
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        </CardContent>
+      </Card>
     </aside>
   );
 };
