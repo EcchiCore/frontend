@@ -1,21 +1,17 @@
-"use client"
+"use client";
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { ChevronRight, Download, Code, Zap, Shield, Search, Menu, X, Github, Twitter, MessageCircle, Sun, Moon } from 'lucide-react';
+import { ChevronRight, Download, Code, Zap, Shield, Search, Github, Twitter, MessageCircle } from 'lucide-react';
 import Navbar from '../components/Navbar';
+
 export default function BunStyleChanomHub() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [theme, setTheme] = useState('light');
 
   useEffect(() => {
     document.documentElement.className = theme;
   }, [theme]);
-
-  const toggleTheme = () => {
-    setTheme(theme === 'light' ? 'dark' : 'light');
-  };
 
   const techStack = [
     { name: 'Rust', icon: '🦀' },
@@ -45,7 +41,7 @@ export default function BunStyleChanomHub() {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <Navbar/>
+      <Navbar />
 
       {/* Hero Section */}
       <section className="py-24 px-4">
@@ -77,6 +73,15 @@ export default function BunStyleChanomHub() {
 
             <Button variant="outline" size="lg" className="h-12 px-8 text-base font-medium">
               How to use
+            </Button>
+
+            <Button
+              onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+              variant="outline"
+              size="lg"
+              className="h-12 px-8 text-base font-medium"
+            >
+              {theme === 'light' ? 'Switch to Dark' : 'Switch to Light'}
             </Button>
           </div>
         </div>

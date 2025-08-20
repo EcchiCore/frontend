@@ -15,7 +15,7 @@ import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
 import { useUserData } from '../hooks/useUserData';
 import { useAuthContext } from '../providers/AuthProvider';
 import { Article, ArticleStatus } from '../utils/types';
-import { ARTICLE_STATUS, ITEMS_PER_PAGE_OPTIONS } from '../utils/constants';
+import { ITEMS_PER_PAGE_OPTIONS } from '../utils/constants';
 import Image from 'next/image';
 import myImageLoader from '../../../lib/imageLoader';
 
@@ -24,7 +24,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Alert, AlertDescription } from '@/components/ui/alert';

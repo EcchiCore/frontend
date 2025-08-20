@@ -11,8 +11,6 @@ import {
 } from '@heroicons/react/24/outline';
 import { useAuthContext } from '../providers/AuthProvider';
 import { userApi, ApiError } from '../utils/api';
-import Image from 'next/image';
-import myImageLoader from "../../../lib/imageLoader";
 
 // shadcn/ui imports
 import { Button } from '@/components/ui/button';

@@ -4,12 +4,11 @@
 import Head from 'next/head';
 import { Inter } from 'next/font/google';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Input } from '@/components/ui/input';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Search, TrendingUp, MessageSquare, Users, Star, Clock, Eye, Heart, Share } from 'lucide-react';
+import { Search, TrendingUp, MessageSquare, Star } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import FeaturedPosts from './components/FeaturedPosts';
 

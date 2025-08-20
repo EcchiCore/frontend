@@ -5,6 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Eye, MessageSquare, Heart, Clock } from 'lucide-react';
+import Image from 'next/image'; // Import Next.js Image component
 
 // Define the structure of an article from the API
 interface Article {
@@ -61,7 +62,7 @@ export default function FeaturedPosts({ platform = 'windows' }: FeaturedPostsPro
         // Store data and cache time in localStorage
         localStorage.setItem(cacheKey, JSON.stringify(data.articles));
         localStorage.setItem(`${cacheKey}_time`, now.toString());
-      } catch (err) {
+      } catch {
         setError('เกิดข้อผิดพลาดในการโหลดกระทู้แนะนำ');
       } finally {
         setLoading(false);
@@ -99,10 +100,13 @@ export default function FeaturedPosts({ platform = 'windows' }: FeaturedPostsPro
           <CardContent className="p-6">
             <div className="flex space-x-4">
               <div className="w-32 h-20 bg-muted rounded-lg flex-shrink-0 overflow-hidden">
-                <img
+                <Image
                   src={post.mainImage || '/api/placeholder/400/200'}
                   alt={post.title}
+                  width={128} // Match w-32 (32 * 4 = 128px)
+                  height={80} // Match h-20 (20 * 4 = 80px)
                   className="w-full h-full object-cover"
+                  priority={false}
                 />
               </div>
               <div className="flex-grow">
