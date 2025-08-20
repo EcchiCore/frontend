@@ -18,8 +18,9 @@ interface Article {
   sequentialCode: string;
 }
 
+// Updated interface to match Next.js expectations
 interface RouteParams {
-  params: Promise<{ slug: string; locale?: string[] }>;
+  params: Promise<{ slug: string; locale: string }>;
 }
 
 // Define supported locales
@@ -145,15 +146,12 @@ export async function GET(
 ): Promise<NextResponse> {
   try {
     const resolvedParams = await params;
-    const { slug, locale: localeArray } = resolvedParams;
+    const { slug, locale: localeParam } = resolvedParams;
 
-    // Extract locale from the array or use default
+    // Validate and set locale
     let locale = DEFAULT_LOCALE;
-    if (localeArray && localeArray.length > 0) {
-      const potentialLocale = localeArray[0];
-      if (SUPPORTED_LOCALES.includes(potentialLocale)) {
-        locale = potentialLocale;
-      }
+    if (localeParam && SUPPORTED_LOCALES.includes(localeParam)) {
+      locale = localeParam;
     }
 
     const decodedSlug = decodeURIComponent(slug);

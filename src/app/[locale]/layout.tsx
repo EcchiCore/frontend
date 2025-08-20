@@ -6,11 +6,11 @@ import { NextIntlClientProvider } from 'next-intl';
 import { ThemeProvider } from '@/components/theme-provider';
 
 // Infer the locale type from routing.locales
-type Locale = typeof routing.locales[number]; // "en" | "de"
+type Locale = typeof routing.locales[number]; // "en" | "th"
 
 interface LocaleSegmentLayoutProps {
   children: ReactNode;
-  params: Promise<{ locale: Locale }>; // Use Locale instead of string
+  params: Promise<{ locale: string }>; // Keep as string to satisfy Next.js types
 }
 
 export default async function LocaleSegmentLayout({
@@ -22,7 +22,11 @@ export default async function LocaleSegmentLayout({
   const currentLocale = resolvedParams.locale;
 
   // Validate the locale against the supported locales from routing
-  const validLocale = routing.locales.includes(currentLocale)
+  const isValidLocale = (locale: string): locale is Locale => {
+    return routing.locales.includes(locale as Locale);
+  };
+
+  const validLocale = isValidLocale(currentLocale)
     ? currentLocale
     : routing.defaultLocale;
 
