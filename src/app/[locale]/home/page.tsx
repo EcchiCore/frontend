@@ -37,19 +37,19 @@ export default function HomePage() {
   return (
     <>
       <Head>
-        <title>Pantip - เว็บบอร์ดชั้นนำของไทย | ถาม-ตอบ แลกเปลี่ยนความรู้</title>
+        <title>Chanomhub - ชุมชนคนรักเกม H | ถาม-ตอบประเด็นเกม H</title>
         <meta
           name="description"
-          content="Pantip เว็บบอร์ดชั้นนำของไทย ที่รวมคนไทยเข้ามาถาม-ตอบ แลกเปลี่ยนความรู้ ความคิดเห็น ในหัวข้อที่หลากหลาย ทั้งข่าวสาร บันเทิง เทคโนโลยี การเงิน ท่องเที่ยว"
+          content="Chanomhub แหล่งร่วมเกม H และเกมแปล"
         />
-        <meta name="keywords" content="pantip, เว็บบอร์ด, ถาม-ตอบ, ชุมชนออนไลน์, ข่าวสาร, บันเทิง, เทคโนโลยี" />
+        <meta name="keywords" content="Chanomhub, เว็บบอร์ด, ถาม-ตอบ, ชุมชนออนไลน์, ข่าวสาร,เกมผู้ใหญ่, NSFW" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta property="og:title" content="Pantip - เว็บบอร์ดชั้นนำของไทย" />
-        <meta property="og:description" content="ถาม-ตอบ แลกเปลี่ยนความรู้ ในชุมชนออนไลน์ที่ใหญ่ที่สุดของไทย" />
+        <meta property="og:title" content="Chanomhub - เว็บบอร์ดเกม H" />
+        <meta property="og:description" content="ถาม-ตอบ แลกเปลี่ยนความรู้เกม H" />
         <meta property="og:type" content="website" />
         <meta property="og:image" content="/og-image.png" />
         <meta name="twitter:card" content="summary_large_image" />
-        <link rel="canonical" href="https://pantip.com" />
+        <link rel="canonical" href="https://www.chanomhub.online" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
@@ -251,7 +251,7 @@ export default function HomePage() {
                             </Avatar>
                             <div className="flex-grow">
                               <h4 className="font-medium text-foreground">หัวข้อกระทู้ตัวอย่างที่ {i}</h4>
-                              <div className="flex items-center space-x-4 text-sm text-muted-foreground mt-1">
+0                              <div className="flex items-center space-x-4 text-sm text-muted-foreground mt-1">
                                 <span>โดย: ผู้ใช้{i}</span>
                                 <span>5 นาทีที่แล้ว</span>
                                 <span>12 ตอบ</span>
@@ -374,7 +374,7 @@ export default function HomePage() {
           <div className="container mx-auto px-4">
             <div className="grid md:grid-cols-4 gap-8">
               <div>
-                <h3 className="text-xl font-bold mb-4">Pantip</h3>
+                <h3 className="text-xl font-bold mb-4">Chanomhub</h3>
                 <p className="text-gray-300 text-sm">
                   เว็บบอร์ดชั้นนำของไทย ที่รวมคนไทยเข้ามาแลกเปลี่ยนความรู้และความคิดเห็น
                 </p>
@@ -408,7 +408,7 @@ export default function HomePage() {
               </div>
             </div>
             <div className="border-t border-gray-800 mt-8 pt-8 text-center text-sm text-gray-400">
-              <p>&copy; 2025 Pantip. สงวนลิขสิทธิ์ทุกประการ</p>
+              <p>&copy; 2025 Chanomhub. สงวนลิขสิทธิ์ทุกประการ</p>
 
             </div>
           </div>

@@ -46,7 +46,7 @@ export default function FeaturedPosts({ platform = 'windows' }: FeaturedPostsPro
 
       try {
         const response = await fetch(
-          `https://api.chanomhub.online/api/articles?platform=${platform}&status=PUBLISHED`,
+          `${process.env.NEXT_PUBLIC_API_URL}/api/articles?platform=${platform}&status=PUBLISHED`,
           {
             headers: {
               accept: 'application/json',

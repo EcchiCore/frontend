@@ -26,7 +26,7 @@ export default function LoginPage() {
 
     try {
       const response = await axios.post(
-        "https://api.chanomhub.online/api/users/login",
+        `${process.env.NEXT_PUBLIC_API_URL}/api/users/login`,
         { user: { email, password } }
       );
 

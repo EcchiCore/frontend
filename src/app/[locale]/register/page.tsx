@@ -53,7 +53,8 @@ export default function RegisterPage() {
 
     try {
       const response = await axios.post(
-        "https://api.chanomhub.online/api/users",
+        `${process.env.NEXT_PUBLIC_API_URL}/api/users`,
+        
         {
           user: {
             username: formData.username,
