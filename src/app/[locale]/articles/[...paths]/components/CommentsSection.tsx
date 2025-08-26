@@ -77,12 +77,9 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({
                     </div>
                   </div>
                   {isCurrentUserAuthor && (
-                    <button
-                      className="p-1 rounded-lg hover:bg-base-300 transition-colors duration-200"
-                      onClick={() => handleDeleteComment(comment.id)}
-                    >
-                      <TrashIcon className="w-5 h-5 text-base-content/60" />
-                    </button>
+                    <Button variant="ghost" size="icon" onClick={() => handleDeleteComment(comment.id)}>
+                      <TrashIcon className="w-5 h-5" />
+                    </Button>
                   )}
                 </div>
                 <p className="mt-2 text-base-content">{comment.body}</p>

@@ -1,21 +1,18 @@
 "use client";
 import React from "react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
-interface AlertState {
-  open: boolean;
+interface AlertProps {
+  title: string;
   message: string;
-  severity: "success" | "error";
+  variant: "default" | "destructive";
 }
 
-const Alert = ({ alert }: { alert: AlertState }) =>
-  alert.open ? (
-    <div
-      className={`alert ${
-        alert.severity === "success" ? "alert-success" : "alert-error"
-      } fixed top-4 right-4 z-50 max-w-md transition-opacity duration-300`}
-    >
-      <span>{alert.message}</span>
-    </div>
-  ) : null;
+const CustomAlert = ({ title, message, variant }: AlertProps) => (
+  <Alert variant={variant}>
+    <AlertTitle>{title}</AlertTitle>
+    <AlertDescription>{message}</AlertDescription>
+  </Alert>
+);
 
-export default Alert;
+export default CustomAlert;

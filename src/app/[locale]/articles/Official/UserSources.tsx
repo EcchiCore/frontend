@@ -172,19 +172,16 @@ export default function UserSources() {
       <div className="mb-8">
         <h2 className="text-2xl font-semibold mb-4">Approved Sources</h2>
         <div className="flex flex-col sm:flex-row gap-4 mb-4">
-          <input
+          <Input
             type="number"
             placeholder="Enter Article ID"
             value={articleId}
             onChange={(e) => setArticleId(e.target.value)}
-            className="input input-bordered w-full sm:w-1/2"
+            className="w-full sm:w-1/2"
           />
-          <button
-            onClick={fetchApprovedSources}
-            className="btn btn-success w-full sm:w-auto"
-          >
+          <Button onClick={fetchApprovedSources}>
             Fetch Sources
-          </button>
+          </Button>
         </div>
         {sources.length === 0 ? (
           <p className="text-gray-500">

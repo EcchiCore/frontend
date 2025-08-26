@@ -71,13 +71,10 @@ const InteractionBar: React.FC<InteractionBarProps> = ({
           <span>{favoritesCount > 0 ? favoritesCount : 'ถูกใจ'}</span>
         </button>
 
-        <button
-          className="flex items-center gap-2 px-4 py-2 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-all duration-200"
-          onClick={handleShare}
-        >
-          <ShareIcon className="w-4 h-4" />
-          <span>แชร์</span>
-        </button>
+        <Button onClick={handleShare} variant="secondary">
+          <ShareIcon className="w-4 h-4 mr-2" />
+          <span>Share</span>
+        </Button>
       </div>
     </div>
   </div>

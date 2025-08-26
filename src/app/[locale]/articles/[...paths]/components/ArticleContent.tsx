@@ -23,14 +23,17 @@ import SidebarLeft from "./SidebarLeft";
 import InteractionBar from "./InteractionBar";
 import CommentsSection from "./CommentsSection";
 import SidebarRight from "./SidebarRight";
-import DownloadModal from "./DownloadModal";
-import ArticleTitleMeta from "./ArticleTitleMeta"; // Import the new component
+import { getFileIcon, getFileSize } from "@/utils/fileUtils";
+import ArticleTitleMeta from "./ArticleTitleMeta";
 import { Article, DownloadFile, TranslationFile, Comment, TokenPayload, AlertState } from "./Interfaces";
 import myImageLoader from "../../../lib/imageLoader";
 import { useDebounce } from "./Debounce";
-import { CloudArrowDownIcon } from "@heroicons/react/24/outline";
+import { CloudArrowDownIcon, CalendarDaysIcon, FolderIcon, UserIcon, InformationCircleIcon, CheckIcon, ClipboardIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import { Button, Card, CardContent, CardHeader, CardTitle, Input, Dialog, DialogContent, DialogHeader, DialogTitle, Tabs, TabsList, TabsTrigger, TabsContent, Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui"; // Adjust import based on your UI library
+import cn from 'classnames';
+import { useTranslations } from 'next-intl';
 import { TextAlign } from "@tiptap/extension-text-align";
-import { useTranslations } from 'next-intl'
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 interface ArticleContentProps {
@@ -39,7 +42,7 @@ interface ArticleContentProps {
   downloads: DownloadFile[];
   isTranslated: boolean;
   translationInfo: { sourceLanguage: string; targetLanguage: string; } | null;
-  hasTranslationError: boolean; // Add this line
+  hasTranslationError: boolean;
 }
 
 const fetcher = (url: string) => {
@@ -52,13 +55,7 @@ const fetcher = (url: string) => {
   });
 };
 
-const ArticleContent: React.FC<ArticleContentProps> = ({
-  article,
-  slug,
-  downloads: initialDownloads = [],
-  isTranslated = false,
-  translationInfo = null,
-}) => {
+const ArticleContent: React.FC<ArticleContentProps> = ({ article, slug, downloads: initialDownloads, isTranslated, translationInfo, hasTranslationError }) => {
   const t = useTranslations('ArticleContent');
   // Essential state
   const [isFavorited, setIsFavorited] = useState(article.favorited);
@@ -76,7 +73,214 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
   const [isMobile, setIsMobile] = useState(false);
   const [readingProgress, setReadingProgress] = useState(0);
   const [fontSize, setFontSize] = useState(16);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [activeTab, setActiveTab] = useState<"downloads" | "translations">("downloads");
+  const [sortBy, setSortBy] = useState<"name" | "date">("date");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+  const [copiedLink, setCopiedLink] = useState<string | null>(null); // Added missing state
   const commentInputRef = useRef<HTMLTextAreaElement>(null);
+
+  const sortItems = useCallback(<T extends DownloadFile | TranslationFile>(items: T[]): T[] => {
+    return [...items].sort((a, b) => {
+      let comparison = 0;
+
+      if (sortBy === "name") {
+        comparison = a.name.localeCompare(b.name);
+      } else {
+        comparison = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+      }
+
+      return sortOrder === "asc" ? comparison : -comparison;
+    });
+  }, [sortBy, sortOrder]);
+
+  const filteredDownloads = React.useMemo(() => {
+    const filtered = downloads.filter((item) =>
+      item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      ("description" in item && typeof item.description === 'string' && item.description?.toLowerCase().includes(searchQuery.toLowerCase()))
+    );
+    return sortItems(filtered);
+  }, [downloads, searchQuery, sortItems]);
+
+  const filteredTranslationFiles = React.useMemo(() => {
+    const filtered = translationFiles.filter((item) =>
+      item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      ("translator" in item && item.translator?.name.toLowerCase().includes(searchQuery.toLowerCase()))
+    );
+    return sortItems(filtered);
+  }, [translationFiles, searchQuery, sortItems]);
+
+  const handleCopyLink = useCallback(async (url: string) => {
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopiedLink(url);
+      showAlert(t("linkCopied"), "success");
+      // Clear the copied state after 2 seconds
+      setTimeout(() => setCopiedLink(null), 2000);
+    } catch {
+      showAlert(t("copyLinkError"), "error");
+    }
+  }, [t]);
+
+  const FileCard = ({ item, index }: { item: DownloadFile | TranslationFile; index: number }) => (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{ delay: index * 0.05 }}
+      className={cn(
+        "group relative overflow-hidden rounded-2xl border shadow-sm hover:shadow-lg transition-all duration-300",
+        "hover:scale-[1.02] hover:-translate-y-1",
+        isDarkMode
+          ? "bg-gray-800/50 border-gray-700/50 hover:bg-gray-800 hover:border-gray-600"
+          : "bg-white/70 border-gray-200 hover:bg-white hover:border-gray-300"
+      )}
+    >
+      <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-black/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+      <div className="relative p-6">
+        <div className="flex items-start gap-4 mb-4">
+          <div className={cn(
+            "flex size-14 items-center justify-center rounded-xl transition-all duration-300 group-hover:scale-110",
+            isDarkMode ? "bg-gray-700/50 group-hover:bg-gray-600" : "bg-gray-50 group-hover:bg-gray-100"
+          )}>
+            {getFileIcon(item.name)}
+          </div>
+
+          <div className="min-w-0 flex-1">
+            <h5 className={cn(
+              "font-semibold break-words mb-2 line-clamp-2",
+              isDarkMode ? "text-gray-100" : "text-gray-900"
+            )}>
+              {item.name}
+            </h5>
+
+            <div className="space-y-2">
+              <div className={cn(
+                "flex items-center gap-2 text-sm",
+                isDarkMode ? "text-gray-400" : "text-gray-500"
+              )}>
+                <CalendarDaysIcon className="size-4" />
+                <span>{formatDate(item.createdAt)}</span>
+              </div>
+
+              {"size" in item && typeof item.size === 'number' && (
+                <div className={cn(
+                  "flex items-center gap-2 text-sm",
+                  isDarkMode ? "text-gray-400" : "text-gray-500"
+                )}>
+                  <FolderIcon className="size-4" />
+                  <span>{getFileSize(item.size)}</span>
+                </div>
+              )}
+
+              {"translator" in item && item.translator && (
+                <div className={cn(
+                  "flex items-center gap-2 text-sm",
+                  isDarkMode ? "text-gray-400" : "text-gray-500"
+                )}>
+                  <UserIcon className="size-4" />
+                  <span>{t("translatedBy", { name: item.translator.name, language: item.language })}</span>
+                </div>
+              )}
+            </div>
+
+            {"description" in item && item.description && (
+              <div className={cn(
+                "flex items-start gap-2 text-sm mt-3 p-3 rounded-lg",
+                isDarkMode ? "bg-gray-700/30 text-gray-300" : "bg-gray-50 text-gray-600"
+              )}>
+                <InformationCircleIcon className="size-4 mt-0.5 flex-shrink-0" />
+                <p className="line-clamp-2">{item.description}</p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="flex gap-3 mt-4">
+          <Button
+            className="flex-1"
+            onClick={() => handleOpenDownload(item)}
+          >
+            <CloudArrowDownIcon className="size-5 mr-2" />
+            <span>{t("download")}</span>
+          </Button>
+
+          <Button
+            variant="outline"
+            onClick={() => handleCopyLink("url" in item ? item.url : item.fileUrl)}
+            aria-label={t("copyLink")}
+          >
+            {copiedLink === ("url" in item ? item.url : item.fileUrl) ? (
+              <>
+                <CheckIcon className="size-5 mr-2" />
+                <span>{t("copied")}</span>
+              </>
+            ) : (
+              <>
+                <ClipboardIcon className="size-5 mr-2" />
+                <span>{t("copy")}</span>
+              </>
+            )}
+          </Button>
+        </div>
+      </div>
+    </motion.div>
+  );
+
+  const renderFileItems = (items: (DownloadFile | TranslationFile)[], title: string) => (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h4 className="text-lg font-semibold flex items-center gap-2">
+          <FolderIcon className="size-5" />
+          {title} ({items.length})
+        </h4>
+
+        <div className="flex items-center gap-2">
+          <Select value={sortBy} onValueChange={(value) => setSortBy(value as "name" | "date")}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Sort by" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="date">{t("sortByDate")}</SelectItem>
+              <SelectItem value="name">{t("sortByName")}</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Button
+            variant="outline"
+            onClick={() => setSortOrder(prev => prev === "asc" ? "desc" : "asc")}
+          >
+            {sortOrder === "asc" ? "↑" : "↓"}
+          </Button>
+        </div>
+      </div>
+
+      {items.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+          {items.map((item, index) => (
+            <FileCard key={item.id} item={item} index={index} />
+          ))}
+        </div>
+      ) : (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center py-12"
+        >
+          <FolderIcon className="size-16 mx-auto mb-4 text-gray-400" />
+          <p className="text-lg font-medium mb-2 text-gray-500">
+            {searchQuery ? t("noSearchResults") : t("noFiles")}
+          </p>
+          {searchQuery && (
+            <p className="text-sm text-gray-400">
+              {t("tryDifferentSearch")}
+            </p>
+          )}
+        </motion.div>
+      )}
+    </div>
+  );
 
   // Tiptap editor for content display
   const editor = useEditor({
@@ -88,19 +292,14 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
           },
         },
       }),
-
-      // Support for text alignment (style="text-align: center")
       TextAlign.configure({
         types: ['heading', 'paragraph'],
         alignments: ['left', 'center', 'right', 'justify'],
         defaultAlignment: 'left',
       }),
-
-      // Text styling support
       TextStyle,
       Color,
       Underline,
-
       TiptapImage.configure({
         HTMLAttributes: {
           class: 'max-w-full h-auto rounded-lg my-4',
@@ -108,7 +307,6 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
         allowBase64: true,
         inline: false,
       }),
-
       TiptapLink.configure({
         openOnClick: false,
         HTMLAttributes: {
@@ -119,9 +317,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
         protocols: ['http', 'https', 'mailto'],
         validate: href => /^https?:\/\//.test(href),
       }),
-
       Typography,
-
       Heading.configure({
         levels: [1, 2, 3, 4, 5, 6],
         HTMLAttributes: {
@@ -129,25 +325,18 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
         },
       }),
     ],
-
     content: article.body,
     editable: false,
-
     editorProps: {
       attributes: {
-        class: `prose prose-lg max-w-none ${
-          isDarkMode ? "prose-invert" : ""
-        } prose-primary`,
+        class: `prose prose-lg max-w-none ${isDarkMode ? "prose-invert" : ""} prose-primary`,
         style: `font-size: ${fontSize}px`,
       },
     },
-
-    // Enhanced parsing options
     parseOptions: {
       preserveWhitespace: 'full',
     },
   });
-
 
   const { data: commentsData, error: commentsError, isLoading } = useSWR(
     `${API_BASE_URL}/api/articles/${slug}/comments`,
@@ -170,8 +359,6 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
 
   const debouncedSetFontSize = useDebounce(setFontSize, 300);
 
-  // Find this useEffect around line 120 and update the dependency array:
-
   useEffect(() => {
     setIsClient(true);
     setIsMobile(window.innerWidth <= 768);
@@ -187,7 +374,6 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
       }
     }
 
-    // Set dark mode from preferences
     const preferencesCookie = Cookies.get("userPreferences");
     try {
       const preferences =
@@ -197,7 +383,6 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
       setIsDarkMode(true);
     }
 
-    // Fetch downloads and translation files
     const fetchData = async (url: string, setter: (data: any) => void, errorMsg: string) => {
       try {
         const response = await fetch(url, {
@@ -217,7 +402,6 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
     fetchData(`${API_BASE_URL}/api/downloads/article/${article.id}`, setDownloads, t('download_error'));
     fetchData(`${API_BASE_URL}/api/translation-files/article/${slug}`, setTranslationFiles, t('translation_error'));
 
-    // Event listeners
     const handleResize = () => setIsMobile(window.innerWidth <= 768);
     const handleScroll = () => {
       const articleElement = document.querySelector("main");
@@ -234,9 +418,8 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
       window.removeEventListener("resize", handleResize);
       window.removeEventListener("scroll", handleScroll);
     };
-  }, [article.id, slug, showAlert, article.author.username, t]); // Add 't' here
+  }, [article.id, slug, showAlert, article.author.username, t]);
 
-  // Update editor font size
   useEffect(() => {
     if (editor) {
       editor.view.dom.style.fontSize = `${fontSize}px`;
@@ -394,6 +577,18 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
     [comments, slug, showAlert]
   );
 
+  const handleOpenDownload = useCallback((item: DownloadFile | TranslationFile) => {
+    const url = "url" in item ? item.url : item.fileUrl;
+    window.open(url, "_blank");
+  }, []);
+
+  const formatDate = (date: string) => 
+    new Date(date).toLocaleDateString("th-TH", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+
   const encodeURLComponent = (value: string) =>
     encodeURIComponent(value.trim()).replace(/%20/g, "%20").replace(/\//g, "%2F");
   const wordCount = article.body.split(/\s+/).length;
@@ -407,7 +602,6 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
         isDarkMode ? "bg-base-200 text-base-content" : "bg-base-200 text-base-content"
       }`}
     >
-      {/* Reading Progress Bar */}
       <div className="fixed top-0 left-0 w-full h-1 bg-base-200 z-50">
         <div
           className="h-full bg-primary transition-all"
@@ -423,14 +617,13 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
         />
         <Alert alert={alert} />
 
-        {/* Reading Controls */}
         <div className="flex justify-between items-center mb-4">
           <span className="text-sm text-base-content/70">
-            เวลาอ่าน: {readingTime} นาที
+            {t("readingTime", { time: readingTime })}
           </span>
           <div className="flex items-center space-x-4">
             <label className="flex items-center gap-2">
-              ขนาดตัวอักษร:
+              {t("fontSize")}:
               <input
                 type="range"
                 min="14"
@@ -447,7 +640,6 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
           {isMobile ? (
             <>
               <main className="min-w-0">
-                {/* Mobile Author Card */}
                 <div className="md:hidden mb-6 card bg-base-100 shadow-xl">
                   <div className="card-body flex-row items-center gap-4">
                     <Image
@@ -468,88 +660,82 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
                         {article.author.username}
                       </Link>
                       <p className="text-sm text-base-content/70 line-clamp-2">
-                        {article.author.bio || "ยังไม่มีประวัติ"}
+                        {article.author.bio || t("noBio")}
                       </p>
                     </div>
                   </div>
                 </div>
 
-                {/* Article Content */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5 }}
-                  className="card bg-base-100 shadow-xl"
                 >
-                  <div className="card-body">
-                    <ArticleTitleMeta article={article} isDarkMode={isDarkMode} />
+                  <Card>
+                    <CardContent>
+                      <ArticleTitleMeta article={article} isDarkMode={isDarkMode} />
 
-                    {/* Tiptap Content */}
-                    <div className="mb-6">
-                      <EditorContent editor={editor} />
-                    </div>
-
-                    <InteractionBar
-                      isCurrentUserAuthor={isCurrentUserAuthor}
-                      isFollowing={isFollowing}
-                      handleFollow={handleFollow}
-                      isFavorited={isFavorited}
-                      favoritesCount={favoritesCount}
-                      handleFavorite={handleFavorite}
-                      handleShare={handleShare}
-                      isDarkBackground={isDarkMode}
-                    />
-
-                    {commentsError && (
-                      <div className="alert alert-error">
-                        ไม่สามารถโหลดความคิดเห็นได้{" "}
-                        <button
-                          onClick={() =>
-                            mutate(`${API_BASE_URL}/api/articles/${slug}/comments`)
-                          }
-                          className="link link-hover"
-                        >
-                          ลองใหม่
-                        </button>
+                      <div className="mb-6">
+                        <EditorContent editor={editor} />
                       </div>
-                    )}
 
-                    <CommentsSection
-                      isAuthenticated={isAuthenticated}
-                      isDarkBackground={isDarkMode}
-                      comments={commentsData?.comments || commentsData || []}
-                      newComment={newComment}
-                      setNewComment={setNewComment}
-                      handleAddComment={handleAddComment}
-                      isCurrentUserAuthor={isCurrentUserAuthor}
-                      handleDeleteComment={handleDeleteComment}
-                      formatDate={(date) =>
-                        new Date(date).toLocaleDateString("th-TH", {
-                          year: "numeric",
-                          month: "short",
-                          day: "numeric",
-                        })
-                      }
-                      commentInputRef={commentInputRef}
-                      isLoading={isLoading}
-                    />
-                  </div>
+                      <InteractionBar
+                        isCurrentUserAuthor={isCurrentUserAuthor}
+                        isFollowing={isFollowing}
+                        handleFollow={handleFollow}
+                        isFavorited={isFavorited}
+                        favoritesCount={favoritesCount}
+                        handleFavorite={handleFavorite}
+                        handleShare={handleShare}
+                        isDarkBackground={isDarkMode}
+                      />
+
+                      {commentsError && (
+                        <div className="alert alert-error">
+                          {t("commentsLoadError")}{" "}
+                          <Button
+                            onClick={() =>
+                              mutate(`${API_BASE_URL}/api/articles/${slug}/comments`)
+                            }
+                            variant="link"
+                          >
+                            {t("tryAgain")}
+                          </Button>
+                        </div>
+                      )}
+
+                      <CommentsSection
+                        isAuthenticated={isAuthenticated}
+                        isDarkBackground={isDarkMode}
+                        comments={commentsData?.comments || commentsData || []}
+                        newComment={newComment}
+                        setNewComment={setNewComment}
+                        handleAddComment={handleAddComment}
+                        isCurrentUserAuthor={isCurrentUserAuthor}
+                        handleDeleteComment={handleDeleteComment}
+                        formatDate={formatDate}
+                        commentInputRef={commentInputRef}
+                        isLoading={isLoading}
+                      />
+                    </CardContent>
+                  </Card>
                 </motion.div>
 
-                {/* Mobile Download Button */}
                 {(downloads.length > 0 || translationFiles.length > 0) && (
-                  <div className="md:hidden mt-4 card bg-base-100 shadow-xl">
-                    <div className="card-body">
-                      <h3 className="card-title">ดาวน์โหลดและแปล</h3>
-                      <button
-                        className="btn btn-primary w-full flex items-center justify-center gap-2"
+                  <Card className="md:hidden mt-4">
+                    <CardHeader>
+                      <CardTitle>{t("downloadsAndTranslations")}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <Button
+                        className="w-full flex items-center justify-center gap-2"
                         onClick={() => setOpenDownloadDialog(true)}
                       >
-                        <CloudArrowDownIcon className="w-5 h-5" /> ดูไฟล์ (
+                        <CloudArrowDownIcon className="w-5 h-5" /> {t("viewFiles")} (
                         {downloads.length + translationFiles.length})
-                      </button>
-                    </div>
-                  </div>
+                      </Button>
+                    </CardContent>
+                  </Card>
                 )}
               </main>
 
@@ -565,13 +751,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
                 handleFollow={handleFollow}
                 isFavorited={isFavorited}
                 handleFavorite={handleFavorite}
-                formatDate={(date) =>
-                  new Date(date).toLocaleDateString("th-TH", {
-                    year: "numeric",
-                    month: "short",
-                    day: "numeric",
-                  })
-                }
+                formatDate={formatDate}
                 downloads={downloads}
                 translationFiles={translationFiles}
                 setOpenDownloadDialog={setOpenDownloadDialog}
@@ -591,61 +771,55 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5 }}
-                  className="card bg-base-100 shadow-xl"
                 >
-                  <div className="card-body">
-                    <ArticleTitleMeta article={article} isDarkMode={isDarkMode} />
+                  <Card>
+                    <CardContent>
+                      <ArticleTitleMeta article={article} isDarkMode={isDarkMode} />
 
-                    {/* Tiptap Content */}
-                    <div className="mb-6">
-                      <EditorContent editor={editor} />
-                    </div>
-
-                    <InteractionBar
-                      isCurrentUserAuthor={isCurrentUserAuthor}
-                      isFollowing={isFollowing}
-                      handleFollow={handleFollow}
-                      isFavorited={isFavorited}
-                      favoritesCount={favoritesCount}
-                      handleFavorite={handleFavorite}
-                      handleShare={handleShare}
-                      isDarkBackground={isDarkMode}
-                    />
-
-                    {commentsError && (
-                      <div className="alert alert-error">
-                        ไม่สามารถโหลดความคิดเห็นได้{" "}
-                        <button
-                          onClick={() =>
-                            mutate(`${API_BASE_URL}/api/articles/${slug}/comments`)
-                          }
-                          className="link link-hover"
-                        >
-                          ลองใหม่
-                        </button>
+                      <div className="mb-6">
+                        <EditorContent editor={editor} />
                       </div>
-                    )}
 
-                    <CommentsSection
-                      isAuthenticated={isAuthenticated}
-                      isDarkBackground={isDarkMode}
-                      comments={commentsData?.comments || commentsData || []}
-                      newComment={newComment}
-                      setNewComment={setNewComment}
-                      handleAddComment={handleAddComment}
-                      isCurrentUserAuthor={isCurrentUserAuthor}
-                      handleDeleteComment={handleDeleteComment}
-                      formatDate={(date) =>
-                        new Date(date).toLocaleDateString("th-TH", {
-                          year: "numeric",
-                          month: "short",
-                          day: "numeric",
-                        })
-                      }
-                      commentInputRef={commentInputRef}
-                      isLoading={isLoading}
-                    />
-                  </div>
+                      <InteractionBar
+                        isCurrentUserAuthor={isCurrentUserAuthor}
+                        isFollowing={isFollowing}
+                        handleFollow={handleFollow}
+                        isFavorited={isFavorited}
+                        favoritesCount={favoritesCount}
+                        handleFavorite={handleFavorite}
+                        handleShare={handleShare}
+                        isDarkBackground={isDarkMode}
+                      />
+
+                      {commentsError && (
+                        <div className="alert alert-error">
+                          {t("commentsLoadError")}{" "}
+                          <Button
+                            onClick={() =>
+                              mutate(`${API_BASE_URL}/api/articles/${slug}/comments`)
+                            }
+                            variant="link"
+                          >
+                            {t("tryAgain")}
+                          </Button>
+                        </div>
+                      )}
+
+                      <CommentsSection
+                        isAuthenticated={isAuthenticated}
+                        isDarkBackground={isDarkMode}
+                        comments={commentsData?.comments || commentsData || []}
+                        newComment={newComment}
+                        setNewComment={setNewComment}
+                        handleAddComment={handleAddComment}
+                        isCurrentUserAuthor={isCurrentUserAuthor}
+                        handleDeleteComment={handleDeleteComment}
+                        formatDate={formatDate}
+                        commentInputRef={commentInputRef}
+                        isLoading={isLoading}
+                      />
+                    </CardContent>
+                  </Card>
                 </motion.div>
               </main>
 
@@ -656,13 +830,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
                 handleFollow={handleFollow}
                 isFavorited={isFavorited}
                 handleFavorite={handleFavorite}
-                formatDate={(date) =>
-                  new Date(date).toLocaleDateString("th-TH", {
-                    year: "numeric",
-                    month: "short",
-                    day: "numeric",
-                  })
-                }
+                formatDate={formatDate}
                 downloads={downloads}
                 translationFiles={translationFiles}
                 setOpenDownloadDialog={setOpenDownloadDialog}
@@ -673,30 +841,35 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
         </div>
       </div>
 
-      <DownloadModal
-        openDownloadDialog={openDownloadDialog}
-        setOpenDownloadDialog={setOpenDownloadDialog}
-        downloads={downloads}
-        translationFiles={translationFiles}
-        handleOpenDownload={(item) => {
-          const url = "url" in item ? item.url : item.fileUrl;
-          window.open(url, "_blank");
-        }}
-        handleCopyLink={(url) => {
-          navigator.clipboard.writeText(url).then(() => {
-            setTimeout(() => {}, 2000);
-          });
-        }}
-        copiedLink={null}
-        formatDate={(date) =>
-          new Date(date).toLocaleDateString("th-TH", {
-            year: "numeric",
-            month: "short",
-            day: "numeric",
-          })
-        }
-        isDarkMode={isDarkMode}
-      />
+      <Dialog open={openDownloadDialog} onOpenChange={setOpenDownloadDialog}>
+        <DialogContent className="max-w-6xl">
+          <DialogHeader>
+            <DialogTitle>{t("title")}</DialogTitle>
+          </DialogHeader>
+          <div className="relative mb-4">
+            <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 size-5 text-gray-500" />
+            <Input
+              type="text"
+              placeholder={t("searchPlaceholder")}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 pr-4 py-3 rounded-xl"
+            />
+          </div>
+          <Tabs defaultValue="downloads" className="w-full">
+            <TabsList>
+              <TabsTrigger value="downloads">{t("downloadFiles")} ({filteredDownloads.length})</TabsTrigger>
+              <TabsTrigger value="translations">{t("translationFiles")} ({filteredTranslationFiles.length})</TabsTrigger>
+            </TabsList>
+            <TabsContent value="downloads">
+              {renderFileItems(filteredDownloads, t("downloadFiles"))}
+            </TabsContent>
+            <TabsContent value="translations">
+              {renderFileItems(filteredTranslationFiles, t("translationFiles"))}
+            </TabsContent>
+          </Tabs>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

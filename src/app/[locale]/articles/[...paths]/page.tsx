@@ -363,25 +363,20 @@ interface ArticlePageProps {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+
 const TranslationErrorBanner = ({ translationInfo }: { translationInfo: any }) => (
-  <div className="alert alert-warning mb-6">
-    <div className="flex items-center">
-      <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 15.5c-.77.833.192 2.5 1.732 2.5z" />
-      </svg>
-      <div>
-        <div className="font-medium">การแปลอาจไม่สมบูรณ์</div>
-        <div className="text-sm opacity-75">
-          Translation Service อาจมีปัญหา หรือเนื้อหาบางส่วนยังไม่ได้รับการแปล
-          {translationInfo && (
-            <span className="ml-2">
-              ({translationInfo.sourceLanguage} → {translationInfo.targetLanguage})
-            </span>
-          )}
-        </div>
-      </div>
-    </div>
-  </div>
+  <Alert variant="destructive" className="mb-6">
+    <AlertTitle>Translation may be incomplete</AlertTitle>
+    <AlertDescription>
+      The translation service may have issues, or some content may not have been translated yet.
+      {translationInfo && (
+        <span className="ml-2">
+          ({translationInfo.sourceLanguage} → {translationInfo.targetLanguage})
+        </span>
+      )}
+    </AlertDescription>
+  </Alert>
 );
 
 // Function to generate JSON-LD structured data for the article

@@ -6,11 +6,13 @@ interface SourceCardProps {
 
 export default function SourceCard({ source }: SourceCardProps) {
   return (
-    <div className="card bg-base-100 shadow-xl">
-      <div className="card-body">
-        <h3 className="card-title">{source.name}</h3>
+    <Card>
+      <CardHeader>
+        <CardTitle>{source.name}</CardTitle>
+      </CardHeader>
+      <CardContent>
         <p>
-          <strong>URL:</strong>{' '}
+          <strong>URL:</strong>{" "}
           <a href={source.url} className="link link-primary">
             {source.url}
           </a>
@@ -29,7 +31,7 @@ export default function SourceCard({ source }: SourceCardProps) {
             <strong>Submit Note:</strong> {source.submitNote}
           </p>
         )}
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }

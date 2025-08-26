@@ -173,9 +173,9 @@ export default function ModeratorSources() {
             className="textarea textarea-bordered w-full"
           />
         </div>
-        <button type="submit" className="btn btn-warning w-full">
+        <Button type="submit" className="w-full">
           Update Status
-        </button>
+        </Button>
       </form>
     </div>
   );
