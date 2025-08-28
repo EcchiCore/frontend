@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Search, TrendingUp, MessageSquare, Star } from 'lucide-react';
-import Navbar from '../components/Navbar';
+import { NavbarNew } from '../components/NavbarNew';
 import FeaturedPosts from './components/FeaturedPosts';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -53,7 +53,7 @@ export default function HomePage() {
       </Head>
 
       <div className={`min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 ${inter.className}`}>
-        <Navbar />
+        <NavbarNew />
 
         <main className="bg-background">
           {/* Image Carousel Section - Pure CSS */}

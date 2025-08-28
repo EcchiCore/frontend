@@ -32,3 +32,4 @@ export const config = {
     '/((?!api|_next|_vercel|.*\\..*).*)' // Match all other paths except API, Next.js internals, and static files
   ],
 };
+
