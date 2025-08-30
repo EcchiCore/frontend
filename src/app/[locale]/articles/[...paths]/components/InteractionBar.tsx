@@ -1,12 +1,12 @@
 "use client";
 import React from "react";
 import {
-  HeartIcon as HeartOutline,
-  ShareIcon,
-  UserPlusIcon,
-  CheckIcon,
-} from "@heroicons/react/24/outline";
-import { HeartIcon as HeartSolid } from "@heroicons/react/24/solid";
+  Heart,
+  Share2,
+  UserPlus,
+  Check,
+} from "lucide-react";
+import { Button } from '@/components/ui/button';
 
 interface InteractionBarProps {
   isCurrentUserAuthor: boolean;
@@ -32,47 +32,37 @@ const InteractionBar: React.FC<InteractionBarProps> = ({
   <div className={`mt-6 pt-6 ${isDarkBackground ? 'border-t border-gray-700' : 'border-t border-gray-200'}`}>
     <div className="flex flex-col md:flex-row items-center justify-between gap-4">
       {!isCurrentUserAuthor && (
-        <button
-          className={`flex items-center gap-2 px-5 py-2 rounded-full transition-all duration-200 ${
-            isFollowing
-              ? 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-              : 'bg-blue-600 text-white hover:bg-blue-700'
-          }`}
+        <Button
+          variant={isFollowing ? "outline" : "default"}
           onClick={handleFollow}
+          className="flex items-center gap-2"
         >
           {isFollowing ? (
             <>
-              <CheckIcon className="w-4 h-4" />
+              <Check className="w-4 h-4" />
               <span>กำลังติดตาม</span>
             </>
           ) : (
             <>
-              <UserPlusIcon className="w-4 h-4" />
+              <UserPlus className="w-4 h-4" />
               <span>ติดตาม</span>
             </>
           )}
-        </button>
+        </Button>
       )}
 
       <div className="flex items-center gap-4">
-        <button
-          className={`flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-200 ${
-            isFavorited
-              ? 'bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-900/30'
-              : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-          }`}
+        <Button
+          variant={isFavorited ? "destructive" : "outline"}
           onClick={handleFavorite}
+          className="flex items-center gap-2"
         >
-          {isFavorited ? (
-            <HeartSolid className="w-4 h-4" />
-          ) : (
-            <HeartOutline className="w-4 h-4" />
-          )}
+          <Heart className="w-4 h-4" fill={isFavorited ? "currentColor" : "none"} />
           <span>{favoritesCount > 0 ? favoritesCount : 'ถูกใจ'}</span>
-        </button>
+        </Button>
 
-        <Button onClick={handleShare} variant="secondary">
-          <ShareIcon className="w-4 h-4 mr-2" />
+        <Button onClick={handleShare} variant="outline">
+          <Share2 className="w-4 h-4 mr-2" />
           <span>Share</span>
         </Button>
       </div>

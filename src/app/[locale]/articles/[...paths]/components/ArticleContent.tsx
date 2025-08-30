@@ -28,7 +28,7 @@ import ArticleTitleMeta from "./ArticleTitleMeta";
 import { Article, DownloadFile, TranslationFile, Comment, TokenPayload, AlertState } from "./Interfaces";
 import myImageLoader from "../../../lib/imageLoader";
 import { useDebounce } from "./Debounce";
-import { CloudArrowDownIcon, CalendarDaysIcon, FolderIcon, UserIcon, InformationCircleIcon, CheckIcon, ClipboardIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import { CloudArrowDown, CalendarDays, Folder, User, Info, Check, Clipboard, Search } from "lucide-react";
 import { Button, Card, CardContent, CardHeader, CardTitle, Input, Dialog, DialogContent, DialogHeader, DialogTitle, Tabs, TabsList, TabsTrigger, TabsContent, Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui"; // Adjust import based on your UI library
 import cn from 'classnames';
 import { useTranslations } from 'next-intl';
@@ -42,7 +42,6 @@ interface ArticleContentProps {
   downloads: DownloadFile[];
   isTranslated: boolean;
   translationInfo: { sourceLanguage: string; targetLanguage: string; } | null;
-  hasTranslationError: boolean;
 }
 
 const fetcher = (url: string) => {
@@ -55,7 +54,7 @@ const fetcher = (url: string) => {
   });
 };
 
-const ArticleContent: React.FC<ArticleContentProps> = ({ article, slug, downloads: initialDownloads, isTranslated, translationInfo, hasTranslationError }) => {
+const ArticleContent: React.FC<ArticleContentProps> = ({ article, slug, downloads: initialDownloads, isTranslated, translationInfo }) => {
   const t = useTranslations('ArticleContent');
   // Essential state
   const [isFavorited, setIsFavorited] = useState(article.favorited);
@@ -74,7 +73,6 @@ const ArticleContent: React.FC<ArticleContentProps> = ({ article, slug, download
   const [readingProgress, setReadingProgress] = useState(0);
   const [fontSize, setFontSize] = useState(16);
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeTab, setActiveTab] = useState<"downloads" | "translations">("downloads");
   const [sortBy, setSortBy] = useState<"name" | "date">("date");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [copiedLink, setCopiedLink] = useState<string | null>(null); // Added missing state
@@ -114,11 +112,11 @@ const ArticleContent: React.FC<ArticleContentProps> = ({ article, slug, download
     try {
       await navigator.clipboard.writeText(url);
       setCopiedLink(url);
-      showAlert(t("linkCopied"), "success");
+      setAlert({ open: true, message: t("linkCopied"), severity: "success" });
       // Clear the copied state after 2 seconds
-      setTimeout(() => setCopiedLink(null), 2000);
+      setTimeout(() => setAlert((prev) => ({ ...prev, open: false })), 2000);
     } catch {
-      showAlert(t("copyLinkError"), "error");
+      setAlert({ open: true, message: t("copyLinkError"), severity: "error" });
     }
   }, [t]);
 
@@ -594,15 +592,15 @@ const ArticleContent: React.FC<ArticleContentProps> = ({ article, slug, download
   const wordCount = article.body.split(/\s+/).length;
   const readingTime = Math.ceil(wordCount / 200);
 
-  if (!isClient) return <Skeleton height={400} containerClassName="min-h-screen bg-base-100" />;
+  if (!isClient) return <Skeleton height={400} containerClassName="min-h-screen bg-background" />;
 
   return (
     <div
       className={`min-h-screen ${
-        isDarkMode ? "bg-base-200 text-base-content" : "bg-base-200 text-base-content"
+        isDarkMode ? "bg-muted text-foreground" : "bg-muted text-foreground"
       }`}
     >
-      <div className="fixed top-0 left-0 w-full h-1 bg-base-200 z-50">
+      <div className="fixed top-0 left-0 w-full h-1 bg-muted z-50">
         <div
           className="h-full bg-primary transition-all"
           style={{ width: `${readingProgress}%` }}
@@ -618,7 +616,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({ article, slug, download
         <Alert alert={alert} />
 
         <div className="flex justify-between items-center mb-4">
-          <span className="text-sm text-base-content/70">
+          <span className="text-sm text-muted-foreground">
             {t("readingTime", { time: readingTime })}
           </span>
           <div className="flex items-center space-x-4">
@@ -630,7 +628,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({ article, slug, download
                 max="20"
                 value={fontSize}
                 onChange={(e) => debouncedSetFontSize(Number(e.target.value))}
-                className="range range-primary range-xs w-24"
+                className="w-24"
               />
             </label>
           </div>
@@ -640,7 +638,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({ article, slug, download
           {isMobile ? (
             <>
               <main className="min-w-0">
-                <div className="md:hidden mb-6 card bg-base-100 shadow-xl">
+                <div className="md:hidden mb-6 card bg-background shadow-xl">
                   <div className="card-body flex-row items-center gap-4">
                     <Image
                       loader={myImageLoader}
@@ -655,11 +653,11 @@ const ArticleContent: React.FC<ArticleContentProps> = ({ article, slug, download
                         href={`/profiles/${encodeURLComponent(
                           article.author.username
                         )}`}
-                        className="text-lg font-semibold link link-hover link-primary"
+                        className="text-lg font-semibold text-primary hover:underline"
                       >
                         {article.author.username}
                       </Link>
-                      <p className="text-sm text-base-content/70 line-clamp-2">
+                      <p className="text-sm text-muted-foreground line-clamp-2">
                         {article.author.bio || t("noBio")}
                       </p>
                     </div>
@@ -691,7 +689,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({ article, slug, download
                       />
 
                       {commentsError && (
-                        <div className="alert alert-error">
+                        <Alert variant="destructive">
                           {t("commentsLoadError")}{" "}
                           <Button
                             onClick={() =>
@@ -701,7 +699,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({ article, slug, download
                           >
                             {t("tryAgain")}
                           </Button>
-                        </div>
+                        </Alert>
                       )}
 
                       <CommentsSection
@@ -731,7 +729,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({ article, slug, download
                         className="w-full flex items-center justify-center gap-2"
                         onClick={() => setOpenDownloadDialog(true)}
                       >
-                        <CloudArrowDownIcon className="w-5 h-5" /> {t("viewFiles")} (
+                        <CloudArrowDown className="w-5 h-5" /> {t("viewFiles")} (
                         {downloads.length + translationFiles.length})
                       </Button>
                     </CardContent>
@@ -792,7 +790,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({ article, slug, download
                       />
 
                       {commentsError && (
-                        <div className="alert alert-error">
+                        <Alert variant="destructive">
                           {t("commentsLoadError")}{" "}
                           <Button
                             onClick={() =>
@@ -802,7 +800,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({ article, slug, download
                           >
                             {t("tryAgain")}
                           </Button>
-                        </div>
+                        </Alert>
                       )}
 
                       <CommentsSection
@@ -847,7 +845,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({ article, slug, download
             <DialogTitle>{t("title")}</DialogTitle>
           </DialogHeader>
           <div className="relative mb-4">
-            <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 size-5 text-gray-500" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 size-5 text-gray-500" />
             <Input
               type="text"
               placeholder={t("searchPlaceholder")}

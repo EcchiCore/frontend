@@ -1,4 +1,5 @@
 import { Source } from './types';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface SourceCardProps {
   source: Source;
@@ -13,7 +14,7 @@ export default function SourceCard({ source }: SourceCardProps) {
       <CardContent>
         <p>
           <strong>URL:</strong>{" "}
-          <a href={source.url} className="link link-primary">
+          <a href={source.url} className="text-primary underline">
             {source.url}
           </a>
         </p>

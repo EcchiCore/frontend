@@ -5,6 +5,12 @@ import { useCookies } from 'react-cookie';
 import axios from 'axios';
 import SourceCard from './SourceCard';
 import { Source, SourcesResponse } from './types';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { AlertCircle } from 'lucide-react';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.chanomhub.online';
 
@@ -82,89 +88,70 @@ export default function UserSources() {
       <h1 className="text-3xl font-bold mb-6">Official Download Sources</h1>
 
       {error && (
-        <div className="alert alert-error mb-6">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="stroke-current shrink-0 h-6 w-6"
-            fill="none"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
-            />
-          </svg>
-          <span>{error}</span>
-        </div>
+        <Alert variant="destructive" className="mb-6">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       )}
 
       {/* Submit New Source */}
       <div className="mb-8">
         <h2 className="text-2xl font-semibold mb-4">Submit New Source</h2>
         <form onSubmit={handleSubmitNewSource} className="space-y-4">
-          <div className="form-control">
-            <label className="label">
-              <span className="label-text">Article ID</span>
-            </label>
-            <input
+          <div className="grid w-full items-center gap-1.5">
+            <Label htmlFor="new-article-id">Article ID</Label>
+            <Input
               type="number"
+              id="new-article-id"
               placeholder="Enter Article ID"
               value={newSource.articleId}
               onChange={(e) =>
                 setNewSource({ ...newSource, articleId: e.target.value })
               }
-              className="input input-bordered w-full"
               required
             />
           </div>
-          <div className="form-control">
-            <label className="label">
-              <span className="label-text">Source Name</span>
-            </label>
-            <input
+          <div className="grid w-full items-center gap-1.5">
+            <Label htmlFor="source-name">Source Name</Label>
+            <Input
               type="text"
+              id="source-name"
               placeholder="Enter Source Name"
               value={newSource.name}
               onChange={(e) =>
                 setNewSource({ ...newSource, name: e.target.value })
               }
-              className="input input-bordered w-full"
               required
             />
           </div>
-          <div className="form-control">
-            <label className="label">
-              <span className="label-text">URL</span>
-            </label>
-            <input
+          <div className="grid w-full items-center gap-1.5">
+            <Label htmlFor="source-url">URL</Label>
+            <Input
               type="url"
+              id="source-url"
               placeholder="Enter URL"
               value={newSource.url}
               onChange={(e) =>
                 setNewSource({ ...newSource, url: e.target.value })
               }
-              className="input input-bordered w-full"
               required
             />
           </div>
-          <div className="form-control">
-            <label className="label">
-              <span className="label-text">Submit Note</span>
-            </label>
-            <textarea
+          <div className="grid w-full items-center gap-1.5">
+            <Label htmlFor="submit-note">Submit Note</Label>
+            <Textarea
+              id="submit-note"
               placeholder="Enter Submit Note"
               value={newSource.submitNote}
               onChange={(e) =>
                 setNewSource({ ...newSource, submitNote: e.target.value })
               }
-              className="textarea textarea-bordered w-full"
             />
           </div>
-          <button type="submit" className="btn btn-primary w-full">
+          <Button type="submit" className="w-full">
             Submit Source
-          </button>
+          </Button>
         </form>
       </div>
 

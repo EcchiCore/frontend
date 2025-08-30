@@ -7,7 +7,6 @@ import { ArticleBodyProps } from "./Interfaces";
 import { useTranslations } from "next-intl";
 import {
   Alert,
-  AlertDescription,
   AlertTitle,
   Button,
   Card,
@@ -43,7 +42,7 @@ const ArticleBody: React.FC<ArticleBodyProps> = ({
   return (
     <>
       {showAlert && (
-        <Alert className="fixed top-4 right-4 z-50 animate-bounce bg-success text-success-content shadow-lg">
+        <Alert className="fixed top-4 right-4 z-50 animate-bounce bg-green-500 text-white shadow-lg">
           <AlertTitle>{t("copySuccess")}</AlertTitle>
         </Alert>
       )}

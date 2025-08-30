@@ -1,32 +1,28 @@
-// Sidebar.tsx - Fixed version
 'use client';
 
 import React from 'react';
-import {
-  UserIcon,
-  DocumentTextIcon,
-  ShieldCheckIcon,
-  CogIcon
-} from '@heroicons/react/24/outline';
+import { User, FileText, Shield, Settings } from 'lucide-react';
 import { useDashboard } from '../providers/DashboardProvider';
 import { useAuthContext } from '../providers/AuthProvider';
 import { NAVIGATION_ITEMS } from '../utils/constants';
 import { NavigationItem, PageType } from '../utils/types';
 import Image from 'next/image';
-import myImageLoader from "../../../lib/imageLoader";
+import myImageLoader from '@/lib/imageLoader';
+import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 const iconMap = {
-  UserIcon,
-  DocumentTextIcon,
-  ShieldCheckIcon,
-  CogIcon
+  User,
+  FileText,
+  Shield,
+  Settings,
 };
 
 interface SidebarProps {
   className?: string;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ className = '' }) => {
+export const SidebarShadcn: React.FC<SidebarProps> = ({ className = '' }) => {
   const { currentPage, navigateTo } = useDashboard();
   const { user } = useAuthContext();
 
@@ -35,8 +31,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ className = '' }) => {
     return item.requiredRanks.includes(user.rank);
   };
 
-  const getIcon = (iconName: string) => {
-    const IconComponent = iconMap[iconName as keyof typeof iconMap];
+  const getIcon = (iconName: keyof typeof iconMap) => {
+    const IconComponent = iconMap[iconName];
     return IconComponent ? <IconComponent className="h-5 w-5" /> : null;
   };
 
@@ -47,14 +43,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ className = '' }) => {
   const visibleItems = NAVIGATION_ITEMS.filter(hasRequiredRank);
 
   return (
-    <div className={`bg-base-200 h-full flex flex-col ${className}`}>
+    <div className={`bg-muted/40 h-full flex flex-col ${className}`}>
       {/* Header */}
-      <div className="p-4 text-center border-b border-base-300 flex-shrink-0">
-        <h2 className="text-lg font-semibold text-base-content">
+      <div className="p-4 text-center border-b flex-shrink-0">
+        <h2 className="text-lg font-semibold text-foreground">
           Welcome to Dashboard
         </h2>
         {user && (
-          <p className="text-sm text-base-content/70 mt-1 truncate">
+          <p className="text-sm text-muted-foreground mt-1 truncate">
             {user.username} ({user.rank || 'No rank'})
           </p>
         )}
@@ -62,52 +58,35 @@ export const Sidebar: React.FC<SidebarProps> = ({ className = '' }) => {
 
       {/* Navigation Menu */}
       <nav className="flex-1 p-2 overflow-y-auto">
-        <ul className="menu space-y-1">
+        <div className="space-y-1">
           {visibleItems.map((item) => (
-            <li key={item.id}>
-              <button
-                className={`flex items-center gap-3 w-full text-left p-3 rounded-lg transition-colors
-                  ${currentPage === item.id
-                  ? 'bg-primary text-primary-content'
-                  : 'hover:bg-base-300'
-                }`}
-                onClick={() => handleNavigation(item.id)}
-              >
-                {getIcon(item.icon)}
-                <span className="font-medium">{item.label}</span>
-              </button>
-            </li>
+            <Button
+              key={item.id}
+              variant={currentPage === item.id ? 'default' : 'ghost'}
+              className="w-full justify-start gap-3 text-foreground"
+              onClick={() => handleNavigation(item.id)}
+
+            >
+              {getIcon(item.icon as keyof typeof iconMap)}
+              <span className="font-medium">{item.label}</span>
+            </Button>
           ))}
-        </ul>
+        </div>
       </nav>
 
       {/* User Info Section */}
       {user && (
-        <div className="p-4 border-t border-base-300 flex-shrink-0">
+        <div className="p-4 border-t flex-shrink-0">
           <div className="flex items-center gap-3">
-            <div className="avatar">
-              <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white overflow-hidden">
-                {user.image ? (
-                  <Image
-                    src={user.image}
-                    alt={user.username}
-                    width={40}
-                    height={40}
-                    loader={myImageLoader}
-                    className="w-full h-full rounded-full object-cover"
-                  />
-                ) : (
-                  <span className="text-sm font-medium">
-                    {user.username.charAt(0).toUpperCase()}
-                  </span>
-                )}
-              </div>
-            </div>
+            <Avatar>
+              <AvatarImage src={user.image || undefined} alt={user.username} />
+              <AvatarFallback>{user.username.charAt(0).toUpperCase()}</AvatarFallback>
+            </Avatar>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-base-content truncate">
+              <p className="text-sm font-medium truncate">
                 {user.username}
               </p>
-              <p className="text-xs text-base-content/60 truncate">
+              <p className="text-xs text-muted-foreground truncate">
                 {user.email}
               </p>
             </div>

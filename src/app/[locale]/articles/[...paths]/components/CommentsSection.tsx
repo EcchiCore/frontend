@@ -2,7 +2,9 @@ import React from "react";
 import Image from "next/image";
 import { CommentsSectionProps } from "./Interfaces";
 import myImageLoader from "../../../lib/imageLoader";
-import { TrashIcon } from "@heroicons/react/24/outline";
+import { Trash } from "lucide-react";
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
 
 const CommentsSection: React.FC<CommentsSectionProps> = ({
                                                            isAuthenticated,
@@ -16,11 +18,11 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({
                                                            commentInputRef,
                                                            isLoading,
                                                          }) => (
-  <div className="mt-8 border-t border-base-content/20 pt-6 dark:bg-gray-800">
-    <h2 className="text-xl font-semibold mb-2 text-base-content">ความคิดเห็น</h2>
+  <div className="mt-8 border-t border-border pt-6">
+    <h2 className="text-xl font-semibold mb-2 text-foreground">ความคิดเห็น</h2>
 
     {isLoading ? (
-      <div className="text-center py-8 text-base-content/60">
+      <div className="text-center py-8 text-muted-foreground">
         กำลังโหลดความคิดเห็น...
       </div>
     ) : (
@@ -28,28 +30,25 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({
         {isAuthenticated && (
           <div className="mb-8">
             <div className="flex gap-3 mb-4">
-              <textarea
+              <Textarea
                 ref={commentInputRef}
-                className="w-full rounded-lg p-3 border bg-base-200 border-base-content/20 text-base-content focus:ring-2 focus:ring-primary transition-all duration-200"
+                className="w-full"
                 rows={3}
                 value={newComment}
                 onChange={(e) => setNewComment(e.target.value)}
                 placeholder="เขียนความคิดเห็นของคุณ..."
               />
-              <button
-                className={`px-5 py-2 rounded-lg text-white bg-primary hover:bg-primary-focus focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-all duration-200 ${
-                  !newComment.trim() ? "opacity-50 cursor-not-allowed" : ""
-                }`}
+              <Button
                 onClick={handleAddComment}
                 disabled={!newComment.trim()}
               >
                 ส่ง
-              </button>
+              </Button>
             </div>
           </div>
         )}
 
-        <p className="text-sm text-base-content/60 mb-6">
+        <p className="text-sm text-muted-foreground mb-6">
           ทั้งหมด {comments?.length || 0} ความคิดเห็น
         </p>
 
@@ -58,7 +57,7 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({
             comments.map((comment) => (
               <div
                 key={comment.id}
-                className="p-4 rounded-lg bg-base-200 border border-base-content/20 transition-shadow duration-200 hover:shadow-sm"
+                className="p-4 rounded-lg bg-muted border border-border transition-shadow duration-200 hover:shadow-sm"
               >
                 <div className="flex justify-between items-start">
                   <div className="flex items-start gap-3">
@@ -72,21 +71,21 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({
                       />
                     </div>
                     <div>
-                      <p className="font-medium text-base-content">{comment.author.username}</p>
-                      <p className="text-sm text-base-content/60">{formatDate(comment.createdAt)}</p>
+                      <p className="font-medium text-foreground">{comment.author.username}</p>
+                      <p className="text-sm text-muted-foreground">{formatDate(comment.createdAt)}</p>
                     </div>
                   </div>
                   {isCurrentUserAuthor && (
                     <Button variant="ghost" size="icon" onClick={() => handleDeleteComment(comment.id)}>
-                      <TrashIcon className="w-5 h-5" />
+                      <Trash className="w-5 h-5" />
                     </Button>
                   )}
                 </div>
-                <p className="mt-2 text-base-content">{comment.body}</p>
+                <p className="mt-2 text-foreground">{comment.body}</p>
               </div>
             ))
           ) : (
-            <p className="text-center text-base-content/60 py-8">ยังไม่มีความคิดเห็น</p>
+            <p className="text-center text-muted-foreground py-8">ยังไม่มีความคิดเห็น</p>
           )}
         </div>
       </>

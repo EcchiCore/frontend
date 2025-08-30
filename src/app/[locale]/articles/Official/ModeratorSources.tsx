@@ -5,6 +5,19 @@ import { useCookies } from 'react-cookie';
 import axios from 'axios';
 import SourceCard from './SourceCard';
 import { Source, SourcesResponse } from './types';
+import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
+import { AlertCircle } from 'lucide-react';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.chanomhub.online';
 
@@ -90,22 +103,11 @@ export default function ModeratorSources() {
       <h1 className="text-3xl font-bold mb-6">Moderator: Pending Sources</h1>
 
       {error && (
-        <div className="alert alert-error mb-6">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="stroke-current shrink-0 h-6 w-6"
-            fill="none"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
-            />
-          </svg>
-          <span>{error}</span>
-        </div>
+        <Alert variant="destructive" className="mb-6">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       )}
 
       <button
@@ -127,50 +129,48 @@ export default function ModeratorSources() {
 
       <h2 className="text-2xl font-semibold mb-4">Update Source Status</h2>
       <form onSubmit={handleUpdateStatus} className="space-y-4">
-        <div className="form-control">
-          <label className="label">
-            <span className="label-text">Source ID</span>
-          </label>
-          <input
+        <div className="grid w-full items-center gap-1.5">
+          <Label htmlFor="source-id">Source ID</Label>
+          <Input
             type="number"
+            id="source-id"
             placeholder="Enter Source ID"
             value={updateStatus.id}
             onChange={(e) =>
               setUpdateStatus({ ...updateStatus, id: e.target.value })
             }
-            className="input input-bordered w-full"
             required
           />
         </div>
-        <div className="form-control">
-          <label className="label">
-            <span className="label-text">Status</span>
-          </label>
-          <select
+        <div className="grid w-full items-center gap-1.5">
+          <Label htmlFor="status">Status</Label>
+          <Select
             value={updateStatus.status}
-            onChange={(e) =>
+            onValueChange={(value: 'APPROVED' | 'REJECTED') =>
               setUpdateStatus({
                 ...updateStatus,
-                status: e.target.value as 'APPROVED' | 'REJECTED',
+                status: value,
               })
             }
-            className="select select-bordered w-full"
           >
-            <option value="APPROVED">APPROVED</option>
-            <option value="REJECTED">REJECTED</option>
-          </select>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select a status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="APPROVED">APPROVED</SelectItem>
+              <SelectItem value="REJECTED">REJECTED</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
-        <div className="form-control">
-          <label className="label">
-            <span className="label-text">Review Note</span>
-          </label>
-          <textarea
+        <div className="grid w-full items-center gap-1.5">
+          <Label htmlFor="review-note">Review Note</Label>
+          <Textarea
+            id="review-note"
             placeholder="Enter Review Note"
             value={updateStatus.reviewNote}
             onChange={(e) =>
               setUpdateStatus({ ...updateStatus, reviewNote: e.target.value })
             }
-            className="textarea textarea-bordered w-full"
           />
         </div>
         <Button type="submit" className="w-full">
