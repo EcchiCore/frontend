@@ -7,7 +7,7 @@ import ArticleManagement from './components/ArticleManagement';
 import ProfileUpdate from './components/ProfileUpdate';
 import { DashboardUser } from './types';
 import { Pencil, FileText } from 'lucide-react';
-import { DashboardLayoutShadcn } from '../layout/DashboardLayout.shadcn';
+import { DashboardLayoutShadcn } from '../layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -47,8 +47,6 @@ const Dashboard: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<'profile' | 'articles' | 'moderate'>('profile');
   const [userData, setUserData] = useState<DashboardUser | null>(null);
   const [articlesData, setArticlesData] = useState<ArticlesResponse>({ articles: [], articlesCount: 0 });
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const router = useRouter();
   const { rank } = useParams();
@@ -87,11 +85,9 @@ const Dashboard: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        setLoading(true);
         const token = getCookie('token');
 
         if (!token) {
-          setError('Authorization token not found. Please log in.');
           router.push('/login');
           return;
         }
@@ -111,7 +107,6 @@ const Dashboard: React.FC = () => {
         const userRank = userData.user.ranks[0]?.toLowerCase();
 
         if (rank && userRank !== rank.toString().toLowerCase()) {
-          setError('Unauthorized access for this rank');
           router.push(`/member/dashboard/${userRank}`);
           return;
         }
@@ -139,12 +134,9 @@ const Dashboard: React.FC = () => {
 
         setUserData(userData.user);
         setArticlesData(articlesData);
-        setError(null);
       } catch (err) {
         console.error('Error fetching data:', err);
-        setError(err instanceof Error ? err.message : 'Failed to fetch data');
       } finally {
-        setLoading(false);
       }
     };
 
@@ -165,17 +157,21 @@ const Dashboard: React.FC = () => {
   };
 
   const renderProfile = () => {
-    if (isEditingProfile) {
-      return (
-        <ProfileUpdate
-          user={userData}
-          onUpdate={handleUpdateUser}
-          onCancel={() => setIsEditingProfile(false)}
-        />
-      );
-    }
+  if (!userData) {
+    return null;
+  }
 
+  if (isEditingProfile) {
     return (
+      <ProfileUpdate
+        user={userData}
+        onUpdate={handleUpdateUser}
+        onCancel={() => setIsEditingProfile(false)}
+      />
+    );
+  }
+
+  return (
       <div className="container mx-auto p-4">
         <Card className="mb-6">
           <CardContent className="flex flex-col md:flex-row items-center md:items-start gap-4 p-6">
@@ -274,7 +270,10 @@ const Dashboard: React.FC = () => {
   };
 
   const renderModerateContent = () => {
-    return (
+  if (!userData) {
+    return null;
+  }
+  return (
       <div className="container mx-auto p-4">
         <h2 className="text-2xl font-bold mb-4">Moderate Content</h2>
         <p>This is the moderation panel for {userData.ranks[0]}.</p>

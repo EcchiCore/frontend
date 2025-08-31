@@ -18,7 +18,8 @@ import TextStyle from '@tiptap/extension-text-style';
 import { Color } from '@tiptap/extension-color';
 import Underline from '@tiptap/extension-underline';
 import ArticleHeader from "./ArticleHeader";
-import Alert from "./Alert";
+import CustomArticleAlert from "./Alert";
+import { Alert } from "@/components/ui/alert";
 import SidebarLeft from "./SidebarLeft";
 import InteractionBar from "./InteractionBar";
 import CommentsSection from "./CommentsSection";
@@ -42,6 +43,7 @@ interface ArticleContentProps {
   downloads: DownloadFile[];
   isTranslated: boolean;
   translationInfo: { sourceLanguage: string; targetLanguage: string; } | null;
+  hasTranslationError: boolean;
 }
 
 const fetcher = (url: string) => {
@@ -613,7 +615,13 @@ const ArticleContent: React.FC<ArticleContentProps> = ({ article, slug, download
           translationInfo={translationInfo}
           slug={slug}
         />
-        <Alert alert={alert} />
+        {alert.open && (
+  <CustomArticleAlert
+    title={alert.severity === "success" ? t("success") : t("error")}
+    message={alert.message}
+    variant={alert.severity === "success" ? "default" : "destructive"}
+  />
+)}
 
         <div className="flex justify-between items-center mb-4">
           <span className="text-sm text-muted-foreground">

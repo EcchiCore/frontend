@@ -5,14 +5,10 @@ import Link from "next/link";
 import myImageLoader from "../../../lib/imageLoader";
 import { ArticleBodyProps } from "./Interfaces";
 import { useTranslations } from "next-intl";
-import {
-  Alert,
-  AlertTitle,
-  Button,
-  Card,
-  CardContent,
-  Badge,
-} from "@/components/ui";
+import { Alert, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 const ArticleBody: React.FC<ArticleBodyProps> = ({
   content,

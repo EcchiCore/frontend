@@ -9,13 +9,14 @@ import { ArticlesPage } from '../pages/ArticlesPage';
 import { ProfilePage } from '../pages/ProfilePage';
 import SettingsPage from '../pages/SettingsPage';
 import { ModerationPage } from '../pages/ModerationPage';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Loader2, AlertCircle } from 'lucide-react';
 
 interface DashboardLayoutProps {
   title: string;
+  children: React.ReactNode;
 }
 
 export const DashboardLayoutShadcn: React.FC<DashboardLayoutProps> = ({ title }) => {
