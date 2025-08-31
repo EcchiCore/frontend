@@ -10,6 +10,8 @@ import { FiBold, FiItalic, FiList, FiHash } from 'react-icons/fi';
 import { MdUndo, MdRedo } from 'react-icons/md';
 import Image from 'next/image';
 
+const PLACEHOLDER_IMAGE = '/placeholder-image.png';
+
 interface Author {
   username: string;
   bio: string | null;
@@ -577,7 +579,7 @@ const ArticleEditorPage: React.FC = () => {
                 src={mainImage}
                 alt="Main Image"
                 className="w-32 h-32 object-cover rounded"
-                onError={() => setMainImage('')}
+                onError={(e) => (e.currentTarget.src = PLACEHOLDER_IMAGE)}
               />
               <button
                 className="btn btn-error btn-sm mt-2"
@@ -618,7 +620,11 @@ const ArticleEditorPage: React.FC = () => {
                   src={url}
                   alt={`Image ${index + 1}`}
                   className="w-24 h-24 object-cover rounded"
-                  onError={() => handleRemoveImage(url)}
+                  onError={(e) => {
+                    e.currentTarget.src = PLACEHOLDER_IMAGE;
+                    // Optionally, update the state to reflect the placeholder
+                    setImages(prevImages => prevImages.map(img => img === url ? PLACEHOLDER_IMAGE : img));
+                  }}
                 />
                 <button
                   className="btn btn-error btn-xs absolute top-0 right-0"

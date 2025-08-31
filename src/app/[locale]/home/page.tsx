@@ -9,27 +9,19 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Search, TrendingUp, MessageSquare, Star } from 'lucide-react';
-import { NavbarNew } from '../components/NavbarNew';
+import Navbar from '../components/Navbar';
 import FeaturedPosts from './components/FeaturedPosts';
+import CategoriesCard from './components/CategoriesCard';
 
 const inter = Inter({ subsets: ['latin'] });
 
-// Mock data for other sections
+// Mock data for trending topics
 const trendingTopics = [
   { name: "การลงทุน", count: 1250 },
   { name: "เทคโนโลยี", count: 980 },
   { name: "ท่องเที่ยว", count: 856 },
   { name: "สุขภาพ", count: 742 },
   { name: "อาหาร", count: 698 },
-];
-
-const categories = [
-  { name: "ข่าวสาร", icon: "📰", count: 5420 },
-  { name: "บันเทิง", icon: "🎬", count: 3890 },
-  { name: "กีฬา", icon: "⚽", count: 2340 },
-  { name: "เทคโนโลยี", icon: "💻", count: 4560 },
-  { name: "การเงิน", icon: "💰", count: 2890 },
-  { name: "ท่องเที่ยว", icon: "✈️", count: 1890 },
 ];
 
 export default function HomePage() {
@@ -53,7 +45,7 @@ export default function HomePage() {
       </Head>
 
       <div className={`min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 ${inter.className}`}>
-        <NavbarNew />
+        <Navbar />
 
         <main className="bg-background">
           {/* Image Carousel Section - Pure CSS */}
@@ -202,7 +194,6 @@ export default function HomePage() {
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                   </svg>
-.dou
                 </button>
                 
                 <button className="nav-btn nav-btn-right" aria-label="ภาพถัดไป">
@@ -250,7 +241,7 @@ export default function HomePage() {
                             </Avatar>
                             <div className="flex-grow">
                               <h4 className="font-medium text-foreground">หัวข้อกระทู้ตัวอย่างที่ {i}</h4>
-0                              <div className="flex items-center space-x-4 text-sm text-muted-foreground mt-1">
+                              <div className="flex items-center space-x-4 text-sm text-muted-foreground mt-1">
                                 <span>โดย: ผู้ใช้{i}</span>
                                 <span>5 นาทีที่แล้ว</span>
                                 <span>12 ตอบ</span>
@@ -278,26 +269,8 @@ export default function HomePage() {
 
             {/* Sidebar */}
             <div className="space-y-6">
-              {/* Categories */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">หมวดหมู่ยอดนิยม</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {categories.map((category, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors"
-                    >
-                      <div className="flex items-center space-x-3">
-                        <span className="text-xl">{category.icon}</span>
-                        <span className="font-medium">{category.name}</span>
-                      </div>
-                      <Badge variant="secondary">{category.count.toLocaleString()}</Badge>
-                    </div>
-                  ))}
-                </CardContent>
-              </Card>
+              {/* Categories Card - Now using the separate component */}
+              <CategoriesCard />
 
               {/* Trending Topics */}
               <Card>
@@ -408,7 +381,6 @@ export default function HomePage() {
             </div>
             <div className="border-t border-gray-800 mt-8 pt-8 text-center text-sm text-gray-400">
               <p>&copy; 2025 Chanomhub. สงวนลิขสิทธิ์ทุกประการ</p>
-
             </div>
           </div>
         </footer>

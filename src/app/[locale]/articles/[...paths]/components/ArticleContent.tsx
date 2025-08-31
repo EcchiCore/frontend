@@ -28,6 +28,9 @@ import { getFileIcon, getFileSize } from "@/utils/fileUtils";
 import ArticleTitleMeta from "./ArticleTitleMeta";
 import { Article, DownloadFile, TranslationFile, Comment, TokenPayload, AlertState } from "./Interfaces";
 import myImageLoader from "../../../lib/imageLoader";
+
+const PLACEHOLDER_IMAGE = '/placeholder-image.png';
+
 import { useDebounce } from "./Debounce";
 import { Download, CalendarDays, Folder, User, Info, Check, Clipboard, Search } from "lucide-react";
 import { Button, Card, CardContent, CardHeader, CardTitle, Input, Dialog, DialogContent, DialogHeader, DialogTitle, Tabs, TabsList, TabsTrigger, TabsContent, Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui"; // Adjust import based on your UI library
@@ -655,6 +658,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({ article, slug, download
                       width={48}
                       height={48}
                       className="avatar rounded-full"
+                      onError={(e) => (e.currentTarget.src = PLACEHOLDER_IMAGE)}
                     />
                     <div>
                       <Link

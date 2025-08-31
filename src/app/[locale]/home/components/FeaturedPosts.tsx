@@ -7,6 +7,8 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Eye, MessageSquare, Heart, Clock } from 'lucide-react';
 import Image from 'next/image'; // Import Next.js Image component
 
+const PLACEHOLDER_IMAGE = '/placeholder-image.png';
+
 // Define the structure of an article from the API
 interface Article {
   id: number;
@@ -101,12 +103,13 @@ export default function FeaturedPosts({ platform = 'windows' }: FeaturedPostsPro
             <div className="flex space-x-4">
               <div className="w-32 h-20 bg-muted rounded-lg flex-shrink-0 overflow-hidden">
                 <Image
-                  src={post.mainImage || '/api/placeholder/400/200'}
+                  src={post.mainImage || PLACEHOLDER_IMAGE}
                   alt={post.title}
                   width={128} // Match w-32 (32 * 4 = 128px)
                   height={80} // Match h-20 (20 * 4 = 80px)
                   className="w-full h-full object-cover"
                   priority={false}
+                  onError={(e) => (e.currentTarget.src = PLACEHOLDER_IMAGE)}
                 />
               </div>
               <div className="flex-grow">

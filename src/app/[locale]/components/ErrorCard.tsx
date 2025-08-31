@@ -1,41 +1,37 @@
 // components/ErrorCard.tsx
 "use client";
 
-import React from 'react';
-
-interface ErrorCardProps {
-  locale: string;
-}
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 
 export default function ErrorCard({ locale }: ErrorCardProps) {
   return (
-    <div className="min-h-screen bg-base-200 flex items-center justify-center">
-      <div className="card w-full max-w-md bg-base-100 shadow-xl">
-        <div className="card-body text-center">
-          <div className="w-16 h-16 mx-auto mb-4 text-error">
+    <div className="min-h-screen bg-background flex items-center justify-center">
+      <Card className="w-full max-w-md">
+        <CardHeader className="text-center">
+          <div className="w-16 h-16 mx-auto mb-4 text-destructive">
             <svg className="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
-          <h2 className="card-title justify-center text-error">
+          <CardTitle className="text-destructive">
             {locale === 'th' ? 'เกิดข้อผิดพลาด' : 'Error Occurred'}
-          </h2>
-          <p className="text-base-content/60 mb-4">
+          </CardTitle>
+          <CardDescription className="text-muted-foreground">
             {locale === 'th'
               ? 'เกิดข้อผิดพลาดในการโหลดบทความ กรุณาลองใหม่ภายหลัง'
               : 'Error loading articles. Please try again later.'
             }
-          </p>
-          <div className="card-actions justify-center">
-            <button
-              className="btn btn-primary"
-              onClick={() => window.location.reload()}
-            >
-              {locale === 'th' ? 'ลองใหม่' : 'Try Again'}
-            </button>
-          </div>
-        </div>
-      </div>
+          </CardDescription>
+        </CardHeader>
+        <CardFooter className="flex justify-center">
+          <Button
+            onClick={() => window.location.reload()}
+          >
+            {locale === 'th' ? 'ลองใหม่' : 'Try Again'}
+          </Button>
+        </CardFooter>
+      </Card>
     </div>
   );
 }

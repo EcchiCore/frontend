@@ -118,7 +118,7 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({
                     width={128}
                     height={128}
                     className="rounded-full object-cover"
-                    onError={(e) => (e.currentTarget.src = '/default-avatar.png')}
+                    onError={(e) => (e.currentTarget.src = '/placeholder-image.png')}
                   />
                 </div>
               </div>

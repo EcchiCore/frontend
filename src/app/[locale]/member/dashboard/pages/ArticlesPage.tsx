@@ -19,6 +19,8 @@ import { ITEMS_PER_PAGE_OPTIONS } from '../utils/constants';
 import Image from 'next/image';
 import myImageLoader from '../../../lib/imageLoader';
 
+const PLACEHOLDER_IMAGE = '/placeholder-image.png';
+
 // shadcn/ui imports
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -334,6 +336,7 @@ export const ArticlesPage: React.FC = () => {
                         height={96}
                         loader={myImageLoader}
                         className="w-24 h-24 object-cover rounded-lg"
+                        onError={(e) => (e.currentTarget.src = PLACEHOLDER_IMAGE)}
                       />
                     </div>
                   )}

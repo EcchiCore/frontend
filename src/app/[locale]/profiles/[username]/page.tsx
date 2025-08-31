@@ -6,6 +6,8 @@ import ProfileClient from './ProfileClient';
 import myImageLoader from '../../lib/imageLoader';
 import SocialLinkItem from './components/SocialLinkItem';
 
+const PLACEHOLDER_IMAGE = '/placeholder-image.png';
+
 interface SocialMediaLink {
   platform: string;
   url: string;
@@ -129,6 +131,7 @@ export default async function ProfilePage({ params }: Readonly<{ params: Promise
                         sizes="(max-width: 768px) 100vw, 128px"
                         className="rounded-full"
                         priority
+                        onError={(e) => (e.currentTarget.src = PLACEHOLDER_IMAGE)}
                       />
                     </div>
                   </div>

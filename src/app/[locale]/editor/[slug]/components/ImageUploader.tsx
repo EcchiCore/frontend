@@ -370,46 +370,53 @@ export const ImagePreview: React.FC<{
   urls: string[];
   onRemove?: (url: string) => void;
   size?: number;
-}> = ({ urls, onRemove, size = 100 }) => (
-  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mt: 2 }}>
-    {urls.map((url, index) => {
-      const transformedUrl = url.includes('cloudinary.com')
-        ? url.replace(/upload\//, `upload/q_auto,f_auto/`)
-        : url;
+}> = ({ urls, onRemove, size = 100 }) => {
+  const PLACEHOLDER_IMAGE = '/placeholder-image.png';
 
-      return (
-        <Box key={index} sx={{ position: 'relative' }}>
-          <Image
-            loader={myImageLoader}
-            src={transformedUrl}
-            alt={`Image ${index + 1}`}
-            width={size}
-            height={size}
-            style={{
-              objectFit: 'cover',
-              borderRadius: 8,
-            }}
-          />
-          {onRemove && (
-            <IconButton
-              sx={{
-                position: 'absolute',
-                top: 0,
-                right: 0,
-                backgroundColor: 'rgba(255,255,255,0.7)',
-                '&:hover': {
-                  backgroundColor: 'rgba(255,255,255,0.9)',
-                }
+  return (
+    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mt: 2 }}>
+      {urls.map((url, index) => {
+        const transformedUrl = url.includes('cloudinary.com')
+          ? url.replace(/upload\//, `upload/q_auto,f_auto/`)
+          : url;
+
+        const [imgSrc, setImgSrc] = useState(transformedUrl);
+
+        return (
+          <Box key={index} sx={{ position: 'relative' }}>
+            <Image
+              loader={myImageLoader}
+              src={imgSrc}
+              alt={`Image ${index + 1}`}
+              width={size}
+              height={size}
+              style={{
+                objectFit: 'cover',
+                borderRadius: 8,
               }}
-              onClick={() => onRemove(url)}
-              color="error"
-              size="small"
-            >
-              <DeleteIcon fontSize="small" />
-            </IconButton>
-          )}
-        </Box>
-      );
-    })}
-  </Box>
-);
+              onError={() => setImgSrc(PLACEHOLDER_IMAGE)}
+            />
+            {onRemove && (
+              <IconButton
+                sx={{
+                  position: 'absolute',
+                  top: 0,
+                  right: 0,
+                  backgroundColor: 'rgba(255,255,255,0.7)',
+                  '&:hover': {
+                    backgroundColor: 'rgba(255,255,255,0.9)',
+                  }
+                }}
+                onClick={() => onRemove(url)}
+                color="error"
+                size="small"
+              >
+                <DeleteIcon fontSize="small" />
+              </IconButton>
+            )}
+          </Box>
+        );
+      })}
+    </Box>
+  );
+};

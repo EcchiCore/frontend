@@ -5,6 +5,9 @@ import { format } from 'date-fns';
 import ArticleFavoriteHandler from './ArticleFavoriteHandler';
 import { EyeIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
+import ImageWithFallback from '@/components/ImageWithFallback';
+
+const PLACEHOLDER_IMAGE = '/placeholder-image.png';
 
 interface Author {
   username: string;
@@ -72,7 +75,7 @@ const ArticleItem: React.FC<ArticleItemProps> = ({
             <div className="avatar">
               <div className="w-12 h-12 rounded-full">
                 {author.image ? (
-                  <Image src={author.image} alt={author.username} width={48} height={48} className="rounded-full" />
+                  <ImageWithFallback src={author.image} alt={author.username} className="rounded-full" type="nextImage" />
                 ) : (
                   <div className="bg-primary text-white flex items-center justify-center h-full text-xl">
                     {author.username.charAt(0).toUpperCase()}

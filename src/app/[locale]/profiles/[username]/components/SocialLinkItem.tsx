@@ -2,7 +2,9 @@
 'use client'; // This is crucial to mark it as a Client Component
 
 import Image from 'next/image';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+
+const PLACEHOLDER_IMAGE = '/placeholder-image.png';
 
 interface SocialLinkItemProps {
   href: string;
@@ -12,14 +14,11 @@ interface SocialLinkItemProps {
 }
 
 export default function SocialLinkItem({ href, platform, initialIconUrl, username }: SocialLinkItemProps) {
-  const [iconLoadError, setIconLoadError] = useState(false);
+  const [currentIconUrl, setCurrentIconUrl] = useState(initialIconUrl || PLACEHOLDER_IMAGE);
 
-  const handleIconError = () => {
-    setIconLoadError(true);
-  };
-
-  // Determine if we should show the DDG icon or a fallback
-  const showDuckDuckGoIcon = initialIconUrl && !iconLoadError;
+  useEffect(() => {
+    setCurrentIconUrl(initialIconUrl || PLACEHOLDER_IMAGE);
+  }, [initialIconUrl]);
 
   return (
     <a
@@ -28,21 +27,15 @@ export default function SocialLinkItem({ href, platform, initialIconUrl, usernam
       rel="noopener noreferrer nofollow"
       className="inline-flex items-center gap-2 rounded-md px-3 py-1.5 text-sm font-medium text-primary transition-colors hover:bg-primary/10 hover:text-primary-focus focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-base-100/10"
       aria-label={`Visit ${username}'s ${platform} profile`}
-      data-icon-failed={iconLoadError ? 'true' : undefined}
     >
-      {showDuckDuckGoIcon ? (
-        <Image
-          src={initialIconUrl} // initialIconUrl is guaranteed to be non-null here
-          alt="" // Decorative, as platform name is shown next to it
-          width={16}
-          height={16}
-          className="flex-shrink-0"
-          onError={handleIconError} // Event handler is now in a Client Component
-        />
-      ) : (
-        // Fallback icon (if initialIconUrl was null or if loading failed)
-        <span className="w-4 h-4 inline-flex items-center justify-center" aria-hidden="true">🔗</span>
-      )}
+      <Image
+        src={currentIconUrl}
+        alt=""
+        width={16}
+        height={16}
+        className="flex-shrink-0"
+        onError={() => setCurrentIconUrl(PLACEHOLDER_IMAGE)}
+      />
       <span>{platform}</span>
     </a>
   );

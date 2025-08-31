@@ -10,6 +10,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
+const PLACEHOLDER_IMAGE = '/placeholder-image.png';
+
 const ArticleBody: React.FC<ArticleBodyProps> = ({
   content,
   article,
@@ -75,8 +77,8 @@ const ArticleBody: React.FC<ArticleBodyProps> = ({
                 onClick={() =>
                   handleOpenLightbox(
                     article.images?.findIndex((img) => img === selectedImage) || 0
-                  )
-                }
+                  )}
+                onError={(e) => (e.currentTarget.src = PLACEHOLDER_IMAGE)}
               />
             </CardContent>
           </Card>
@@ -101,6 +103,7 @@ const ArticleBody: React.FC<ArticleBodyProps> = ({
                   sizes="100px"
                   quality={80}
                   loading="lazy"
+                  onError={(e) => (e.currentTarget.src = PLACEHOLDER_IMAGE)}
                 />
               </div>
             ))}

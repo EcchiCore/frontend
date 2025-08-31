@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import myImageLoader from '../../../lib/imageLoader';
 
+const PLACEHOLDER_IMAGE = '/placeholder-image.png';
+
 interface FormData {
   username: string;
   email: string;
@@ -138,6 +140,7 @@ export default function SettingsPreview({
                   fill
                   style={{ objectFit: 'cover' }}
                   className="w-full"
+                  onError={(e) => (e.currentTarget.src = PLACEHOLDER_IMAGE)}
                 />
               </figure>
             )}
@@ -152,6 +155,7 @@ export default function SettingsPreview({
                         alt={formData.username || 'User'}
                         width={96}
                         height={96}
+                        onError={(e) => (e.currentTarget.src = PLACEHOLDER_IMAGE)}
                       />
                     </div>
                   </div>

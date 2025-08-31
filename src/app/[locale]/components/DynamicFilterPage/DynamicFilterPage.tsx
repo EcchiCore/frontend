@@ -4,9 +4,17 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { RssIcon, Tag, Monitor, FolderOpen, Calendar, User, Heart, Eye } from 'lucide-react';
 import { ArticlesResponse } from '../ArticleList/article';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import myImageLoader from '../../lib/imageLoader';
 import ErrorCard from '../../components/ErrorCard';
 import { getTranslations } from 'next-intl/server';
+import ImageWithFallback from '@/components/ImageWithFallback';
+
+const PLACEHOLDER_IMAGE = '/placeholder-image.png';
 
 // Define types for filter
 type FilterType = 'platforms' | 'tag' | 'category';
@@ -161,7 +169,7 @@ export default async function DynamicFilterPage({ params, filterType, hasRss = t
       .slice(0, 3);
 
     return (
-      <div className="min-h-screen bg-base-200">
+      <div className="min-h-screen bg-background">
         {/* Hero Section */}
         <div className="bg-gradient-to-br from-primary to-primary-focus text-primary-content">
           <div className="container mx-auto px-4 py-12">
@@ -171,12 +179,16 @@ export default async function DynamicFilterPage({ params, filterType, hasRss = t
                   <div className={`p-3 bg-white/20 rounded-xl ${getFilterColor(filterType)}`}>
                     {getFilterIcon(filterType)}
                   </div>
-                  <div className="breadcrumbs text-sm opacity-80">
-                    <ul>
-                      <li><Link href={`/${locale}`}>{t('home')}</Link></li>
-                      <li className="capitalize">{t(`filter_types.${filterType}`)}</li>
-                      <li>{decodedSlug}</li>
-                    </ul>
+                  <div className="text-sm opacity-80 flex items-center space-x-1">
+                    <Link href={`/${locale}`} className="hover:underline">
+                      {t('home')}
+                    </Link>
+                    <span>/</span>
+                    <span className="capitalize">
+                      {t(`filter_types.${filterType}`)}
+                    </span>
+                    <span>/</span>
+                    <span>{decodedSlug}</span>
                   </div>
                 </div>
 
@@ -192,14 +204,12 @@ export default async function DynamicFilterPage({ params, filterType, hasRss = t
               {/* RSS Link */}
               {hasRss && filterType !== 'category' && (
                 <div className="flex gap-3">
-                  <Link
-                    href={rssUrl}
-                    className="btn btn-outline btn-primary bg-white/10 border-white/30 hover:bg-white hover:text-primary"
-                    title={t(`rss_title_${filterType}`, { slug: decodedSlug })}
-                  >
-                    <RssIcon className="w-4 h-4" />
-                    {t('rss_feed')}
-                  </Link>
+                  <Button asChild variant="outline" className="bg-white/10 border-white/30 hover:bg-white hover:text-primary" title={t(`rss_title_${filterType}`, { slug: decodedSlug })}>
+                    <Link href={rssUrl}>
+                      <RssIcon className="w-4 h-4 mr-2" />
+                      {t('rss_feed')}
+                    </Link>
+                  </Button>
                 </div>
               )}
             </div>
@@ -211,193 +221,173 @@ export default async function DynamicFilterPage({ params, filterType, hasRss = t
           <div className="container mx-auto px-4 py-8">
             {/* Main Stats */}
             <div className="grid grid-cols-2 lg:grid-cols-6 gap-4 mb-8">
-              <div className="stats shadow-lg">
-                <div className="stat place-items-center">
-                  <div className="stat-figure text-primary">
-                    <FolderOpen className="w-6 h-6" />
-                  </div>
-                  <div className="stat-title text-xs">{t('stats.articles')}</div>
-                  <div className="stat-value text-primary text-xl">{articlesCount}</div>
+              <Card className="shadow-lg flex flex-col items-center justify-center p-4">
+                <div className="text-primary mb-2">
+                  <FolderOpen className="w-6 h-6" />
                 </div>
-              </div>
+                <div className="text-xs text-muted-foreground">{t('stats.articles')}</div>
+                <div className="text-primary text-xl font-bold">{articlesCount}</div>
+              </Card>
 
-              <div className="stats shadow-lg">
-                <div className="stat place-items-center">
-                  <div className="stat-figure text-secondary">
-                    <Heart className="w-6 h-6" />
-                  </div>
-                  <div className="stat-title text-xs">{t('stats.likes')}</div>
-                  <div className="stat-value text-secondary text-xl">{totalFavorites}</div>
+              <Card className="shadow-lg flex flex-col items-center justify-center p-4">
+                <div className="text-secondary mb-2">
+                  <Heart className="w-6 h-6" />
                 </div>
-              </div>
+                <div className="text-xs text-muted-foreground">{t('stats.likes')}</div>
+                <div className="text-secondary text-xl font-bold">{totalFavorites}</div>
+              </Card>
 
-              <div className="stats shadow-lg">
-                <div className="stat place-items-center">
-                  <div className="stat-figure text-accent">
-                    <User className="w-6 h-6" />
-                  </div>
-                  <div className="stat-title text-xs">{t('stats.authors')}</div>
-                  <div className="stat-value text-accent text-xl">{uniqueAuthors}</div>
+              <Card className="shadow-lg flex flex-col items-center justify-center p-4">
+                <div className="text-accent mb-2">
+                  <User className="w-6 h-6" />
                 </div>
-              </div>
+                <div className="text-xs text-muted-foreground">{t('stats.authors')}</div>
+                <div className="text-accent text-xl font-bold">{uniqueAuthors}</div>
+              </Card>
 
-              <div className="stats shadow-lg">
-                <div className="stat place-items-center">
-                  <div className="stat-figure text-info">
-                    <Tag className="w-6 h-6" />
-                  </div>
-                  <div className="stat-title text-xs">{t('stats.tags')}</div>
-                  <div className="stat-value text-info text-xl">{uniqueTags}</div>
+              <Card className="shadow-lg flex flex-col items-center justify-center p-4">
+                <div className="text-info mb-2">
+                  <Tag className="w-6 h-6" />
                 </div>
-              </div>
+                <div className="text-xs text-muted-foreground">{t('stats.tags')}</div>
+                <div className="text-info text-xl font-bold">{uniqueTags}</div>
+              </Card>
 
-              <div className="stats shadow-lg">
-                <div className="stat place-items-center">
-                  <div className="stat-figure text-warning">
-                    <FolderOpen className="w-6 h-6" />
-                  </div>
-                  <div className="stat-title text-xs">{t('stats.categories')}</div>
-                  <div className="stat-value text-warning text-xl">{uniqueCategories}</div>
+              <Card className="shadow-lg flex flex-col items-center justify-center p-4">
+                <div className="text-warning mb-2">
+                  <FolderOpen className="w-6 h-6" />
                 </div>
-              </div>
+                <div className="text-xs text-muted-foreground">{t('stats.categories')}</div>
+                <div className="text-warning text-xl font-bold">{uniqueCategories}</div>
+              </Card>
 
-              <div className="stats shadow-lg">
-                <div className="stat place-items-center">
-                  <div className="stat-figure text-success">
-                    <Monitor className="w-6 h-6" />
-                  </div>
-                  <div className="stat-title text-xs">{t('stats.engines')}</div>
-                  <div className="stat-value text-success text-xl">{uniqueEngines}</div>
+              <Card className="shadow-lg flex flex-col items-center justify-center p-4">
+                <div className="text-success mb-2">
+                  <Monitor className="w-6 h-6" />
                 </div>
-              </div>
+                <div className="text-xs text-muted-foreground">{t('stats.engines')}</div>
+                <div className="text-success text-xl font-bold">{uniqueEngines}</div>
+              </Card>
             </div>
 
             {/* Analytics Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
               {/* Popular Tags */}
-              <div className="card bg-base-100 shadow-xl">
-                <div className="card-body">
-                  <h3 className="card-title text-lg flex items-center gap-2">
+              <Card className="shadow-xl">
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
                     <Tag className="w-5 h-5" />
                     {t('stats.popular_tags')}
-                  </h3>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
                   <div className="space-y-2">
                     {popularTags.slice(0, 8).map(({ tag, count }) => (
                       <Link
                         key={tag}
                         href={`/${locale}/tag/${encodeURIComponent(tag)}`}
-                        className="flex justify-between items-center p-2 bg-base-200 rounded-lg hover:bg-base-300 transition-colors cursor-pointer"
+                        className="flex justify-between items-center p-2 bg-muted rounded-lg hover:bg-muted/80 transition-colors cursor-pointer"
                       >
-                        <span className="badge badge-outline text-xs hover:badge-primary">{tag}</span>
-                        <span className="text-sm font-semibold">{count}</span>
+                        <Badge variant="outline" className="text-xs hover:bg-primary hover:text-primary-foreground">{tag}</Badge>
+                        <span className="text-sm font-semibold text-foreground">{count}</span>
                       </Link>
                     ))}
                   </div>
-                </div>
-              </div>
+                </CardContent>
+              </Card>
 
               {/* Top Authors */}
-              <div className="card bg-base-100 shadow-xl">
-                <div className="card-body">
-                  <h3 className="card-title text-lg flex items-center gap-2">
+              <Card className="shadow-xl">
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
                     <User className="w-5 h-5" />
                     {t('stats.top_authors')}
-                  </h3>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
                   <div className="space-y-3">
                     {topAuthors.map((authorStat: any, index) => (
-                      <div key={authorStat.author.username} className="flex items-center gap-3 p-2 bg-base-200 rounded-lg">
-                        <div className="avatar">
-                          <div className="w-8 h-8 rounded-full">
-                            <Image
-                              src={authorStat.author.image || '/default-avatar.png'}
-                              alt={authorStat.author.username}
-                              width={32}
-                              height={32}
-                              loader={myImageLoader}
-                              className="object-cover"
-                            />
-                          </div>
-                        </div>
+                      <div key={authorStat.author.username} className="flex items-center gap-3 p-2 bg-muted rounded-lg">
+                        <Avatar className="w-8 h-8">
+                          <AvatarImage src={authorStat.author.image || '/default-avatar.png'} alt={authorStat.author.username} />
+                          <AvatarFallback>{authorStat.author.username.charAt(0)}</AvatarFallback>
+                        </Avatar>
                         <div className="flex-1">
-                          <div className="font-semibold text-sm">{authorStat.author.username}</div>
-                          <div className="text-xs text-base-content/60">
+                          <div className="font-semibold text-sm text-foreground">{authorStat.author.username}</div>
+                          <div className="text-xs text-muted-foreground">
                             {t('author_stats', {
                               articleCount: authorStat.articleCount,
                               favoritesCount: authorStat.totalFavorites,
                             })}
                           </div>
                         </div>
-                        <div className="badge badge-primary badge-sm">{index + 1}</div>
+                        <Badge variant="default">#{index + 1}</Badge>
                       </div>
                     ))}
                   </div>
-                </div>
-              </div>
+                </CardContent>
+              </Card>
 
               {/* Quick Stats */}
-              <div className="card bg-base-100 shadow-xl">
-                <div className="card-body">
-                  <h3 className="card-title text-lg flex items-center gap-2">
+              <Card className="shadow-xl">
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
                     <Eye className="w-5 h-5" />
                     {t('stats.additional_stats')}
-                  </h3>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
                   <div className="space-y-3">
-                    <div className="stat">
-                      <div className="stat-title text-xs">{t('stats.total_platforms')}</div>
-                      <div className="stat-value text-lg">{uniquePlatforms}</div>
+                    <div className="flex justify-between items-center">
+                      <div className="text-xs text-muted-foreground">{t('stats.total_platforms')}</div>
+                      <div className="text-lg font-bold">{uniquePlatforms}</div>
                     </div>
-                    <div className="stat">
-                      <div className="stat-title text-xs">{t('stats.game_engines')}</div>
-                      <div className="stat-value text-lg">{uniqueEngines}</div>
+                    <div className="flex justify-between items-center">
+                      <div className="text-xs text-muted-foreground">{t('stats.game_engines')}</div>
+                      <div className="text-lg font-bold">{uniqueEngines}</div>
                     </div>
-                    <div className="stat">
-                      <div className="stat-title text-xs">{t('stats.avg_likes')}</div>
-                      <div className="stat-value text-lg">
+                    <div className="flex justify-between items-center">
+                      <div className="text-xs text-muted-foreground">{t('stats.avg_likes')}</div>
+                      <div className="text-lg font-bold">
                         {articlesCount > 0 ? Math.round(totalFavorites / articlesCount) : 0}
                       </div>
                     </div>
                   </div>
-                </div>
-              </div>
+                </CardContent>
+              </Card>
             </div>
 
             {/* Featured Content */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
               {/* Recent Articles Showcase */}
-              <div className="card bg-base-100 shadow-xl">
-                <div className="card-body">
-                  <h3 className="card-title text-lg flex items-center gap-2">
+              <Card className="shadow-xl">
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
                     <Calendar className="w-5 h-5" />
                     {t('stats.recent_articles')}
-                  </h3>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
                   <div className="space-y-4">
                     {recentArticles.map((article) => (
                       <Link
                         key={article.id}
                         href={`/${locale}/articles/${article.slug}`}
-                        className="flex gap-3 p-3 bg-base-200 rounded-lg hover:bg-base-300 transition-colors cursor-pointer block"
+                        className="flex gap-3 p-3 bg-muted rounded-lg hover:bg-muted/80 transition-colors cursor-pointer block"
                       >
-                        <div className="avatar">
-                          <div className="w-12 h-12 rounded-lg">
-                            <Image
-                              src={article.mainImage}
-                              alt={article.title}
-                              width={48}
-                              height={48}
-                              loader={myImageLoader}
-                              className="object-cover"
-                            />
-                          </div>
-                        </div>
+                        <Avatar className="w-12 h-12 rounded-lg">
+                          <ImageWithFallback src={article.mainImage} alt={article.title} className="object-cover" type="nextImage" fill={true} />
+                          <AvatarFallback>{article.title.charAt(0)}</AvatarFallback>
+                        </Avatar>
                         <div className="flex-1 min-w-0">
                           <h4 className="font-semibold text-sm line-clamp-2 hover:text-primary transition-colors">
                             {article.title}
                           </h4>
                           <div className="flex items-center gap-2 mt-1">
-                            <div className="text-xs text-base-content/60">
+                            <div className="text-xs text-muted-foreground">
                               {new Date(article.createdAt).toLocaleDateString(locale === 'th' ? 'th-TH' : 'en-US')}
                             </div>
-                            <div className="badge badge-xs">{article.engine}</div>
+                            <Badge variant="secondary" className="text-xs">{article.engine}</Badge>
                           </div>
                           <div className="flex items-center gap-1 mt-1">
                             <Heart className="w-3 h-3" />
@@ -407,85 +397,81 @@ export default async function DynamicFilterPage({ params, filterType, hasRss = t
                       </Link>
                     ))}
                   </div>
-                </div>
-              </div>
+                </CardContent>
+              </Card>
 
               {/* Most Popular Articles */}
-              <div className="card bg-base-100 shadow-xl">
-                <div className="card-body">
-                  <h3 className="card-title text-lg flex items-center gap-2">
+              <Card className="shadow-xl">
+                <CardHeader>
+                  <CardTitle className="text-lg flex items-center gap-2">
                     <Heart className="w-5 h-5" />
                     {t('stats.most_popular')}
-                  </h3>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
                   <div className="space-y-4">
                     {popularArticles.map((article, index) => (
                       <Link
                         key={article.id}
                         href={`/${locale}/articles/${article.slug}`}
-                        className="flex gap-3 p-3 bg-base-200 rounded-lg hover:bg-base-300 transition-colors cursor-pointer block"
+                        className="flex gap-3 p-3 bg-muted rounded-lg hover:bg-muted/80 transition-colors cursor-pointer block"
                       >
-                        <div className="avatar">
-                          <div className="w-12 h-12 rounded-lg">
-                            <Image
-                              src={article.mainImage}
-                              alt={article.title}
-                              width={48}
-                              height={48}
-                              loader={myImageLoader}
-                              className="object-cover"
-                            />
-                          </div>
-                        </div>
+                        <Avatar className="w-12 h-12 rounded-lg">
+                          <ImageWithFallback src={article.mainImage} alt={article.title} className="object-cover" type="nextImage" fill={true} />
+                          <AvatarFallback>{article.title.charAt(0)}</AvatarFallback>
+                        </Avatar>
                         <div className="flex-1 min-w-0">
                           <h4 className="font-semibold text-sm line-clamp-2 hover:text-primary transition-colors">
                             {article.title}
                           </h4>
                           <div className="flex items-center gap-2 mt-1">
-                            <div className="text-xs text-base-content/60">
+                            <div className="text-xs text-muted-foreground">
                               {t('by_author', { username: article.author.username })}
                             </div>
-                            <div className="badge badge-xs">{article.engine}</div>
+                            <Badge variant="secondary" className="text-xs">{article.engine}</Badge>
                           </div>
                           <div className="flex items-center gap-2 mt-1">
                             <div className="flex items-center gap-1 text-red-500">
                               <Heart className="w-3 h-3" />
                               <span className="text-xs font-semibold">{article.favoritesCount}</span>
                             </div>
-                            <div className="badge badge-primary badge-xs">#{index + 1}</div>
+                            <Badge variant="default">#{index + 1}</Badge>
                           </div>
                         </div>
                       </Link>
                     ))}
                   </div>
-                </div>
-              </div>
+                </CardContent>
+              </Card>
             </div>
           </div>
         )}
 
         {/* Articles Section */}
         <div className="container mx-auto px-4 pb-12">
-          <div className="bg-base-100 rounded-2xl shadow-xl p-6">
+          <div className="bg-card rounded-2xl shadow-lg p-6">
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold flex items-center gap-3">
+              <h2 className="text-2xl font-bold flex items-center gap-3 text-foreground">
                 {getFilterIcon(filterType)}
                 {t('stats.articles')}
               </h2>
 
               {/* Sort/Filter Options */}
-              <div className="dropdown dropdown-end">
-                <div tabIndex={0} role="button" className="btn btn-outline btn-sm">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 2v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-                  </svg>
-                  {t('sort.label')}
-                </div>
-                <ul tabIndex={0} className="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
-                  <li><a>{t('sort.latest')}</a></li>
-                  <li><a>{t('sort.oldest')}</a></li>
-                  <li><a>{t('sort.most_popular')}</a></li>
-                </ul>
-              </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm">
+                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 2v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                    </svg>
+                    {t('sort.label')}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-52">
+                  <DropdownMenuItem>{t('sort.latest')}</DropdownMenuItem>
+                  <DropdownMenuItem>{t('sort.oldest')}</DropdownMenuItem>
+                  <DropdownMenuItem>{t('sort.most_popular')}</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
 
             {articlesCount > 0 ? (
@@ -500,7 +486,7 @@ export default async function DynamicFilterPage({ params, filterType, hasRss = t
                 <div className="w-24 h-24 mx-auto mb-6 opacity-20">
                   {getFilterIcon(filterType)}
                 </div>
-                <h3 className="text-xl font-semibold mb-2">{t('no_articles_title')}</h3>
+                <h3 className="text-xl font-semibold mb-2 text-foreground">{t('no_articles_title')}</h3>
                 <p className="text-base-content/60">
                   {t('no_articles', { filterType: t(`filter_types.${filterType}`), slug: decodedSlug })}
                 </p>

@@ -8,6 +8,7 @@ import { useParams, usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 interface NavLink {
   id: string;
@@ -191,13 +192,12 @@ export default function NavbarLinks({ section, onCloseMenu = () => {}, isMobile 
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
-                  className={`
-                    flex items-center gap-2 text-sm lg:text-base hover:bg-accent 
-                    ${isMobile 
-                      ? "justify-between w-full h-10 px-3" 
-                      : "justify-start w-auto px-3 py-2"
-                    }
-                  `}
+                  className={cn(
+                    "group inline-flex h-9 w-max items-center justify-center rounded-md bg-transparent px-4 py-2 text-sm font-medium transition-colors hover:bg-zinc-100 focus:bg-zinc-100 focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-zinc-100/50 dark:hover:bg-zinc-800 dark:focus:bg-zinc-800 dark:data-[active]:bg-zinc-800/50",
+                    isMobile
+                      ? "justify-between w-full h-10 px-3" // Keep mobile specific styles
+                      : "justify-start w-auto px-3 py-2" // Keep desktop specific styles
+                  )}
                 >
                   <span className="flex items-center gap-2">
                     {item.name === t("member") && <User size={16} />}
@@ -223,7 +223,11 @@ export default function NavbarLinks({ section, onCloseMenu = () => {}, isMobile 
                     <DropdownMenuItem key={sub.id} asChild>
                       <Link
                         href={sub.link || "#"}
-                        className="text-sm w-full hover:bg-accent"
+                        className={cn(
+                          'w-full rounded-lg px-4 py-2 text-left text-sm font-medium',
+                          // No conditional main link styling needed here as it's for sublinks
+                          'hover:bg-zinc-100 dark:hover:bg-zinc-800' // Default hover style
+                        )}
                         onClick={onCloseMenu}
                         target={sub.link?.startsWith("http") ? "_blank" : undefined}
                         rel={sub.link?.startsWith("http") ? "noopener noreferrer" : undefined}
@@ -238,13 +242,12 @@ export default function NavbarLinks({ section, onCloseMenu = () => {}, isMobile 
           ) : (
             <Link
               href={item.link || "#"}
-              className={`
-                flex items-center gap-2 text-sm lg:text-base hover:bg-accent rounded-md transition-colors
-                ${isMobile 
-                  ? "w-full px-3 py-2 h-10" 
-                  : "px-3 py-2"
-                }
-              `}
+              className={cn(
+                "group inline-flex h-9 w-max items-center justify-center rounded-md bg-transparent px-4 py-2 text-sm font-medium transition-colors hover:bg-zinc-100 focus:bg-zinc-100 focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-zinc-100/50 dark:hover:bg-zinc-800 dark:focus:bg-zinc-800 dark:data-[active]:bg-zinc-800/50",
+                isMobile
+                  ? "w-full px-3 py-2 h-10" // Keep mobile specific styles
+                  : "" // No extra styles for desktop, as the main class covers it
+              )}
               onClick={onCloseMenu}
             >
               {item.name}

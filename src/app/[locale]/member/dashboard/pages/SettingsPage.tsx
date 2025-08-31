@@ -17,6 +17,9 @@ import { userApi, ApiError, getCookie, setCookie } from '../utils/api';
 import { DashboardUser, SocialMediaLink, Token } from '../utils/types';
 import Image from 'next/image';
 import Link from 'next/link';
+import ImageWithFallback from '@/components/ImageWithFallback';
+
+const PLACEHOLDER_IMAGE = '/placeholder-image.png';
 
 // shadcn/ui components
 import { Button } from '@/components/ui/button';
@@ -482,11 +485,12 @@ const SettingsPage: React.FC = () => {
                   <Card>
                     {profileForm.backgroundImage && (
                       <div className="relative h-32 overflow-hidden">
-                        <Image
+                        <ImageWithFallback
                           src={profileForm.backgroundImage}
                           alt="Profile background"
                           fill
                           style={{ objectFit: 'cover' }}
+                          type="nextImage"
                         />
                       </div>
                     )}
@@ -496,7 +500,7 @@ const SettingsPage: React.FC = () => {
                           className={`h-24 w-24 ${profileForm.backgroundImage ? '-mt-12' : ''}`}
                         >
                           {profileForm.image ? (
-                            <AvatarImage src={profileForm.image} alt={profileForm.username} />
+                            <ImageWithFallback src={profileForm.image} alt={profileForm.username} type="avatarImage" />
                           ) : (
                             <AvatarFallback>
                               {profileForm.username.charAt(0).toUpperCase()}

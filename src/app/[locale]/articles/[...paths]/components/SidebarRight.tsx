@@ -7,6 +7,8 @@ import { useTranslations } from "next-intl";
 import { SidebarRightProps } from "./Interfaces";
 import myImageLoader from "../../../lib/imageLoader";
 
+const PLACEHOLDER_IMAGE = '/placeholder-image.png';
+
 import {
   BookmarkIcon as BookmarkOutline,
   UserPlusIcon,
@@ -83,6 +85,7 @@ const SidebarRight: React.FC<SidebarRightProps> = ({
                 width={56}
                 height={56}
                 className="rounded-full ring-2 ring-primary"
+                onError={(e) => (e.currentTarget.src = PLACEHOLDER_IMAGE)}
               />
             </div>
             <div>
