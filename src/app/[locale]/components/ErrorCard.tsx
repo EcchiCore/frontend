@@ -4,6 +4,10 @@
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 
+interface ErrorCardProps {
+  locale: string;
+}
+
 export default function ErrorCard({ locale }: ErrorCardProps) {
   return (
     <div className="min-h-screen bg-background flex items-center justify-center">

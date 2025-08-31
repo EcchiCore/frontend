@@ -366,6 +366,56 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
   );
 };
 
+const ImageItem: React.FC<{
+  url: string;
+  index: number;
+  size: number;
+  onRemove?: (url: string) => void;
+  myImageLoader: any; // Assuming myImageLoader is passed down
+  PLACEHOLDER_IMAGE: string; // Pass placeholder image as prop
+}> = ({ url, index, size, onRemove, myImageLoader, PLACEHOLDER_IMAGE }) => {
+  const transformedUrl = url.includes('cloudinary.com')
+    ? url.replace(/upload\//, `upload/q_auto,f_auto/`)
+    : url;
+
+  const [imgSrc, setImgSrc] = useState(transformedUrl);
+
+  return (
+    <Box key={index} sx={{ position: 'relative' }}>
+      <Image
+        loader={myImageLoader}
+        src={imgSrc}
+        alt={`Image ${index + 1}`}
+        width={size}
+        height={size}
+        style={{
+          objectFit: 'cover',
+          borderRadius: 8,
+        }}
+        onError={() => setImgSrc(PLACEHOLDER_IMAGE)}
+      />
+      {onRemove && (
+        <IconButton
+          sx={{
+            position: 'absolute',
+            top: 0,
+            right: 0,
+            backgroundColor: 'rgba(255,255,255,0.7)',
+            '&:hover': {
+              backgroundColor: 'rgba(255,255,255,0.9)',
+            },
+          }}
+          onClick={() => onRemove(url)}
+          color="error"
+          size="small"
+        >
+          <DeleteIcon fontSize="small" />
+        </IconButton>
+      )}
+    </Box>
+  );
+};
+
 export const ImagePreview: React.FC<{
   urls: string[];
   onRemove?: (url: string) => void;
@@ -375,48 +425,17 @@ export const ImagePreview: React.FC<{
 
   return (
     <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mt: 2 }}>
-      {urls.map((url, index) => {
-        const transformedUrl = url.includes('cloudinary.com')
-          ? url.replace(/upload\//, `upload/q_auto,f_auto/`)
-          : url;
-
-        const [imgSrc, setImgSrc] = useState(transformedUrl);
-
-        return (
-          <Box key={index} sx={{ position: 'relative' }}>
-            <Image
-              loader={myImageLoader}
-              src={imgSrc}
-              alt={`Image ${index + 1}`}
-              width={size}
-              height={size}
-              style={{
-                objectFit: 'cover',
-                borderRadius: 8,
-              }}
-              onError={() => setImgSrc(PLACEHOLDER_IMAGE)}
-            />
-            {onRemove && (
-              <IconButton
-                sx={{
-                  position: 'absolute',
-                  top: 0,
-                  right: 0,
-                  backgroundColor: 'rgba(255,255,255,0.7)',
-                  '&:hover': {
-                    backgroundColor: 'rgba(255,255,255,0.9)',
-                  }
-                }}
-                onClick={() => onRemove(url)}
-                color="error"
-                size="small"
-              >
-                <DeleteIcon fontSize="small" />
-              </IconButton>
-            )}
-          </Box>
-        );
-      })}
+      {urls.map((url, index) => (
+        <ImageItem
+          key={index}
+          url={url}
+          index={index}
+          size={size}
+          onRemove={onRemove}
+          myImageLoader={myImageLoader}
+          PLACEHOLDER_IMAGE={PLACEHOLDER_IMAGE}
+        />
+      ))}
     </Box>
   );
 };
