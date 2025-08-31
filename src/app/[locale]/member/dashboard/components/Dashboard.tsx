@@ -7,8 +7,6 @@ import ArticleManagement from './components/ArticleManagement';
 import ProfileUpdate from './components/ProfileUpdate';
 import { DashboardUser } from './types';
 import { Pencil, FileText } from 'lucide-react';
-import Image from 'next/image';
-import myImageLoader from '@/lib/imageLoader';
 import { DashboardLayoutShadcn } from '../layout/DashboardLayout.shadcn';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -250,7 +248,7 @@ const Dashboard: React.FC = () => {
           <CardContent>
             {articlesData.articles.length > 0 ? (
               <ul className="space-y-4">
-                {articlesData.articles.map((article, index) => (
+                {articlesData.articles.map((article) => (
                   <li key={article.slug} className="flex items-start gap-4">
                     <Avatar>
                       <AvatarFallback>

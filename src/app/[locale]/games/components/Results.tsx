@@ -3,6 +3,8 @@
 // ===============================
 import { fetchArticles, type Article } from "@/lib/api";
 import GameCard from "./GameCard";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 export default async function Results({ searchParams }: { searchParams: Record<string, string | string[] | undefined> | null | undefined }) {
   const { items, total, page, pageSize } = await fetchArticles(searchParams);
@@ -38,9 +40,13 @@ function Pager({ page, pages, searchParams }: { page: number; pages: number; sea
   };
   return (
     <div className="flex items-center gap-2 justify-center pt-2">
-      <a href={params(prev)} className="px-3 py-1 rounded-full border">ก่อนหน้า</a>
+      <Button asChild variant="outline">
+        <Link href={params(prev)}>ก่อนหน้า</Link>
+      </Button>
       <span className="text-sm opacity-70">หน้า {page} / {pages}</span>
-      <a href={params(next)} className="px-3 py-1 rounded-full border">ถัดไป</a>
+      <Button asChild variant="outline">
+        <Link href={params(next)}>ถัดไป</Link>
+      </Button>
     </div>
   );
 }

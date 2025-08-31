@@ -37,7 +37,6 @@ const SidebarRight: React.FC<SidebarRightProps> = ({
   downloads,
   translationFiles,
   setOpenDownloadDialog,
-  isDarkBackground,
 }) => {
   const t = useTranslations("sidebar");
 
@@ -225,12 +224,6 @@ const SidebarRight: React.FC<SidebarRightProps> = ({
           platformList: "/platforms/",
           tagList: "/tag/",
           categoryList: "/category/",
-        };
-
-        const colorMap: Record<string, string> = {
-          platformList: "warning",
-          tagList: "primary",
-          categoryList: "secondary",
         };
 
         return (

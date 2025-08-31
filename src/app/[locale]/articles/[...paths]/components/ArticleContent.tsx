@@ -28,7 +28,7 @@ import ArticleTitleMeta from "./ArticleTitleMeta";
 import { Article, DownloadFile, TranslationFile, Comment, TokenPayload, AlertState } from "./Interfaces";
 import myImageLoader from "../../../lib/imageLoader";
 import { useDebounce } from "./Debounce";
-import { CloudArrowDown, CalendarDays, Folder, User, Info, Check, Clipboard, Search } from "lucide-react";
+import { Download, CalendarDays, Folder, User, Info, Check, Clipboard, Search } from "lucide-react";
 import { Button, Card, CardContent, CardHeader, CardTitle, Input, Dialog, DialogContent, DialogHeader, DialogTitle, Tabs, TabsList, TabsTrigger, TabsContent, Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui"; // Adjust import based on your UI library
 import cn from 'classnames';
 import { useTranslations } from 'next-intl';
@@ -158,7 +158,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({ article, slug, download
                 "flex items-center gap-2 text-sm",
                 isDarkMode ? "text-gray-400" : "text-gray-500"
               )}>
-                <CalendarDaysIcon className="size-4" />
+                <CalendarDays className="size-4" />
                 <span>{formatDate(item.createdAt)}</span>
               </div>
 
@@ -167,7 +167,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({ article, slug, download
                   "flex items-center gap-2 text-sm",
                   isDarkMode ? "text-gray-400" : "text-gray-500"
                 )}>
-                  <FolderIcon className="size-4" />
+                  <Folder className="size-4" />
                   <span>{getFileSize(item.size)}</span>
                 </div>
               )}
@@ -177,7 +177,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({ article, slug, download
                   "flex items-center gap-2 text-sm",
                   isDarkMode ? "text-gray-400" : "text-gray-500"
                 )}>
-                  <UserIcon className="size-4" />
+                  <User className="size-4" />
                   <span>{t("translatedBy", { name: item.translator.name, language: item.language })}</span>
                 </div>
               )}
@@ -188,7 +188,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({ article, slug, download
                 "flex items-start gap-2 text-sm mt-3 p-3 rounded-lg",
                 isDarkMode ? "bg-gray-700/30 text-gray-300" : "bg-gray-50 text-gray-600"
               )}>
-                <InformationCircleIcon className="size-4 mt-0.5 flex-shrink-0" />
+                <Info className="size-4 mt-0.5 flex-shrink-0" />
                 <p className="line-clamp-2">{item.description}</p>
               </div>
             )}
@@ -200,7 +200,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({ article, slug, download
             className="flex-1"
             onClick={() => handleOpenDownload(item)}
           >
-            <CloudArrowDownIcon className="size-5 mr-2" />
+            <Download className="size-5 mr-2" />
             <span>{t("download")}</span>
           </Button>
 
@@ -211,12 +211,12 @@ const ArticleContent: React.FC<ArticleContentProps> = ({ article, slug, download
           >
             {copiedLink === ("url" in item ? item.url : item.fileUrl) ? (
               <>
-                <CheckIcon className="size-5 mr-2" />
+                <Check className="size-5 mr-2" />
                 <span>{t("copied")}</span>
               </>
             ) : (
               <>
-                <ClipboardIcon className="size-5 mr-2" />
+                <Clipboard className="size-5 mr-2" />
                 <span>{t("copy")}</span>
               </>
             )}
@@ -230,7 +230,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({ article, slug, download
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h4 className="text-lg font-semibold flex items-center gap-2">
-          <FolderIcon className="size-5" />
+          <Folder className="size-5" />
           {title} ({items.length})
         </h4>
 
@@ -266,7 +266,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({ article, slug, download
           animate={{ opacity: 1, y: 0 }}
           className="text-center py-12"
         >
-          <FolderIcon className="size-16 mx-auto mb-4 text-gray-400" />
+          <Folder className="size-16 mx-auto mb-4 text-gray-400" />
           <p className="text-lg font-medium mb-2 text-gray-500">
             {searchQuery ? t("noSearchResults") : t("noFiles")}
           </p>
@@ -729,7 +729,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({ article, slug, download
                         className="w-full flex items-center justify-center gap-2"
                         onClick={() => setOpenDownloadDialog(true)}
                       >
-                        <CloudArrowDown className="w-5 h-5" /> {t("viewFiles")} (
+                        <Download className="w-5 h-5" /> {t("viewFiles")} (
                         {downloads.length + translationFiles.length})
                       </Button>
                     </CardContent>

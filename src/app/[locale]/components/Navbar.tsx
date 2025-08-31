@@ -64,7 +64,7 @@ const Navbar = () => {
   if (!isClient) {
     // Render minimal navbar during SSR
     return (
-      <nav className="sticky top-0 z-50 w-full border-b bg-gray-900/95">
+      <nav className="sticky top-0 z-50 w-full border-b bg-background">
         <div className="container mx-auto flex h-14 items-center justify-between px-4 lg:px-6">
           <div className="flex items-center">
             <Link

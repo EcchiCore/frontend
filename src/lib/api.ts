@@ -61,12 +61,11 @@ export async function fetchArticles(params: Record<string, string | string[] | u
   const offset = (page - 1) * pageSize;
   usp.set("limit", String(pageSize));
   usp.set("offset", String(offset));
-  usp.delete("page");
   usp.delete("pageSize");
 
   const url = `${API_BASE}/api/articles?${usp.toString()}`;
   console.log('Fetching articles from:', url);
-  const res = await fetch(url, { cache: "no-store" }); // dynamic hole for PPR
+  const res = await fetch(url, { next: { revalidate: 3600 } }); // cache for 1 hour
   if (!res.ok) throw new Error(`API error ${res.status} for URL: ${url}`);
 
   // Normalize response to match PagedResponse

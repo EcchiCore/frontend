@@ -4,8 +4,6 @@ import React from 'react';
 import { Bell, UserCircle, LogOut, Settings, Menu } from 'lucide-react';
 import { useDashboard } from '../providers/DashboardProvider';
 import { useAuthContext } from '../providers/AuthProvider';
-import Image from 'next/image';
-import myImageLoader from '@/lib/imageLoader';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
