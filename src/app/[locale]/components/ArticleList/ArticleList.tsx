@@ -5,6 +5,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Article } from './article';
+import imageLoader from '@/app/[locale]/lib/imageLoader';
 
 interface ArticleListProps {
   articles: Article[];
@@ -29,6 +30,7 @@ const ArticleItem: React.FC<{
     >
       <div className="relative w-full h-48">
         <Image
+          loader={imageLoader}
           src={mainImageSrc}
           alt={article.title}
           fill
@@ -42,6 +44,7 @@ const ArticleItem: React.FC<{
         <p className="text-gray-600 line-clamp-3">{article.description}</p>
         <div className="mt-4 flex items-center">
           <Image
+            loader={imageLoader}
             src={authorImageSrc}
             alt={article.author.username}
             width={32}

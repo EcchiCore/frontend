@@ -3,6 +3,7 @@
 import React from 'react';
 import Image from 'next/image';
 import { User, Mail, FileText, ImageIcon } from 'lucide-react';
+import imageLoader from '../../lib/imageLoader';
 
 interface UserData {
   username: string;
@@ -113,6 +114,7 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({
               <div className="avatar mb-4">
                 <div className="w-32 rounded-full ring-2 ring-primary ring-offset-4 mx-auto">
                   <Image
+                    loader={imageLoader}
                     src={formData.image || '/default-avatar.png'}
                     alt={formData.username}
                     width={128}

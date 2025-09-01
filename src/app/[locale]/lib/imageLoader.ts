@@ -1,5 +1,5 @@
 'use client'
-// src/app/lib/imageLoader.ts
+// src/app/lib/[locale]/imageLoader.ts
 
 export default function myImageLoader({
                                         src,

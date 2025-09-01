@@ -9,6 +9,7 @@ import { IoArrowBack } from 'react-icons/io5';
 import { FiBold, FiItalic, FiList, FiHash } from 'react-icons/fi';
 import { MdUndo, MdRedo } from 'react-icons/md';
 import Image from 'next/image';
+import imageLoader from '@/app/[locale]/lib/imageLoader';
 
 const PLACEHOLDER_IMAGE = '/placeholder-image.png';
 
@@ -576,6 +577,7 @@ const ArticleEditorPage: React.FC = () => {
           {mainImage && (
             <div className="mt-2">
               <Image
+                loader={imageLoader}
                 src={mainImage}
                 alt="Main Image"
                 className="w-32 h-32 object-cover rounded"
@@ -617,6 +619,7 @@ const ArticleEditorPage: React.FC = () => {
             {images.map((url, index) => (
               <div key={index} className="relative">
                 <Image
+                  loader={imageLoader}
                   src={url}
                   alt={`Image ${index + 1}`}
                   className="w-24 h-24 object-cover rounded"

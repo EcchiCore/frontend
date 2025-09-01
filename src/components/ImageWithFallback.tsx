@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import { AvatarImage } from "@/components/ui/avatar";
+import imageLoader from '@/app/[locale]/lib/imageLoader';
 
 const PLACEHOLDER_IMAGE = "/placeholder-image.png";
 
@@ -32,6 +33,7 @@ const ImageWithFallback: React.FC<ImageWithFallbackProps> = ({
   if (type === "nextImage") {
     return (
       <Image
+        loader={imageLoader}
         src={imageSrc}
         alt={alt}
         className={className}

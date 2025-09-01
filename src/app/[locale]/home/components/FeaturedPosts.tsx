@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Eye, MessageSquare, Heart, Clock } from 'lucide-react';
 import Image from 'next/image'; // Import Next.js Image component
+import imageLoader from '@/app/[locale]/lib/imageLoader';
 
 const PLACEHOLDER_IMAGE = '/placeholder-image.png';
 
@@ -103,6 +104,7 @@ export default function FeaturedPosts({ platform = 'windows' }: FeaturedPostsPro
             <div className="flex space-x-4">
               <div className="w-32 h-20 bg-muted rounded-lg flex-shrink-0 overflow-hidden">
                 <Image
+                  loader={imageLoader}
                   src={post.mainImage || PLACEHOLDER_IMAGE}
                   alt={post.title}
                   width={128} // Match w-32 (32 * 4 = 128px)

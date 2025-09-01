@@ -104,7 +104,7 @@ export default function NavbarLinks({ section, onCloseMenu = () => {}, isMobile 
             id: "extensions-status",
             name: t("webStatus"),
             transKey: "webStatus",
-            link: "https://status.chanomhub.online/status/all",
+            link: "https://stats.uptimerobot.com/0hsXzq4YLX",
           },
         ],
       },
