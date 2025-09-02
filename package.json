@@ -55,7 +55,6 @@
     "@types/lodash": "^4.17.20",
     "@types/mdx": "^2.0.13",
     "@types/next": "^9.0.0",
-    "@vercel/blob": "^1.1.1",
     "axios": "^1.11.0",
     "class-variance-authority": "^0.7.1",
     "classnames": "^2.5.1",

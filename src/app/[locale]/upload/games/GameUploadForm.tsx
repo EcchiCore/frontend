@@ -48,27 +48,16 @@ export default function GameUploadForm() {
       return;
     }
 
-    const data = new FormData();
-    Object.keys(formData).forEach(key => {
-      if (key === 'otherImages' && formData.otherImages) {
-        for (let i = 0; i < formData.otherImages.length; i++) {
-          data.append('otherImages', formData.otherImages[i]);
-        }
-      } else if (key === 'downloads' || key === 'sources') {
-        // Skip these keys as they are handled separately
-      }
-      else {
-        data.append(key, formData[key]);
-      }
-    });
+    const data = { ...formData };
 
     try {
       const gameResponse = await fetch(`/${locale}/api/games`, {
         method: 'POST',
         headers: {
+          'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
-        body: data,
+        body: JSON.stringify(data),
       });
 
       if (!gameResponse.ok) {

@@ -1,4 +1,3 @@
-
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
@@ -8,15 +7,53 @@ interface Step3_MediaProps {
 }
 
 export const Step3_Media = ({ formData, setFormData }: Step3_MediaProps) => {
-  const handleFileChange = (e: { target: { id: string; files: FileList | null } }) => {
-    if (e.target.files) {
-      setFormData({ ...formData, [e.target.id]: e.target.files[0] });
+  const handleFileChange = async (e: { target: { id: string; files: FileList | null } }) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      const uploadFormData = new FormData();
+      uploadFormData.append('file', file);
+
+      try {
+        const response = await fetch('https://rustgram.onrender.com/upload', {
+          method: 'POST',
+          body: uploadFormData,
+        });
+
+        if (!response.ok) {
+          throw new Error('Upload failed');
+        }
+
+        const result = await response.json();
+        setFormData({ ...formData, [e.target.id]: result.url });
+      } catch (error) {
+        console.error('Error uploading file:', error);
+        // Handle error, maybe show a message to the user
+      }
     }
   };
 
-  const handleMultipleFileChange = (e: { target: { id: string; files: FileList | null } }) => {
+  const handleMultipleFileChange = async (e: { target: { id: string; files: FileList | null } }) => {
     if (e.target.files) {
-      setFormData({ ...formData, [e.target.id]: e.target.files });
+      const files = Array.from(e.target.files);
+      try {
+        const urls = await Promise.all(files.map(async (file) => {
+          const uploadFormData = new FormData();
+          uploadFormData.append('file', file);
+          const response = await fetch('https://rustgram.onrender.com/upload', {
+            method: 'POST',
+            body: uploadFormData,
+          });
+          if (!response.ok) {
+            throw new Error(`Upload failed for ${file.name}`);
+          }
+          const result = await response.json();
+          return result.url;
+        }));
+        setFormData({ ...formData, [e.target.id]: urls });
+      } catch (error) {
+        console.error('Error uploading multiple files:', error);
+        // Handle error, maybe show a message to the user
+      }
     }
   };
 

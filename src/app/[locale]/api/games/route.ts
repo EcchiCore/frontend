@@ -1,4 +1,3 @@
-
 import { NextRequest, NextResponse } from 'next/server';
 import { getCached } from '@/lib/cache';
 
@@ -9,8 +8,6 @@ function getAuthToken(req: NextRequest): string | null {
   }
   return req.cookies.get('token')?.value || null;
 }
-
-
 
 async function fetchTags() {
     const response = await fetch('https://api.chanomhub.online/api/tags');
@@ -57,43 +54,6 @@ async function validateTaxonomies(tags: string[], categories: string[]): Promise
     }
 }
 
-async function uploadImageToRustGram(file: File): Promise<string> {
-  // 1. Upload to Vercel Blob
-  const blob = await put(file.name, file, {
-    access: 'public',
-  });
-
-  // 2. Call rustgram to download from Vercel Blob
-  const rustgramUploadUrl = 'https://rustgram.onrender.com/upload_from_url';
-  const response = await fetch(rustgramUploadUrl, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ url: blob.url }),
-  });
-
-  if (!response.ok) {
-    // If rustgram fails, we should probably delete the blob from vercel
-    await del(blob.url);
-    const errorBody = await response.text();
-    throw new Error(`Image upload to RustGram from URL failed: ${response.statusText}. Body: ${errorBody}`);
-  }
-
-  const result = await response.json();
-  if (!result.url) {
-    // If rustgram fails, we should probably delete the blob from vercel
-    await del(blob.url);
-    throw new Error('Image upload to RustGram from URL did not return a URL.');
-  }
-
-  // 3. Delete the image from Vercel Blob
-  await del(blob.url);
-
-  // 4. Return the URL from rustgram
-  return result.url;
-}
-
 export async function POST(request: NextRequest) {
   try {
     const token = getAuthToken(request);
@@ -101,19 +61,21 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
-    const formData = await request.formData();
-    const title = formData.get('title') as string;
-    const description = formData.get('description') as string;
-    const body = formData.get('body') as string;
-    const ver = formData.get('ver') as string;
-    const engine = formData.get('engine') as string;
-    const tagListJSON = formData.get('tagList') as string;
-    const categoryListJSON = formData.get('categoryList') as string;
-    const platformListJSON = formData.get('platformList') as string;
-    const coverImage = formData.get('coverImage') as File;
-    const mainImage = formData.get('mainImage') as File | null;
-    const backgroundImage = formData.get('backgroundImage') as File | null;
-    const otherImages = formData.getAll('otherImages') as File[];
+    const data = await request.json();
+    const {
+      title,
+      description,
+      body,
+      ver,
+      engine,
+      tagList,
+      categoryList,
+      platformList,
+      coverImage,
+      mainImage,
+      backgroundImage,
+      otherImages,
+    } = data;
 
     const missingFields = [];
     if (!title) missingFields.push('title');
@@ -124,31 +86,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ message: `Missing required fields: ${missingFields.join(', ')}` }, { status: 400 });
     }
 
-    const tagList = tagListJSON ? JSON.parse(tagListJSON) : [];
-    const categoryList = categoryListJSON ? JSON.parse(categoryListJSON) : [];
-
-    const validationResult = await validateTaxonomies(tagList, categoryList);
+    const validationResult = await validateTaxonomies(tagList || [], categoryList || []);
     if (!validationResult.isValid) {
         return NextResponse.json({ message: validationResult.error }, { status: 400 });
-    }
-
-    // Upload files
-    const coverImageUrl = await uploadImageToRustGram(coverImage);
-
-    let mainImageUrl = coverImageUrl;
-    if (mainImage) {
-        mainImageUrl = await uploadImageToRustGram(mainImage);
-    }
-
-    let backgroundImageUrl = coverImageUrl;
-    if (backgroundImage) {
-        backgroundImageUrl = await uploadImageToRustGram(backgroundImage);
-    }
-
-    const otherImageUrls = [];
-    for (const imageFile of otherImages) {
-        const url = await uploadImageToRustGram(imageFile);
-        otherImageUrls.push(url);
     }
 
     const newArticle = {
@@ -159,13 +99,13 @@ export async function POST(request: NextRequest) {
         ver,
         engine,
         status: 'DRAFT',
-        mainImage: mainImageUrl,
-        backgroundImage: backgroundImageUrl,
-        coverImage: coverImageUrl,
-        images: [coverImageUrl, ...otherImageUrls],
-        tagList,
-        categoryList,
-        platformList: platformListJSON ? JSON.parse(platformListJSON) : [],
+        mainImage: mainImage || coverImage,
+        backgroundImage: backgroundImage || coverImage,
+        coverImage: coverImage,
+        images: [coverImage, ...(otherImages || [])],
+        tagList: tagList || [],
+        categoryList: categoryList || [],
+        platformList: platformList || [],
       },
     };
 
@@ -183,23 +123,6 @@ export async function POST(request: NextRequest) {
     if (!backendResponse.ok) {
       return NextResponse.json({ message: 'Backend API error', details: backendData }, { status: backendResponse.status });
     }
-
-    
-
-    return NextResponse.json({ message: 'Game uploaded successfully!', data: backendData }, { status: 200 });
-
-  } catch (error) {
-    console.error('Upload error:', error);
-    return NextResponse.json({ message: 'An error occurred during upload.' }, { status: 500 });
-  }
-}
-nst backendData = await backendResponse.json();
-
-    if (!backendResponse.ok) {
-      return NextResponse.json({ message: 'Backend API error', details: backendData }, { status: backendResponse.status });
-    }
-
-    
 
     return NextResponse.json({ message: 'Game uploaded successfully!', data: backendData }, { status: 200 });
 
