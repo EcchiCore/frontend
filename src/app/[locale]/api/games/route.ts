@@ -58,25 +58,39 @@ async function validateTaxonomies(tags: string[], categories: string[]): Promise
 }
 
 async function uploadImageToRustGram(file: File): Promise<string> {
-  const formData = new FormData();
-  formData.append('file', file);
+  // 1. Upload to Vercel Blob
+  const blob = await put(file.name, file, {
+    access: 'public',
+  });
 
-  const uploadUrl = 'https://rustgram.onrender.com/upload';
-
-  const response = await fetch(uploadUrl, {
+  // 2. Call rustgram to download from Vercel Blob
+  const rustgramUploadUrl = 'https://rustgram.onrender.com/upload_from_url';
+  const response = await fetch(rustgramUploadUrl, {
     method: 'POST',
-    body: formData,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ url: blob.url }),
   });
 
   if (!response.ok) {
+    // If rustgram fails, we should probably delete the blob from vercel
+    await del(blob.url);
     const errorBody = await response.text();
-    throw new Error(`Image upload to RustGram failed: ${response.statusText}. Body: ${errorBody}`);
+    throw new Error(`Image upload to RustGram from URL failed: ${response.statusText}. Body: ${errorBody}`);
   }
 
   const result = await response.json();
   if (!result.url) {
-    throw new Error('Image upload to RustGram did not return a URL.');
+    // If rustgram fails, we should probably delete the blob from vercel
+    await del(blob.url);
+    throw new Error('Image upload to RustGram from URL did not return a URL.');
   }
+
+  // 3. Delete the image from Vercel Blob
+  await del(blob.url);
+
+  // 4. Return the URL from rustgram
   return result.url;
 }
 
@@ -165,6 +179,21 @@ export async function POST(request: NextRequest) {
     });
 
     const backendData = await backendResponse.json();
+
+    if (!backendResponse.ok) {
+      return NextResponse.json({ message: 'Backend API error', details: backendData }, { status: backendResponse.status });
+    }
+
+    
+
+    return NextResponse.json({ message: 'Game uploaded successfully!', data: backendData }, { status: 200 });
+
+  } catch (error) {
+    console.error('Upload error:', error);
+    return NextResponse.json({ message: 'An error occurred during upload.' }, { status: 500 });
+  }
+}
+nst backendData = await backendResponse.json();
 
     if (!backendResponse.ok) {
       return NextResponse.json({ message: 'Backend API error', details: backendData }, { status: backendResponse.status });
