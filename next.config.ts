@@ -17,7 +17,8 @@ const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
       { protocol: 'http', hostname: 'res.cloudinary.com', pathname: '/**' },
-      { protocol: 'https', hostname: 'rustgram.onrender.com' pathname: '/**'},
+      { protocol: 'https', hostname: 'rustgram.onrender.com', pathname: '/**'},
+
       { protocol: 'https', hostname: 'resize.chanomhub.online', pathname: '/**' },
       { protocol: 'https', hostname: 'icons.duckduckgo.com', pathname: '/ip3/**' },
     ],
