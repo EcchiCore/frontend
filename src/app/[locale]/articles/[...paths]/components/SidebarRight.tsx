@@ -1,12 +1,12 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { SidebarRightProps } from "./Interfaces";
 
-const PLACEHOLDER_IMAGE = '/placeholder-image.png';
+
 
 import {
   BookmarkIcon as BookmarkOutline,
@@ -39,6 +39,8 @@ const SidebarRight: React.FC<SidebarRightProps> = ({
   translationFiles,
   setOpenDownloadDialog,
 }) => {
+  const [error, setError] = useState(false);
+  const [loading, setLoading] = useState(true);
   const t = useTranslations("sidebar");
 
   const encodeURLComponent = (value: string) =>

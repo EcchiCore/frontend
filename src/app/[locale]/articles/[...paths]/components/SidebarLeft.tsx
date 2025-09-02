@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -12,6 +12,8 @@ const SidebarLeft: React.FC<SidebarLeftProps> = ({
   article,
   topCommenters,
 }) => {
+  const [error, setError] = useState(false);
+  const [loading, setLoading] = useState(true);
   const mainImageUrl =
     typeof article.mainImage === "string"
       ? article.mainImage

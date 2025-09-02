@@ -119,8 +119,13 @@ function extractKeysFromFile(filePath: string): string[] {
         ) {
           node.specifiers.forEach((specifier) => {
             if (specifier.type === 'ImportSpecifier') {
-              importedTranslationFunctions.add(specifier.imported.name);
-              console.log(`📦 Found import: ${specifier.imported.name} from ${node.source.value} in ${path.basename(filePath)}`);
+              if (specifier.imported.type === 'Identifier') {
+                importedTranslationFunctions.add(specifier.imported.name);
+                console.log(`📦 Found import: ${specifier.imported.name} from ${node.source.value} in ${path.basename(filePath)}`);
+              } else if (specifier.imported.type === 'StringLiteral') {
+                importedTranslationFunctions.add(specifier.imported.value);
+                console.log(`📦 Found import: ${specifier.imported.value} from ${node.source.value} in ${path.basename(filePath)}`);
+              }
             }
           });
         }

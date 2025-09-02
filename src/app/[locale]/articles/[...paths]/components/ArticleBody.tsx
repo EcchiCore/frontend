@@ -67,7 +67,6 @@ const ArticleBody: React.FC<ArticleBodyProps> = ({
           <Card className="relative h-64 md:h-80 rounded-xl overflow-hidden bg-base-200 flex justify-center items-center border border-base-content/20 shadow-lg">
             <CardContent className="p-0 relative w-full h-full">
               <Image
-                loader={myImageLoader}
                 src={selectedImage}
                 alt="ภาพที่เลือก"
                 fill
@@ -101,9 +100,6 @@ const ArticleBody: React.FC<ArticleBodyProps> = ({
                   sizes="100px"
                   quality={80}
                   loading="lazy"
-                  onError={() => setError(true)}
-                  onLoad={() => setLoading(false)}
-                  {...props}
 
                 />
 

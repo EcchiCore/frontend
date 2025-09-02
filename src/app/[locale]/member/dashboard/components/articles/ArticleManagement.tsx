@@ -103,7 +103,7 @@ const ArticleManagement: React.FC = () => {
       setLoading(false);
       console.log('fetchArticles: Fetch finished. Loading:', false, 'Error:', error);
     }
-  }, [statusFilter, tagFilter, page, itemsPerPage, API_URL]);
+  }, [statusFilter, tagFilter, page, itemsPerPage, API_URL, error]);
 
   useEffect(() => {
     console.log('ArticleManagement: useEffect triggered. Calling fetchArticles...');

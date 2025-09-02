@@ -18,10 +18,10 @@ import { useUserData } from '../hooks/useUserData';
 import { useAuthContext } from '../providers/AuthProvider';
 import { Article, ArticleStatus } from '../utils/types';
 import { ITEMS_PER_PAGE_OPTIONS } from '../utils/constants';
-import Image from 'next/image';
-import myImageLoader from '../../../lib/imageLoader';
 
-const PLACEHOLDER_IMAGE = '/placeholder-image.png';
+
+
+
 
 // shadcn/ui imports
 import { Button } from '@/components/ui/button';

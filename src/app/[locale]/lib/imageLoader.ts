@@ -5,15 +5,13 @@ export default function myImageLoader({
   src,
   width,
   quality,
-  height,
 }: {
   src: string
   width: number
   quality?: number
-  height?: number
 }) {
   // Debug log
-  console.log('Image loader called with:', { src, width, quality, height });
+  console.log('Image loader called with:', { src, width, quality });
 
   // ตรวจสอบว่าคือ relative path /image/... หรือ full URL
   const isRelativeImage = src.startsWith('/image/');
@@ -40,12 +38,10 @@ export function myImageLoaderWithOptimization({
   src,
   width,
   quality,
-  height,
 }: {
   src: string
   width: number
   quality?: number
-  height?: number
 }) {
   const isRelativeImage = src.startsWith('/image/');
   const isRustgramImage = isRelativeImage || src.startsWith('https://rustgram.onrender.com');

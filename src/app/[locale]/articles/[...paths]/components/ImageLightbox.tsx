@@ -3,6 +3,10 @@ import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { ImageLightboxProps } from "./Interfaces";
 
+const myImageLoader = ({ src, width, quality }: { src: string; width: number; quality?: number }) => {
+  return `${src}?w=${width}&q=${quality || 75}`;
+};
+
 const ImageLightbox = ({
                          open,
                          onClose,
@@ -17,6 +21,7 @@ const ImageLightbox = ({
   const [rotation, setRotation] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [preloadedImages, setPreloadedImages] = useState<Set<string>>(new Set());
+  const [error, setError] = useState(false);
 
   // Reset state when lightbox opens
   useEffect(() => {
@@ -248,8 +253,6 @@ const ImageLightbox = ({
                   onLoad={handleImageLoad}
                   quality={90}
                   onError={() => setError(true)}
-                  onLoad={() => setLoading(false)}
-                  {...props}
                 />
               </div>
 

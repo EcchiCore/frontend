@@ -27,6 +27,7 @@ interface ArticleItemProps {
   onDelete?: (slug: string) => void;
   onView?: (slug: string) => void;
   onFavoriteChange?: (slug: string, favorited: boolean, favoritesCount: number) => void;
+  onPublishRequest?: (slug: string) => void;
 }
 
 const ArticleItem: React.FC<ArticleItemProps> = ({
