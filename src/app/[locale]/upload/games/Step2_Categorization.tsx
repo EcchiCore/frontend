@@ -2,11 +2,18 @@
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 
-export const Step2_Categorization = ({ formData, setFormData, availableTags, availableCategories }) => {
+interface Step2_CategorizationProps {
+  formData: Record<string, any>;
+  setFormData: (data: Record<string, any>) => void;
+  availableTags: string[];
+  availableCategories: string[];
+}
+
+export const Step2_Categorization = ({ formData, setFormData, availableTags, availableCategories }: Step2_CategorizationProps) => {
   const handleTagChange = (tag: string) => {
     const currentTags = formData.tags || [];
     const newTags = currentTags.includes(tag)
-      ? currentTags.filter(t => t !== tag)
+      ? currentTags.filter((t: string) => t !== tag)
       : [...currentTags, tag];
     setFormData({ ...formData, tags: newTags });
   };
@@ -14,7 +21,7 @@ export const Step2_Categorization = ({ formData, setFormData, availableTags, ava
   const handleCategoryChange = (category: string) => {
     const currentCategories = formData.categories || [];
     const newCategories = currentCategories.includes(category)
-      ? currentCategories.filter(c => c !== category)
+      ? currentCategories.filter((c: string) => c !== category)
       : [...currentCategories, category];
     setFormData({ ...formData, categories: newCategories });
   };

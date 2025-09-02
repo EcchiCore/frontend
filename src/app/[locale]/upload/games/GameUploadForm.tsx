@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button';
 
 export default function GameUploadForm() {
   const [activeSection, setActiveSection] = useState('basic');
-  const [formData, setFormData] = useState({});
+  const [formData, setFormData] = useState<Record<string, any>>({});
   const [isUploading, setIsUploading] = useState(false);
   const [availableTags, setAvailableTags] = useState<string[]>([]);
   const [availableCategories, setAvailableCategories] = useState<string[]>([]);
@@ -50,7 +50,7 @@ export default function GameUploadForm() {
 
     const data = new FormData();
     Object.keys(formData).forEach(key => {
-      if (key === 'otherImages') {
+      if (key === 'otherImages' && formData.otherImages) {
         for (let i = 0; i < formData.otherImages.length; i++) {
           data.append('otherImages', formData.otherImages[i]);
         }

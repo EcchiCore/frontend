@@ -4,10 +4,7 @@ import React from 'react';
 import { format } from 'date-fns';
 import ArticleFavoriteHandler from './ArticleFavoriteHandler';
 import { EyeIcon, PencilIcon, TrashIcon } from '@heroicons/react/24/outline';
-import Image from 'next/image';
 import ImageWithFallback from '@/components/ImageWithFallback';
-
-const PLACEHOLDER_IMAGE = '/placeholder-image.png';
 
 interface Author {
   username: string;

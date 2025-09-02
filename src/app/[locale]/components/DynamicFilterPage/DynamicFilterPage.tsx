@@ -1,7 +1,6 @@
 import { Metadata } from 'next';
 import ArticleList from '../ArticleList/ArticleList';
 import Link from 'next/link';
-import Image from 'next/image';
 import { RssIcon, Tag, Monitor, FolderOpen, Calendar, User, Heart, Eye } from 'lucide-react';
 import { ArticlesResponse } from '../ArticleList/article';
 import { Button } from '@/components/ui/button';
@@ -9,12 +8,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import myImageLoader from '../../lib/imageLoader';
 import ErrorCard from '../../components/ErrorCard';
 import { getTranslations } from 'next-intl/server';
 import ImageWithFallback from '@/components/ImageWithFallback';
-
-const PLACEHOLDER_IMAGE = '/placeholder-image.png';
 
 // Define types for filter
 type FilterType = 'platforms' | 'tag' | 'category';

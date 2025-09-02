@@ -9,19 +9,24 @@ import { Checkbox } from '@/components/ui/checkbox';
 const engines = ["RENPY", "RPGM", "UNITY", "UNREAL", "Godot", "TyranoBuilder", "WOLFRPG", "KIRIKIRI", "FLASH", "BAKINPLAYER"];
 const platforms = ["Windows", "macOS", "Linux", "Android", "iOS", "Web"];
 
-export const Step1_BasicInfo = ({ formData, setFormData }) => {
-  const handleChange = (e) => {
+interface Step1_BasicInfoProps {
+  formData: Record<string, any>;
+  setFormData: (data: Record<string, any>) => void;
+}
+
+export const Step1_BasicInfo = ({ formData, setFormData }: Step1_BasicInfoProps) => {
+  const handleChange = (e: { target: { id: string; value: string } }) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
   };
 
-  const handleSelectChange = (id, value) => {
+  const handleSelectChange = (id: string, value: string) => {
     setFormData({ ...formData, [id]: value });
   }
 
   const handlePlatformChange = (platform: string) => {
     const currentPlatforms = formData.platforms || [];
     const newPlatforms = currentPlatforms.includes(platform)
-      ? currentPlatforms.filter(p => p !== platform)
+      ? currentPlatforms.filter((p: string) => p !== platform)
       : [...currentPlatforms, platform];
     setFormData({ ...formData, platforms: newPlatforms });
   };

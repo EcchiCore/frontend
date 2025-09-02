@@ -10,7 +10,12 @@ const menuItems = [
   { id: 'downloads', label: 'Downloads' },
 ];
 
-export const SideMenu = ({ activeSection, setActiveSection }) => {
+interface SideMenuProps {
+  activeSection: string;
+  setActiveSection: (section: string) => void;
+}
+
+export const SideMenu = ({ activeSection, setActiveSection }: SideMenuProps) => {
   return (
     <div className="flex flex-col space-y-2">
       {menuItems.map(item => (

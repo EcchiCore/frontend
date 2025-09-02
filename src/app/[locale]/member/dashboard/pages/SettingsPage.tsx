@@ -15,11 +15,8 @@ import {
 import { useAuthContext } from '../providers/AuthProvider';
 import { userApi, ApiError, getCookie, setCookie } from '../utils/api';
 import { DashboardUser, SocialMediaLink, Token } from '../utils/types';
-import Image from 'next/image';
 import Link from 'next/link';
 import ImageWithFallback from '@/components/ImageWithFallback';
-
-const PLACEHOLDER_IMAGE = '/placeholder-image.png';
 
 // shadcn/ui components
 import { Button } from '@/components/ui/button';
@@ -29,7 +26,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import {
   Table,

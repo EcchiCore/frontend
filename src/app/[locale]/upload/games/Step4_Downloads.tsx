@@ -5,7 +5,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
-export const Step4_Downloads = ({ formData, setFormData }) => {
+interface Step4_DownloadsProps {
+  formData: Record<string, any>;
+  setFormData: (data: Record<string, any>) => void;
+}
+
+export const Step4_Downloads = ({ formData, setFormData }: Step4_DownloadsProps) => {
   const [downloadName, setDownloadName] = useState('');
   const [downloadUrl, setDownloadUrl] = useState('');
   const [sourceName, setSourceName] = useState('');
@@ -13,11 +18,11 @@ export const Step4_Downloads = ({ formData, setFormData }) => {
   const [downloadUrlError, setDownloadUrlError] = useState('');
   const [sourceUrlError, setSourceUrlError] = useState('');
 
-  const isValidUrl = (url) => {
+  const isValidUrl = (url: string) => {
     try {
       new URL(url);
       return true;
-    } catch (e) {
+    } catch {
       return false;
     }
   };
@@ -56,13 +61,13 @@ export const Step4_Downloads = ({ formData, setFormData }) => {
     setSourceUrl('');
   };
 
-  const handleRemoveDownload = (indexToRemove) => {
-    const updatedDownloads = formData.downloads.filter((_, index) => index !== indexToRemove);
+  const handleRemoveDownload = (indexToRemove: number) => {
+    const updatedDownloads = formData.downloads.filter((_: any, index: number) => index !== indexToRemove);
     setFormData({ ...formData, downloads: updatedDownloads });
   };
 
-  const handleRemoveSource = (indexToRemove) => {
-    const updatedSources = formData.sources.filter((_, index) => index !== indexToRemove);
+  const handleRemoveSource = (indexToRemove: number) => {
+    const updatedSources = formData.sources.filter((_: any, index: number) => index !== indexToRemove);
     setFormData({ ...formData, sources: updatedSources });
   };
 
@@ -71,7 +76,7 @@ export const Step4_Downloads = ({ formData, setFormData }) => {
       <div>
         <h3 className="text-lg font-medium">Download Links</h3>
         <div className="space-y-4 mt-4">
-          {formData.downloads?.map((download, index) => (
+          {formData.downloads?.map((download: { name: string, url: string }, index: number) => (
             <div key={index} className="flex items-center gap-4">
               <Input value={download.name} disabled />
               <Input value={download.url} disabled />
@@ -82,11 +87,11 @@ export const Step4_Downloads = ({ formData, setFormData }) => {
         <div className="flex items-end gap-4 mt-4">
           <div className="w-full">
             <Label htmlFor="downloadName">Name</Label>
-            <Input id="downloadName" value={downloadName} onChange={(e) => setDownloadName(e.target.value)} />
+            <Input id="downloadName" value={downloadName} onChange={(e: { target: { value: string } }) => setDownloadName(e.target.value)} />
           </div>
           <div className="w-full">
             <Label htmlFor="downloadUrl">URL</Label>
-            <Input id="downloadUrl" value={downloadUrl} onChange={(e) => setDownloadUrl(e.target.value)} />
+            <Input id="downloadUrl" value={downloadUrl} onChange={(e: { target: { value: string } }) => setDownloadUrl(e.target.value)} />
             {downloadUrlError && <p className="text-red-500 text-sm mt-1">{downloadUrlError}</p>}
           </div>
           <Button onClick={handleAddDownload}>Add</Button>
@@ -96,7 +101,7 @@ export const Step4_Downloads = ({ formData, setFormData }) => {
       <div>
         <h3 className="text-lg font-medium">Official Download Sources</h3>
         <div className="space-y-4 mt-4">
-          {formData.sources?.map((source, index) => (
+          {formData.sources?.map((source: { name: string, url: string }, index: number) => (
             <div key={index} className="flex items-center gap-4">
               <Input value={source.name} disabled />
               <Input value={source.url} disabled />
@@ -107,11 +112,11 @@ export const Step4_Downloads = ({ formData, setFormData }) => {
         <div className="flex items-end gap-4 mt-4">
           <div className="w-full">
             <Label htmlFor="sourceName">Name</Label>
-            <Input id="sourceName" value={sourceName} onChange={(e) => setSourceName(e.target.value)} />
+            <Input id="sourceName" value={sourceName} onChange={(e: { target: { value: string } }) => setSourceName(e.target.value)} />
           </div>
           <div className="w-full">
             <Label htmlFor="sourceUrl">URL</Label>
-            <Input id="sourceUrl" value={sourceUrl} onChange={(e) => setSourceUrl(e.target.value)} />
+            <Input id="sourceUrl" value={sourceUrl} onChange={(e: { target: { value: string } }) => setSourceUrl(e.target.value)} />
             {sourceUrlError && <p className="text-red-500 text-sm mt-1">{sourceUrlError}</p>}
           </div>
           <Button onClick={handleAddSource}>Add</Button>
