@@ -121,5 +121,11 @@ export const articlesApi = {
   unfavoriteArticle: (slug: string) =>
     apiRequest<{ article: Article }>(`/api/articles/${slug}/favorite`, {
       method: 'DELETE',
+      body: JSON.stringify({}),
+    }),
+  publishRequest: (slug: string) =>
+    apiRequest<void>(`/api/articles/${slug}/publish-request`, {
+      method: 'POST',
+      body: JSON.stringify({}),
     }),
 };

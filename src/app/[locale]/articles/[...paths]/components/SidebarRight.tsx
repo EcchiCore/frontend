@@ -5,7 +5,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { SidebarRightProps } from "./Interfaces";
-import myImageLoader from "../../../lib/imageLoader";
 
 const PLACEHOLDER_IMAGE = '/placeholder-image.png';
 
@@ -79,14 +78,15 @@ const SidebarRight: React.FC<SidebarRightProps> = ({
           <div className="flex items-center gap-4">
             <div className="relative">
               <Image
-                loader={myImageLoader}
                 src={article.author.image}
                 alt={article.author.username}
                 width={56}
                 height={56}
                 className="rounded-full ring-2 ring-primary"
-                onError={(e) => (e.currentTarget.src = PLACEHOLDER_IMAGE)}
+                onError={() => setError(true)}
+                onLoad={() => setLoading(false)}
               />
+
             </div>
             <div>
               <Link

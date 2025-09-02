@@ -2,7 +2,6 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import myImageLoader from "../../../lib/imageLoader";
 import { ArticleBodyProps } from "./Interfaces";
 import { useTranslations } from "next-intl";
 import { Alert, AlertTitle } from "@/components/ui/alert";
@@ -95,7 +94,6 @@ const ArticleBody: React.FC<ArticleBodyProps> = ({
                 onClick={() => setSelectedImage(image)}
               >
                 <Image
-                  loader={myImageLoader}
                   src={image}
                   alt={`Thumbnail ${index + 1}`}
                   fill
@@ -103,8 +101,12 @@ const ArticleBody: React.FC<ArticleBodyProps> = ({
                   sizes="100px"
                   quality={80}
                   loading="lazy"
-                  onError={(e) => (e.currentTarget.src = PLACEHOLDER_IMAGE)}
+                  onError={() => setError(true)}
+                  onLoad={() => setLoading(false)}
+                  {...props}
+
                 />
+
               </div>
             ))}
           </div>

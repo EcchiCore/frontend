@@ -1,41 +1,75 @@
 'use client'
+
 // src/app/lib/[locale]/imageLoader.ts
-
 export default function myImageLoader({
-                                        src,
-                                        width,
-                                        quality,
-                                      }: {
-  src: string;
-  width: number;
-  quality?: number;
+  src,
+  width,
+  quality,
+  height,
+}: {
+  src: string
+  width: number
+  quality?: number
+  height?: number
 }) {
-  const videoExtensions = ['.mp4', '.webm', '.ogv', '.mov', '.avi'];
-  if (videoExtensions.some(ext => src.toLowerCase().endsWith(ext))) {
-    return src;
-  }
+  // Debug log
+  console.log('Image loader called with:', { src, width, quality, height });
 
-  const userQuality = getUserPreferredQuality();
-  const finalQuality = (quality ?? userQuality ?? 80);
-  const height = width;
-  const format = 'format=auto';
-  const encodedSrc = encodeURIComponent(src);
-
-  // Try/catch for extra safety, even though logic is minimal
-  try {
-    const cdnUrl = `https://chanomhub.online/cdn-cgi/image/width=${width},height=${height},quality=${finalQuality},${format}/${encodedSrc}`;
-    return cdnUrl;
-  } catch (e) {
-    console.warn('CDN image URL generation failed, using original:', e);
-    return src; // fallback to original if error happens
+  // ตรวจสอบว่าคือ relative path /image/... หรือ full URL
+  const isRelativeImage = src.startsWith('/image/');
+  const isRustgramImage = isRelativeImage || src.startsWith('https://rustgram.onrender.com');
+  
+  // หากเป็น Rustgram image
+  if (isRustgramImage) {
+    // สร้าง absolute URL
+    const baseUrl = 'https://rustgram.onrender.com';
+    const finalSrc = isRelativeImage ? `${baseUrl}${src}` : src;
+    
+    // ไม่ใส่ query parameters เพราะ Rustgram อาจไม่รองรับ
+    console.log('Returning Rustgram URL:', finalSrc);
+    return finalSrc;
   }
+  
+  // ภาพจาก URL อื่น ใช้ตรง ๆ ไม่ optimize
+  console.log('Returning external URL:', src);
+  return src;
+}
+
+// Alternative version with optimization (ถ้า Rustgram รองรับ)
+export function myImageLoaderWithOptimization({
+  src,
+  width,
+  quality,
+  height,
+}: {
+  src: string
+  width: number
+  quality?: number
+  height?: number
+}) {
+  const isRelativeImage = src.startsWith('/image/');
+  const isRustgramImage = isRelativeImage || src.startsWith('https://rustgram.onrender.com');
+  
+  if (isRustgramImage) {
+    const baseUrl = 'https://rustgram.onrender.com';
+    const finalSrc = isRelativeImage ? `${baseUrl}${src}` : src;
+    const finalQuality = quality ?? getUserPreferredQuality() ?? 80;
+    
+    // ใช้ format ที่ Rustgram รองรับ (ต้องเช็ค API docs)
+    return `${finalSrc}?w=${width}&q=${finalQuality}`;
+  }
+  
+  return src;
 }
 
 function getUserPreferredQuality(): number | null {
-  if (typeof document === 'undefined') return null;
+  // Server-side rendering safety
+  if (typeof window === 'undefined') return null;
+  
   try {
     const cookies = document.cookie.split(';');
     let userPrefCookie = '';
+    
     for (const cookie of cookies) {
       const [name, value] = cookie.trim().split('=');
       if (name === 'userPreferences') {
@@ -43,8 +77,11 @@ function getUserPreferredQuality(): number | null {
         break;
       }
     }
+    
     if (!userPrefCookie) return null;
+    
     const userPreferences = JSON.parse(userPrefCookie);
+    
     switch (userPreferences.imageResolution) {
       case 'low': return 60;
       case 'medium': return 80;
@@ -54,5 +91,15 @@ function getUserPreferredQuality(): number | null {
   } catch (error) {
     console.error('Error parsing userPreferences cookie:', error);
     return null;
+  }
+}
+
+// Utility function เพื่อตรวจสอบว่า URL ใช้งานได้
+export async function validateImageUrl(url: string): Promise<boolean> {
+  try {
+    const response = await fetch(url, { method: 'HEAD' });
+    return response.ok;
+  } catch {
+    return false;
   }
 }

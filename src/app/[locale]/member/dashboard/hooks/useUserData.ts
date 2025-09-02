@@ -107,6 +107,17 @@ export const useUserData = () => {
     }
   }, [removeArticle]);
 
+  const publishRequest = useCallback(async (slug: string) => {
+    try {
+      await articlesApi.publishRequest(slug);
+    } catch (err) {
+      const errorMessage = err instanceof ApiError
+        ? err.message
+        : 'Failed to request publish';
+      throw new Error(errorMessage);
+    }
+  }, []);
+
   return {
     articles,
     articlesCount,
@@ -118,6 +129,7 @@ export const useUserData = () => {
     removeArticle,
     addArticle,
     toggleFavorite,
-    deleteArticle
+    deleteArticle,
+    publishRequest
   };
 };

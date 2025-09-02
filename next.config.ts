@@ -15,8 +15,6 @@ const nextConfig: NextConfig = {
   output: 'standalone',
   distDir: '.next',
   images: {
-    loader: 'custom',
-    loaderFile: './src/app/[locale]/lib/imageLoader.ts',
     remotePatterns: [
       { protocol: 'http', hostname: 'res.cloudinary.com', pathname: '/**' },
       { protocol: 'https', hostname: 'resize.chanomhub.online', pathname: '/**' },

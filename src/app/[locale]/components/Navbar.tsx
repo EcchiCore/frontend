@@ -6,7 +6,7 @@ import NavbarLinks from "./Navbar/NavbarLinks";
 import NotificationDropdown from "./Navbar/NotificationDropdown";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import dynamic from "next/dynamic";
 import { cn } from "@/lib/utils";
 
@@ -204,9 +204,9 @@ const Navbar = () => {
               </SheetTrigger>
               <SheetContent side="right" className="w-[85vw] sm:w-[350px] p-0 text-foreground rounded-xl">
                 <div className="flex flex-col h-full">
-                  <div className="p-6 border-b">
-                    <h2 className="text-lg font-semibold">เมนู</h2>
-                  </div>
+                  <SheetHeader className="p-6 border-b">
+                    <SheetTitle className="text-lg font-semibold">เมนู</SheetTitle>
+                  </SheetHeader>
                   
                   <div className="flex-1 overflow-y-auto">
                     <div className="p-4 space-y-6">

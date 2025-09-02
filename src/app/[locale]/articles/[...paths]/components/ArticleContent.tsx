@@ -33,7 +33,7 @@ const PLACEHOLDER_IMAGE = '/placeholder-image.png';
 
 import { useDebounce } from "./Debounce";
 import { Download, CalendarDays, Folder, User, Info, Check, Clipboard, Search } from "lucide-react";
-import { Button, Card, CardContent, CardHeader, CardTitle, Input, Dialog, DialogContent, DialogHeader, DialogTitle, Tabs, TabsList, TabsTrigger, TabsContent, Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui"; // Adjust import based on your UI library
+import { Button, Card, CardContent, CardHeader, CardTitle, Input, Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Tabs, TabsList, TabsTrigger, TabsContent, Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui"; // Adjust import based on your UI library
 import cn from 'classnames';
 import { useTranslations } from 'next-intl';
 import { TextAlign } from "@tiptap/extension-text-align";
@@ -855,6 +855,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({ article, slug, download
         <DialogContent className="max-w-6xl">
           <DialogHeader>
             <DialogTitle>{t("title")}</DialogTitle>
+            <DialogDescription>{t("description")}</DialogDescription>
           </DialogHeader>
           <div className="relative mb-4">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 size-5 text-gray-500" />

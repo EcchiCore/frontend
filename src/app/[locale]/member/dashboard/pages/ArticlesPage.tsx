@@ -9,9 +9,11 @@ import {
   HeartIcon,
   FunnelIcon,
   MagnifyingGlassIcon,
-  PlusIcon
+  PlusIcon,
+  ArrowUpOnSquareIcon
 } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
+import { useRouter } from 'next/navigation';
 import { useUserData } from '../hooks/useUserData';
 import { useAuthContext } from '../providers/AuthProvider';
 import { Article, ArticleStatus } from '../utils/types';
@@ -35,6 +37,8 @@ import { Loader2 } from 'lucide-react';
 
 export const ArticlesPage: React.FC = () => {
   const { user } = useAuthContext();
+  const router = useRouter();
+  const [publishingSlug, setPublishingSlug] = useState<string | null>(null);
   const {
     articles,
     articlesCount,
@@ -42,7 +46,8 @@ export const ArticlesPage: React.FC = () => {
     error,
     fetchArticles,
     toggleFavorite,
-    deleteArticle
+    deleteArticle,
+    publishRequest
   } = useUserData();
 
   // Local state with explicit typing
@@ -91,6 +96,26 @@ export const ArticlesPage: React.FC = () => {
     } catch (error) {
       console.error('Failed to delete article:', error);
       alert('Failed to delete article. Please try again.');
+    }
+  };
+
+  // Handle publish request
+  const handlePublishRequest = async (article: Article) => {
+    setPublishingSlug(article.slug);
+    try {
+      await publishRequest(article.slug);
+      // Optionally, refresh the articles list or update the specific article's status in the state
+      await fetchArticles({
+        status: statusFilter === 'all' ? undefined : statusFilter,
+        limit: itemsPerPage,
+        offset: (currentPage - 1) * itemsPerPage,
+        feedMode
+      });
+    } catch (error) {
+      console.error('Failed to request publish:', error);
+      alert('Failed to request publish. Please try again.');
+    } finally {
+      setPublishingSlug(null);
     }
   };
 
@@ -326,20 +351,6 @@ export const ArticlesPage: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Article Image */}
-                  {article.mainImage && (
-                    <div className="ml-4">
-                      <Image
-                        src={article.mainImage}
-                        alt={article.title}
-                        width={96}
-                        height={96}
-                        loader={myImageLoader}
-                        className="w-24 h-24 object-cover rounded-lg"
-                        onError={(e) => (e.currentTarget.src = PLACEHOLDER_IMAGE)}
-                      />
-                    </div>
-                  )}
                 </div>
 
                 {/* Actions */}
@@ -365,7 +376,22 @@ export const ArticlesPage: React.FC = () => {
                   {/* Show edit/delete only for own articles */}
                   {!feedMode && article.author.username === user?.username && (
                     <>
-                      <Button variant="outline" size="sm">
+                      {article.status === ArticleStatus.DRAFT && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handlePublishRequest(article)}
+                          disabled={publishingSlug === article.slug}
+                        >
+                          {publishingSlug === article.slug ? (
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          ) : (
+                            <ArrowUpOnSquareIcon className="h-4 w-4 mr-2" />
+                          )}
+                          {publishingSlug === article.slug ? 'Requesting...' : 'Request Publish'}
+                        </Button>
+                      )}
+                      <Button variant="outline" size="sm" onClick={() => router.push(`/editor/${article.slug}`)}>
                         <PencilIcon className="h-4 w-4 mr-2" />
                         Edit
                       </Button>

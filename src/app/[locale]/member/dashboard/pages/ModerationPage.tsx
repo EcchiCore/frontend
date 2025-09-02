@@ -1,4 +1,3 @@
-'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { Search, Eye, Check, X, Clock, Trash2, AlertTriangle, FileText, Link, MessageCircle, RefreshCw, AlertCircle } from 'lucide-react';
@@ -14,7 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Textarea } from '@/components/ui/textarea';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Loader2 } from 'lucide-react';
 
@@ -706,6 +705,9 @@ export const ModerationPage: React.FC = () => {
             <DialogTitle>
               Review {selectedRequest?.entityType.replace('_', ' ')} Request
             </DialogTitle>
+            <DialogDescription>
+              Review the content and approve or reject the request.
+            </DialogDescription>
           </DialogHeader>
 
           {selectedRequest && (
@@ -814,4 +816,4 @@ export const ModerationPage: React.FC = () => {
       </Dialog>
     </div>
   );
-};
+}

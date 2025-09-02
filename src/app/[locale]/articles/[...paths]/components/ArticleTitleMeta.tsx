@@ -445,10 +445,10 @@ const ArticleTitleMeta: React.FC<ArticleTitleMetaProps> = ({ article, isDarkMode
                 fill
                 sizes="100vw"
                 className="object-contain"
-                onError={() => handleImageError(modalImageIndex)}
-                priority
-                loader={myImageLoader}
-              />
+                onError={() => setError(true)}
+                onLoad={() => setLoading(false)}
+                {...props}
+                />
             </div>
           </div>
         </div>

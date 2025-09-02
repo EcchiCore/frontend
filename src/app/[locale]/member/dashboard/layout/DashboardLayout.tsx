@@ -9,7 +9,7 @@ import { ArticlesPage } from '../pages/ArticlesPage';
 import { ProfilePage } from '../pages/ProfilePage';
 import SettingsPage from '../pages/SettingsPage';
 import { ModerationPage } from '../pages/ModerationPage';
-import { Sheet, SheetContent } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Loader2, AlertCircle } from 'lucide-react';
@@ -73,6 +73,10 @@ export const DashboardLayoutShadcn: React.FC<DashboardLayoutProps> = ({ title })
     <div className="min-h-screen bg-background">
       <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
         <SheetContent side="left" className="p-0 w-64">
+          <SheetHeader className="sr-only">
+            <SheetTitle>Sidebar Navigation</SheetTitle>
+            <SheetDescription>Main navigation for the dashboard.</SheetDescription>
+          </SheetHeader>
           <Sidebar />
         </SheetContent>
       </Sheet>

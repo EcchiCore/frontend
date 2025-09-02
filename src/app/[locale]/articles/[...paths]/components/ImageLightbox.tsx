@@ -1,7 +1,6 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
-import myImageLoader from "../../../lib/imageLoader";
 import { ImageLightboxProps } from "./Interfaces";
 
 const ImageLightbox = ({
@@ -240,7 +239,6 @@ const ImageLightbox = ({
                 style={{ transform: `scale(${zoomLevel}) rotate(${rotation}deg)` }}
               >
                 <Image
-                  loader={myImageLoader}
                   src={images[currentIndex]}
                   alt={`Expanded image ${currentIndex + 1}`}
                   fill
@@ -249,6 +247,9 @@ const ImageLightbox = ({
                   priority
                   onLoad={handleImageLoad}
                   quality={90}
+                  onError={() => setError(true)}
+                  onLoad={() => setLoading(false)}
+                  {...props}
                 />
               </div>
 

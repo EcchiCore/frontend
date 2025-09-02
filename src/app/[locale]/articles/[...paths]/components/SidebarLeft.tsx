@@ -7,7 +7,6 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { MessageCircle, Trophy, Medal, Award } from "lucide-react";
 import { SidebarLeftProps } from "./Interfaces";
-import myImageLoader from "../../../lib/imageLoader";
 
 const SidebarLeft: React.FC<SidebarLeftProps> = ({
   article,
@@ -56,13 +55,14 @@ const SidebarLeft: React.FC<SidebarLeftProps> = ({
             <div className="relative w-full aspect-video rounded-lg overflow-hidden mb-6 group">
               <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               <Image
-                loader={myImageLoader}
                 src={mainImageUrl}
                 alt="ภาพหลักของบทความ"
                 fill
                 className="object-cover transition-transform duration-500 group-hover:scale-105"
                 sizes="(max-width: 768px) 100vw, 300px"
                 loading="eager"
+                onError={() => setError(true)}
+                onLoad={() => setLoading(false)}
               />
               
               {/* Decorative corner accent */}

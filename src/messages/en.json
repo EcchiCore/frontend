@@ -381,8 +381,18 @@
     "translateLink": "Translate this article"
   },
   "ArticleContent": {
-    "download_error": "Failed to fetch download files"
-    
+    "download_error": "Failed to fetch download files",
+    "translation_error": "Failed to translation",
+    "readingTime":   "readingTime",
+    "fontSize": "fontSize",
+    "title": "title",
+    "description":  "description",
+    "searchPlaceholder": "searchPlaceholder",
+    "downloadFiles": "downloadFiles",
+    "translationFiles": "translationFiles",
+    "sortByDate": "sortByDate",
+    "sortByName":  "sortByName",
+    "noFiles": "noFiles"
   },
   "Register": {
     "title": "Register",
