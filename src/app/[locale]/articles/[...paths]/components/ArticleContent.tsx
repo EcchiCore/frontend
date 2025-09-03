@@ -14,7 +14,8 @@ import { Image as TiptapImage } from '@tiptap/extension-image';
 import { Link as TiptapLink } from '@tiptap/extension-link';
 import Typography from '@tiptap/extension-typography';
 import Heading from '@tiptap/extension-heading';
-import TextStyle from '@tiptap/extension-text-style';
+import {TextStyle} from '@tiptap/extension-text-style';
+
 import { Color } from '@tiptap/extension-color';
 import Underline from '@tiptap/extension-underline';
 import ArticleHeader from "./ArticleHeader";
