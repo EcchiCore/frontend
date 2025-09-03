@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React from "react";
 import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -12,9 +12,7 @@ const SidebarLeft: React.FC<SidebarLeftProps> = ({
   article,
   topCommenters,
 }) => {
-  const [error, setError] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const mainImageUrl =
+  const mainImageUrl = 
     typeof article.mainImage === "string"
       ? article.mainImage
       : article.mainImage?.url || "/default-image.jpg";
@@ -63,8 +61,6 @@ const SidebarLeft: React.FC<SidebarLeftProps> = ({
                 className="object-cover transition-transform duration-500 group-hover:scale-105"
                 sizes="(max-width: 768px) 100vw, 300px"
                 loading="eager"
-                onError={() => setError(true)}
-                onLoad={() => setLoading(false)}
               />
               
               {/* Decorative corner accent */}

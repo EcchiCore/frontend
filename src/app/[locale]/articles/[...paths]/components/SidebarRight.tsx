@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
@@ -39,8 +39,6 @@ const SidebarRight: React.FC<SidebarRightProps> = ({
   translationFiles,
   setOpenDownloadDialog,
 }) => {
-  const [error, setError] = useState(false);
-  const [loading, setLoading] = useState(true);
   const t = useTranslations("sidebar");
 
   const encodeURLComponent = (value: string) =>
@@ -85,8 +83,6 @@ const SidebarRight: React.FC<SidebarRightProps> = ({
                 width={56}
                 height={56}
                 className="rounded-full ring-2 ring-primary"
-                onError={() => setError(true)}
-                onLoad={() => setLoading(false)}
               />
 
             </div>

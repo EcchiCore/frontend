@@ -1,5 +1,4 @@
-"use client";
-import { useState, useEffect, useCallback } from "react";
+import { useEffect, useCallback, useState } from "react";
 import Image from "next/image";
 import { ImageLightboxProps } from "./Interfaces";
 
@@ -21,7 +20,6 @@ const ImageLightbox = ({
   const [rotation, setRotation] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [preloadedImages, setPreloadedImages] = useState<Set<string>>(new Set());
-  const [error, setError] = useState(false);
 
   // Reset state when lightbox opens
   useEffect(() => {
@@ -252,7 +250,6 @@ const ImageLightbox = ({
                   priority
                   onLoad={handleImageLoad}
                   quality={90}
-                  onError={() => setError(true)}
                 />
               </div>
 

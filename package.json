@@ -80,6 +80,7 @@
     "html-react-parser": "^5.2.6",
     "install": "^0.13.0",
     "instantsearch.js": "^4.79.2",
+    "intlayer": "^5.8.1",
     "js-cookie": "^3.0.5",
     "js-cookies": "^1.0.4",
     "jsdom": "^26.1.0",
