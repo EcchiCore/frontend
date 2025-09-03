@@ -148,6 +148,7 @@
     "@types/uuid": "^10.0.0",
     "@types/xml": "^1.0.11",
     "@typescript-eslint/eslint-plugin": "^8.42.0",
+    "@next/eslint-plugin-next": "^15.5.2",
     "base64-url": "^2.3.3",
     "eslint": "^9.34.0",
     "eslint-config-next": "^15.5.2",
