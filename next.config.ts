@@ -12,8 +12,6 @@ const withMDXEnhanced = withMDX({
 
 // Next.js configuration
 const nextConfig: NextConfig = {
-  output: 'standalone',
-  distDir: '.next',
   images: {
     remotePatterns: [
       { protocol: 'http', hostname: 'res.cloudinary.com', pathname: '/**' },
