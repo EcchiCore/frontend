@@ -1,7 +1,6 @@
 "use client";
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { Search, Plus, Filter, Clock, MessageCircle, User, Tag, ChevronDown, X, Send } from "lucide-react";
-import PropTypes from "prop-types";
 
 interface NotionPage {
   id: string;
@@ -596,15 +595,5 @@ function useDebounce<T>(value: T, delay: number): T {
 
   return debouncedValue;
 }
-
-// PropTypes for type checking
-Community.propTypes = {
-  initialPages: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.string.isRequired,
-      properties: PropTypes.object.isRequired
-    }).isRequired
-  ).isRequired
-};
 
 export default React.memo(Community);
