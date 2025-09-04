@@ -43,7 +43,7 @@ export const Step3_Media = ({ formData, setFormData, setOngoingUploads }: Step3_
         const result = await response.json();
         const domain = getUploadUrl().replace('/upload', '');
         const url = result.url.startsWith('http') ? result.url : `${domain}${result.url}`;
-        setFormData(prevFormData => ({ ...prevFormData, [e.target.id]: url }));
+        setFormData((prevFormData: Record<string, any>) => ({ ...prevFormData, [e.target.id]: url }));
       } catch (error) {
         console.error('Error uploading file:', error);
         // Handle error, maybe show a message to the user
@@ -74,7 +74,7 @@ export const Step3_Media = ({ formData, setFormData, setOngoingUploads }: Step3_
           setOngoingUploads(prev => prev - 1);
           return url;
         }));
-        setFormData(prevFormData => ({ ...prevFormData, [e.target.id]: urls }));
+        setFormData((prevFormData: Record<string, any>) => ({ ...prevFormData, [e.target.id]: urls }));
       } catch (error) {
         console.error('Error uploading multiple files:', error);
         // Handle error, maybe show a message to the user
