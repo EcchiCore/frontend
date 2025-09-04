@@ -207,7 +207,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({ article, slug, download
             onClick={() => handleOpenDownload(item)}
           >
             <Download className="size-5 mr-2" />
-            <span>{t("download")}</span>
+            <span>{t("downloadFiles")}</span>
           </Button>
 
           <Button

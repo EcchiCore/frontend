@@ -389,6 +389,7 @@
     "description":  "description",
     "searchPlaceholder": "searchPlaceholder",
     "downloadFiles": "downloadFiles",
+    "copy": "copy",
     "translationFiles": "translationFiles",
     "sortByDate": "sortByDate",
     "sortByName":  "sortByName",
