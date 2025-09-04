@@ -340,6 +340,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({ article, slug, download
     parseOptions: {
       preserveWhitespace: 'full',
     },
+    immediatelyRender: false,
   });
 
   const { data: commentsData, error: commentsError, isLoading } = useSWR(

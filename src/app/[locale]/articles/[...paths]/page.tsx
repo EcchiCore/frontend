@@ -285,9 +285,13 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
   }
 
   // Get main image URL
-  const mainImageUrl = typeof originalArticle.mainImage === 'string'
+  let mainImageUrl = typeof originalArticle.mainImage === 'string'
     ? originalArticle.mainImage
     : originalArticle.mainImage?.url || '';
+
+  if (mainImageUrl) {
+    mainImageUrl = mainImageUrl.replace('rustgram.onrender.com', 'oi.chanomhub.online');
+  }
 
   // Construct content path for hreflang and canonical
   const contentPath = constructContentPath(locale, paths, isTranslate, searchParams);
@@ -387,9 +391,13 @@ function generateArticleJsonLd(
   isTranslated: boolean = false,
   searchParams?: any
 ) {
-  const mainImageUrl = typeof article.mainImage === 'string'
+  let mainImageUrl = typeof article.mainImage === 'string'
     ? article.mainImage
     : article.mainImage?.url || '';
+
+  if (mainImageUrl) {
+    mainImageUrl = mainImageUrl.replace('rustgram.onrender.com', 'oi.chanomhub.online');
+  }
 
   // Construct the correct article URL with locale
   let articleUrl = `${siteUrl}/${locale}/articles/${slug}`;

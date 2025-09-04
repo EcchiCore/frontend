@@ -164,6 +164,9 @@
   },
   "resolutions": {
     "@babel/types": "7.28.2",
-    "@tiptap/core": "3.3.1"
+    "@tiptap/core": "3.3.1",
+    "cookie": "1.0.2",
+    "@theguild/remark-mermaid": "0.3.0",
+    "clipboardy": "4.0.0"
   }
 }

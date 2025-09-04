@@ -11,6 +11,7 @@ This is the frontend of the Chanomhub project.
 - [ESLint](https://eslint.org/) - Pluggable and configurable linter tool for identifying and reporting on patterns in JavaScript
 - [Prettier](https://prettier.io/) - Opinionated code formatter
 - [Bun](https://bun.sh/) - Fast JavaScript all-in-one toolkit
+- [Snyk](https://snyk.io/) - Find and automatically fix vulnerabilities in your code
 
 ## Running the project
 
