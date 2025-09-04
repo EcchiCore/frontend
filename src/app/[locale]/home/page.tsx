@@ -11,7 +11,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Search, TrendingUp, MessageSquare, Star } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import FeaturedPosts from './components/FeaturedPosts';
+import HomeCarousel from './components/HomeCarousel';
 import CategoriesCard from './components/CategoriesCard';
+import { useEffect, useState } from 'react';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -25,6 +27,32 @@ const trendingTopics = [
 ];
 
 export default function HomePage() {
+  const [homeData, setHomeData] = useState({
+    carousel: [],
+    featured: [],
+    latest: [],
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchHomeData = async () => {
+      try {
+        const response = await fetch('/api/home');
+        if (!response.ok) {
+          throw new Error('Failed to fetch home page data');
+        }
+        const data = await response.json();
+        setHomeData(data);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchHomeData();
+  }, []);
+
   return (
     <>
       <Head>
@@ -48,170 +76,7 @@ export default function HomePage() {
         <Navbar />
 
         <main className="bg-background">
-          {/* Image Carousel Section - Pure CSS */}
-          <section className="container mx-auto px-4 py-8 mb-12">
-            <div className="relative bg-white rounded-xl shadow-lg overflow-hidden">
-              <div className="relative h-96 md:h-[500px]">
-                <style jsx>{`
-                  .carousel-container {
-                    position: relative;
-                    width: 100%;
-                    height: 100%;
-                    overflow: hidden;
-                  }
-                  
-                  .carousel-wrapper {
-                    display: flex;
-                    width: 300%;
-                    height: 100%;
-                    animation: carousel-slide 15s infinite;
-                  }
-                  
-                  .carousel-slide {
-                    width: 33.333%;
-                    height: 100%;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                  }
-                  
-                  .carousel-wrapper:hover {
-                    animation-play-state: paused;
-                  }
-                  
-                  @keyframes carousel-slide {
-                    0%, 30% { transform: translateX(0); }
-                    33.333%, 63.333% { transform: translateX(-33.333%); }
-                    66.666%, 96.666% { transform: translateX(-66.666%); }
-                    100% { transform: translateX(0); }
-                  }
-                  
-                  .slide-1 { background: linear-gradient(to right, #8b5cf6, #2563eb); }
-                  .slide-2 { background: linear-gradient(to right, #10b981, #0d9488); }
-                  .slide-3 { background: linear-gradient(to right, #f97316, #dc2626); }
-                  
-                  .nav-btn {
-                    position: absolute;
-                    top: 50%;
-                    transform: translateY(-50%);
-                    background: rgba(255, 255, 255, 0.8);
-                    border: none;
-                    border-radius: 50%;
-                    width: 48px;
-                    height: 48px;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    cursor: pointer;
-                    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-                    transition: all 0.2s;
-                    z-index: 10;
-                  }
-                  
-                  .nav-btn:hover {
-                    background: white;
-                    transform: translateY(-50%) scale(1.1);
-                  }
-                  
-                  .nav-btn-left { left: 16px; }
-                  .nav-btn-right { right: 16px; }
-                  
-                  .dots-container {
-                    position: absolute;
-                    bottom: 24px;
-                    left: 50%;
-                    transform: translateX(-50%);
-                    display: flex;
-                    gap: 8px;
-                    z-index: 10;
-                  }
-                  
-                  .dot {
-                    width: 12px;
-                    height: 12px;
-                    border-radius: 50%;
-                    background: rgba(255, 255, 255, 0.5);
-                    cursor: pointer;
-                    transition: all 0.3s;
-                  }
-                  
-                  .dot:hover {
-                    background: rgba(255, 255, 255, 0.8);
-                    transform: scale(1.1);
-                  }
-                  
-                  .slide-counter {
-                    position: absolute;
-                    top: 16px;
-                    right: 16px;
-                    background: rgba(0, 0, 0, 0.3);
-                    color: white;
-                    padding: 8px 12px;
-                    border-radius: 20px;
-                    font-size: 14px;
-                    z-index: 10;
-                  }
-                `}</style>
-
-                <div className="carousel-container">
-                  <div className="carousel-wrapper">
-                    <div className="carousel-slide slide-1">
-                      <div className="text-center text-white px-8">
-                        <h2 className="text-3xl md:text-5xl font-bold mb-4">
-                          ข่าวสารและกิจกรรมล่าสุด
-                        </h2>
-                        <p className="text-lg md:text-xl opacity-90 max-w-2xl mx-auto">
-                          อัปเดตข้อมูลสำคัญและกิจกรรมน่าสนใจประจำสัปดาห์
-                        </p>
-                      </div>
-                    </div>
-                    
-                    <div className="carousel-slide slide-2">
-                      <div className="text-center text-white px-8">
-                        <h2 className="text-3xl md:text-5xl font-bold mb-4">
-                          ชุมชนผู้ใช้งานที่แข็งแกร่ง
-                        </h2>
-                        <p className="text-lg md:text-xl opacity-90 max-w-2xl mx-auto">
-                          เข้าร่วมกับชุมชนออนไลน์ที่มีสมาชิกกว่า 2.5 ล้านคน
-                        </p>
-                      </div>
-                    </div>
-                    
-                    <div className="carousel-slide slide-3">
-                      <div className="text-center text-white px-8">
-                        <h2 className="text-3xl md:text-5xl font-bold mb-4">
-                          แลกเปลี่ยนความรู้ไร้ขีดจำกัด
-                        </h2>
-                        <p className="text-lg md:text-xl opacity-90 max-w-2xl mx-auto">
-                          พูดคุยและแบ่งปันประสบการณ์ในทุกหัวข้อที่คุณสนใจ
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <button className="nav-btn nav-btn-left" aria-label="ภาพก่อนหน้า">
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                  </svg>
-                </button>
-                
-                <button className="nav-btn nav-btn-right" aria-label="ภาพถัดไป">
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </button>
-
-                <div className="dots-container">
-                  <span className="dot"></span>
-                  <span className="dot"></span>
-                  <span className="dot"></span>
-                </div>
-
-                <div className="slide-counter">1 / 3</div>
-              </div>
-            </div>
-          </section>
+          <HomeCarousel articles={homeData.carousel} loading={loading} />
 
           <div className="grid lg:grid-cols-4 gap-8 container mx-auto px-4">
             {/* Main Content */}
@@ -226,11 +91,11 @@ export default function HomePage() {
                 </TabsList>
 
                 <TabsContent value="featured" className="space-y-6">
-                  <FeaturedPosts platform="windows" />
+                  <FeaturedPosts posts={homeData.featured} loading={loading} />
                 </TabsContent>
 
                 <TabsContent value="latest" className="space-y-6">
-                  <FeaturedPosts showLatest />
+                  <FeaturedPosts posts={homeData.latest} loading={loading} />
                 </TabsContent>
 
                 <TabsContent value="trending" className="space-y-6">
@@ -241,7 +106,7 @@ export default function HomePage() {
                 <TabsContent value="myFeed" className="space-y-6">
                   <h3 className="text-2xl font-semibold text-foreground mb-6">ฟีดของฉัน</h3>
                   <p className="text-muted-foreground">เข้าสู่ระบบเพื่อดูกระทู้ที่คุณติดตาม</p>
-                </TabsContent>
+               </TabsContent> 
               </Tabs>
             </div>
 
@@ -268,6 +133,7 @@ export default function HomePage() {
                       <span className="text-xs text-gray-500">{topic.count} กระทู้</span>
                     </div>
                   ))}
+
                 </CardContent>
               </Card>
 
