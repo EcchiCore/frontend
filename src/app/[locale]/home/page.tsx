@@ -230,29 +230,7 @@ export default function HomePage() {
                 </TabsContent>
 
                 <TabsContent value="latest" className="space-y-6">
-                  <h3 className="text-2xl font-semibold text-foreground mb-6">กระทู้ล่าสุด</h3>
-                  <div className="space-y-4">
-                    {[1, 2, 3, 4, 5].map((i) => (
-                      <Card key={i} className="hover:shadow-md transition-shadow">
-                        <CardContent className="p-4">
-                          <div className="flex items-center space-x-3">
-                            <Avatar className="h-10 w-10">
-                              <AvatarFallback>U{i}</AvatarFallback>
-                            </Avatar>
-                            <div className="flex-grow">
-                              <h4 className="font-medium text-foreground">หัวข้อกระทู้ตัวอย่างที่ {i}</h4>
-                              <div className="flex items-center space-x-4 text-sm text-muted-foreground mt-1">
-                                <span>โดย: ผู้ใช้{i}</span>
-                                <span>5 นาทีที่แล้ว</span>
-                                <span>12 ตอบ</span>
-                              </div>
-                            </div>
-                            <Badge variant="outline">ทั่วไป</Badge>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
+                  <FeaturedPosts showLatest />
                 </TabsContent>
 
                 <TabsContent value="trending" className="space-y-6">

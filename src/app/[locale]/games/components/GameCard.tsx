@@ -4,17 +4,18 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Heart, User } from 'lucide-react';
-
+import Image from 'next/image'
 export default function GameCard({ article }: { article: Article }) {
   return (
     <Link href={`/articles/${article.slug}`} className="group">
       <Card className="overflow-hidden hover:shadow-lg transition-all duration-200 group-hover:scale-[1.02]">
         <CardHeader className="p-0">
           {article.mainImage ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img 
+            <Image
               src={article.mainImage} 
-              alt={article.title} 
+              alt={article.title}
+              width={500}
+              height={500} 
               className="w-full h-40 object-cover group-hover:scale-105 transition-transform duration-200" 
             />
           ) : (

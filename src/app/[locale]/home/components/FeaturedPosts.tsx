@@ -26,22 +26,22 @@ interface Article {
 
 interface FeaturedPostsProps {
   platform?: 'windows' | 'android';
+  showLatest?: boolean;
 }
 
-export default function FeaturedPosts({ platform = 'windows' }: FeaturedPostsProps) {
+export default function FeaturedPosts({ platform, showLatest = false }: FeaturedPostsProps) {
   const [posts, setPosts] = useState<Article[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchPosts = async () => {
-      const cacheKey = `posts_${platform}`;
+      const cacheKey = showLatest ? 'posts_latest' : `posts_${platform || 'all'}`;
       const cachedData = localStorage.getItem(cacheKey);
       const cacheTime = localStorage.getItem(`${cacheKey}_time`);
       const now = Date.now();
       const cacheDuration = 1000 * 60 * 30; // Cache for 30 minutes
 
-      // Check if cache exists and is not expired
       if (cachedData && cacheTime && now - parseInt(cacheTime) < cacheDuration) {
         setPosts(JSON.parse(cachedData));
         setLoading(false);
@@ -49,31 +49,33 @@ export default function FeaturedPosts({ platform = 'windows' }: FeaturedPostsPro
       }
 
       try {
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/articles?platform=${platform}&status=PUBLISHED`,
-          {
-            headers: {
-              accept: 'application/json',
-            },
-          }
-        );
+        let url = `${process.env.NEXT_PUBLIC_API_URL}/api/articles?status=PUBLISHED`;
+        if (platform) {
+          url += `&platform=${platform}`;
+        }
+
+        const response = await fetch(url, {
+          headers: {
+            accept: 'application/json',
+          },
+        });
+
         if (!response.ok) {
           throw new Error('Failed to fetch articles');
         }
         const data = await response.json();
         setPosts(data.articles || []);
-        // Store data and cache time in localStorage
         localStorage.setItem(cacheKey, JSON.stringify(data.articles));
         localStorage.setItem(`${cacheKey}_time`, now.toString());
       } catch {
-        setError('เกิดข้อผิดพลาดในการโหลดกระทู้แนะนำ');
+        setError('เกิดข้อผิดพลาดในการโหลดกระทู้');
       } finally {
         setLoading(false);
       }
     };
 
     fetchPosts();
-  }, [platform]);
+  }, [platform, showLatest]);
 
   // Function to calculate time ago
   const getTimeAgo = (dateString: string) => {
