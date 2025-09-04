@@ -15,6 +15,7 @@ export default function GameUploadForm() {
   const [activeSection, setActiveSection] = useState('basic');
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [isUploading, setIsUploading] = useState(false);
+  const [ongoingUploads, setOngoingUploads] = useState(0);
   const [availableTags, setAvailableTags] = useState<string[]>([]);
   const [availableCategories, setAvailableCategories] = useState<string[]>([]);
   const params = useParams();
@@ -117,7 +118,7 @@ export default function GameUploadForm() {
           <Step2_Categorization formData={formData} setFormData={setFormData} availableTags={availableTags} availableCategories={availableCategories} />
         </div>
         <div style={{ display: activeSection === 'media' ? 'block' : 'none' }}>
-          <Step3_Media formData={formData} setFormData={setFormData} />
+          <Step3_Media formData={formData} setFormData={setFormData} setOngoingUploads={setOngoingUploads} />
         </div>
         <div style={{ display: activeSection === 'downloads' ? 'block' : 'none' }}>
           <Step4_Downloads formData={formData} setFormData={setFormData} />
@@ -138,7 +139,7 @@ export default function GameUploadForm() {
         <div className="col-span-3">
           {renderSection()}
           <div className="flex justify-end mt-8">
-            <Button onClick={handleSubmit} disabled={isUploading}>
+            <Button onClick={handleSubmit} disabled={isUploading || ongoingUploads > 0}>
               {isUploading ? 'Uploading...' : 'Upload Game'}
             </Button>
           </div>
