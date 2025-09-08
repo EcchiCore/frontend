@@ -28,7 +28,7 @@ const trendingTopics = [
 // Metadata generation
 export async function generateMetadata({ params }: { params: { locale?: string } }) {
   const locale = (params?.locale || 'en') as (typeof locales)[number]; // Cast locale
-  const t = await getTranslations({ locale, namespace: 'homeT' });
+  const t = await getTranslations({ locale, namespace: 'Home' });
 
   return generatePageMetadata({
     locale,
@@ -67,12 +67,18 @@ async function fetchHomeData(locale: string) {
 export default async function HomePage({ params }: { params: { locale: string } }) {
   const { locale } = params;
   const homeData = await fetchHomeData(locale);
+  const t = await getTranslations({ locale, namespace: 'homePage' });
 
   return (
     <div className={`min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 ${inter.className}`}>
       <Navbar />
 
       <main className="bg-background">
+        <div className="text-center py-8">
+          <h1 className="text-4xl font-bold">
+            {t('welcomeTo')}<span className="text-primary">{t('hub')}</span>
+          </h1>
+        </div>
         <HomeCarousel articles={homeData.carousel} loading={false} />
 
         <div className="grid lg:grid-cols-4 gap-8 container mx-auto px-4">
