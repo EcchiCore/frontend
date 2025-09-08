@@ -20,6 +20,7 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: 'i.pinimg.com', pathname: '/**'},
 
       { protocol: 'https', hostname: 'resize.chanomhub.online', pathname: '/**' },
+      { protocol: 'https', hostname: 'cdn.chanomhub.online', pathname: '/**' },
       { protocol: 'https', hostname: 'icons.duckduckgo.com', pathname: '/ip3/**' },
     ],
   },
