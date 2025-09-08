@@ -49,8 +49,7 @@ async function fetchHomeData(locale: string) {
       headers: {
         'Accept-Language': locale,
       },
-      // Ensure fresh data for SSR
-      cache: 'no-store',
+      next: { revalidate: 3600 }, // Revalidate every hour
     });
 
     if (!response.ok) {
