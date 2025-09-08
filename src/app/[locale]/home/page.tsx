@@ -34,7 +34,7 @@ export async function generateMetadata({ params }: { params: { locale?: string }
     locale,
     title: t('title'),
     description: t('description'),
-    keywords: ['Chanomhub', 'เว็บบอร์ด', 'ถาม-ตอบ', 'ชุมชนออนไลน์', 'ข่าวสาร', 'เกมผู้ใหญ่', 'NSFW'],
+    keywords: ['Chanomhub', 'เว็บบอร์ด', 'ถาม-ตอบ', 'ชุมชนออนไลน์', 'ข่าวสาร', 'เกมผู้ใหญ่', 'NSFW', ...trendingTopics.map(topic => topic.name)],
     contentPath: 'home',
   });
 }
