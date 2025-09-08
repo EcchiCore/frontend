@@ -50,21 +50,19 @@ export function generateLanguageAlternates(
 /**
  * Generate canonical URL for content
  * @param contentPath - The content path without locale (including query params if any)
- * @param locale - Current locale
  * @returns Canonical URL string
  */
 export function generateCanonicalUrl(
-  contentPath: string = '',
-  locale: Locale
+  contentPath: string = ''
 ): string {
   if (contentPath) {
     if (contentPath.includes('?')) {
       const [path, params] = contentPath.split('?');
-      return `${siteUrl}/${locale}/${path}?${params}`;
+      return `${siteUrl}/${defaultLocale}/${path}?${params}`;
     }
-    return `${siteUrl}/${locale}/${contentPath}`;
+    return `${siteUrl}/${defaultLocale}/${contentPath}`;
   }
-  return `${siteUrl}/${locale}`;
+  return `${siteUrl}/${defaultLocale}`;
 }
 
 /**
@@ -104,7 +102,7 @@ export function generatePageMetadata(options: {
     section
   } = options;
 
-  const canonicalUrl = generateCanonicalUrl(contentPath, locale);
+  const canonicalUrl = generateCanonicalUrl(contentPath);
   const languageAlternates = generateLanguageAlternates(contentPath);
   const metadataBase = new URL(siteUrl);
 
