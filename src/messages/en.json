@@ -16,6 +16,10 @@
     "sortByName": "Sort by name",
     "translatedBy": "Translated by {name} ({language})"
   },
+  "Home": {
+    "title": "Chanomhub - H-Game Community | Q&A for H-Games",
+    "description": "Chanomhub, a hub for H-games and translated games."
+  },
   "homePage": {
     "welcomeTo": "Welcome to Chanom",
     "hub": "Hub",
@@ -78,7 +82,6 @@
       }
     }
   },
-
   "SearchFilters": {
     "gameSearch": "Game Search",
     "searchGame": "Search for your favorite games...",
@@ -263,7 +266,6 @@
     "toggleTheme": "Toggle theme",
     "toggleMenu": "Toggle menu",
     "signUp": "Sign Up"
-
   },
   "SearchResults": {
     "found": "Found",

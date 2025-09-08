@@ -14,7 +14,7 @@ import {
   AlertDescription,
   AlertTitle,
 } from "@/components/ui/alert";
-import { Separator } from "@/components/ui/separator";
+
 import Image from "next/image";
 import { Metadata } from 'next';
 import { TriangleAlert } from 'lucide-react';

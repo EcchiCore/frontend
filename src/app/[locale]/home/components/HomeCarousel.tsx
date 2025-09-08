@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-const PLACEHOLDER_IMAGE = '/placeholder-image.png';
+
 
 interface Article {
   id: number;

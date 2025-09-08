@@ -1,14 +1,14 @@
 "use client";
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Eye, MessageSquare, Heart, Clock } from 'lucide-react';
 import Image from 'next/image'; // Import Next.js Image component
 
-const PLACEHOLDER_IMAGE = '/placeholder-image.png';
+
 
 // Define the structure of an article from the API
 interface Article {
@@ -31,7 +31,7 @@ interface FeaturedPostsProps {
 }
 
 export default function FeaturedPosts({ posts, loading }: FeaturedPostsProps) {
-  const [error, setError] = useState<string | null>(null);
+  
 
   // Function to calculate time ago
   const getTimeAgo = (dateString: string) => {
@@ -49,9 +49,7 @@ export default function FeaturedPosts({ posts, loading }: FeaturedPostsProps) {
     return <div className="text-center">กำลังโหลดกระทู้แนะนำ...</div>;
   }
 
-  if (error) {
-    return <div className="text-center text-red-500">{error}</div>;
-  }
+  
 
   return (
     <div className="space-y-6">

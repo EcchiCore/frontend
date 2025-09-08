@@ -4,12 +4,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useState } from 'react';
 
 interface Step3_MediaProps {
-  formData: Record<string, any>;
   setFormData: (data: Record<string, any>) => void;
   setOngoingUploads: (updater: (prev: number) => number) => void;
 }
 
-export const Step3_Media = ({ formData, setFormData, setOngoingUploads }: Step3_MediaProps) => {
+export const Step3_Media = ({ setFormData, setOngoingUploads }: Step3_MediaProps) => {
   const [uploadDestination, setUploadDestination] = useState('auto');
 
   const getUploadUrl = () => {

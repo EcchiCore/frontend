@@ -118,7 +118,7 @@ export default function GameUploadForm() {
           <Step2_Categorization formData={formData} setFormData={setFormData} availableTags={availableTags} availableCategories={availableCategories} />
         </div>
         <div style={{ display: activeSection === 'media' ? 'block' : 'none' }}>
-          <Step3_Media formData={formData} setFormData={setFormData} setOngoingUploads={setOngoingUploads} />
+          <Step3_Media setFormData={setFormData} setOngoingUploads={setOngoingUploads} />
         </div>
         <div style={{ display: activeSection === 'downloads' ? 'block' : 'none' }}>
           <Step4_Downloads formData={formData} setFormData={setFormData} />
