@@ -130,12 +130,12 @@ export default function NstPromotionPage() {
               </CardHeader>
               <CardContent className="grid grid-cols-2 gap-4">
                   <Button asChild className="w-full">
-                    <a href="https://nst.chanomhub.online/NST-Linux-dev-0.2.zip">
+                    <a href="https://nst.chanomhub.online/NST-Linux-Dev-0.3.7z">
                       ดาวน์โหลด (Linux)
                     </a>
                   </Button>
                   <Button asChild variant="secondary" className="w-full">
-                    <a href="https://nst.chanomhub.online/NST-Window-dev-0.2.zip">
+                    <a href="https://nst.chanomhub.online/NST-Windows-Dev-0.3.7z">
                       ดาวน์โหลด (Win)
                     </a>
                   </Button>
