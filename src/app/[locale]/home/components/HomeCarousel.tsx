@@ -68,7 +68,7 @@ export default function HomeCarousel({ articles, loading }: HomeCarouselProps) {
 
   return (
     <section className="container mx-auto px-4 py-8 mb-12">
-      <div className="relative bg-white rounded-xl shadow-lg overflow-hidden">
+      <div className="relative bg-white rounded-2xl shadow-xl overflow-hidden border border-border/20 hover:shadow-2xl transition-shadow duration-300">
         <div className="relative h-96 md:h-[500px] overflow-hidden">
           <div
             className="flex transition-transform duration-500 ease-in-out"
@@ -99,14 +99,22 @@ export default function HomeCarousel({ articles, loading }: HomeCarouselProps) {
                       </div>
                     )}
                     
-                    {/* Overlay สำหรับข้อความ */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent flex flex-col justify-end p-8 md:p-12">
-                      <h2 className="text-2xl md:text-4xl font-bold text-white mb-2 drop-shadow-lg">
-                        {article.title}
-                      </h2>
-                      <p className="text-md md:text-lg text-white/90 max-w-2xl drop-shadow-md">
-                        {article.description}
-                      </p>
+                    {/* Enhanced Overlay สำหรับข้อความ */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent flex flex-col justify-end p-8 md:p-12">
+                      <div className="max-w-4xl">
+                        <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold text-white mb-4 drop-shadow-2xl leading-tight">
+                          {article.title}
+                        </h2>
+                        <p className="text-md md:text-lg lg:text-xl text-white/95 max-w-3xl drop-shadow-lg leading-relaxed">
+                          {article.description}
+                        </p>
+                        <div className="mt-6 flex items-center space-x-4">
+                          <div className="bg-white/20 backdrop-blur-sm rounded-full px-4 py-2 text-white text-sm font-medium">
+                            อ่านต่อ
+                          </div>
+                          <div className="w-2 h-2 bg-white/60 rounded-full animate-pulse"></div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </Link>
@@ -119,29 +127,29 @@ export default function HomeCarousel({ articles, loading }: HomeCarouselProps) {
             <>
               <button
                 onClick={prevSlide}
-                className="absolute top-1/2 left-4 transform -translate-y-1/2 bg-white/80 hover:bg-white rounded-full p-2 transition-all duration-200 shadow-lg z-10 backdrop-blur-sm"
+                className="absolute top-1/2 left-4 transform -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-3 transition-all duration-300 shadow-xl z-10 backdrop-blur-sm hover:scale-110 group"
                 aria-label="Previous Slide"
               >
-                <ChevronLeft className="h-6 w-6 text-gray-800" />
+                <ChevronLeft className="h-5 w-5 text-gray-800 group-hover:text-primary transition-colors" />
               </button>
               <button
                 onClick={nextSlide}
-                className="absolute top-1/2 right-4 transform -translate-y-1/2 bg-white/80 hover:bg-white rounded-full p-2 transition-all duration-200 shadow-lg z-10 backdrop-blur-sm"
+                className="absolute top-1/2 right-4 transform -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-3 transition-all duration-300 shadow-xl z-10 backdrop-blur-sm hover:scale-110 group"
                 aria-label="Next Slide"
               >
-                <ChevronRight className="h-6 w-6 text-gray-800" />
+                <ChevronRight className="h-5 w-5 text-gray-800 group-hover:text-primary transition-colors" />
               </button>
 
-              {/* Dots indicator */}
-              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2 z-10">
+              {/* Enhanced Dots indicator */}
+              <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex space-x-3 z-10">
                 {articles.map((_, index) => (
                   <button
                     key={index}
                     onClick={() => setCurrentSlide(index)}
-                    className={`w-3 h-3 rounded-full transition-all duration-200 ${
+                    className={`w-3 h-3 rounded-full transition-all duration-300 ${
                       currentSlide === index 
-                        ? 'bg-white scale-110 shadow-lg' 
-                        : 'bg-white/60 hover:bg-white/80'
+                        ? 'bg-white scale-125 shadow-xl ring-2 ring-white/50' 
+                        : 'bg-white/50 hover:bg-white/80 hover:scale-110'
                     }`}
                     aria-label={`Go to slide ${index + 1}`}
                   />

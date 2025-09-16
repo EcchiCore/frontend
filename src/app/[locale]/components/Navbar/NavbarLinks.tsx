@@ -193,9 +193,9 @@ export default function NavbarLinks({ section, onCloseMenu = () => {}, isMobile 
                 <Button
                   variant="ghost"
                   className={cn(
-                    "group inline-flex h-9 w-max items-center justify-center rounded-md bg-transparent px-4 py-2 text-sm font-medium transition-colors hover:bg-zinc-100 focus:bg-zinc-100 focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-zinc-100/50 dark:hover:bg-zinc-800 dark:focus:bg-zinc-800 dark:data-[active]:bg-zinc-800/50",
+                    "group inline-flex h-9 w-max items-center justify-center rounded-lg bg-transparent px-4 py-2 text-sm font-medium transition-all duration-200 hover:bg-accent/50 focus:bg-accent/50 focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/30 hover:scale-105",
                     isMobile
-                      ? "justify-between w-full h-10 px-3" // Keep mobile specific styles
+                      ? "justify-between w-full h-11 px-4 hover:bg-primary/5 hover:border-primary/20 border border-transparent hover:border-border/50" // Enhanced mobile styles
                       : "justify-start w-auto px-3 py-2" // Keep desktop specific styles
                   )}
                 >
@@ -207,14 +207,14 @@ export default function NavbarLinks({ section, onCloseMenu = () => {}, isMobile 
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent 
-                className={`w-full ${isMobile ? "min-w-[200px]" : "md:w-56"}`}
+                className={`w-full ${isMobile ? "min-w-[200px]" : "md:w-56"} border-border/50 shadow-xl`}
                 align={isMobile ? "start" : section === 'right' ? "end" : "start"}
               >
                 {item.subLinks.map((sub) => (
                   item.id === "language" ? (
                     <DropdownMenuItem
                       key={sub.id}
-                      className="text-sm cursor-pointer hover:bg-accent"
+                      className="text-sm cursor-pointer hover:bg-accent/50 transition-colors duration-200"
                       onClick={() => changeLanguage(sub.id === "lang-en" ? "en" : "th")}
                     >
                       {sub.name}
@@ -224,9 +224,8 @@ export default function NavbarLinks({ section, onCloseMenu = () => {}, isMobile 
                       <Link
                         href={sub.link || "#"}
                         className={cn(
-                          'w-full rounded-lg px-4 py-2 text-left text-sm font-medium',
-                          // No conditional main link styling needed here as it's for sublinks
-                          'hover:bg-zinc-100 dark:hover:bg-zinc-800' // Default hover style
+                          'w-full rounded-lg px-4 py-2 text-left text-sm font-medium transition-all duration-200',
+                          'hover:bg-accent/50 hover:text-primary' // Enhanced hover style
                         )}
                         onClick={onCloseMenu}
                         target={sub.link?.startsWith("http") ? "_blank" : undefined}
@@ -243,9 +242,9 @@ export default function NavbarLinks({ section, onCloseMenu = () => {}, isMobile 
             <Link
               href={item.link || "#"}
               className={cn(
-                "group inline-flex h-9 w-max items-center justify-center rounded-md bg-transparent px-4 py-2 text-sm font-medium transition-colors hover:bg-zinc-100 focus:bg-zinc-100 focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-zinc-100/50 dark:hover:bg-zinc-800 dark:focus:bg-zinc-800 dark:data-[active]:bg-zinc-800/50",
+                "group inline-flex h-9 w-max items-center justify-center rounded-lg bg-transparent px-4 py-2 text-sm font-medium transition-all duration-200 hover:bg-accent/50 focus:bg-accent/50 focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/30 hover:scale-105 hover:text-primary",
                 isMobile
-                  ? "w-full px-3 py-2 h-10" // Keep mobile specific styles
+                  ? "w-full px-4 py-2 h-11 hover:bg-primary/5 hover:border-primary/20 border border-transparent hover:border-border/50" // Enhanced mobile styles
                   : "" // No extra styles for desktop, as the main class covers it
               )}
               onClick={onCloseMenu}

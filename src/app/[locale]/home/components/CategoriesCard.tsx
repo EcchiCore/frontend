@@ -35,30 +35,37 @@ const categories = [
 
 export default function CategoriesCard() {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-lg">หมวดหมู่ยอดนิยม</CardTitle>
+    <Card className="border-border/50 shadow-sm hover:shadow-md transition-shadow duration-200">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-lg flex items-center space-x-2 text-foreground">
+          <div className="p-1.5 bg-primary/10 rounded-md">
+            <div className="w-4 h-4 bg-primary rounded-sm"></div>
+          </div>
+          <span>หมวดหมู่ยอดนิยม</span>
+        </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-3">
+      <CardContent className="space-y-2">
         {categories.map((category, index) => (
           <Link 
             key={index}
             href={`/platforms/${category.slug}`}
             className="block"
           >
-            <div className="flex items-center justify-between p-3 hover:bg-accent rounded-lg cursor-pointer transition-all duration-200 hover:shadow-sm border border-transparent hover:border-border">
+            <div className="flex items-center justify-between p-3 hover:bg-accent/50 rounded-lg cursor-pointer transition-all duration-200 hover:shadow-sm border border-transparent hover:border-primary/20 group">
               <div className="flex items-center space-x-3">
-                <span className="text-xl">{category.icon}</span>
-                <span className="font-medium text-foreground hover:text-primary transition-colors">
+                <div className="text-xl group-hover:scale-110 transition-transform duration-200">
+                  {category.icon}
+                </div>
+                <span className="font-medium text-foreground group-hover:text-primary transition-colors">
                   {category.name}
                 </span>
               </div>
               <div className="flex items-center space-x-2">
-                <Badge variant="secondary" className="hover:bg-accent">
+                <Badge variant="secondary" className="group-hover:bg-primary/10 group-hover:text-primary transition-colors">
                   {category.count.toLocaleString()}
                 </Badge>
                 <svg 
-                  className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" 
+                  className="w-4 h-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all duration-200" 
                   fill="none" 
                   stroke="currentColor" 
                   viewBox="0 0 24 24"

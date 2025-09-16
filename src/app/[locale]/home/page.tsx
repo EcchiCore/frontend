@@ -68,28 +68,65 @@ export default async function HomePage({ params }: { params: { locale: string } 
   const homeData = await fetchHomeData(locale);
 
   return (
-    <div className={`min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 ${inter.className}`}>
+    <div className={`min-h-screen bg-gradient-to-br from-slate-50 via-background to-slate-100 ${inter.className}`}>
       <Navbar />
 
       <main className="bg-background">
-        <div className="text-center py-8">
-          <h1 className="text-4xl font-bold">
-            Chanom<span className="text-primary">Hub</span>
-          </h1>
+        {/* Enhanced Hero Section */}
+        <div className="relative text-center py-16 px-4">
+          <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-primary/5"></div>
+          <div className="relative z-10">
+            <h1 className="text-5xl md:text-6xl font-bold tracking-tight mb-4">
+              <span className="text-primary bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">ChanomHub</span>
+            </h1>
+            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+              ชุมชนออนไลน์เกมผู้ใหญ่ แหล่งเกม H-Game
+            </p>
+            <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
+              <Button size="lg" className="px-8 py-3 text-base font-semibold">
+                เริ่มต้นใช้งาน
+              </Button>
+              <Button size="lg" variant="outline" className="px-8 py-3 text-base font-semibold">
+                ดูกระทู้ทั้งหมด
+              </Button>
+            </div>
+          </div>
         </div>
         <HomeCarousel articles={homeData.carousel} loading={false} />
 
-        <div className="grid lg:grid-cols-4 gap-8 container mx-auto px-4">
+        <div className="grid lg:grid-cols-4 gap-8 container mx-auto px-4 pb-16">
           {/* Main Content */}
           <div className="lg:col-span-3">
-            {/* Tabs Navigation */}
+            {/* Enhanced Tabs Navigation */}
             <Tabs defaultValue="featured" className="mb-8">
-              <TabsList className="grid w-full grid-cols-4">
-                <TabsTrigger value="featured">แนะนำ</TabsTrigger>
-                <TabsTrigger value="latest">ล่าสุด</TabsTrigger>
-                <TabsTrigger value="trending">ยอดนิยม</TabsTrigger>
-                <TabsTrigger value="myFeed">ฟีดของฉัน</TabsTrigger>
-              </TabsList>
+              <div className="bg-card/50 backdrop-blur-sm rounded-lg p-1 border border-border/50 shadow-sm">
+                <TabsList className="grid w-full grid-cols-4 bg-transparent h-12">
+                  <TabsTrigger 
+                    value="featured" 
+                    className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm transition-all duration-200 font-medium"
+                  >
+                    แนะนำ
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="latest"
+                    className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm transition-all duration-200 font-medium"
+                  >
+                    ล่าสุด
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="trending"
+                    className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm transition-all duration-200 font-medium"
+                  >
+                    ยอดนิยม
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="myFeed"
+                    className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-sm transition-all duration-200 font-medium"
+                  >
+                    ฟีดของฉัน
+                  </TabsTrigger>
+                </TabsList>
+              </div>
 
               <TabsContent value="featured" className="space-y-6">
                 <FeaturedPosts posts={homeData.featured} loading={false} />
@@ -111,72 +148,95 @@ export default async function HomePage({ params }: { params: { locale: string } 
             </Tabs>
           </div>
 
-          {/* Sidebar */}
+          {/* Enhanced Sidebar */}
           <div className="space-y-6">
             {/* Categories Card */}
             <CategoriesCard />
 
-            {/* Trending Topics */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center space-x-2">
-                  <TrendingUp className="h-5 w-5" />
+            {/* Enhanced Trending Topics */}
+            <Card className="border-border/50 shadow-sm hover:shadow-md transition-shadow duration-200">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg flex items-center space-x-2 text-foreground">
+                  <div className="p-1.5 bg-primary/10 rounded-md">
+                    <TrendingUp className="h-4 w-4 text-primary" />
+                  </div>
                   <span>หัวข้อฮิต</span>
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-2">
+              <CardContent className="space-y-1">
                 {trendingTopics.map((topic, index) => (
                   <div
                     key={index}
-                    className="flex items-center justify-between p-2 hover:bg-gray-50 rounded cursor-pointer transition-colors"
+                    className="flex items-center justify-between p-3 hover:bg-accent/50 rounded-lg cursor-pointer transition-all duration-200 group border border-transparent hover:border-border/50"
                   >
-                    <span className="text-sm font-medium">#{topic.name}</span>
-                    <span className="text-xs text-gray-500">{topic.count} กระทู้</span>
+                    <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">
+                      #{topic.name}
+                    </span>
+                    <div className="flex items-center space-x-2">
+                      <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded-full">
+                        {topic.count.toLocaleString()}
+                      </span>
+                      <div className="w-1 h-1 bg-primary/60 rounded-full group-hover:bg-primary transition-colors"></div>
+                    </div>
                   </div>
                 ))}
               </CardContent>
             </Card>
 
-            {/* Online Users */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">ผู้ใช้ออนไลน์</CardTitle>
+            {/* Enhanced Online Users */}
+            <Card className="border-border/50 shadow-sm hover:shadow-md transition-shadow duration-200">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg flex items-center space-x-2 text-foreground">
+                  <div className="p-1.5 bg-green-500/10 rounded-md">
+                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                  </div>
+                  <span>ผู้ใช้ออนไลน์</span>
+                </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="flex items-center space-x-2 mb-4">
+                <div className="flex items-center space-x-2 mb-4 p-3 bg-green-50 dark:bg-green-950/20 rounded-lg border border-green-200 dark:border-green-800">
                   <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-                  <span className="text-sm font-medium">15,432 คนออนไลน์</span>
+                  <span className="text-sm font-semibold text-green-700 dark:text-green-300">15,432 คนออนไลน์</span>
                 </div>
                 <div className="space-y-2">
                   {[1, 2, 3, 4, 5].map((i) => (
-                    <div key={i} className="flex items-center space-x-2">
-                      <Avatar className="h-6 w-6">
-                        <AvatarFallback className="text-xs">U{i}</AvatarFallback>
+                    <div key={i} className="flex items-center space-x-3 p-2 hover:bg-accent/50 rounded-lg transition-colors group">
+                      <Avatar className="h-7 w-7 ring-2 ring-background shadow-sm">
+                        <AvatarFallback className="text-xs font-medium bg-primary/10 text-primary">
+                          U{i}
+                        </AvatarFallback>
                       </Avatar>
-                      <span className="text-sm text-gray-700">ผู้ใช้{i}</span>
-                      <div className="w-2 h-2 bg-green-400 rounded-full ml-auto"></div>
+                      <span className="text-sm text-foreground font-medium group-hover:text-primary transition-colors">
+                        ผู้ใช้{i}
+                      </span>
+                      <div className="w-2 h-2 bg-green-400 rounded-full ml-auto group-hover:bg-green-500 transition-colors"></div>
                     </div>
                   ))}
                 </div>
               </CardContent>
             </Card>
 
-            {/* Quick Actions */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">เริ่มต้นใช้งาน</CardTitle>
+            {/* Enhanced Quick Actions */}
+            <Card className="border-border/50 shadow-sm hover:shadow-md transition-shadow duration-200">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg flex items-center space-x-2 text-foreground">
+                  <div className="p-1.5 bg-primary/10 rounded-md">
+                    <Star className="h-4 w-4 text-primary" />
+                  </div>
+                  <span>เริ่มต้นใช้งาน</span>
+                </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3">
-                <Button className="w-full justify-start" variant="outline">
-                  <MessageSquare className="h-4 w-4 mr-2" />
+              <CardContent className="space-y-2">
+                <Button className="w-full justify-start h-11 font-medium hover:bg-primary/5 hover:border-primary/20 transition-all duration-200" variant="outline">
+                  <MessageSquare className="h-4 w-4 mr-3" />
                   สร้างกระทู้ใหม่
                 </Button>
-                <Button className="w-full justify-start" variant="outline">
-                  <Search className="h-4 w-4 mr-2" />
+                <Button className="w-full justify-start h-11 font-medium hover:bg-primary/5 hover:border-primary/20 transition-all duration-200" variant="outline">
+                  <Search className="h-4 w-4 mr-3" />
                   ค้นหากระทู้
                 </Button>
-                <Button className="w-full justify-start" variant="outline">
-                  <Star className="h-4 w-4 mr-2" />
+                <Button className="w-full justify-start h-11 font-medium hover:bg-primary/5 hover:border-primary/20 transition-all duration-200" variant="outline">
+                  <Star className="h-4 w-4 mr-3" />
                   กระทู้ที่บันทึก
                 </Button>
               </CardContent>
@@ -185,46 +245,104 @@ export default async function HomePage({ params }: { params: { locale: string } 
         </div>
       </main>
 
-      {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12">
+      {/* Enhanced Footer */}
+      <footer className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white py-16">
         <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-4 gap-8">
-            <div>
-              <h3 className="text-xl font-bold mb-4">Chanomhub</h3>
-              <p className="text-gray-300 text-sm">
+          <div className="grid md:grid-cols-4 gap-8 mb-8">
+            <div className="md:col-span-1">
+              <h3 className="text-2xl font-bold mb-4 bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">
+                <span className="text-primary">ChanomHub</span>
+              </h3>
+              <p className="text-slate-300 text-sm leading-relaxed mb-4">
                 เว็บบอร์ดชั้นนำของไทย ที่รวมคนไทยเข้ามาแลกเปลี่ยนความรู้และความคิดเห็น
               </p>
+              <div className="flex space-x-3">
+                <div className="w-8 h-8 bg-slate-700 rounded-lg flex items-center justify-center hover:bg-primary transition-colors cursor-pointer">
+                  <span className="text-xs">f</span>
+                </div>
+                <div className="w-8 h-8 bg-slate-700 rounded-lg flex items-center justify-center hover:bg-primary transition-colors cursor-pointer">
+                  <span className="text-xs">t</span>
+                </div>
+                <div className="w-8 h-8 bg-slate-700 rounded-lg flex items-center justify-center hover:bg-primary transition-colors cursor-pointer">
+                  <span className="text-xs">L</span>
+                </div>
+              </div>
             </div>
             <div>
-              <h4 className="font-semibold mb-4">บริการ</h4>
-              <ul className="space-y-2 text-sm text-gray-300">
-                <li><a href="#" className="hover:text-white transition-colors">กระทู้</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">แท็ก</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">กิจกรรม</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">ชุมชน</a></li>
+              <h4 className="font-semibold mb-4 text-lg text-white">บริการ</h4>
+              <ul className="space-y-3 text-sm">
+                <li><a href="#" className="text-slate-300 hover:text-primary transition-colors duration-200 flex items-center group">
+                  <span className="w-1 h-1 bg-primary rounded-full mr-2 group-hover:scale-150 transition-transform"></span>
+                  กระทู้
+                </a></li>
+                <li><a href="#" className="text-slate-300 hover:text-primary transition-colors duration-200 flex items-center group">
+                  <span className="w-1 h-1 bg-primary rounded-full mr-2 group-hover:scale-150 transition-transform"></span>
+                  แท็ก
+                </a></li>
+                <li><a href="#" className="text-slate-300 hover:text-primary transition-colors duration-200 flex items-center group">
+                  <span className="w-1 h-1 bg-primary rounded-full mr-2 group-hover:scale-150 transition-transform"></span>
+                  กิจกรรม
+                </a></li>
+                <li><a href="#" className="text-slate-300 hover:text-primary transition-colors duration-200 flex items-center group">
+                  <span className="w-1 h-1 bg-primary rounded-full mr-2 group-hover:scale-150 transition-transform"></span>
+                  ชุมชน
+                </a></li>
               </ul>
             </div>
             <div>
-              <h4 className="font-semibold mb-4">ช่วยเหลือ</h4>
-              <ul className="space-y-2 text-sm text-gray-300">
-                <li><a href="#" className="hover:text-white transition-colors">คำถามที่พบบ่อย</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">กฎของเว็บไซต์</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">ติดต่อเรา</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">ร้องเรียน</a></li>
+              <h4 className="font-semibold mb-4 text-lg text-white">ช่วยเหลือ</h4>
+              <ul className="space-y-3 text-sm">
+                <li><a href="#" className="text-slate-300 hover:text-primary transition-colors duration-200 flex items-center group">
+                  <span className="w-1 h-1 bg-primary rounded-full mr-2 group-hover:scale-150 transition-transform"></span>
+                  คำถามที่พบบ่อย
+                </a></li>
+                <li><a href="#" className="text-slate-300 hover:text-primary transition-colors duration-200 flex items-center group">
+                  <span className="w-1 h-1 bg-primary rounded-full mr-2 group-hover:scale-150 transition-transform"></span>
+                  กฎของเว็บไซต์
+                </a></li>
+                <li><a href="#" className="text-slate-300 hover:text-primary transition-colors duration-200 flex items-center group">
+                  <span className="w-1 h-1 bg-primary rounded-full mr-2 group-hover:scale-150 transition-transform"></span>
+                  ติดต่อเรา
+                </a></li>
+                <li><a href="#" className="text-slate-300 hover:text-primary transition-colors duration-200 flex items-center group">
+                  <span className="w-1 h-1 bg-primary rounded-full mr-2 group-hover:scale-150 transition-transform"></span>
+                  ร้องเรียน
+                </a></li>
               </ul>
             </div>
             <div>
-              <h4 className="font-semibold mb-4">ติดตาม</h4>
-              <ul className="space-y-2 text-sm text-gray-300">
-                <li><a href="#" className="hover:text-white transition-colors">Facebook</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Twitter</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">LINE</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">YouTube</a></li>
+              <h4 className="font-semibold mb-4 text-lg text-white">ติดตาม</h4>
+              <ul className="space-y-3 text-sm">
+                <li><a href="#" className="text-slate-300 hover:text-primary transition-colors duration-200 flex items-center group">
+                  <span className="w-1 h-1 bg-primary rounded-full mr-2 group-hover:scale-150 transition-transform"></span>
+                  Facebook
+                </a></li>
+                <li><a href="#" className="text-slate-300 hover:text-primary transition-colors duration-200 flex items-center group">
+                  <span className="w-1 h-1 bg-primary rounded-full mr-2 group-hover:scale-150 transition-transform"></span>
+                  Twitter
+                </a></li>
+                <li><a href="#" className="text-slate-300 hover:text-primary transition-colors duration-200 flex items-center group">
+                  <span className="w-1 h-1 bg-primary rounded-full mr-2 group-hover:scale-150 transition-transform"></span>
+                  LINE
+                </a></li>
+                <li><a href="#" className="text-slate-300 hover:text-primary transition-colors duration-200 flex items-center group">
+                  <span className="w-1 h-1 bg-primary rounded-full mr-2 group-hover:scale-150 transition-transform"></span>
+                  YouTube
+                </a></li>
               </ul>
             </div>
           </div>
-          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-sm text-gray-400">
-            <p>&copy; 2025 Chanomhub. สงวนลิขสิทธิ์ทุกประการ</p>
+          <div className="border-t border-slate-700 pt-8">
+            <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+              <p className="text-sm text-slate-400">
+                &copy; 2025 Chanomhub. สงวนลิขสิทธิ์ทุกประการ
+              </p>
+              <div className="flex space-x-6 text-sm text-slate-400">
+                <a href="#" className="hover:text-primary transition-colors">นโยบายความเป็นส่วนตัว</a>
+                <a href="#" className="hover:text-primary transition-colors">เงื่อนไขการใช้งาน</a>
+                <a href="#" className="hover:text-primary transition-colors">คุกกี้</a>
+              </div>
+            </div>
           </div>
         </div>
       </footer>
