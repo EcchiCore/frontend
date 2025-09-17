@@ -11,6 +11,11 @@ import {
   KeyIcon,
   CheckIcon,
   XMarkIcon,
+  ShieldCheckIcon,
+  CogIcon,
+  GlobeAltIcon,
+  UserGroupIcon,
+  TrashIcon,
 } from '@heroicons/react/24/outline';
 import { useAuthContext } from '../providers/AuthProvider';
 import { userApi, ApiError, getCookie, setCookie } from '../utils/api';
@@ -446,13 +451,29 @@ const SettingsPage: React.FC = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="space-y-8">
+      {/* Header Section */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 p-8">
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-indigo-500/5"></div>
+        <div className="relative">
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 bg-clip-text text-transparent mb-2">
+            Settings & Preferences
+          </h1>
+          <p className="text-muted-foreground text-lg">Customize your account and application preferences</p>
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Sidebar Navigation */}
         <div className="lg:col-span-1">
           <div className="sticky top-4">
-            <h2 className="text-lg font-bold mb-4">Settings</h2>
-            <Card>
+            <Card className="overflow-hidden shadow-lg border-0 bg-gradient-to-br from-white to-gray-50/50 dark:from-gray-900 dark:to-gray-800/50">
+              <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100/50 dark:from-gray-800/50 dark:to-gray-700/50">
+                <h2 className="text-lg font-bold flex items-center gap-2">
+                  <CogIcon className="h-5 w-5 text-blue-600" />
+                  Settings
+                </h2>
+              </CardHeader>
               <CardContent className="p-2">
                 <nav className="space-y-1">
                   {tabs.map((tab) => {
@@ -460,8 +481,12 @@ const SettingsPage: React.FC = () => {
                     return (
                       <Button
                         key={tab.id}
-                        variant={activeTab === tab.id ? 'secondary' : 'ghost'}
-                        className="w-full justify-start"
+                        variant={activeTab === tab.id ? 'default' : 'ghost'}
+                        className={`w-full justify-start transition-all duration-200 ${
+                          activeTab === tab.id 
+                            ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg' 
+                            : 'hover:bg-gray-100 dark:hover:bg-gray-800'
+                        }`}
                         onClick={() => setActiveTab(tab.id as typeof activeTab)}
                       >
                         <Icon className="h-4 w-4 mr-2" />
@@ -473,9 +498,12 @@ const SettingsPage: React.FC = () => {
               </CardContent>
             </Card>
             {/* Preview Section */}
-            <Card className="mt-8">
-              <CardHeader>
-                <h3 className="text-lg font-semibold">Preview</h3>
+            <Card className="mt-8 overflow-hidden shadow-lg border-0 bg-gradient-to-br from-white to-gray-50/50 dark:from-gray-900 dark:to-gray-800/50">
+              <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100/50 dark:from-gray-800/50 dark:to-gray-700/50">
+                <h3 className="text-lg font-semibold flex items-center gap-2">
+                  <EyeIcon className="h-5 w-5 text-blue-600" />
+                  Preview
+                </h3>
               </CardHeader>
               <CardContent>
                 {activeTab === 'profile' && (
@@ -533,7 +561,20 @@ const SettingsPage: React.FC = () => {
 
         {/* Content Area */}
         <div className="lg:col-span-2">
-          <h1 className="text-2xl font-bold mb-6">Your Settings</h1>
+          <div className="mb-6">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+              {tabs.find(tab => tab.id === activeTab)?.label || 'Settings'}
+            </h2>
+            <p className="text-muted-foreground">
+              {activeTab === 'profile' && 'Manage your personal information and profile settings'}
+              {activeTab === 'security' && 'Secure your account with password and authentication settings'}
+              {activeTab === 'notifications' && 'Configure how and when you receive notifications'}
+              {activeTab === 'privacy' && 'Control your privacy and visibility settings'}
+              {activeTab === 'appearance' && 'Customize the look and feel of your interface'}
+              {activeTab === 'tokens' && 'Manage your API tokens and access keys'}
+              {activeTab === 'danger' && 'Dangerous actions that cannot be undone'}
+            </p>
+          </div>
 
           {/* Mobile Tabs */}
           <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as typeof activeTab)} className="lg:hidden mb-6">

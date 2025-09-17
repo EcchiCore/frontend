@@ -26,7 +26,6 @@ export const getAuthHeaders = (): HeadersInit => {
   const token = getCookie('token');
   return {
     Authorization: `Bearer ${token}`,
-    'Content-Type': 'application/json',
   };
 };
 
@@ -45,9 +44,17 @@ export const apiRequest = async <T>(endpoint: string, options: RequestInit = {})
     throw new ApiError('Authorization token not found. Please log in.', 401);
   }
 
+  const headers: HeadersInit = getAuthHeaders();
+  if (options.method !== 'DELETE') {
+    headers['Content-Type'] = 'application/json';
+  }
+
   const defaultOptions: RequestInit = {
-    headers: getAuthHeaders(),
     ...options,
+    headers: {
+      ...headers,
+      ...options.headers,
+    },
   };
 
   try {
@@ -60,6 +67,10 @@ export const apiRequest = async <T>(endpoint: string, options: RequestInit = {})
         response.status,
         errorData
       );
+    }
+
+    if (response.status === 204) {
+      return {} as T;
     }
 
     return await response.json();

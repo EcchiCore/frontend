@@ -377,22 +377,28 @@ export const ModerationPage: React.FC = () => {
   }
 
   return (
-    <div className="p-4 max-w-7xl mx-auto">
-      {/* Header */}
-      <div className="mb-8 flex justify-between items-center">
-        <div>
-          <h1 className="text-4xl font-bold mb-2">Moderation Dashboard</h1>
-          <p className="text-muted-foreground">Manage and review content submissions</p>
+    <div className="space-y-8">
+      {/* Header Section */}
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-950/20 dark:to-indigo-950/20 p-8">
+        <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 to-indigo-500/5"></div>
+        <div className="relative flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+          <div className="space-y-2">
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 dark:from-purple-400 dark:to-indigo-400 bg-clip-text text-transparent">
+              Moderation Dashboard
+            </h1>
+            <p className="text-muted-foreground text-lg">Manage and review content submissions</p>
+          </div>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={handleRefresh}
+            disabled={refreshing}
+            title="Refresh data"
+            className="bg-white/50 hover:bg-white/80 dark:bg-gray-800/50 dark:hover:bg-gray-800/80 border-2 hover:border-purple-300 transition-all duration-200"
+          >
+            <RefreshCw className={`w-5 h-5 ${refreshing ? 'animate-spin' : ''}`} />
+          </Button>
         </div>
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={handleRefresh}
-          disabled={refreshing}
-          title="Refresh data"
-        >
-          <RefreshCw className={`w-5 h-5 ${refreshing ? 'animate-spin' : ''}`} />
-        </Button>
       </div>
 
       {/* Alerts */}
@@ -431,62 +437,77 @@ export const ModerationPage: React.FC = () => {
       )}
 
       {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
-        <Card>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+        <Card className="relative overflow-hidden bg-gradient-to-br from-yellow-50 to-amber-50 dark:from-yellow-950/20 dark:to-amber-950/20 border-yellow-200/50 dark:border-yellow-800/50 hover:shadow-lg transition-all duration-300">
           <CardContent className="p-6">
-            <div className="flex items-center">
-              <Clock className="h-8 w-8 text-yellow-500" />
-              <div className="ml-4">
-                <p className="text-sm font-medium text-muted-foreground">Pending</p>
-                <p className="text-2xl font-bold text-yellow-500">{stats.pendingRequests}</p>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-yellow-600 dark:text-yellow-400">Pending</p>
+                <p className="text-3xl font-bold text-yellow-900 dark:text-yellow-100">{stats.pendingRequests}</p>
+                <p className="text-xs text-yellow-600/70 dark:text-yellow-400/70">Awaiting review</p>
+              </div>
+              <div className="p-3 bg-yellow-500/10 rounded-full">
+                <Clock className="h-6 w-6 text-yellow-600" />
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="relative overflow-hidden bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 border-blue-200/50 dark:border-blue-800/50 hover:shadow-lg transition-all duration-300">
           <CardContent className="p-6">
-            <div className="flex items-center">
-              <AlertTriangle className="h-8 w-8 text-blue-500" />
-              <div className="ml-4">
-                <p className="text-sm font-medium text-muted-foreground">Needs Revision</p>
-                <p className="text-2xl font-bold text-blue-500">{stats.needsRevisionRequests}</p>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-blue-600 dark:text-blue-400">Needs Revision</p>
+                <p className="text-3xl font-bold text-blue-900 dark:text-blue-100">{stats.needsRevisionRequests}</p>
+                <p className="text-xs text-blue-600/70 dark:text-blue-400/70">Requires changes</p>
+              </div>
+              <div className="p-3 bg-blue-500/10 rounded-full">
+                <AlertTriangle className="h-6 w-6 text-blue-600" />
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="relative overflow-hidden bg-gradient-to-br from-purple-50 to-violet-50 dark:from-purple-950/20 dark:to-violet-950/20 border-purple-200/50 dark:border-purple-800/50 hover:shadow-lg transition-all duration-300">
           <CardContent className="p-6">
-            <div className="flex items-center">
-              <FileText className="h-8 w-8 text-purple-500" />
-              <div className="ml-4">
-                <p className="text-sm font-medium text-muted-foreground">Articles</p>
-                <p className="text-2xl font-bold text-purple-500">{stats.articleRequests}</p>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-purple-600 dark:text-purple-400">Articles</p>
+                <p className="text-3xl font-bold text-purple-900 dark:text-purple-100">{stats.articleRequests}</p>
+                <p className="text-xs text-purple-600/70 dark:text-purple-400/70">Content submissions</p>
+              </div>
+              <div className="p-3 bg-purple-500/10 rounded-full">
+                <FileText className="h-6 w-6 text-purple-600" />
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="relative overflow-hidden bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 border-green-200/50 dark:border-green-800/50 hover:shadow-lg transition-all duration-300">
           <CardContent className="p-6">
-            <div className="flex items-center">
-              <Link className="h-8 w-8 text-green-500" />
-              <div className="ml-4">
-                <p className="text-sm font-medium text-muted-foreground">Links</p>
-                <p className="text-2xl font-bold text-green-500">{stats.downloadLinkRequests}</p>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-green-600 dark:text-green-400">Links</p>
+                <p className="text-3xl font-bold text-green-900 dark:text-green-100">{stats.downloadLinkRequests}</p>
+                <p className="text-xs text-green-600/70 dark:text-green-400/70">Download links</p>
+              </div>
+              <div className="p-3 bg-green-500/10 rounded-full">
+                <Link className="h-6 w-6 text-green-600" />
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="relative overflow-hidden bg-gradient-to-br from-pink-50 to-rose-50 dark:from-pink-950/20 dark:to-rose-950/20 border-pink-200/50 dark:border-pink-800/50 hover:shadow-lg transition-all duration-300">
           <CardContent className="p-6">
-            <div className="flex items-center">
-              <MessageCircle className="h-8 w-8 text-pink-500" />
-              <div className="ml-4">
-                <p className="text-sm font-medium text-muted-foreground">Comments</p>
-                <p className="text-2xl font-bold text-pink-500">{stats.commentRequests}</p>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-pink-600 dark:text-pink-400">Comments</p>
+                <p className="text-3xl font-bold text-pink-900 dark:text-pink-100">{stats.commentRequests}</p>
+                <p className="text-xs text-pink-600/70 dark:text-pink-400/70">User comments</p>
+              </div>
+              <div className="p-3 bg-pink-500/10 rounded-full">
+                <MessageCircle className="h-6 w-6 text-pink-600" />
               </div>
             </div>
           </CardContent>
@@ -494,7 +515,13 @@ export const ModerationPage: React.FC = () => {
       </div>
 
       {/* Filters and Search */}
-      <Card className="mb-6">
+      <Card className="overflow-hidden shadow-lg border-0 bg-gradient-to-br from-white to-gray-50/50 dark:from-gray-900 dark:to-gray-800/50">
+        <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100/50 dark:from-gray-800/50 dark:to-gray-700/50">
+          <h3 className="text-lg font-semibold flex items-center gap-2">
+            <Search className="h-5 w-5 text-purple-600" />
+            Search & Filter
+          </h3>
+        </CardHeader>
         <CardContent className="p-6">
           <div className="flex flex-col lg:flex-row gap-4 items-center">
             <div className="flex-1">
@@ -503,7 +530,7 @@ export const ModerationPage: React.FC = () => {
                 <Input
                   type="text"
                   placeholder="Search requests..."
-                  className="pl-10"
+                  className="pl-10 focus:ring-2 focus:ring-purple-500 border-gray-300 dark:border-gray-600"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
@@ -515,6 +542,7 @@ export const ModerationPage: React.FC = () => {
                 variant={activeFilter === 'ALL' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setActiveFilter('ALL')}
+                className={activeFilter === 'ALL' ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white' : 'hover:bg-purple-50 dark:hover:bg-purple-950/20'}
               >
                 All ({requests.length})
               </Button>
@@ -522,6 +550,7 @@ export const ModerationPage: React.FC = () => {
                 variant={activeFilter === 'ARTICLE' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setActiveFilter('ARTICLE')}
+                className={activeFilter === 'ARTICLE' ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white' : 'hover:bg-purple-50 dark:hover:bg-purple-950/20'}
               >
                 <FileText className="w-4 h-4 mr-1" />
                 Articles ({stats.articleRequests})
@@ -530,6 +559,7 @@ export const ModerationPage: React.FC = () => {
                 variant={activeFilter === 'DOWNLOAD_LINK' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setActiveFilter('DOWNLOAD_LINK')}
+                className={activeFilter === 'DOWNLOAD_LINK' ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white' : 'hover:bg-purple-50 dark:hover:bg-purple-950/20'}
               >
                 <Link className="w-4 h-4 mr-1" />
                 Links ({stats.downloadLinkRequests})
@@ -538,6 +568,7 @@ export const ModerationPage: React.FC = () => {
                 variant={activeFilter === 'COMMENT' ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setActiveFilter('COMMENT')}
+                className={activeFilter === 'COMMENT' ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white' : 'hover:bg-purple-50 dark:hover:bg-purple-950/20'}
               >
                 <MessageCircle className="w-4 h-4 mr-1" />
                 Comments ({stats.commentRequests})
@@ -555,18 +586,24 @@ export const ModerationPage: React.FC = () => {
       )}
 
       {/* Requests Table */}
-      <Card>
+      <Card className="overflow-hidden shadow-lg border-0 bg-gradient-to-br from-white to-gray-50/50 dark:from-gray-900 dark:to-gray-800/50">
+        <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100/50 dark:from-gray-800/50 dark:to-gray-700/50">
+          <h3 className="text-lg font-semibold flex items-center gap-2">
+            <FileText className="h-5 w-5 text-purple-600" />
+            Moderation Requests
+          </h3>
+        </CardHeader>
         <CardContent className="p-0">
           <Table>
             <TableHeader>
-              <TableRow>
-                <TableHead>ID</TableHead>
-                <TableHead>Type</TableHead>
-                <TableHead>Content</TableHead>
-                <TableHead>Requester</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Created</TableHead>
-                <TableHead>Actions</TableHead>
+              <TableRow className="bg-gray-50/50 dark:bg-gray-800/50">
+                <TableHead className="font-semibold">ID</TableHead>
+                <TableHead className="font-semibold">Type</TableHead>
+                <TableHead className="font-semibold">Content</TableHead>
+                <TableHead className="font-semibold">Requester</TableHead>
+                <TableHead className="font-semibold">Status</TableHead>
+                <TableHead className="font-semibold">Created</TableHead>
+                <TableHead className="font-semibold">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -582,17 +619,19 @@ export const ModerationPage: React.FC = () => {
                 </TableRow>
               )}
               {currentRequests.map((request) => (
-                <TableRow key={request.id} className="hover:bg-muted/50">
-                  <TableCell className="font-mono text-sm">#{request.id}</TableCell>
+                <TableRow key={request.id} className="hover:bg-gradient-to-r hover:from-gray-50/50 hover:to-gray-100/30 dark:hover:from-gray-800/30 dark:hover:to-gray-700/30 transition-all duration-200 border-b border-gray-200/50 dark:border-gray-700/50">
+                  <TableCell className="font-mono text-sm font-medium text-purple-600 dark:text-purple-400">#{request.id}</TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
-                      <EntityIcon type={request.entityType} />
-                      <span className="text-sm">{request.entityType.replace('_', ' ')}</span>
+                      <div className="p-1.5 rounded-full bg-purple-100 dark:bg-purple-900/20">
+                        <EntityIcon type={request.entityType} />
+                      </div>
+                      <span className="text-sm font-medium">{request.entityType.replace('_', ' ')}</span>
                     </div>
                   </TableCell>
                   <TableCell>
                     <div className="max-w-xs">
-                      <div className="font-medium truncate">
+                      <div className="font-medium truncate text-gray-900 dark:text-white">
                         {request.entityType === 'ARTICLE' && (request.entityDetails.title || 'Untitled Article')}
                         {request.entityType === 'DOWNLOAD_LINK' && (request.entityDetails.name || 'Unnamed Link')}
                         {request.entityType === 'COMMENT' &&
@@ -606,13 +645,13 @@ export const ModerationPage: React.FC = () => {
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
-                      <Avatar className="h-8 w-8">
+                      <Avatar className="h-8 w-8 border-2 border-gray-200 dark:border-gray-700">
                         <AvatarImage src={request.requester.image || undefined} />
-                        <AvatarFallback className="text-xs">
+                        <AvatarFallback className="text-xs bg-gradient-to-br from-purple-500 to-indigo-500 text-white">
                           {request.requester.name.charAt(0)}
                         </AvatarFallback>
                       </Avatar>
-                      <div className="text-sm">{request.requester.name}</div>
+                      <div className="text-sm font-medium">{request.requester.name}</div>
                     </div>
                   </TableCell>
                   <TableCell>
@@ -628,6 +667,7 @@ export const ModerationPage: React.FC = () => {
                           size="sm"
                           onClick={() => handleReviewRequest(request)}
                           disabled={loading}
+                          className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white"
                         >
                           <Eye className="w-4 h-4 mr-1" />
                           Review
@@ -639,6 +679,7 @@ export const ModerationPage: React.FC = () => {
                           size="sm"
                           onClick={() => handleDeleteRequest(request.id)}
                           disabled={loading}
+                          className="hover:bg-red-600"
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>

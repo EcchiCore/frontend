@@ -134,14 +134,19 @@ export default function ModerationDashboard() {
         return null;
       }
 
+      const headers: Record<string, string> = {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+        ...options.headers,
+      };
+
+      if (options.method !== 'DELETE') {
+        headers["Content-Type"] = "application/json";
+      }
+
       const response = await fetch(`${API_BASE_URL}${url}`, {
         ...options,
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-          Accept: "application/json",
-          ...options.headers,
-        },
+        headers,
         credentials: "include",
       });
 
