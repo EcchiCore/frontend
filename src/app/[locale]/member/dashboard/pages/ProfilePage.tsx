@@ -10,7 +10,6 @@ import {
   PhotoIcon,
   CalendarIcon,
   ShieldCheckIcon,
-  StarIcon,
   DocumentTextIcon,
   HeartIcon
 } from '@heroicons/react/24/outline';
@@ -21,13 +20,13 @@ import { userApi, ApiError } from '../utils/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
-import { Loader2, TrendingUp, Users, FileText, Calendar, Award } from 'lucide-react';
+import { Loader2, Users, FileText, Award } from 'lucide-react';
 
 export const ProfilePage: React.FC = () => {
   const { user, updateUser } = useAuthContext();

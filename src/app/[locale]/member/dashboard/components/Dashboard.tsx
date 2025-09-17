@@ -11,6 +11,7 @@ import { DashboardLayoutShadcn } from '../layout/DashboardLayout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
 
 interface Author {
   username: string;
@@ -181,7 +182,7 @@ const Dashboard: React.FC = () => {
               <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 bg-clip-text text-transparent">
                 Welcome back, {userData.username}!
               </h1>
-              <p className="text-muted-foreground text-lg">Here's your dashboard overview</p>
+              <p className="text-muted-foreground text-lg">Here&apos;s your dashboard overview</p>
             </div>
             <Button
               variant="outline"
@@ -314,7 +315,7 @@ const Dashboard: React.FC = () => {
           <CardContent className="p-6">
             {articlesData.articles.length > 0 ? (
               <div className="space-y-4">
-                {articlesData.articles.slice(0, 5).map((article, index) => (
+                {articlesData.articles.slice(0, 5).map((article) => (
                   <div 
                     key={article.slug} 
                     className="flex items-start gap-4 p-4 rounded-lg bg-gradient-to-r from-gray-50/50 to-gray-100/30 dark:from-gray-800/30 dark:to-gray-700/30 hover:from-gray-100/50 hover:to-gray-200/30 dark:hover:from-gray-700/50 dark:hover:to-gray-600/30 transition-all duration-200 border border-gray-200/50 dark:border-gray-700/50"

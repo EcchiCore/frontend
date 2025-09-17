@@ -22,7 +22,7 @@ export const setCookie = (name: string, value: string, days: number) => {
   }
 };
 
-export const getAuthHeaders = (): HeadersInit => {
+export const getAuthHeaders = (): Record<string, string> => {
   const token = getCookie('token');
   return {
     Authorization: `Bearer ${token}`,
@@ -44,7 +44,7 @@ export const apiRequest = async <T>(endpoint: string, options: RequestInit = {})
     throw new ApiError('Authorization token not found. Please log in.', 401);
   }
 
-  const headers: HeadersInit = getAuthHeaders();
+  const headers: Record<string, string> = getAuthHeaders();
   if (options.method !== 'DELETE') {
     headers['Content-Type'] = 'application/json';
   }

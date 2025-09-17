@@ -134,14 +134,20 @@ export default function ModerationDashboard() {
         return null;
       }
 
-      const headers: Record<string, string> = {
-        Authorization: `Bearer ${token}`,
-        Accept: "application/json",
-        ...options.headers,
-      };
+      const headers = new Headers();
+      headers.set('Authorization', `Bearer ${token}`);
+      headers.set('Accept', 'application/json');
 
       if (options.method !== 'DELETE') {
-        headers["Content-Type"] = "application/json";
+        headers.set("Content-Type", "application/json");
+      }
+
+      // Merge additional headers
+      if (options.headers) {
+        const tempHeaders = new Headers(options.headers);
+        tempHeaders.forEach((value, key) => {
+          headers.set(key, value);
+        });
       }
 
       const response = await fetch(`${API_BASE_URL}${url}`, {

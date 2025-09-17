@@ -11,11 +11,7 @@ import {
   KeyIcon,
   CheckIcon,
   XMarkIcon,
-  ShieldCheckIcon,
   CogIcon,
-  GlobeAltIcon,
-  UserGroupIcon,
-  TrashIcon,
 } from '@heroicons/react/24/outline';
 import { useAuthContext } from '../providers/AuthProvider';
 import { userApi, ApiError, getCookie, setCookie } from '../utils/api';
