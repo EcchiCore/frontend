@@ -149,7 +149,7 @@ export const ArticlesPage: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2">
+          <h1 className="text-2xl font-bold flex items-center gap-2 text-foreground">
             <DocumentTextIcon className="h-6 w-6" />
             {feedMode ? 'Article Feed' : 'My Articles'}
           </h1>
@@ -160,7 +160,7 @@ export const ArticlesPage: React.FC = () => {
 
         <div className="flex items-center gap-4">
           {/* Toggle Feed Mode */}
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-2 text-foreground">
             <Label htmlFor="feed-mode">Feed Mode</Label>
             <Switch
               id="feed-mode"
@@ -344,69 +344,71 @@ export const ArticlesPage: React.FC = () => {
 
                     {/* Stats */}
                     <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                      <span className="flex items-center gap-1">
-                        <HeartIcon className="h-4 w-4" />
-                        {article.favoritesCount}
-                      </span>
+  <span className="flex items-center gap-1">
+    <HeartIcon className="h-4 w-4" />
+    {article.favoritesCount}
+  </span>
+
+                      {/* Actions */}
+                      <div className="flex justify-end gap-2 mt-4 w-full">
+                        <Button
+                          variant={article.favorited ? "destructive" : "outline"}
+                          size="sm"
+                          onClick={() => handleToggleFavorite(article)}
+                        >
+                          {article.favorited ? (
+                            <HeartSolidIcon className="h-4 w-4 mr-2" />
+                          ) : (
+                            <HeartIcon className="h-4 w-4 mr-2" />
+                          )}
+                          {article.favorited ? 'Unfavorite' : 'Favorite'}
+                        </Button>
+
+                        <Button variant="outline" size="sm">
+                          <EyeIcon className="h-4 w-4 mr-2" />
+                          View
+                        </Button>
+
+                        {/* Show edit/delete only for own articles */}
+                        {!feedMode && article.author.username === user?.username && (
+                          <>
+                            {article.status === ArticleStatus.DRAFT && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handlePublishRequest(article)}
+                                disabled={publishingSlug === article.slug}
+                              >
+                                {publishingSlug === article.slug ? (
+                                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                ) : (
+                                  <ArrowUpOnSquareIcon className="h-4 w-4 mr-2" />
+                                )}
+                                {publishingSlug === article.slug ? 'Requesting...' : 'Request Publish'}
+                              </Button>
+                            )}
+                            <Button variant="outline" size="sm" onClick={() => router.push(`/editor/${article.slug}`)}>
+                              <PencilIcon className="h-4 w-4 mr-2" />
+                              Edit
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleDeleteArticle(article)}
+                              className="text-destructive hover:text-destructive"
+                            >
+                              <TrashIcon className="h-4 w-4 mr-2" />
+                              Delete
+                            </Button>
+                          </>
+                        )}
+                      </div>
                     </div>
                   </div>
 
                 </div>
 
-                {/* Actions */}
-                <div className="flex justify-end gap-2 mt-4">
-                  <Button
-                    variant={article.favorited ? "destructive" : "outline"}
-                    size="sm"
-                    onClick={() => handleToggleFavorite(article)}
-                  >
-                    {article.favorited ? (
-                      <HeartSolidIcon className="h-4 w-4 mr-2" />
-                    ) : (
-                      <HeartIcon className="h-4 w-4 mr-2" />
-                    )}
-                    {article.favorited ? 'Unfavorite' : 'Favorite'}
-                  </Button>
 
-                  <Button variant="outline" size="sm">
-                    <EyeIcon className="h-4 w-4 mr-2" />
-                    View
-                  </Button>
-
-                  {/* Show edit/delete only for own articles */}
-                  {!feedMode && article.author.username === user?.username && (
-                    <>
-                      {article.status === ArticleStatus.DRAFT && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handlePublishRequest(article)}
-                          disabled={publishingSlug === article.slug}
-                        >
-                          {publishingSlug === article.slug ? (
-                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                          ) : (
-                            <ArrowUpOnSquareIcon className="h-4 w-4 mr-2" />
-                          )}
-                          {publishingSlug === article.slug ? 'Requesting...' : 'Request Publish'}
-                        </Button>
-                      )}
-                      <Button variant="outline" size="sm" onClick={() => router.push(`/editor/${article.slug}`)}>
-                        <PencilIcon className="h-4 w-4 mr-2" />
-                        Edit
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleDeleteArticle(article)}
-                        className="text-destructive hover:text-destructive"
-                      >
-                        <TrashIcon className="h-4 w-4 mr-2" />
-                        Delete
-                      </Button>
-                    </>
-                  )}
-                </div>
               </CardContent>
             </Card>
           ))}

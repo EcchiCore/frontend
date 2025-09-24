@@ -55,15 +55,17 @@ export const SidebarShadcn: React.FC<SidebarProps> = ({ className = '' }) => {
       </div>
 
       {/* Navigation Menu */}
+
       <nav className="flex-1 p-2 overflow-y-auto">
         <div className="space-y-1">
           {visibleItems.map((item) => (
             <Button
               key={item.id}
               variant={currentPage === item.id ? 'default' : 'ghost'}
-              className="w-full justify-start gap-3 text-foreground"
+              className={`w-full justify-start gap-3 ${
+                currentPage === item.id ? 'bg-gray-300 text-black' : 'bg-transparent text-foreground'
+              }`}
               onClick={() => handleNavigation(item.id)}
-
             >
               {getIcon(item.icon as keyof typeof iconMap)}
               <span className="font-medium">{item.label}</span>
@@ -81,7 +83,7 @@ export const SidebarShadcn: React.FC<SidebarProps> = ({ className = '' }) => {
               <AvatarFallback>{user.username.charAt(0).toUpperCase()}</AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate">
+              <p className="text-sm font-medium truncate text-foreground">
                 {user.username}
               </p>
               <p className="text-xs text-muted-foreground truncate">

@@ -573,8 +573,8 @@ const SettingsPage: React.FC = () => {
           </div>
 
           {/* Mobile Tabs */}
-          <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as typeof activeTab)} className="lg:hidden mb-6">
-            <TabsList className="grid grid-cols-2 lg:grid-cols-4">
+          <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as typeof activeTab)} className="mb-6">
+            <TabsList className="flex flex-row space-x-2">
               {tabs.map((tab) => (
                 <TabsTrigger key={tab.id} value={tab.id}>
                   {tab.label}
@@ -597,7 +597,7 @@ const SettingsPage: React.FC = () => {
 
           {/* Profile Tab */}
           {activeTab === 'profile' && (
-            <form onSubmit={handleProfileUpdate} className="space-y-6">
+            <form onSubmit={handleProfileUpdate} className="space-y-6 text-foreground">
               <div className="space-y-2">
                 <Label htmlFor="image">Profile Picture URL</Label>
                 <Input
@@ -715,7 +715,7 @@ const SettingsPage: React.FC = () => {
 
           {/* Security Tab */}
           {activeTab === 'security' && (
-            <form onSubmit={handlePasswordChange} className="space-y-6">
+            <form onSubmit={handlePasswordChange} className="space-y-6 text-foreground">
               <div className="space-y-2">
                 <Label htmlFor="currentPassword">Current Password</Label>
                 <Input
@@ -768,7 +768,7 @@ const SettingsPage: React.FC = () => {
 
           {/* Notifications Tab */}
           {activeTab === 'notifications' && (
-            <div className="space-y-6">
+            <div className="space-y-6 text-foreground">
               <h3 className="text-lg font-medium">Email Notifications</h3>
               {Object.entries(notificationSettings)
                 .filter(([key]) => key.startsWith('email'))
@@ -802,7 +802,7 @@ const SettingsPage: React.FC = () => {
 
           {/* Privacy Tab */}
           {activeTab === 'privacy' && (
-            <div className="space-y-6">
+            <div className="space-y-6 text-foreground">
               <div className="space-y-2">
                 <Label>Profile Visibility</Label>
                 <Select
@@ -855,7 +855,7 @@ const SettingsPage: React.FC = () => {
 
           {/* Appearance Tab */}
           {activeTab === 'appearance' && (
-            <form onSubmit={handleAppearanceUpdate} className="space-y-6">
+            <form onSubmit={handleAppearanceUpdate} className="space-y-6 text-foreground">
               <div className="space-y-2">
                 <Label>Theme</Label>
                 <Select

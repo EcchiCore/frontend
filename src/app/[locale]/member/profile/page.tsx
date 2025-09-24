@@ -203,7 +203,7 @@ export default async function UserPage() {
                       <h1 className="text-4xl font-bold mb-2 text-white bg-gradient-to-r from-purple-300 to-blue-300 bg-clip-text text-transparent">
                         {userData.username}
                       </h1>
-                      <p className="text-lg text-gray-300 flex items-center gap-2">
+                      <p className="text-lg text-gray-100 flex items-center gap-2">
                         <span className="w-2 h-2 bg-purple-400 rounded-full animate-pulse"></span>
                         {userData.email}
                       </p>
@@ -214,7 +214,7 @@ export default async function UserPage() {
                   {userData.bio && (
                     <div className="mt-6 p-6 bg-gradient-to-r from-purple-500/10 to-blue-500/10 backdrop-blur-sm border border-white/10 rounded-2xl hover:bg-white/10 transition-all duration-300">
                       <h3 className="text-sm font-semibold text-purple-300 uppercase tracking-wider mb-2">เกี่ยวกับฉัน</h3>
-                      <p className="text-gray-200 leading-relaxed italic">{userData.bio}</p>
+                      <p className="text-gray-100 leading-relaxed italic">{userData.bio}</p>
                     </div>
                   )}
 
