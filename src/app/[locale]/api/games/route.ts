@@ -62,15 +62,18 @@ export async function POST(request: NextRequest) {
     }
 
     const data = await request.json();
+    console.log('--- Received Game Upload Data on Server ---');
+    console.log(JSON.stringify(data, null, 2));
+    console.log('--- End of Server Data ---');
     const {
       title,
       description,
       body,
       ver,
       engine,
-      tagList,
-      categoryList,
-      platformList,
+      tags,
+      categories,
+      platforms,
       coverImage,
       mainImage,
       backgroundImage,
@@ -86,7 +89,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ message: `Missing required fields: ${missingFields.join(', ')}` }, { status: 400 });
     }
 
-    const validationResult = await validateTaxonomies(tagList || [], categoryList || []);
+    const validationResult = await validateTaxonomies(tags || [], categories || []);
     if (!validationResult.isValid) {
         return NextResponse.json({ message: validationResult.error }, { status: 400 });
     }
@@ -103,28 +106,40 @@ export async function POST(request: NextRequest) {
         backgroundImage: backgroundImage || coverImage,
         coverImage: coverImage,
         images: [coverImage, ...(otherImages || [])],
-        tagList: tagList || [],
-        categoryList: categoryList || [],
-        platformList: platformList || [],
+        tagList: tags || [],
+        categoryList: categories || [],
+        platformList: platforms || [],
       },
     };
 
-    const backendResponse = await fetch('https://api.chanomhub.online/api/articles', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-      },
-      body: JSON.stringify(newArticle),
-    });
+    // CHANGE: Set to true to send to production
+    const isProduction = true;
 
-    const backendData = await backendResponse.json();
+    if (isProduction) {
+      const backendResponse = await fetch('https://api.chanomhub.online/api/articles', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(newArticle),
+      });
 
-    if (!backendResponse.ok) {
-      return NextResponse.json({ message: 'Backend API error', details: backendData }, { status: backendResponse.status });
+      const backendData = await backendResponse.json();
+
+      if (!backendResponse.ok) {
+        return NextResponse.json({ message: 'Backend API error', details: backendData }, { status: backendResponse.status });
+      }
+
+      return NextResponse.json({ message: 'Game uploaded successfully!', data: backendData }, { status: 200 });
+    } else {
+      // Simulate a successful response without sending to the backend
+      console.log('--- MOCK MODE: Request not sent to backend ---');
+      return NextResponse.json({
+        message: 'Mock success: Game data was logged but not sent to the backend.',
+        data: { article: { id: 'mock-id-12345', ...newArticle.article } }
+      }, { status: 200 });
     }
-
-    return NextResponse.json({ message: 'Game uploaded successfully!', data: backendData }, { status: 200 });
 
   } catch (error) {
     console.error('Upload error:', error);

@@ -52,7 +52,7 @@ interface ModerationRequest {
     content?: string;
     status: EntityStatus;
     articleId?: number;
-  };
+  } | null;
 }
 
 interface Statistics {
@@ -237,9 +237,9 @@ export const ModerationPage: React.FC = () => {
 
     if (searchTerm) {
       filtered = filtered.filter(req =>
-        req.entityDetails.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        req.entityDetails.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        req.entityDetails.content?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        req.entityDetails?.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        req.entityDetails?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        req.entityDetails?.content?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         req.requester.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         req.requestNote.toLowerCase().includes(searchTerm.toLowerCase())
       );
@@ -293,7 +293,7 @@ export const ModerationPage: React.FC = () => {
       setLoading(true);
       setError(null);
 
-      if (action === 'APPROVED' && selectedRequest.entityType === 'ARTICLE' && selectedRequest.entityDetails.status !== ArticleStatus.PENDING_REVIEW) {
+      if (action === 'APPROVED' && selectedRequest.entityType === 'ARTICLE' && selectedRequest.entityDetails?.status !== ArticleStatus.PENDING_REVIEW) {
         setError('Cannot approve: Article must be in PENDING_REVIEW status');
         return;
       }
@@ -632,11 +632,11 @@ export const ModerationPage: React.FC = () => {
                   <TableCell>
                     <div className="max-w-xs">
                       <div className="font-medium truncate text-gray-900 dark:text-white">
-                        {request.entityType === 'ARTICLE' && (request.entityDetails.title || 'Untitled Article')}
-                        {request.entityType === 'DOWNLOAD_LINK' && (request.entityDetails.name || 'Unnamed Link')}
+                        {request.entityType === 'ARTICLE' && (request.entityDetails?.title || 'Untitled Article')}
+                        {request.entityType === 'DOWNLOAD_LINK' && (request.entityDetails?.name || 'Unnamed Link')}
                         {request.entityType === 'COMMENT' &&
-                          (request.entityDetails.content?.substring(0, 50) || 'No content') +
-                          (request.entityDetails.content && request.entityDetails.content.length > 50 ? '...' : '')}
+                          (request.entityDetails?.content?.substring(0, 50) || 'No content') +
+                          (request.entityDetails?.content && request.entityDetails.content.length > 50 ? '...' : '')}
                       </div>
                       <div className="text-sm text-muted-foreground truncate">
                         {request.requestNote}
@@ -758,19 +758,19 @@ export const ModerationPage: React.FC = () => {
                   <CardTitle className="text-base">Content Details</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  {selectedRequest.entityType === 'ARTICLE' && (
+                  {selectedRequest.entityType === 'ARTICLE' && selectedRequest.entityDetails && (
                     <div className="space-y-2">
                       <p><strong>Title:</strong> {selectedRequest.entityDetails.title || 'Untitled'}</p>
                       <p><strong>Status:</strong> <StatusBadge status={selectedRequest.entityDetails.status} /></p>
                     </div>
                   )}
-                  {selectedRequest.entityType === 'DOWNLOAD_LINK' && (
+                  {selectedRequest.entityType === 'DOWNLOAD_LINK' && selectedRequest.entityDetails && (
                     <div className="space-y-2">
                       <p><strong>Name:</strong> {selectedRequest.entityDetails.name || 'Unnamed'}</p>
                       <p><strong>URL:</strong> <a href={selectedRequest.entityDetails.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">{selectedRequest.entityDetails.url}</a></p>
                     </div>
                   )}
-                  {selectedRequest.entityType === 'COMMENT' && (
+                  {selectedRequest.entityType === 'COMMENT' && selectedRequest.entityDetails && (
                     <div>
                       <p><strong>Comment:</strong> {selectedRequest.entityDetails.content}</p>
                     </div>
@@ -793,6 +793,7 @@ export const ModerationPage: React.FC = () => {
               )}
 
               {selectedRequest.entityType === 'ARTICLE' &&
+                selectedRequest.entityDetails &&
                 selectedRequest.entityDetails.status !== ArticleStatus.PENDING_REVIEW &&
                 selectedRequest.status === 'PENDING' && (
                   <Alert variant="destructive">
@@ -844,9 +845,10 @@ export const ModerationPage: React.FC = () => {
               onClick={() => handleSubmitReview('APPROVED')}
               disabled={
                 loading ||
-                selectedRequest?.status === 'NEEDS_REVISION' ||
-                (selectedRequest?.entityType === 'ARTICLE' &&
-                  selectedRequest?.entityDetails.status !== ArticleStatus.PENDING_REVIEW)
+                !selectedRequest ||
+                selectedRequest.status === 'NEEDS_REVISION' ||
+                (selectedRequest.entityType === 'ARTICLE' &&
+                  (!selectedRequest.entityDetails || selectedRequest.entityDetails.status !== ArticleStatus.PENDING_REVIEW))
               }
             >
               {loading ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Check className="w-4 h-4 mr-1" />}

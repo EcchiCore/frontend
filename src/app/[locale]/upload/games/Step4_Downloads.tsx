@@ -28,47 +28,35 @@ export const Step4_Downloads = ({ formData, setFormData }: Step4_DownloadsProps)
   };
 
   const handleAddDownload = () => {
-    if (!downloadName) {
-      // Optionally, add error for missing name
+    if (!downloadName || !isValidUrl(downloadUrl)) {
+      if (!isValidUrl(downloadUrl)) setDownloadUrlError('URL must be a valid HTTP or HTTPS URL');
       return;
     }
-    if (!isValidUrl(downloadUrl)) {
-      setDownloadUrlError('URL must be a valid HTTP or HTTPS URL');
-      return;
-    }
-    setDownloadUrlError(''); // Clear error if valid
+    setDownloadUrlError('');
 
-    const newDownloads = [...(formData.downloads || []), { name: downloadName, url: downloadUrl }];
-    setFormData({ ...formData, downloads: newDownloads });
+    setFormData((prev: Record<string, any>) => ({ ...prev, downloads: [...(prev.downloads || []), { name: downloadName, url: downloadUrl }] }));
     setDownloadName('');
     setDownloadUrl('');
   };
 
   const handleAddSource = () => {
-    if (!sourceName) {
-      // Optionally, add error for missing name
+    if (!sourceName || !isValidUrl(sourceUrl)) {
+      if (!isValidUrl(sourceUrl)) setSourceUrlError('URL must be a valid HTTP or HTTPS URL');
       return;
     }
-    if (!isValidUrl(sourceUrl)) {
-      setSourceUrlError('URL must be a valid HTTP or HTTPS URL');
-      return;
-    }
-    setSourceUrlError(''); // Clear error if valid
+    setSourceUrlError('');
 
-    const newSources = [...(formData.sources || []), { name: sourceName, url: sourceUrl }];
-    setFormData({ ...formData, sources: newSources });
+    setFormData((prev: Record<string, any>) => ({ ...prev, sources: [...(prev.sources || []), { name: sourceName, url: sourceUrl }] }));
     setSourceName('');
     setSourceUrl('');
   };
 
   const handleRemoveDownload = (indexToRemove: number) => {
-    const updatedDownloads = formData.downloads.filter((_: any, index: number) => index !== indexToRemove);
-    setFormData({ ...formData, downloads: updatedDownloads });
+    setFormData((prev: Record<string, any>) => ({ ...prev, downloads: prev.downloads.filter((_: any, index: number) => index !== indexToRemove) }));
   };
 
   const handleRemoveSource = (indexToRemove: number) => {
-    const updatedSources = formData.sources.filter((_: any, index: number) => index !== indexToRemove);
-    setFormData({ ...formData, sources: updatedSources });
+    setFormData((prev: Record<string, any>) => ({ ...prev, sources: prev.sources.filter((_: any, index: number) => index !== indexToRemove) }));
   };
 
   return (

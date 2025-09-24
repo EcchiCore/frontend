@@ -11,19 +11,23 @@ interface Step2_CategorizationProps {
 
 export const Step2_Categorization = ({ formData, setFormData, availableTags, availableCategories }: Step2_CategorizationProps) => {
   const handleTagChange = (tag: string) => {
-    const currentTags = formData.tags || [];
-    const newTags = currentTags.includes(tag)
-      ? currentTags.filter((t: string) => t !== tag)
-      : [...currentTags, tag];
-    setFormData({ ...formData, tags: newTags });
+    setFormData((prev: Record<string, any>) => {
+      const currentTags = prev.tags || [];
+      const newTags = currentTags.includes(tag)
+        ? currentTags.filter((t: string) => t !== tag)
+        : [...currentTags, tag];
+      return { ...prev, tags: newTags };
+    });
   };
 
   const handleCategoryChange = (category: string) => {
-    const currentCategories = formData.categories || [];
-    const newCategories = currentCategories.includes(category)
-      ? currentCategories.filter((c: string) => c !== category)
-      : [...currentCategories, category];
-    setFormData({ ...formData, categories: newCategories });
+    setFormData((prev: Record<string, any>) => {
+      const currentCategories = prev.categories || [];
+      const newCategories = currentCategories.includes(category)
+        ? currentCategories.filter((c: string) => c !== category)
+        : [...currentCategories, category];
+      return { ...prev, categories: newCategories };
+    });
   };
 
   return (

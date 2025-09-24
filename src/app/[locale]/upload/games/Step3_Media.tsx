@@ -50,21 +50,45 @@ export const Step3_Media = ({ setFormData, setOngoingUploads }: Step3_MediaProps
     }
   };
 
+  const pollForUrl = async (statusUrl: string, maxRetries = 10): Promise<string> => {
+    let attempt = 0;
+    const domain = getUploadUrl().replace('/upload', '');
+    const fullStatusUrl = statusUrl.startsWith('http') ? statusUrl : `${domain}${statusUrl}`;
+
+    while (attempt < maxRetries) {
+      try {
+        await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds
+        const response = await fetch(fullStatusUrl);
+        const data = await response.json();
+
+        if (response.ok && data.status === 'Completed' && data.response && data.response.url) {
+          const finalUrl = data.response.url;
+          return finalUrl.startsWith('http') ? finalUrl : `${domain}${finalUrl}`;
+        }
+
+      } catch (error) {
+        console.error(`Polling attempt ${attempt + 1} failed:`, error);
+      }
+      attempt++;
+    }
+    throw new Error('Failed to retrieve file URL after multiple attempts.');
+  };
+
   const handleFileChange = async (e: { target: { id: string; files: FileList | null } }) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       setOngoingUploads(prev => prev + 1);
       try {
-        const result = await uploadFileWithRetry(file, getUploadUrl());
-        if (!result) {
-          throw new Error('Upload failed after multiple retries');
+        const initialResult = await uploadFileWithRetry(file, getUploadUrl());
+        if (!initialResult || !initialResult.status_url) {
+          throw new Error('Upload initiation failed or did not return a status URL.');
         }
-        const domain = getUploadUrl().replace('/upload', '');
-        const url = result.url.startsWith('http') ? result.url : `${domain}${result.url}`;
-        setFormData((prevFormData: Record<string, any>) => ({ ...prevFormData, [e.target.id]: url }));
+
+        const finalUrl = await pollForUrl(initialResult.status_url);
+        setFormData((prevFormData: Record<string, any>) => ({ ...prevFormData, [e.target.id]: finalUrl }));
+
       } catch (error) {
-        console.error('Error uploading file:', error);
-        // Handle error, maybe show a message to the user
+        console.error('Error during file upload process:', error);
       } finally {
         setOngoingUploads(prev => prev - 1);
       }
@@ -75,25 +99,24 @@ export const Step3_Media = ({ setFormData, setOngoingUploads }: Step3_MediaProps
     if (e.target.files) {
       const files = Array.from(e.target.files);
       setOngoingUploads(prev => prev + files.length);
-      const uploadPromises = files.map(async (file) => {
+
+      const uploadAndPoll = async (file: File): Promise<string> => {
         try {
-          const result = await uploadFileWithRetry(file, getUploadUrl());
-          if (!result) {
-            throw new Error(`Upload failed for ${file.name} after multiple retries`);
+          const initialResult = await uploadFileWithRetry(file, getUploadUrl());
+          if (!initialResult || !initialResult.status_url) {
+            throw new Error(`Upload initiation failed for ${file.name}`);
           }
-          const domain = getUploadUrl().replace('/upload', '');
-          return result.url.startsWith('http') ? result.url : `${domain}${result.url}`;
+          return await pollForUrl(initialResult.status_url);
         } finally {
           setOngoingUploads(prev => prev - 1);
         }
-      });
+      };
 
       try {
-        const urls = await Promise.all(uploadPromises);
+        const urls = await Promise.all(files.map(uploadAndPoll));
         setFormData((prevFormData: Record<string, any>) => ({ ...prevFormData, [e.target.id]: urls }));
       } catch (error) {
         console.error('Error uploading multiple files:', error);
-        // Handle error, maybe show a message to the user
       }
     }
   };

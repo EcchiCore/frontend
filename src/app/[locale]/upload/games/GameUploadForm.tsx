@@ -22,6 +22,10 @@ export default function GameUploadForm() {
   const locale = params.locale;
 
   useEffect(() => {
+    console.log("formData updated:", JSON.stringify(formData, null, 2));
+  }, [formData]);
+
+  useEffect(() => {
     const fetchTaxonomies = async () => {
       try {
         const [tagsRes, catsRes] = await Promise.all([

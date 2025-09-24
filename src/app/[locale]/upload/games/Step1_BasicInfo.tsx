@@ -5,30 +5,42 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
+import dynamic from 'next/dynamic';
+
+const RichTextEditor = dynamic(() => import('@/components/ui/RichTextEditor'), { 
+  ssr: false, 
+  loading: () => <p>Loading editor...</p> 
+});
 
 const engines = ["RENPY", "RPGM", "UNITY", "UNREAL", "Godot", "TyranoBuilder", "WOLFRPG", "KIRIKIRI", "FLASH", "BAKINPLAYER"];
 const platforms = ["Windows", "macOS", "Linux", "Android", "iOS", "Web"];
 
 interface Step1_BasicInfoProps {
   formData: Record<string, any>;
-  setFormData: (data: Record<string, any>) => void;
+  setFormData: (updater: (prev: Record<string, any>) => Record<string, any>) => void;
 }
 
 export const Step1_BasicInfo = ({ formData, setFormData }: Step1_BasicInfoProps) => {
   const handleChange = (e: { target: { id: string; value: string } }) => {
-    setFormData({ ...formData, [e.target.id]: e.target.value });
+    setFormData(prev => ({ ...prev, [e.target.id]: e.target.value }));
   };
 
   const handleSelectChange = (id: string, value: string) => {
-    setFormData({ ...formData, [id]: value });
+    setFormData(prev => ({ ...prev, [id]: value }));
   }
 
+  const handleBodyChange = (html: string) => {
+    setFormData(prev => ({ ...prev, body: html }));
+  };
+
   const handlePlatformChange = (platform: string) => {
-    const currentPlatforms = formData.platforms || [];
-    const newPlatforms = currentPlatforms.includes(platform)
-      ? currentPlatforms.filter((p: string) => p !== platform)
-      : [...currentPlatforms, platform];
-    setFormData({ ...formData, platforms: newPlatforms });
+    setFormData(prev => {
+      const currentPlatforms = prev.platforms || [];
+      const newPlatforms = currentPlatforms.includes(platform)
+        ? currentPlatforms.filter((p: string) => p !== platform)
+        : [...currentPlatforms, platform];
+      return { ...prev, platforms: newPlatforms };
+    });
   };
 
 
@@ -52,7 +64,7 @@ export const Step1_BasicInfo = ({ formData, setFormData }: Step1_BasicInfoProps)
 
       <div className="space-y-2">
         <Label htmlFor="body">Full Description</Label>
-        <Textarea id="body" value={formData.body || ''} onChange={handleChange} placeholder="Tell us all about your game." rows={10} />
+        <RichTextEditor content={formData.body || ''} onUpdate={handleBodyChange} />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
