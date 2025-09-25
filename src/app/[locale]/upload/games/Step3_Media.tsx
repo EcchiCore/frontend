@@ -1,6 +1,6 @@
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Turnstile } from '@marsidev/react-turnstile';
 import { useState } from 'react';
 
 interface Step3_MediaProps {
@@ -9,25 +9,23 @@ interface Step3_MediaProps {
 }
 
 export const Step3_Media = ({ setFormData, setOngoingUploads }: Step3_MediaProps) => {
-  const [uploadDestination, setUploadDestination] = useState('auto');
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
 
   const getUploadUrl = () => {
-    if (uploadDestination === 'rustgram') {
-      return 'https://rustgram.onrender.com/upload';
-    }
-    if (uploadDestination === 'oi.chanomhub.online') {
-      return 'https://oi.chanomhub.online/upload';
-    }
-    // 'auto' logic can be implemented here. For now, it defaults to rustgram.
-    return 'https://rustgram.onrender.com/upload';
+    return 'https://oi.chanomhub.online/upload';
   };
 
   const uploadFileWithRetry = async (file: File, uploadUrl: string, maxRetries = 3) => {
+    if (!turnstileToken) {
+      throw new Error('Please complete the CAPTCHA before uploading.');
+    }
+
     let attempt = 0;
     while (attempt < maxRetries) {
       try {
         const uploadFormData = new FormData();
         uploadFormData.append('file', file);
+        uploadFormData.append('cf-turnstile-response', turnstileToken);
 
         const response = await fetch(uploadUrl, {
           method: 'POST',
@@ -75,6 +73,10 @@ export const Step3_Media = ({ setFormData, setOngoingUploads }: Step3_MediaProps
   };
 
   const handleFileChange = async (e: { target: { id: string; files: FileList | null } }) => {
+    if (!turnstileToken) {
+      alert('Please complete the CAPTCHA before uploading.');
+      return;
+    }
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       setOngoingUploads(prev => prev + 1);
@@ -89,6 +91,7 @@ export const Step3_Media = ({ setFormData, setOngoingUploads }: Step3_MediaProps
 
       } catch (error) {
         console.error('Error during file upload process:', error);
+        alert('An error occurred during upload. Please try again.');
       } finally {
         setOngoingUploads(prev => prev - 1);
       }
@@ -96,6 +99,10 @@ export const Step3_Media = ({ setFormData, setOngoingUploads }: Step3_MediaProps
   };
 
   const handleMultipleFileChange = async (e: { target: { id: string; files: FileList | null } }) => {
+    if (!turnstileToken) {
+      alert('Please complete the CAPTCHA before uploading.');
+      return;
+    }
     if (e.target.files) {
       const files = Array.from(e.target.files);
       setOngoingUploads(prev => prev + files.length);
@@ -117,45 +124,38 @@ export const Step3_Media = ({ setFormData, setOngoingUploads }: Step3_MediaProps
         setFormData((prevFormData: Record<string, any>) => ({ ...prevFormData, [e.target.id]: urls }));
       } catch (error) {
         console.error('Error uploading multiple files:', error);
+        alert('An error occurred during upload. Please try again.');
       }
     }
   };
 
   return (
     <div className="space-y-6">
-      <div className="space-y-2">
-        <Label htmlFor="uploadDestination">Upload Destination</Label>
-        <Select onValueChange={setUploadDestination} defaultValue={uploadDestination}>
-          <SelectTrigger>
-            <SelectValue placeholder="Select an upload destination" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="auto">Auto</SelectItem>
-            <SelectItem value="rustgram">rustgram.onrender.com</SelectItem>
-            <SelectItem value="oi.chanomhub.online">oi.chanomhub.online</SelectItem>
-          </SelectContent>
-        </Select>
+      <div className="flex justify-center my-4">
+        <Turnstile
+          siteKey={process.env.NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY!}
+          onSuccess={setTurnstileToken}
+        />
       </div>
-
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
           <Label htmlFor="coverImage">Cover Image</Label>
-          <Input id="coverImage" type="file" accept="image/*" onChange={handleFileChange} required />
+          <Input id="coverImage" type="file" accept="image/*" onChange={handleFileChange} required disabled={!turnstileToken} />
         </div>
         <div className="space-y-2">
           <Label htmlFor="mainImage">Main Image</Label>
-          <Input id="mainImage" type="file" accept="image/*" onChange={handleFileChange} />
+          <Input id="mainImage" type="file" accept="image/*" onChange={handleFileChange} disabled={!turnstileToken} />
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
           <Label htmlFor="backgroundImage">Background Image</Label>
-          <Input id="backgroundImage" type="file" accept="image/*" onChange={handleFileChange} />
+          <Input id="backgroundImage" type="file" accept="image/*" onChange={handleFileChange} disabled={!turnstileToken} />
         </div>
         <div className="space-y-2">
           <Label htmlFor="otherImages">Other Images</Label>
-          <Input id="otherImages" type="file" accept="image/*" multiple onChange={handleMultipleFileChange} />
+          <Input id="otherImages" type="file" accept="image/*" multiple onChange={handleMultipleFileChange} disabled={!turnstileToken} />
         </div>
       </div>
     </div>
