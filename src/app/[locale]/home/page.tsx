@@ -72,26 +72,7 @@ export default async function HomePage({ params }: { params: { locale: string } 
       <Navbar />
 
       <main className="bg-background">
-        {/* Enhanced Hero Section */}
-        <div className="relative text-center py-16 px-4">
-          <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-primary/5"></div>
-          <div className="relative z-10">
-            <h1 className="text-5xl md:text-6xl font-bold tracking-tight mb-4">
-              <span className="text-primary bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">ChanomHub</span>
-            </h1>
-            <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-              ชุมชนออนไลน์เกมผู้ใหญ่ แหล่งเกม H-Game
-            </p>
-            <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
-              <Button size="lg" className="px-8 py-3 text-base font-semibold">
-                เริ่มต้นใช้งาน
-              </Button>
-              <Button size="lg" variant="outline" className="px-8 py-3 text-base font-semibold">
-                ดูกระทู้ทั้งหมด
-              </Button>
-            </div>
-          </div>
-        </div>
+
         <HomeCarousel articles={homeData.carousel} loading={false} />
 
         <div className="grid lg:grid-cols-4 gap-8 container mx-auto px-4 pb-16">
