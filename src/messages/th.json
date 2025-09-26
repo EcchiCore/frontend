@@ -395,7 +395,9 @@
     "translationFiles": "ไฟล์แปลภาษา",
     "sortByDate": "เรียงตามวันที่",
     "sortByName": "เรียงตามชื่อ",
-    "noFiles": "ไม่มีไฟล์"
+    "noFiles": "ไม่มีไฟล์",
+    "downloadsAndTranslations": "ดาวน์โหลดและการแปล",
+    "viewFiles": "ดูไฟล์"
   },
   "Register": {
     "title": "สมัครสมาชิก",

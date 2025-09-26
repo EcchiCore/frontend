@@ -200,10 +200,10 @@ async function translateArticleWithN8n(
   }
 }
 
-async function fetchDownloads(slug: string): Promise<DownloadFile[]> {
+async function fetchDownloads(articleId: number): Promise<DownloadFile[]> {
   try {
-    const response = await fetch(`${apiUrl}/api/downloads/article/${slug}`, {
-      next: { revalidate: 60 }
+    const response = await fetch(`${apiUrl}/api/downloads/article/${articleId}`, {
+      cache: 'no-store'
     });
 
     if (!response.ok) return [];
@@ -450,7 +450,7 @@ export default async function ArticlePage(props: ArticlePageProps) {
     return notFound();
   }
 
-  const downloads = await fetchDownloads(slug);
+  const downloads = await fetchDownloads(originalArticle.id);
 
   let contentArticle = originalArticle;
   let isTranslated = false;

@@ -33,13 +33,93 @@ import myImageLoader from "../../../lib/imageLoader";
 const PLACEHOLDER_IMAGE = '/placeholder-image.png';
 
 import { useDebounce } from "./Debounce";
-import { Download, CalendarDays, Folder, User, Info, Check, Clipboard, Search } from "lucide-react";
-import { Button, Card, CardContent, CardHeader, CardTitle, Input, Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Tabs, TabsList, TabsTrigger, TabsContent, Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui"; // Adjust import based on your UI library
+import { Download, CalendarDays, Folder, User, Info, Check, Clipboard, Search, Clock, Tag, Cpu } from "lucide-react";
+import { Button, Card, CardContent, CardHeader, CardTitle, Input, Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Tabs, TabsList, TabsTrigger, TabsContent, Select, SelectTrigger, SelectValue, SelectContent, SelectItem, Badge } from "@/components/ui"; // Adjust import based on your UI library
 import cn from 'classnames';
 import { useTranslations } from 'next-intl';
 import { TextAlign } from "@tiptap/extension-text-align";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+
+const MobileArticleInfo: React.FC<{ article: Article, formatDate: (date: string) => string, encodeURLComponent: (value: string) => string }> = ({ article, formatDate, encodeURLComponent }) => {
+  const t = useTranslations("sidebar");
+
+  return (
+    <Card className="md:hidden mt-4">
+      <CardHeader>
+        <CardTitle>{t("articleInfo.title")}</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="space-y-2">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-2">
+              <Clock className="w-4 h-4 text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">{t("articleInfo.published")}:</span>
+            </div>
+            <span className="text-sm font-semibold">{formatDate(article.createdAt)}</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-2">
+              <Clock className="w-4 h-4 text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">{t("articleInfo.updated")}:</span>
+            </div>
+            <span className="text-sm font-semibold">{formatDate(article.updatedAt)}</span>
+          </div>
+          {article.engine && (
+            <div className="flex justify-between items-center">
+              <div className="flex items-center gap-2">
+                <Cpu className="w-4 h-4 text-muted-foreground" />
+                <span className="text-sm text-muted-foreground">{t("articleInfo.engine")}:</span>
+              </div>
+              <Badge variant="outline">{article.engine}</Badge>
+            </div>
+          )}
+        </div>
+
+        {["platformList", "tagList", "categoryList"].map((key) => {
+          const list = article[key as keyof typeof article] as string[] | undefined;
+          if (!list || list.length === 0) return null;
+
+          const iconMap: Record<string, React.ReactNode> = {
+            platformList: <Cpu className="w-5 h-5 text-warning" />,
+            tagList: <Tag className="w-5 h-5 text-primary" />,
+            categoryList: <Folder className="w-5 h-5 text-secondary" />,
+          };
+
+          const titleMap: Record<string, string> = {
+            platformList: t("platforms.title"),
+            tagList: t("tags.title"),
+            categoryList: t("categories.title"),
+          };
+
+          const linkPrefixMap: Record<string, string> = {
+            platformList: "/platforms/",
+            tagList: "/tag/",
+            categoryList: "/category/",
+          };
+
+          return (
+            <div key={key}>
+              <h3 className="text-lg font-semibold mb-2 flex items-center gap-2">
+                {iconMap[key]}
+                {titleMap[key]}
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {list.map((item, index) => (
+                  <Link href={`${linkPrefixMap[key]}${encodeURLComponent(item)}`} key={index}>
+                    <Badge variant="outline" className={`cursor-pointer hover:scale-105 transition-transform`}>
+                      {key === "tagList" ? `#${item}` : item}
+                    </Badge>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          );
+        })}
+      </CardContent>
+    </Card>
+  );
+};
 
 interface ArticleContentProps {
   article: Article;
@@ -234,15 +314,15 @@ const ArticleContent: React.FC<ArticleContentProps> = ({ article, slug, download
 
   const renderFileItems = (items: (DownloadFile | TranslationFile)[], title: string) => (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h4 className="text-lg font-semibold flex items-center gap-2">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <h4 className="text-lg font-semibold flex items-center gap-2 text-foreground">
           <Folder className="size-5" />
           {title} ({items.length})
         </h4>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 text-foreground w-full sm:w-auto">
           <Select value={sortBy} onValueChange={(value) => setSortBy(value as "name" | "date")}>
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="w-full sm:w-[180px]">
               <SelectValue placeholder="Sort by" />
             </SelectTrigger>
             <SelectContent>
@@ -404,7 +484,6 @@ const ArticleContent: React.FC<ArticleContentProps> = ({ article, slug, download
       }
     };
 
-    fetchData(`${API_BASE_URL}/api/downloads/article/${article.id}`, setDownloads, t('download_error'));
     fetchData(`${API_BASE_URL}/api/translation-files/article/${slug}`, setTranslationFiles, t('translation_error'));
 
     const handleResize = () => setIsMobile(window.innerWidth <= 768);
@@ -587,7 +666,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({ article, slug, download
     window.open(url, "_blank");
   }, []);
 
-  const formatDate = (date: string) => 
+  const formatDate = (date: string) =>
     new Date(date).toLocaleDateString("th-TH", {
       year: "numeric",
       month: "short",
@@ -621,12 +700,12 @@ const ArticleContent: React.FC<ArticleContentProps> = ({ article, slug, download
           slug={slug}
         />
         {alert.open && (
-  <CustomArticleAlert
-    title={alert.severity === "success" ? t("success") : t("error")}
-    message={alert.message}
-    variant={alert.severity === "success" ? "default" : "destructive"}
-  />
-)}
+          <CustomArticleAlert
+            title={alert.severity === "success" ? t("success") : t("error")}
+            message={alert.message}
+            variant={alert.severity === "success" ? "default" : "destructive"}
+          />
+        )}
 
         <div className="flex justify-between items-center mb-4">
           <span className="text-sm text-muted-foreground">
@@ -733,6 +812,8 @@ const ArticleContent: React.FC<ArticleContentProps> = ({ article, slug, download
                   </Card>
                 </motion.div>
 
+                <MobileArticleInfo article={article} formatDate={formatDate} encodeURLComponent={encodeURLComponent} />
+
                 {(downloads.length > 0 || translationFiles.length > 0) && (
                   <Card className="md:hidden mt-4">
                     <CardHeader>
@@ -750,25 +831,6 @@ const ArticleContent: React.FC<ArticleContentProps> = ({ article, slug, download
                   </Card>
                 )}
               </main>
-
-              <SidebarLeft
-                article={article}
-                topCommenters={topCommenters}
-                isDarkBackground={isDarkMode}
-              />
-              <SidebarRight
-                article={article}
-                isCurrentUserAuthor={isCurrentUserAuthor}
-                isFollowing={isFollowing}
-                handleFollow={handleFollow}
-                isFavorited={isFavorited}
-                handleFavorite={handleFavorite}
-                formatDate={formatDate}
-                downloads={downloads}
-                translationFiles={translationFiles}
-                setOpenDownloadDialog={setOpenDownloadDialog}
-                isDarkBackground={isDarkMode}
-              />
             </>
           ) : (
             <>
@@ -854,11 +916,8 @@ const ArticleContent: React.FC<ArticleContentProps> = ({ article, slug, download
       </div>
 
       <Dialog open={openDownloadDialog} onOpenChange={setOpenDownloadDialog}>
-        <DialogContent className="max-w-6xl">
-          <DialogHeader>
-            <DialogTitle>{t("title")}</DialogTitle>
-            <DialogDescription>{t("description")}</DialogDescription>
-          </DialogHeader>
+        <DialogContent className={isMobile ? "max-w-[95vw] h-[80vh] overflow-y-auto" : "max-w-6xl"}>
+
           <div className="relative mb-4">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 size-5 text-gray-500" />
             <Input
@@ -870,7 +929,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({ article, slug, download
             />
           </div>
           <Tabs defaultValue="downloads" className="w-full">
-            <TabsList>
+            <TabsList className={isMobile ? "flex-col h-auto" : ""}>
               <TabsTrigger value="downloads">{t("downloadFiles")} ({filteredDownloads.length})</TabsTrigger>
               <TabsTrigger value="translations">{t("translationFiles")} ({filteredTranslationFiles.length})</TabsTrigger>
             </TabsList>
@@ -888,3 +947,4 @@ const ArticleContent: React.FC<ArticleContentProps> = ({ article, slug, download
 };
 
 export default ArticleContent;
+

@@ -395,7 +395,9 @@
     "translationFiles": "translationFiles",
     "sortByDate": "sortByDate",
     "sortByName":  "sortByName",
-    "noFiles": "noFiles"
+    "noFiles": "noFiles",
+    "downloadsAndTranslations": "Downloads and Translations",
+    "viewFiles": "View Files"
   },
   "Register": {
     "title": "Register",

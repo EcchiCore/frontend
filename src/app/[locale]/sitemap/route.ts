@@ -62,14 +62,6 @@ export async function GET(request: NextRequest) {
     ${generateAlternateLinks('')}
   </url>
   
-  <!-- Articles Pages -->
-  <url>
-    <loc>${siteUrl}/${locale}/articles</loc>
-    <lastmod>${currentDate}</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.8</priority>
-    ${generateAlternateLinks('articles')}
-  </url>
   
   <!-- Individual Articles -->
   ${articles.map((article: Article) => `
