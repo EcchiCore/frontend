@@ -102,18 +102,13 @@ export default function HomeCarousel({ articles, loading }: HomeCarouselProps) {
                     {/* Enhanced Overlay สำหรับข้อความ */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent flex flex-col justify-end p-8 md:p-12">
                       <div className="max-w-4xl">
-                        <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold text-white mb-4 drop-shadow-2xl leading-tight">
+                        <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold text-white mb-4 drop-shadow-2xl leading-tight truncate">
                           {article.title}
                         </h2>
-                        <p className="text-md md:text-lg lg:text-xl text-white/95 max-w-3xl drop-shadow-lg leading-relaxed">
+                        <p className="text-md md:text-lg lg:text-xl text-white/95 max-w-3xl drop-shadow-lg leading-relaxed line-clamp-2">
                           {article.description}
                         </p>
-                        <div className="mt-6 flex items-center space-x-4">
-                          <div className="bg-white/20 backdrop-blur-sm rounded-full px-4 py-2 text-white text-sm font-medium">
-                            อ่านต่อ
-                          </div>
-                          <div className="w-2 h-2 bg-white/60 rounded-full animate-pulse"></div>
-                        </div>
+                        
                       </div>
                     </div>
                   </div>
