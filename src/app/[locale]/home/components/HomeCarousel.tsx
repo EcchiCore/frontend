@@ -108,7 +108,7 @@ export default function HomeCarousel({ articles, loading }: HomeCarouselProps) {
                         <p className="text-md md:text-lg lg:text-xl text-white/95 max-w-3xl drop-shadow-lg leading-relaxed line-clamp-2">
                           {article.description}
                         </p>
-                        
+
                       </div>
                     </div>
                   </div>

@@ -29,7 +29,7 @@ export default async function GamesPage({ searchParams }: PageProps) {
   return (
     <>
       <Navbar />
-      <div className="container mx-auto px-4 py-6 space-y-6 bg-background">
+      <div className=" mx-auto px-4 py-6 space-y-6 bg-background ">
         <section className="container mx-auto">
         {/* Client-side filters that update the URL (and thus stream new results) */}
         <SearchControls />
