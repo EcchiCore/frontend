@@ -1,7 +1,5 @@
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Turnstile } from '@marsidev/react-turnstile';
-import { useState } from 'react';
 
 interface Step3_MediaProps {
   setFormData: (data: Record<string, any>) => void;
@@ -9,23 +7,16 @@ interface Step3_MediaProps {
 }
 
 export const Step3_Media = ({ setFormData, setOngoingUploads }: Step3_MediaProps) => {
-  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
-
   const getUploadUrl = () => {
     return 'https://oi.chanomhub.online/upload';
   };
 
   const uploadFileWithRetry = async (file: File, uploadUrl: string, maxRetries = 3) => {
-    if (!turnstileToken) {
-      throw new Error('Please complete the CAPTCHA before uploading.');
-    }
-
     let attempt = 0;
     while (attempt < maxRetries) {
       try {
         const uploadFormData = new FormData();
-        uploadFormData.append('file', file);
-        uploadFormData.append('cf-turnstile-response', turnstileToken);
+        uploadFormData.append('image', file);
 
         const response = await fetch(uploadUrl, {
           method: 'POST',
@@ -73,25 +64,26 @@ export const Step3_Media = ({ setFormData, setOngoingUploads }: Step3_MediaProps
   };
 
   const handleFileChange = async (e: { target: { id: string; files: FileList | null } }) => {
-    if (!turnstileToken) {
-      alert('Please complete the CAPTCHA before uploading.');
-      return;
-    }
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       setOngoingUploads(prev => prev + 1);
       try {
         const initialResult = await uploadFileWithRetry(file, getUploadUrl());
-        if (!initialResult || !initialResult.status_url) {
-          throw new Error('Upload initiation failed or did not return a status URL.');
+
+        let finalUrl: string;
+        if (initialResult && initialResult.url) {
+          finalUrl = initialResult.url;
+        } else if (initialResult && initialResult.status_url) {
+          finalUrl = await pollForUrl(initialResult.status_url);
+        } else {
+          throw new Error('Upload initiation failed or did not return a status or final URL.');
         }
 
-        const finalUrl = await pollForUrl(initialResult.status_url);
         setFormData((prevFormData: Record<string, any>) => ({ ...prevFormData, [e.target.id]: finalUrl }));
 
       } catch (error) {
         console.error('Error during file upload process:', error);
-        alert('An error occurred during upload. Please try again.');
+        alert(`An error occurred during upload: ${error instanceof Error ? error.message : 'Unknown error'}`);
       } finally {
         setOngoingUploads(prev => prev - 1);
       }
@@ -99,10 +91,6 @@ export const Step3_Media = ({ setFormData, setOngoingUploads }: Step3_MediaProps
   };
 
   const handleMultipleFileChange = async (e: { target: { id: string; files: FileList | null } }) => {
-    if (!turnstileToken) {
-      alert('Please complete the CAPTCHA before uploading.');
-      return;
-    }
     if (e.target.files) {
       const files = Array.from(e.target.files);
       setOngoingUploads(prev => prev + files.length);
@@ -110,10 +98,13 @@ export const Step3_Media = ({ setFormData, setOngoingUploads }: Step3_MediaProps
       const uploadAndPoll = async (file: File): Promise<string> => {
         try {
           const initialResult = await uploadFileWithRetry(file, getUploadUrl());
-          if (!initialResult || !initialResult.status_url) {
+          if (initialResult && initialResult.url) {
+            return initialResult.url;
+          } else if (initialResult && initialResult.status_url) {
+            return await pollForUrl(initialResult.status_url);
+          } else {
             throw new Error(`Upload initiation failed for ${file.name}`);
           }
-          return await pollForUrl(initialResult.status_url);
         } finally {
           setOngoingUploads(prev => prev - 1);
         }
@@ -124,38 +115,32 @@ export const Step3_Media = ({ setFormData, setOngoingUploads }: Step3_MediaProps
         setFormData((prevFormData: Record<string, any>) => ({ ...prevFormData, [e.target.id]: urls }));
       } catch (error) {
         console.error('Error uploading multiple files:', error);
-        alert('An error occurred during upload. Please try again.');
+        alert(`An error occurred during upload: ${error instanceof Error ? error.message : 'Unknown error'}`);
       }
     }
   };
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-center my-4">
-        <Turnstile
-          siteKey={process.env.NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY!}
-          onSuccess={setTurnstileToken}
-        />
-      </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
           <Label htmlFor="coverImage">Cover Image</Label>
-          <Input id="coverImage" type="file" accept="image/*" onChange={handleFileChange} required disabled={!turnstileToken} />
+          <Input id="coverImage" type="file" accept="image/*" onChange={handleFileChange} required />
         </div>
         <div className="space-y-2">
           <Label htmlFor="mainImage">Main Image</Label>
-          <Input id="mainImage" type="file" accept="image/*" onChange={handleFileChange} disabled={!turnstileToken} />
+          <Input id="mainImage" type="file" accept="image/*" onChange={handleFileChange} />
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
           <Label htmlFor="backgroundImage">Background Image</Label>
-          <Input id="backgroundImage" type="file" accept="image/*" onChange={handleFileChange} disabled={!turnstileToken} />
+          <Input id="backgroundImage" type="file" accept="image/*" onChange={handleFileChange} />
         </div>
         <div className="space-y-2">
           <Label htmlFor="otherImages">Other Images</Label>
-          <Input id="otherImages" type="file" accept="image/*" multiple onChange={handleMultipleFileChange} disabled={!turnstileToken} />
+          <Input id="otherImages" type="file" accept="image/*" multiple onChange={handleMultipleFileChange} />
         </div>
       </div>
     </div>
