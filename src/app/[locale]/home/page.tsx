@@ -71,7 +71,7 @@ export default async function HomePage({ params }: { params: { locale: string } 
     <div className={`min-h-screen bg-gradient-to-br from-slate-50 via-background to-slate-100 ${inter.className}`}>
       <Navbar />
 
-      <main className="bg-background">
+      <main className="bg-background">D
 
         <HomeCarousel articles={homeData.carousel} loading={false} />
 

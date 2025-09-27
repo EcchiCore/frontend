@@ -34,7 +34,7 @@ const PLACEHOLDER_IMAGE = '/placeholder-image.png';
 
 import { useDebounce } from "./Debounce";
 import { Download, CalendarDays, Folder, User, Info, Check, Clipboard, Search, Clock, Tag, Cpu } from "lucide-react";
-import { Button, Card, CardContent, CardHeader, CardTitle, Input, Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Tabs, TabsList, TabsTrigger, TabsContent, Select, SelectTrigger, SelectValue, SelectContent, SelectItem, Badge } from "@/components/ui"; // Adjust import based on your UI library
+import { Button, Card, CardContent, CardHeader, CardTitle, Input, Dialog, DialogContent, Tabs, TabsList, TabsTrigger, TabsContent, Select, SelectTrigger, SelectValue, SelectContent, SelectItem, Badge } from "@/components/ui"; // Adjust import based on your UI library
 import cn from 'classnames';
 import { useTranslations } from 'next-intl';
 import { TextAlign } from "@tiptap/extension-text-align";
@@ -149,7 +149,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({ article, slug, download
   const [isCurrentUserAuthor, setIsCurrentUserAuthor] = useState(false);
   const [alert, setAlert] = useState<AlertState>({ open: false, message: "", severity: "success" });
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [downloads, setDownloads] = useState<DownloadFile[]>(initialDownloads);
+  const [downloads] = useState<DownloadFile[]>(initialDownloads);
   const [translationFiles, setTranslationFiles] = useState<TranslationFile[]>([]);
   const [openDownloadDialog, setOpenDownloadDialog] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(true);

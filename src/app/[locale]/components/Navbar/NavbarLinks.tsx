@@ -98,7 +98,7 @@ export default function NavbarLinks({ section, onCloseMenu = () => {}, isMobile 
             id: "extensions-app", 
             name: t("loadApp"), 
             transKey: "loadApp", 
-            link: getLocalizedHref("application") 
+            link: getLocalizedHref("tools")
           },
           {
             id: "extensions-status",
