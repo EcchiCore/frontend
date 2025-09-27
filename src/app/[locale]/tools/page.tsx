@@ -24,7 +24,10 @@ export default async function ToolsPage() {
       link: 'https://dreamsavior.net/download/',
       icon: 'Globe',
       os: ['Windows'],
-      pricing: 'paid',
+      pricing: 'free',
+      author: 'DreamSavior',
+      publisher: 'DreamSavior',
+      isOfficial: false,
     },
     {
       name: 'Chanomhub-Desktop',
@@ -33,6 +36,9 @@ export default async function ToolsPage() {
       icon: 'Download',
       os: ['Windows', 'macOS', 'Linux'],
       pricing: 'free',
+      author: 'CrypticDay',
+      publisher: 'Chanomhub',
+      isOfficial: true,
     },
     {
       name: 'Chanomhub-Multiplatform',
@@ -41,6 +47,9 @@ export default async function ToolsPage() {
       icon: 'Smartphone',
       os: ['Android', 'iOS'],
       pricing: 'free',
+      author: 'CrypticDay',
+      publisher: 'Chanomhub',
+      isOfficial: true,
     },
     {
       name: 'NST',
@@ -49,6 +58,9 @@ export default async function ToolsPage() {
       icon: 'Globe',
       os: ['Windows', 'Linux', 'macOS'],
       pricing: ['free', 'paid'],
+      author: 'CrypticDay',
+      publisher: 'Chanomhub',
+      isOfficial: true,
     },
   ];
 
