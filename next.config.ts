@@ -22,6 +22,7 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: 'resize.chanomhub.online', pathname: '/**' },
       { protocol: 'https', hostname: 'cdn.chanomhub.online', pathname: '/**' },
       { protocol: 'https', hostname: 'icons.duckduckgo.com', pathname: '/ip3/**' },
+      { protocol: 'https', hostname: 'via.placeholder.com', pathname: '/**' },
     ],
   },
   compiler: { removeConsole: process.env.NODE_ENV === 'production' },
