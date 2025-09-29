@@ -1,33 +1,49 @@
-# Stage 1: Build stage (ใช้ Node.js หรือ Bun เต็มตัว)
+# Stage 1: Dependencies stage
+FROM oven/bun:1 AS deps
+
+WORKDIR /app
+
+# คัดลอกไฟล์ dependencies
+COPY package.json bun.lockb* ./
+RUN bun install --frozen-lockfile --production=false
+
+# Stage 2: Build stage
 FROM oven/bun:1 AS builder
 
 WORKDIR /app
 
-# คัดลอก dependencies และติดตั้ง
-COPY package.json ./
-COPY .env ./
-RUN bun install --frozen-lockfile
-
-# คัดลอก source code และ build
+# คัดลอก node_modules จาก deps stage
+COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+
+# Build application
 RUN bun run build
 
-# Stage 2: Production stage
-FROM oven/bun:1-alpine
-
-# สร้างผู้ใช้ที่ไม่ใช่ root
-RUN addgroup -S -g 1001 bunjs && \
-    adduser -S -u 1001 -G bunjs nextjs
+# Stage 3: Production stage
+FROM oven/bun:1-alpine AS runner
 
 WORKDIR /app
 
-# คัดลอกไฟล์ที่จำเป็นจาก builder stage
-COPY --from=builder /app/.next/standalone ./
-COPY --from=builder /app/.next/static ./.next/static
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/.env ./
+# สร้างผู้ใช้ที่ไม่ใช่ root
+RUN addgroup --system --gid 1001 bunjs && \
+    adduser --system --uid 1001 nextjs
 
-# ตั้งค่าการเป็นเจ้าของไฟล์ให้กับผู้ใช้ที่ไม่ใช่ root
+# คัดลอกไฟล์ที่จำเป็น
+COPY --from=builder /app/next.config.js ./
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/package.json ./package.json
+
+# คัดลอก .next folder
+COPY --from=builder --chown=nextjs:bunjs /app/.next ./.next
+
+# ติดตั้ง production dependencies เท่านั้น
+COPY package.json bun.lockb* ./
+RUN bun install --frozen-lockfile --production
+
+# คัดลอก environment file (ถ้ามี)
+COPY --from=builder /app/.env* ./
+
+# ตั้งค่าการเป็นเจ้าของไฟล์
 RUN chown -R nextjs:bunjs /app
 
 USER nextjs
@@ -38,5 +54,5 @@ ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
 ENV NODE_ENV=production
 
-# เรียกใช้ server.js (ต้องมีใน standalone build)
-CMD ["bun", "server.js"]
+# เรียกใช้ Next.js ผ่าน bun
+CMD ["bun", "run", "start"]
