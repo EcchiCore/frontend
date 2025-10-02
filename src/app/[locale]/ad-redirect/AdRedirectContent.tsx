@@ -1,5 +1,9 @@
 'use client';
 import React, { useState, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
+import { Separator } from '@/components/ui/separator';
 import {useTranslations} from "next-intl";
 
 async function decryptLink(encryptedLink: string, encryptionKey: string): Promise<string | null> {
@@ -38,8 +42,20 @@ export default function AdRedirectContent(): React.ReactElement {
   const [countdown, setCountdown] = useState(3);
   const [decryptedUrl, setDecryptedUrl] = useState<string | null>(null);
   const [encryptedLink, setEncryptedLink] = useState<string | null>(null);
+  const [faviconUrl, setFaviconUrl] = useState<string | null>(null);
+  const [domainName, setDomainName] = useState<string | null>(null);
 
   const encryptionKey = process.env.NEXT_PUBLIC_ENCRYPTION_KEY || 'w89esQq0cs28f49Gu4e29qC4QARLFXgx';
+
+  const getDomain = (url: string) => {
+    try {
+      const urlObj = new URL(url);
+      return urlObj.hostname;
+    } catch (error) {
+      console.error("Invalid URL:", error);
+      return null;
+    }
+  };
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -54,13 +70,27 @@ export default function AdRedirectContent(): React.ReactElement {
       const timer = setInterval(() => setCountdown((c) => c - 1), 1000);
       return () => clearInterval(timer);
     }
+  }, [countdown]);
 
+  useEffect(() => {
     if (encryptedLink && !decryptedUrl) {
       decryptLink(encryptedLink, encryptionKey).then((url) => {
-        if (url) setDecryptedUrl(url);
+        if (url) {
+          setDecryptedUrl(url);
+        }
       });
     }
-  }, [countdown, encryptedLink, decryptedUrl, encryptionKey]);
+  }, [encryptedLink, decryptedUrl, encryptionKey]);
+
+  useEffect(() => {
+    if (decryptedUrl) {
+      const domain = getDomain(decryptedUrl);
+      if (domain) {
+        setFaviconUrl(`https://www.google.com/s2/favicons?domain=${domain}&sz=64`);
+        setDomainName(domain);
+      }
+    }
+  }, [decryptedUrl]);
 
   const handleRedirect = () => {
     if (decryptedUrl) {
@@ -69,30 +99,36 @@ export default function AdRedirectContent(): React.ReactElement {
   };
 
   return (
-    <div className="min-h-screen bg-base-200 flex justify-center items-center p-4">
-      <div className="card w-full max-w-md bg-base-100 shadow-xl">
-        <div className="card-body">
-          <h2 className="card-title text-center text-2xl font-bold">{t("Redirecting")}</h2>
-          <div className="divider"></div>
-
-          <div className="text-center">
+    <div className="min-h-screen bg-background flex justify-center items-center p-4">
+      <Card className="w-full max-w-md">
+        <CardHeader>
+          <CardTitle className="text-center text-2xl font-bold">{t("Redirecting")}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Separator />
+          <div className="text-center mt-4">
+            {faviconUrl && (
+              <img src={faviconUrl} alt="Favicon" className="mx-auto mb-2 h-10 w-10" />
+            )}
+            {domainName && (
+              <p className="text-sm text-muted-foreground mb-4">{domainName}</p>
+            )}
             <p className="mb-4">
               Please wait <span className="font-bold text-primary">{countdown}</span> {t("countdown")}
             </p>
-            <progress className="progress progress-primary w-full" value={3 - countdown} max={3}></progress>
+            <Progress value={(3 - countdown) * 100 / 3} className="w-full" />
           </div>
-
-          <div className="card-actions justify-center">
+          <div className="mt-4">
             {countdown > 0 ? (
-              <button className="btn btn-disabled btn-block">Please wait ({countdown}s)</button>
+              <Button disabled className="w-full">Please wait ({countdown}s)</Button>
             ) : decryptedUrl ? (
-              <button className="btn btn-primary btn-block" onClick={handleRedirect}>{t("Continue")}</button>
+              <Button className="w-full" onClick={handleRedirect}>{t("Continue")}</Button>
             ) : (
-              <button className="btn btn-primary btn-block" disabled>{t("Decrypting")}</button>
+              <Button disabled className="w-full">{t("Decrypting")}</Button>
             )}
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
