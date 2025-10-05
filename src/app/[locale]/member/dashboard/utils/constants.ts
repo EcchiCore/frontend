@@ -6,26 +6,26 @@ export const NAVIGATION_ITEMS: NavigationItem[] = [
   {
     id: 'profile',
     label: 'Profile',
-    icon: 'UserIcon',
+    icon: 'User',
     path: '#profile'
   },
   {
     id: 'articles',
     label: 'Articles',
-    icon: 'DocumentTextIcon',
+    icon: 'FileText',
     path: '#articles'
   },
   {
     id: 'moderation',
     label: 'Moderate Content',
-    icon: 'ShieldCheckIcon',
+    icon: 'Shield',
     requiredRanks: ['MODERATOR', 'ADMIN'],
     path: '#moderation'
   },
   {
     id: 'settings',
     label: 'Settings',
-    icon: 'CogIcon',
+    icon: 'Settings',
     path: '#settings'
   }
 ];

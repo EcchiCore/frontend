@@ -178,35 +178,7 @@ const SettingsPage: React.FC = () => {
     }
   }, [user, fetchTokens, hasTokenAccess]);
 
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      window.location.hash = activeTab;
-    }
-  }, [activeTab]);
-
-  useEffect(() => {
-    const handleHashChange = () => {
-      const hash = window.location.hash.replace('#', '');
-      const validTabs = [
-        'profile',
-        'security',
-        'notifications',
-        'privacy',
-        'appearance',
-        'tokens',
-        'danger',
-      ] as const;
-      if (validTabs.includes(hash as any)) {
-        setActiveTab(hash as typeof validTabs[number]);
-      } else {
-        setActiveTab('profile');
-      }
-    };
-
-    window.addEventListener('hashchange', handleHashChange);
-    handleHashChange();
-    return () => window.removeEventListener('hashchange', handleHashChange);
-  }, []);
+  
 
   const applyTheme = (theme: string) => {
     document.documentElement.setAttribute('data-theme', theme);

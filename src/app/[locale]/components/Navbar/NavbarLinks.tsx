@@ -155,7 +155,7 @@ export default function NavbarLinks({ section, onCloseMenu = () => {}, isMobile 
             id: "member-settings", 
             name: t("settings"), 
             transKey: "settings", 
-            link: getLocalizedHref("/member/settings") 
+            link: getLocalizedHref("/member/dashboard#settings")
           },
           { 
             id: "member-contact", 

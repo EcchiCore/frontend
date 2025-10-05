@@ -10,9 +10,7 @@ export default function DashboardPage() {
   return (
     <AuthProvider>
       <DashboardProvider>
-        <DashboardLayout title="Dashboard">
-          <Dashboard />
-        </DashboardLayout>
+        <DashboardLayout title="Dashboard" />
       </DashboardProvider>
     </AuthProvider>
   );

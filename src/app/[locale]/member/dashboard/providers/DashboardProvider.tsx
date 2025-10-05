@@ -24,6 +24,7 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children }
   const navigateTo = useCallback((page: PageType) => {
     console.log('Navigating to page:', page); // Debug log
     setCurrentPage(page);
+    window.location.hash = page;
     setMobileOpen(false); // Close mobile menu when navigating
   }, []);
 
