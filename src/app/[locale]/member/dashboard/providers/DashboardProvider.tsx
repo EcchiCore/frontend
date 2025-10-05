@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { DashboardContextType, PageType } from '../utils/types';
 
 const DashboardContext = createContext<DashboardContextType | undefined>(undefined);
@@ -17,8 +17,20 @@ interface DashboardProviderProps {
   children: React.ReactNode;
 }
 
+const getPageFromHash = (): PageType => {
+  if (typeof window === 'undefined') {
+    return 'profile';
+  }
+  const hash = window.location.hash.replace('#', '') as PageType;
+  const validPages: PageType[] = ['profile', 'articles', 'moderation', 'settings'];
+  if (validPages.includes(hash)) {
+    return hash;
+  }
+  return 'profile';
+};
+
 export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children }) => {
-  const [currentPage, setCurrentPage] = useState<PageType>('profile');
+  const [currentPage, setCurrentPage] = useState<PageType>(getPageFromHash());
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const navigateTo = useCallback((page: PageType) => {
@@ -26,6 +38,16 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({ children }
     setCurrentPage(page);
     window.location.hash = page;
     setMobileOpen(false); // Close mobile menu when navigating
+  }, []);
+
+  useEffect(() => {
+    const handleHashChange = () => {
+      setCurrentPage(getPageFromHash());
+    };
+    window.addEventListener('hashchange', handleHashChange);
+    return () => {
+      window.removeEventListener('hashchange', handleHashChange);
+    };
   }, []);
 
   const toggleMobile = useCallback(() => {
