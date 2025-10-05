@@ -16,7 +16,7 @@ import { Loader2, AlertCircle } from 'lucide-react';
 
 interface DashboardLayoutProps {
   title: string;
-  children: React.ReactNode;
+  children?: React.ReactNode;
 }
 
 export const DashboardLayoutShadcn: React.FC<DashboardLayoutProps> = ({ title }) => {
