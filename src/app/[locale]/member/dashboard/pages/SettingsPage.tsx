@@ -88,6 +88,7 @@ const SettingsPage: React.FC = () => {
   const [newTokenDuration, setNewTokenDuration] = useState('7d');
   const [newTokenRank, setNewTokenRank] = useState('USER');
   const [newCreatedToken, setNewCreatedToken] = useState<string | null>(null);
+  const userToken = getCookie('token');
 
   // Form states
   const [profileForm, setProfileForm] = useState<SettingsFormData>({
@@ -943,6 +944,34 @@ const SettingsPage: React.FC = () => {
           {activeTab === 'tokens' && hasTokenAccess() && (
             <div className="space-y-6">
               <h2 className="text-xl font-bold">API Tokens</h2>
+
+              {/* Current User Session Token */}
+              <Card>
+                <CardContent className="pt-6">
+                  <h3 className="font-semibold mb-3">Your Session Token</h3>
+                  <p className="text-sm text-muted-foreground mb-2">
+                    This is your current authentication token. Keep it secure!
+                  </p>
+                  <div className="flex items-center">
+                    <code className="text-sm bg-background p-2 rounded flex-1 overflow-x-auto">
+                      {userToken ? `${userToken.substring(0, 10)}...${userToken.substring(userToken.length - 10)}` : 'No token found'}
+                    </code>
+                    {userToken && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="ml-2"
+                        onClick={() => {
+                          navigator.clipboard.writeText(userToken);
+                          showMessage('success', 'Session token copied to clipboard!');
+                        }}
+                      >
+                        Copy
+                      </Button>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
               <Card>
                 <CardContent className="pt-6">
                   <h3 className="font-semibold mb-3">Create New Token</h3>
