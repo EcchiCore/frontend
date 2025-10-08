@@ -66,12 +66,21 @@ async function fetchHomeData(locale: string) {
 export default async function HomePage({ params }: { params: { locale: string } }) {
   const { locale } = params;
   const homeData = await fetchHomeData(locale);
+  const t = await getTranslations({ locale, namespace: 'homePage' });
 
   return (
     <div className={`min-h-screen bg-gradient-to-br from-slate-50 via-background to-slate-100 ${inter.className}`}>
       <Navbar />
 
-      <main className="bg-background">D
+      <main className="bg-background">
+        <section className="text-center py-12 px-4 bg-gradient-to-b from-background to-transparent">
+          <h1 className="text-4xl md:text-5xl font-bold tracking-tight bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent pb-2">
+            {t('welcomeTo')}<span className="text-foreground">{t('hub')}</span>
+          </h1>
+          <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
+            {t('heroDescription')}
+          </p>
+        </section>
 
         <HomeCarousel articles={homeData.carousel} loading={false} />
 

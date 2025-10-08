@@ -70,16 +70,19 @@ export const Step1_BasicInfo = ({ formData, setFormData }: Step1_BasicInfoProps)
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
           <Label htmlFor="engine">Game Engine</Label>
-          <Select onValueChange={(value) => handleSelectChange('engine', value)} value={formData.engine || ''} required>
-            <SelectTrigger>
-              <SelectValue placeholder="Select an engine" />
-            </SelectTrigger>
-            <SelectContent>
-              {engines.map(engine => (
-                <SelectItem key={engine} value={engine}>{engine}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <Input
+            id="engine"
+            value={formData.engine || ''}
+            onChange={handleChange}
+            placeholder="Select or type an engine"
+            required
+            list="engine-list"
+          />
+          <datalist id="engine-list">
+            {engines.map(engine => (
+              <option key={engine} value={engine} />
+            ))}
+          </datalist>
         </div>
         <div className="space-y-2">
           <Label>Platforms</Label>

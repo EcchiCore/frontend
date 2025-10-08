@@ -124,22 +124,22 @@ export const Step3_Media = ({ setFormData, setOngoingUploads }: Step3_MediaProps
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
-          <Label htmlFor="coverImage">Cover Image</Label>
+          <Label htmlFor="coverImage">Cover Image (Required)</Label>
           <Input id="coverImage" type="file" accept="image/*" onChange={handleFileChange} required />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="mainImage">Main Image</Label>
+          <Label htmlFor="mainImage">Main Image (Optional)</Label>
           <Input id="mainImage" type="file" accept="image/*" onChange={handleFileChange} />
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
-          <Label htmlFor="backgroundImage">Background Image</Label>
+          <Label htmlFor="backgroundImage">Background Image (Optional)</Label>
           <Input id="backgroundImage" type="file" accept="image/*" onChange={handleFileChange} />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="otherImages">Other Images</Label>
+          <Label htmlFor="otherImages">Other Images (Optional)</Label>
           <Input id="otherImages" type="file" accept="image/*" multiple onChange={handleMultipleFileChange} />
         </div>
       </div>
