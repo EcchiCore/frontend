@@ -3,6 +3,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { DashboardUser } from '../utils/types';
 import { userApi, ApiError } from '../utils/api';
 
+const CACHE_KEY = 'dashboard_user';
+
 export const useAuth = () => {
   const [user, setUser] = useState<DashboardUser | null>(null);
   const [loading, setLoading] = useState(true);
@@ -10,19 +12,19 @@ export const useAuth = () => {
 
   const refreshUser = useCallback(async () => {
     try {
-      setLoading(true);
       setError(null);
       const response = await userApi.getUser();
-      setUser(response.user);
+      const fetchedUser = response.user;
+      setUser(fetchedUser);
+      localStorage.setItem(CACHE_KEY, JSON.stringify(fetchedUser));
     } catch (err) {
       const errorMessage = err instanceof ApiError
         ? err.message
         : 'Failed to fetch user data';
       setError(errorMessage);
-      setUser(null);
-
-      // Redirect to login if unauthorized
       if (err instanceof ApiError && err.status === 401) {
+        setUser(null);
+        localStorage.removeItem(CACHE_KEY);
         window.location.href = '/login';
       }
     } finally {
@@ -30,9 +32,37 @@ export const useAuth = () => {
     }
   }, []);
 
+  useEffect(() => {
+    let isMounted = true;
+    try {
+      const cachedUser = localStorage.getItem(CACHE_KEY);
+      if (cachedUser) {
+        if (isMounted) {
+          setUser(JSON.parse(cachedUser));
+          setLoading(false);
+        }
+      } else {
+        if (isMounted) {
+          setLoading(true);
+        }
+      }
+    } catch (error) {
+      console.error("Failed to parse cached user:", error);
+      if (isMounted) {
+        setLoading(true);
+      }
+    }
+
+    refreshUser();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [refreshUser]);
+
   const login = useCallback(async (token: string) => {
-    // Set token in cookie (if needed)
     document.cookie = `token=${token}; path=/`;
+    setLoading(true);
     await refreshUser();
   }, [refreshUser]);
 
@@ -40,17 +70,20 @@ export const useAuth = () => {
     document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT';
     setUser(null);
     setError(null);
+    localStorage.removeItem(CACHE_KEY);
     window.location.href = '/login';
   }, []);
 
   const updateUser = useCallback((userData: Partial<DashboardUser>) => {
-    setUser(prev => prev ? { ...prev, ...userData } : null);
+    setUser(prev => {
+      if (prev) {
+        const updatedUser = { ...prev, ...userData };
+        localStorage.setItem(CACHE_KEY, JSON.stringify(updatedUser));
+        return updatedUser;
+      }
+      return null;
+    });
   }, []);
-
-  // Initial load
-  useEffect(() => {
-    refreshUser();
-  }, [refreshUser]);
 
   return {
     user,

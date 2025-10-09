@@ -94,22 +94,30 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ message: validationResult.error }, { status: 400 });
     }
 
+    const articleData: any = {
+      title,
+      description,
+      body: body || description,
+      ver,
+      engine,
+      status: 'DRAFT',
+      coverImage: coverImage,
+      images: [coverImage, ...(otherImages || [])],
+      tagList: tags || [],
+      categoryList: categories || [],
+      platformList: platforms || [],
+    };
+
+    if (mainImage) {
+      articleData.mainImage = mainImage;
+    }
+
+    if (backgroundImage) {
+      articleData.backgroundImage = backgroundImage;
+    }
+
     const newArticle = {
-      article: {
-        title,
-        description,
-        body: body || description,
-        ver,
-        engine,
-        status: 'DRAFT',
-        mainImage: mainImage || coverImage,
-        backgroundImage: backgroundImage || coverImage,
-        coverImage: coverImage,
-        images: [coverImage, ...(otherImages || [])],
-        tagList: tags || [],
-        categoryList: categories || [],
-        platformList: platforms || [],
-      },
+      article: articleData,
     };
 
     // CHANGE: Set to true to send to production

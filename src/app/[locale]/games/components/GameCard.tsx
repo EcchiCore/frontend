@@ -10,21 +10,26 @@ export default function GameCard({ article }: { article: Article }) {
     <Link href={`/articles/${article.slug}`} className="group">
       <Card className="overflow-hidden hover:shadow-lg transition-all duration-200 group-hover:scale-[1.02]">
         <CardHeader className="p-0">
-          {article.mainImage ? (
-            <Image
-              src={article.mainImage} 
-              alt={article.title}
-              width={500}
-              height={500} 
-              className="w-full h-40 object-cover group-hover:scale-105 transition-transform duration-200" 
-            />
-          ) : (
-            <div className="w-full h-40 bg-muted flex items-center justify-center">
-              <User className="w-8 h-8 text-muted-foreground" />
-            </div>
-          )}
+          {(() => {
+            const imageSrc = article.coverImage || article.mainImage || article.backgroundImage || null;
+
+            return imageSrc ? (
+              <Image
+                src={imageSrc}
+                alt={article.title}
+                width={500}
+                height={500}
+                className="w-full h-40 object-cover group-hover:scale-105 transition-transform duration-200"
+              />
+            ) : (
+              <div className="w-full h-40 bg-muted flex items-center justify-center">
+                <User className="w-8 h-8 text-muted-foreground" />
+              </div>
+            );
+          })()}
         </CardHeader>
-        
+
+
         <CardContent className="p-4 space-y-3">
           <h3 className="font-semibold line-clamp-2 group-hover:text-primary transition-colors">
             {article.title}

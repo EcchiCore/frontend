@@ -578,12 +578,6 @@ export const ModerationPage: React.FC = () => {
         </CardContent>
       </Card>
 
-      {/* Loading overlay */}
-      {loading && !refreshing && (
-        <div className="flex justify-center items-center py-8">
-          <Loader2 className="h-8 w-8 animate-spin" />
-        </div>
-      )}
 
       {/* Requests Table */}
       <Card className="overflow-hidden shadow-lg border-0 bg-gradient-to-br from-white to-gray-50/50 dark:from-gray-900 dark:to-gray-800/50">
@@ -607,18 +601,36 @@ export const ModerationPage: React.FC = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {!loading && currentRequests.length === 0 && (
+              {loading && !refreshing && (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8">
-                    <div className="text-muted-foreground">
-                      {filteredRequests.length === 0 && requests.length === 0
-                        ? 'No moderation requests found'
-                        : 'No requests found matching your criteria'}
+                  <TableCell colSpan={7} className="text-center py-12">
+                    <div className="flex flex-col items-center justify-center gap-3">
+                      <Loader2 className="h-8 w-8 animate-spin text-purple-600" />
+                      <p className="text-sm text-muted-foreground">Loading moderation requests...</p>
                     </div>
                   </TableCell>
                 </TableRow>
               )}
-              {currentRequests.map((request) => (
+              {!loading && currentRequests.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center py-12">
+                    <div className="flex flex-col items-center justify-center gap-2">
+                      <div className="p-3 bg-gray-100 dark:bg-gray-800 rounded-full">
+                        <FileText className="h-8 w-8 text-muted-foreground" />
+                      </div>
+                      <p className="text-muted-foreground font-medium">
+                        {filteredRequests.length === 0 && requests.length === 0
+                          ? 'No moderation requests found'
+                          : 'No requests found matching your criteria'}
+                      </p>
+                      {searchTerm && (
+                        <p className="text-sm text-muted-foreground">Try adjusting your search or filters</p>
+                      )}
+                    </div>
+                  </TableCell>
+                </TableRow>
+              )}
+              {!loading && currentRequests.map((request) => (
                 <TableRow key={request.id} className="hover:bg-gradient-to-r hover:from-gray-50/50 hover:to-gray-100/30 dark:hover:from-gray-800/30 dark:hover:to-gray-700/30 transition-all duration-200 border-b border-gray-200/50 dark:border-gray-700/50">
                   <TableCell className="font-mono text-sm font-medium text-purple-600 dark:text-purple-400">#{request.id}</TableCell>
                   <TableCell>

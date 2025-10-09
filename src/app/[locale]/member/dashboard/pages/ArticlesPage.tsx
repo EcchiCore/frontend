@@ -34,6 +34,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Switch } from '@/components/ui/switch';
 import { Loader2 } from 'lucide-react';
+import Link from "next/link";
 
 export const ArticlesPage: React.FC = () => {
   const { user } = useAuthContext();
@@ -172,7 +173,7 @@ export const ArticlesPage: React.FC = () => {
           {!feedMode && (
             <Button>
               <PlusIcon className="h-4 w-4 mr-2" />
-              New Article
+              <Link href="/upload/games" >New Article</Link>
             </Button>
           )}
         </div>

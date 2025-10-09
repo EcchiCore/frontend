@@ -9,13 +9,12 @@ import { MessageCircle, Trophy, Medal, Award } from "lucide-react";
 import { SidebarLeftProps } from "./Interfaces";
 
 const SidebarLeft: React.FC<SidebarLeftProps> = ({
-  article,
-  topCommenters,
-}) => {
-  const mainImageUrl = 
-    typeof article.mainImage === "string"
-      ? article.mainImage
-      : article.mainImage?.url || "/default-image.jpg";
+                                                   article,
+                                                   topCommenters,
+                                                 }) => {
+
+  const imageUrl = article.coverImage || article.mainImage || article.backgroundImage || null;
+  const mainImageUrl = typeof imageUrl === 'string' ? imageUrl : imageUrl?.url || null;
 
   const getRankingIcon = (index: number) => {
     switch (index) {
@@ -49,25 +48,27 @@ const SidebarLeft: React.FC<SidebarLeftProps> = ({
         <CardContent className="p-0">
           {/* Decorative gradient overlay */}
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-secondary/5 pointer-events-none" />
-          
+
           <div className="relative p-6">
             {/* Enhanced Image Section */}
-            <div className="relative w-full aspect-video rounded-lg overflow-hidden mb-6 group">
-              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              <Image
-                src={mainImageUrl}
-                alt="ภาพหลักของบทความ"
-                fill
-                className="object-cover transition-transform duration-500 group-hover:scale-105"
-                sizes="(max-width: 768px) 100vw, 300px"
-                loading="eager"
-              />
-              
-              {/* Decorative corner accent */}
-              <div className="absolute top-3 right-3 w-8 h-8 bg-primary/20 rounded-full backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
-                <div className="w-3 h-3 bg-primary rounded-full animate-pulse" />
+            {mainImageUrl && (
+              <div className="relative w-full aspect-video rounded-lg overflow-hidden mb-6 group">
+                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <Image
+                  src={mainImageUrl}
+                  alt="ภาพหลักของบทความ"
+                  fill
+                  className="object-cover transition-transform duration-500 group-hover:scale-105"
+                  sizes="(max-width: 768px) 100vw, 300px"
+                  loading="eager"
+                />
+
+                {/* Decorative corner accent */}
+                <div className="absolute top-3 right-3 w-8 h-8 bg-primary/20 rounded-full backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
+                  <div className="w-3 h-3 bg-primary rounded-full animate-pulse" />
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Article Description */}
             <div className="relative mb-6">
@@ -81,7 +82,7 @@ const SidebarLeft: React.FC<SidebarLeftProps> = ({
             {topCommenters.length > 0 && (
               <>
                 <Separator className="mb-6" />
-                
+
                 <div className="space-y-4">
                   {/* Section Header */}
                   <div className="flex items-center gap-3">
@@ -108,7 +109,7 @@ const SidebarLeft: React.FC<SidebarLeftProps> = ({
                                 {commenter.username[0].toUpperCase()}
                               </AvatarFallback>
                             </Avatar>
-                            
+
                             {/* Ranking Badge */}
                             <div className="absolute -top-1 -right-1 w-6 h-6 bg-gradient-to-br from-primary to-secondary rounded-full flex items-center justify-center shadow-lg">
                               {getRankingIcon(index)}

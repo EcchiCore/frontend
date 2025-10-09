@@ -2,6 +2,18 @@ import { useState, useCallback } from 'react';
 import { Article, ArticleStatus, ArticlesResponse } from '../utils/types';
 import { articlesApi, ApiError } from '../utils/api';
 
+const CACHE_PREFIX = 'user_articles_';
+
+// Function to clear all article-related cache
+const clearArticlesCache = () => {
+  if (typeof window === 'undefined') return;
+  Object.keys(sessionStorage).forEach(key => {
+    if (key.startsWith(CACHE_PREFIX)) {
+      sessionStorage.removeItem(key);
+    }
+  });
+};
+
 export const useUserData = () => {
   const [articles, setArticles] = useState<Article[]>([]);
   const [articlesCount, setArticlesCount] = useState<number>(0);
@@ -14,8 +26,20 @@ export const useUserData = () => {
     offset?: number;
     feedMode?: boolean;
   }) => {
+    const cacheKey = `${CACHE_PREFIX}${JSON.stringify(params || {})}`;
+
     try {
-      setLoading(true);
+      if (typeof window !== 'undefined') {
+        const cachedData = sessionStorage.getItem(cacheKey);
+        if (cachedData) {
+          const { articles: cachedArticles, articlesCount: cachedCount } = JSON.parse(cachedData);
+          setArticles(cachedArticles);
+          setArticlesCount(cachedCount);
+        } else {
+          setLoading(true);
+        }
+      }
+
       setError(null);
 
       const queryParams = new URLSearchParams();
@@ -29,7 +53,6 @@ export const useUserData = () => {
 
       const responseTyped = response as ArticlesResponse;
 
-      // Transform API response if backend returns lowercase status values
       const transformedArticles = responseTyped.articles.map(article => ({
         ...article,
         status: article.status.toUpperCase() as ArticleStatus
@@ -37,13 +60,16 @@ export const useUserData = () => {
 
       setArticles(transformedArticles);
       setArticlesCount(responseTyped.articlesCount);
+
+      if (typeof window !== 'undefined') {
+        sessionStorage.setItem(cacheKey, JSON.stringify({ articles: transformedArticles, articlesCount: responseTyped.articlesCount }));
+      }
+
     } catch (err) {
       const errorMessage = err instanceof ApiError
         ? err.message
         : 'Failed to fetch articles';
       setError(errorMessage);
-
-      // Set empty state on error
       setArticles([]);
       setArticlesCount(0);
     } finally {
@@ -54,6 +80,7 @@ export const useUserData = () => {
   const updateArticles = useCallback((newArticles: Article[]) => {
     setArticles(newArticles);
     setArticlesCount(newArticles.length);
+    clearArticlesCache();
   }, []);
 
   const updateArticle = useCallback((slug: string, updates: Partial<Article>) => {
@@ -62,16 +89,19 @@ export const useUserData = () => {
         article.slug === slug ? { ...article, ...updates } : article
       )
     );
+    clearArticlesCache();
   }, []);
 
   const removeArticle = useCallback((slug: string) => {
     setArticles(prev => prev.filter(article => article.slug !== slug));
     setArticlesCount(prev => Math.max(0, prev - 1));
+    clearArticlesCache();
   }, []);
 
   const addArticle = useCallback((newArticle: Article) => {
     setArticles(prev => [newArticle, ...prev]);
     setArticlesCount(prev => prev + 1);
+    clearArticlesCache();
   }, []);
 
   const toggleFavorite = useCallback(async (slug: string, currentFavorited: boolean) => {
@@ -85,7 +115,7 @@ export const useUserData = () => {
         favorited: updatedArticle.favorited,
         favoritesCount: updatedArticle.favoritesCount
       });
-
+      clearArticlesCache();
       return updatedArticle;
     } catch (err) {
       const errorMessage = err instanceof ApiError
@@ -99,6 +129,7 @@ export const useUserData = () => {
     try {
       await articlesApi.deleteArticle(slug);
       removeArticle(slug);
+      clearArticlesCache();
     } catch (err) {
       const errorMessage = err instanceof ApiError
         ? err.message
@@ -110,6 +141,7 @@ export const useUserData = () => {
   const publishRequest = useCallback(async (slug: string) => {
     try {
       await articlesApi.publishRequest(slug);
+      clearArticlesCache();
     } catch (err) {
       const errorMessage = err instanceof ApiError
         ? err.message

@@ -11,6 +11,8 @@ export interface Article {
   updatedAt: string;
   status: string;
   mainImage: string | { url?: string };
+  coverImage: string | { url?: string };
+  backgroundImage: string | { url?: string };
   images: string[];
   tagList: string[];
   categoryList: string[];

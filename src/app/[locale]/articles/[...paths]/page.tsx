@@ -14,25 +14,6 @@ import { getValidLocale, type Locale } from "@/utils/localeUtils";
 import { Article, ArticleResponse } from "./components/Interfaces";
 
 
-interface TranslatedArticle {
-  title: string;
-  description: string;
-  body: string;
-  slug: string;
-  author?: {
-    username: string;
-  };
-  createdAt?: string;
-  updatedAt?: string;
-  mainImage?: string | { url?: string };
-  tagList?: string[];
-  categoryList?: string[];
-  ver?: string;
-  sequentialCode?: string;
-  engine?: string;
-  version?: number;
-}
-
 interface MetadataProps {
   params: Promise<{ locale: string; paths: string[] }>;
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
@@ -54,28 +35,7 @@ interface DownloadsResponse {
   articleStatus: string;
 }
 
-// N8N Translation Interfaces
-interface N8nTranslationRequest {
-  title: string;
-  description: string;
-  body: string;
-  sourceLanguage: string;
-  targetLanguage: string;
-  slug: string;
-}
-
-interface N8nTranslationResponse {
-  success: boolean;
-  translatedTitle: string;
-  translatedDescription: string;
-  translatedBody: string;
-  error?: string;
-}
-
-
-
 const apiUrl = process.env.API_URL;
-const n8nWebhookUrl = process.env.N8N_TRANSLATION_WEBHOOK_URL;
 const siteUrl = process.env.FRONTEND || 'https://chanomhub.online';
 
 async function fetchArticle(slug: string): Promise<Article | null> {
@@ -90,112 +50,6 @@ async function fetchArticle(slug: string): Promise<Article | null> {
     return data.article;
   } catch (error) {
     console.error('Error fetching article:', error);
-    return null;
-  }
-}
-
-// N8N Translation Function
-async function translateArticleWithN8n(
-  article: Article,
-  sourceLanguage: string = 'auto',
-  targetLanguage: string = 'th'
-): Promise<TranslatedArticle | null> {
-  try {
-    if (!n8nWebhookUrl) {
-      console.error('N8N_TRANSLATION_WEBHOOK_URL is not configured');
-      return null;
-    }
-
-    console.log(`Translating article via n8n webhook: ${article.slug}`);
-
-    const translationRequest: N8nTranslationRequest = {
-      title: article.title,
-      description: article.description,
-      body: article.body,
-      sourceLanguage,
-      targetLanguage,
-      slug: article.slug
-    };
-
-    const response = await fetch(n8nWebhookUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(translationRequest),
-      signal: AbortSignal.timeout(45000) // Increased timeout to 45 seconds
-    });
-
-    if (!response.ok) {
-      console.error(`N8n webhook translation error: ${response.status} ${response.statusText}`);
-      return null;
-    }
-
-    const translationResult = await response.json() as N8nTranslationResponse;
-
-    if (!translationResult.success) {
-      console.error('N8n webhook translation failed:', translationResult.error);
-      return null;
-    }
-
-    // Validate translation result
-    const hasValidTranslation =
-      translationResult.translatedTitle &&
-      translationResult.translatedBody &&
-      translationResult.translatedDescription !== "Translation Error";
-
-    if (!hasValidTranslation) {
-      console.warn('Translation result incomplete or has errors:', {
-        hasTitle: !!translationResult.translatedTitle,
-        hasBody: !!translationResult.translatedBody,
-        descriptionError: translationResult.translatedDescription === "Translation Error"
-      });
-
-      // Return partial translation if title and body are available
-      if (translationResult.translatedTitle && translationResult.translatedBody) {
-        return {
-          title: translationResult.translatedTitle,
-          description: translationResult.translatedDescription === "Translation Error"
-            ? article.description // Use original description if translation failed
-            : translationResult.translatedDescription,
-          body: translationResult.translatedBody,
-          slug: article.slug,
-          author: article.author,
-          createdAt: article.createdAt,
-          updatedAt: article.updatedAt,
-          mainImage: article.mainImage,
-          tagList: article.tagList,
-          categoryList: article.categoryList,
-          ver: article.ver,
-          sequentialCode: article.sequentialCode,
-          engine: 'n8n-webhook',
-          version: 1
-        };
-      }
-
-      return null;
-    }
-
-    // Return the translated article with original metadata preserved
-    return {
-      title: translationResult.translatedTitle,
-      description: translationResult.translatedDescription,
-      body: translationResult.translatedBody,
-      slug: article.slug,
-      author: article.author,
-      createdAt: article.createdAt,
-      updatedAt: article.updatedAt,
-      mainImage: article.mainImage,
-      tagList: article.tagList,
-      categoryList: article.categoryList,
-      ver: article.ver,
-      sequentialCode: article.sequentialCode,
-      engine: 'n8n-webhook',
-      version: 1
-    };
-
-  } catch (error) {
-    console.error('Error translating article with n8n webhook:', error);
     return null;
   }
 }
@@ -217,7 +71,7 @@ async function fetchDownloads(articleId: number): Promise<DownloadFile[]> {
 }
 
 // Helper function to create SEO-friendly title
-function createSEOTitle(article: Article | TranslatedArticle, isTranslated: boolean = false): string {
+function createSEOTitle(article: Article): string {
   let title = article.title;
 
   if ('ver' in article && article.ver) {
@@ -228,52 +82,20 @@ function createSEOTitle(article: Article | TranslatedArticle, isTranslated: bool
     title += ` (${article.sequentialCode})`;
   }
 
-  if (isTranslated) {
-    title += ' (Translated)';
-  }
-
   return title;
 }
 
 // Helper function to construct content path for metadata
-function constructContentPath(locale: Locale, paths: string[], isTranslate: boolean, searchParams?: any): string {
-  let contentPath = `articles/${paths[0]}`;
-
-  if (isTranslate) {
-    contentPath += '/translate';
-
-    // Add query parameters if they exist
-    const params = new URLSearchParams();
-    if (searchParams?.sourceLanguage && typeof searchParams.sourceLanguage === 'string') {
-      params.set('sourceLanguage', searchParams.sourceLanguage);
-    }
-    if (searchParams?.targetLanguage && typeof searchParams.targetLanguage === 'string') {
-      params.set('targetLanguage', searchParams.targetLanguage);
-    }
-
-    if (params.toString()) {
-      contentPath += `?${params.toString()}`;
-    }
-  }
-
-  return contentPath;
+function constructContentPath(locale: Locale, paths: string[]): string {
+  return `articles/${paths[0]}`;
 }
 
 export async function generateMetadata(props: MetadataProps): Promise<Metadata> {
   const params = await props.params;
-  const searchParams = await props.searchParams;
 
   const locale = getValidLocale(params.locale);
   const paths = params.paths;
   const slug = paths[0];
-  const isTranslate = paths.length > 1 && paths[1] === 'translate';
-
-  const sourceLanguage = typeof searchParams?.sourceLanguage === 'string'
-    ? searchParams.sourceLanguage
-    : 'auto';
-  const targetLanguage = typeof searchParams?.targetLanguage === 'string'
-    ? searchParams.targetLanguage
-    : 'th';
 
   // First check if original article exists
   const originalArticle = await fetchArticle(slug);
@@ -284,82 +106,48 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
     };
   }
 
-  // Get main image URL
-  let mainImageUrl = typeof originalArticle.mainImage === 'string'
-    ? originalArticle.mainImage
-    : originalArticle.mainImage?.url || '';
+  // Get main image URL - ensure we extract string value
+  let mainImageUrl: string | null = null;
 
+  const coverImage = originalArticle.coverImage;
+  const mainImage = originalArticle.mainImage;
+  const backgroundImage = originalArticle.backgroundImage;
+
+  if (coverImage) {
+    mainImageUrl = typeof coverImage === 'string' ? coverImage : coverImage?.url || null;
+  } else if (mainImage) {
+    mainImageUrl = typeof mainImage === 'string' ? mainImage : mainImage?.url || null;
+  } else if (backgroundImage) {
+    mainImageUrl = typeof backgroundImage === 'string' ? backgroundImage : backgroundImage?.url || null;
+  }
+
+  // Replace domain if URL exists
   if (mainImageUrl) {
-    mainImageUrl = mainImageUrl.replace('rustgram.onrender.com', 'oi.chanomhub.online');
+    mainImageUrl = mainImageUrl.replace("rustgram.onrender.com", "oi.chanomhub.online");
   }
 
   // Construct content path for hreflang and canonical
-  const contentPath = constructContentPath(locale, paths, isTranslate, searchParams);
+  const contentPath = constructContentPath(locale, paths);
 
-  if (isTranslate) {
-    // Use n8n translation
-    const translatedArticle = await translateArticleWithN8n(originalArticle, sourceLanguage, targetLanguage);
-
-    if (!translatedArticle) {
-      const seoTitle = createSEOTitle(originalArticle) + ' (Translation Not Available)';
-      return generatePageMetadata({
-        title: seoTitle,
-        description: originalArticle.description,
-        keywords: originalArticle.tagList || [],
-        locale,
-        contentPath,
-        type: 'article',
-        publishedTime: originalArticle.createdAt,
-        modifiedTime: originalArticle.updatedAt,
-        authors: [originalArticle.author.username],
-        images: mainImageUrl ? [{
-          url: mainImageUrl,
-          width: 1200,
-          height: 630,
-          alt: seoTitle
-        }] : undefined
-      });
-    }
-
-    const seoTitle = createSEOTitle(translatedArticle, true);
-    return generatePageMetadata({
-      title: seoTitle,
-      description: translatedArticle.description,
-      keywords: originalArticle.tagList || [],
-      locale,
-      contentPath,
-      type: 'article',
-      publishedTime: originalArticle.createdAt,
-      modifiedTime: originalArticle.updatedAt,
-      authors: [originalArticle.author.username],
-      images: mainImageUrl ? [{
-        url: mainImageUrl,
-        width: 1200,
-        height: 630,
-        alt: seoTitle
-      }] : undefined
-    });
-  } else {
-    // For original article page
-    const seoTitle = createSEOTitle(originalArticle);
-    return generatePageMetadata({
-      title: seoTitle,
-      description: originalArticle.description,
-      keywords: originalArticle.tagList || [],
-      locale,
-      contentPath,
-      type: 'article',
-      publishedTime: originalArticle.createdAt,
-      modifiedTime: originalArticle.updatedAt,
-      authors: [originalArticle.author.username],
-      images: mainImageUrl ? [{
-        url: mainImageUrl,
-        width: 1200,
-        height: 630,
-        alt: seoTitle
-      }] : undefined
-    });
-  }
+  // For original article page
+  const seoTitle = createSEOTitle(originalArticle);
+  return generatePageMetadata({
+    title: seoTitle,
+    description: originalArticle.description,
+    keywords: originalArticle.tagList || [],
+    locale,
+    contentPath,
+    type: 'article',
+    publishedTime: originalArticle.createdAt,
+    modifiedTime: originalArticle.updatedAt,
+    authors: [originalArticle.author.username],
+    images: mainImageUrl ? [{
+      url: mainImageUrl,
+      width: 1200,
+      height: 630,
+      alt: seoTitle
+    }] : undefined
+  });
 }
 
 interface ArticlePageProps {
@@ -367,29 +155,11 @@ interface ArticlePageProps {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-
-const TranslationErrorBanner = ({ translationInfo }: { translationInfo: any }) => (
-  <Alert variant="destructive" className="mb-6">
-    <AlertTitle>Translation may be incomplete</AlertTitle>
-    <AlertDescription>
-      The translation service may have issues, or some content may not have been translated yet.
-      {translationInfo && (
-        <span className="ml-2">
-          ({translationInfo.sourceLanguage} → {translationInfo.targetLanguage})
-        </span>
-      )}
-    </AlertDescription>
-  </Alert>
-);
-
 // Function to generate JSON-LD structured data for the article
 function generateArticleJsonLd(
   article: Article,
   locale: Locale,
-  slug: string,
-  isTranslated: boolean = false,
-  searchParams?: any
+  slug: string
 ) {
   let mainImageUrl = typeof article.mainImage === 'string'
     ? article.mainImage
@@ -400,25 +170,10 @@ function generateArticleJsonLd(
   }
 
   // Construct the correct article URL with locale
-  let articleUrl = `${siteUrl}/${locale}/articles/${slug}`;
-  if (isTranslated) {
-    articleUrl += '/translate';
-
-    const params = new URLSearchParams();
-    if (searchParams?.sourceLanguage && typeof searchParams.sourceLanguage === 'string') {
-      params.set('sourceLanguage', searchParams.sourceLanguage);
-    }
-    if (searchParams?.targetLanguage && typeof searchParams.targetLanguage === 'string') {
-      params.set('targetLanguage', searchParams.targetLanguage);
-    }
-
-    if (params.toString()) {
-      articleUrl += `?${params.toString()}`;
-    }
-  }
+  const articleUrl = `${siteUrl}/${locale}/articles/${slug}`;
 
   return generateArticleStructuredData({
-    title: createSEOTitle(article, isTranslated),
+    title: createSEOTitle(article),
     description: article.description,
     url: articleUrl,
     datePublished: article.createdAt,
@@ -431,19 +186,10 @@ function generateArticleJsonLd(
 
 export default async function ArticlePage(props: ArticlePageProps) {
   const params = await props.params;
-  const searchParams = await props.searchParams;
 
   const locale = getValidLocale(params.locale);
   const paths = params.paths;
   const slug = paths[0];
-  const isTranslate = paths.length > 1 && paths[1] === 'translate';
-
-  const sourceLanguage = typeof searchParams.sourceLanguage === 'string'
-    ? searchParams.sourceLanguage
-    : 'auto';
-  const targetLanguage = typeof searchParams.targetLanguage === 'string'
-    ? searchParams.targetLanguage
-    : 'th';
 
   const originalArticle = await fetchArticle(slug);
   if (!originalArticle) {
@@ -452,47 +198,11 @@ export default async function ArticlePage(props: ArticlePageProps) {
 
   const downloads = await fetchDownloads(originalArticle.id);
 
-  let contentArticle = originalArticle;
-  let isTranslated = false;
-  let translationInfo = null;
-  let hasTranslationError = false;
-
-  if (isTranslate) {
-    // Use n8n translation
-    const translatedArticle = await translateArticleWithN8n(originalArticle, sourceLanguage, targetLanguage);
-
-    if (translatedArticle) {
-      contentArticle = {
-        ...originalArticle,
-        title: translatedArticle.title,
-        description: translatedArticle.description,
-        body: translatedArticle.body,
-        ver: translatedArticle.ver || originalArticle.ver,
-        sequentialCode: translatedArticle.sequentialCode || originalArticle.sequentialCode,
-        engine: translatedArticle.engine,
-        version: translatedArticle.version
-      };
-      isTranslated = true;
-      translationInfo = { sourceLanguage, targetLanguage };
-
-      // Check if translation has errors or is incomplete
-      hasTranslationError =
-        translatedArticle.description === originalArticle.description || // Description wasn't translated
-        translatedArticle.body.length < originalArticle.body.length * 0.8; // Body is significantly shorter
-    } else {
-      // Translation completely failed
-      hasTranslationError = true;
-      translationInfo = { sourceLanguage, targetLanguage };
-    }
-  }
-
   // Generate structured data JSON-LD for the article
   const articleJsonLd = generateArticleJsonLd(
-    contentArticle,
+    originalArticle,
     locale,
-    slug,
-    isTranslated,
-    searchParams
+    slug
   );
 
   return (
@@ -505,28 +215,17 @@ export default async function ArticlePage(props: ArticlePageProps) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
       />
 
-      {/* Show translation error banner if needed */}
-      {isTranslate && hasTranslationError && (
-        <TranslationErrorBanner translationInfo={translationInfo} />
-      )}
-
-      {/* Only show GTM tracker for original articles */}
-      {!isTranslated && (
-        <GTMArticleTracker
-          title={originalArticle.title}
-          slug={originalArticle.slug}
-          categoryList={originalArticle.categoryList}
-          authorUsername={originalArticle.author.username}
-        />
-      )}
+      <GTMArticleTracker
+        title={originalArticle.title}
+        slug={originalArticle.slug}
+        categoryList={originalArticle.categoryList}
+        authorUsername={originalArticle.author.username}
+      />
 
       <ArticleContent
-        article={contentArticle}
+        article={originalArticle}
         slug={slug}
         downloads={downloads}
-        isTranslated={isTranslated}
-        translationInfo={translationInfo}
-        hasTranslationError={hasTranslationError}
       />
     </>
   );

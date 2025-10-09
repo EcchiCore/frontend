@@ -18,7 +18,7 @@ import {TextStyle} from '@tiptap/extension-text-style';
 
 import { Color } from '@tiptap/extension-color';
 import Underline from '@tiptap/extension-underline';
-import ArticleHeader from "./ArticleHeader";
+
 import CustomArticleAlert from "./Alert";
 import { Alert } from "@/components/ui/alert";
 import SidebarLeft from "./SidebarLeft";
@@ -125,9 +125,6 @@ interface ArticleContentProps {
   article: Article;
   slug: string;
   downloads: DownloadFile[];
-  isTranslated: boolean;
-  translationInfo: { sourceLanguage: string; targetLanguage: string; } | null;
-  hasTranslationError: boolean;
 }
 
 const fetcher = (url: string) => {
@@ -140,7 +137,7 @@ const fetcher = (url: string) => {
   });
 };
 
-const ArticleContent: React.FC<ArticleContentProps> = ({ article, slug, downloads: initialDownloads, isTranslated, translationInfo }) => {
+const ArticleContent: React.FC<ArticleContentProps> = ({ article, slug, downloads: initialDownloads }) => {
   const t = useTranslations('ArticleContent');
   // Essential state
   const [isFavorited, setIsFavorited] = useState(article.favorited);
@@ -150,7 +147,6 @@ const ArticleContent: React.FC<ArticleContentProps> = ({ article, slug, download
   const [alert, setAlert] = useState<AlertState>({ open: false, message: "", severity: "success" });
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [downloads] = useState<DownloadFile[]>(initialDownloads);
-  const [translationFiles, setTranslationFiles] = useState<TranslationFile[]>([]);
   const [openDownloadDialog, setOpenDownloadDialog] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [newComment, setNewComment] = useState("");
@@ -186,13 +182,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({ article, slug, download
     return sortItems(filtered);
   }, [downloads, searchQuery, sortItems]);
 
-  const filteredTranslationFiles = React.useMemo(() => {
-    const filtered = translationFiles.filter((item) =>
-      item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      ("translator" in item && item.translator?.name.toLowerCase().includes(searchQuery.toLowerCase()))
-    );
-    return sortItems(filtered);
-  }, [translationFiles, searchQuery, sortItems]);
+
 
   const handleCopyLink = useCallback(async (url: string) => {
     try {
@@ -468,23 +458,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({ article, slug, download
       setIsDarkMode(true);
     }
 
-    const fetchData = async (url: string, setter: (data: any) => void, errorMsg: string) => {
-      try {
-        const response = await fetch(url, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json"
-          }
-        });
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-        const data = await response.json();
-        setter(data.links || data.translationFiles || []);
-      } catch {
-        showAlert(errorMsg, "error");
-      }
-    };
 
-    fetchData(`${API_BASE_URL}/api/translation-files/article/${slug}`, setTranslationFiles, t('translation_error'));
 
     const handleResize = () => setIsMobile(window.innerWidth <= 768);
     const handleScroll = () => {
@@ -694,11 +668,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({ article, slug, download
       </div>
 
       <div className="container mx-auto px-4 py-8">
-        <ArticleHeader
-          isTranslated={isTranslated}
-          translationInfo={translationInfo}
-          slug={slug}
-        />
+
         {alert.open && (
           <CustomArticleAlert
             title={alert.severity === "success" ? t("success") : t("error")}
@@ -814,7 +784,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({ article, slug, download
 
                 <MobileArticleInfo article={article} formatDate={formatDate} encodeURLComponent={encodeURLComponent} />
 
-                {(downloads.length > 0 || translationFiles.length > 0) && (
+                {(downloads.length > 0) && (
                   <Card className="md:hidden mt-4">
                     <CardHeader>
                       <CardTitle>{t("downloadsAndTranslations")}</CardTitle>
@@ -825,7 +795,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({ article, slug, download
                         onClick={() => setOpenDownloadDialog(true)}
                       >
                         <Download className="w-5 h-5" /> {t("viewFiles")} (
-                        {downloads.length + translationFiles.length})
+                        {downloads.length})
                       </Button>
                     </CardContent>
                   </Card>
@@ -906,7 +876,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({ article, slug, download
                 handleFavorite={handleFavorite}
                 formatDate={formatDate}
                 downloads={downloads}
-                translationFiles={translationFiles}
+                translationFiles={[]}
                 setOpenDownloadDialog={setOpenDownloadDialog}
                 isDarkBackground={isDarkMode}
               />
@@ -931,13 +901,9 @@ const ArticleContent: React.FC<ArticleContentProps> = ({ article, slug, download
           <Tabs defaultValue="downloads" className="w-full">
             <TabsList className={isMobile ? "flex-col h-auto" : ""}>
               <TabsTrigger value="downloads">{t("downloadFiles")} ({filteredDownloads.length})</TabsTrigger>
-              <TabsTrigger value="translations">{t("translationFiles")} ({filteredTranslationFiles.length})</TabsTrigger>
             </TabsList>
             <TabsContent value="downloads">
               {renderFileItems(filteredDownloads, t("downloadFiles"))}
-            </TabsContent>
-            <TabsContent value="translations">
-              {renderFileItems(filteredTranslationFiles, t("translationFiles"))}
             </TabsContent>
           </Tabs>
         </DialogContent>
