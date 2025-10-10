@@ -1,8 +1,8 @@
 import { Inter } from 'next/font/google';
 import { ToolsClient } from './ToolsClient';
 import Navbar from "@/app/[locale]/components/Navbar";
-import { headers } from 'next/headers';
 import { Tool } from '@/types/tool';
+import { client } from '@/lib/sanity';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -15,69 +15,23 @@ export async function generateMetadata() {
   };
 }
 
+async function getTools(): Promise<Tool[]> {
+  const query = `*[_type == "tool"]{
+    ...,
+    versions[] | order(releaseDate desc)
+  }`;
+  const data = await client.fetch(query);
+  return data;
+}
+
 // Server Component ส่งข้อมูลไปให้ Client Component
 export default async function ToolsPage() {
-  const tools: Tool[] = [
-    {
-      name: 'T++',
-      description: 'เครื่องมือช่วยแปลภาษาเกม ทำให้เกมเข้าถึงผู้เล่นทั่วโลกได้ง่ายขึ้น',
-      link: 'https://dreamsavior.net/download/',
-      icon: 'Globe',
-      os: ['Windows'],
-      pricing: 'free',
-      author: 'DreamSavior',
-      publisher: 'DreamSavior',
-      isOfficial: false,
-    },
-    {
-      name: 'Chanomhub-Desktop',
-      description: 'แพลตฟอร์มสำหรับโหลดและจัดการเกมบนคอมพิวเตอร์ ใช้งานง่าย สะดวกสุดๆ',
-      link: 'https://github.com/Chanomhub/Chanomhub-Desktop/releases',
-      icon: 'Download',
-      os: ['Windows', 'macOS', 'Linux'],
-      pricing: 'free',
-      author: 'CrypticDay',
-      publisher: 'Chanomhub',
-      isOfficial: true,
-    },
-    {
-      name: 'Chanomhub-Multiplatform',
-      description: 'แพลตฟอร์มสำหรับจัดการเกมบนมือถือ รองรับทั้ง iOS และ Android',
-      link: 'https://github.com/Chanomhub/Chanomhub-Multiplatform',
-      icon: 'Smartphone',
-      os: ['Android', 'iOS'],
-      pricing: 'free',
-      author: 'CrypticDay',
-      publisher: 'Chanomhub',
-      isOfficial: true,
-    },
-    {
-      name: 'NST',
-      description: 'เครื่องมือแปลภาษาเกมอีกตัว ช่วยปรับแต่งข้อความในเกมให้หลากหลายภาษา',
-      link: '/nst',
-      icon: 'Globe',
-      os: ['Windows', 'Linux', 'macOS'],
-      pricing: ['free', 'paid'],
-      author: 'CrypticDay',
-      publisher: 'Chanomhub',
-      isOfficial: true,
-    },
-  ];
+  const tools = await getTools();
 
-  // SSR: Detect user's OS from User-Agent to recommend suitable tools
-  const ua = ((await headers()).get('user-agent') || '').toLowerCase();
-  let preferredOS: string | undefined = undefined;
-  if (/android/.test(ua)) preferredOS = 'Android';
-  else if (/iphone|ipad|ipod|ios/.test(ua)) preferredOS = 'iOS';
-  else if (/windows/.test(ua)) preferredOS = 'Windows';
-  else if (/mac os x|macintosh|mac os/.test(ua)) preferredOS = 'macOS';
-  else if (/linux/.test(ua)) preferredOS = 'Linux';
-  else preferredOS = 'Web';
- 
   return (
     <div className={`min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-gray-950 dark:via-gray-950 dark:to-gray-900 ${inter.className}`}>
       <Navbar />
-      <ToolsClient tools={tools} preferredOS={preferredOS} />
+      <ToolsClient tools={tools} />
     </div>
   );
 }

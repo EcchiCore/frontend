@@ -7,6 +7,11 @@ const intlMiddleware = createMiddleware(routing);
 
 // Custom middleware to add logging
 export default function middleware(req: NextRequest) {
+  // Bypass middleware for the studio
+  if (req.nextUrl.pathname.startsWith('/studio')) {
+    return;
+  }
+
   console.log('🔍 Middleware - Incoming request URL:', req.url);
   console.log('🔍 Middleware - Request pathname:', req.nextUrl.pathname);
   console.log('🔍 Middleware - Detected locale from header:', req.headers.get('accept-language'));
@@ -29,6 +34,6 @@ export const config = {
   matcher: [
     '/', // Match the root
     '/(th|en)/:path*', // Match internationalized paths
-    '/((?!api|_next|_vercel|ad-redirect|.*\\..*).*)' // Match all other paths except API, Next.js internals, ad-redirect, and static files
+    '/((?!api|_next|_vercel|ad-redirect|studio|.*\\..*).*)' // Match all other paths except API, Next.js internals, ad-redirect, studio, and static files
   ],
 };

@@ -1,372 +1,362 @@
-"use client";
+'use client';
 
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { ExternalLink, Download, Smartphone, Globe } from 'lucide-react';
-import { motion } from 'framer-motion';
+import {
+  ExternalLink,
+  Download,
+  Smartphone,
+  Globe,
+  Video,
+  XCircle,
+  Star,
+  Calendar,
+  User,
+  Gamepad2,
+  Languages,
+  Wrench,
+  Package,
+  Code,
+  Cpu,
+  Shield,
+  Zap,
+  FileText,
+  Image,
+  Music,
+  Film,
+  MessageSquare,
+  Settings,
+  Box
+} from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Badge } from '@/components/ui/badge';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { JSX, useMemo, useState } from 'react';
+import { Tool, ToolVersion } from '@/types/tool';
+import { Button } from '@/components/ui/button';
 
-import { Tool } from '@/types/tool';
+// Helper function to get YouTube embed URL
+const getYoutubeEmbedUrl = (url: string) => {
+  if (!url) return null;
+  let videoId = null;
+  try {
+    const urlObj = new URL(url);
+    if (urlObj.hostname === 'youtu.be') {
+      videoId = urlObj.pathname.slice(1);
+    } else if (urlObj.hostname.includes('youtube.com')) {
+      videoId = urlObj.searchParams.get('v');
+    }
+  } catch (error) {
+    console.error('Invalid URL for YouTube embed', error);
+    return null;
+  }
 
-export function ToolsClient({ tools, preferredOS }: { tools: Tool[]; preferredOS?: string }) {
-  const iconMap = {
-    Globe: <Globe className="h-10 w-10 text-blue-500" />,
-    Download: <Download className="h-10 w-10 text-green-500" />,
-    Smartphone: <Smartphone className="h-10 w-10 text-purple-500" />,
-  };
+  if (!videoId) return null;
+  return `https://www.youtube.com/embed/${videoId}`;
+};
 
-  // Filters and grouping for focus
-  const [onlyOfficial, setOnlyOfficial] = useState(false);
-  const [pricing, setPricing] = useState<'all' | 'free' | 'paid'>('all');
+// Expanded icon mapping with more options and colors
+const iconMap: { [key: string]: { icon: JSX.Element; color: string } } = {
+  Globe: { icon: <Globe className="h-8 w-8" />, color: 'text-blue-500' },
+  Download: { icon: <Download className="h-8 w-8" />, color: 'text-green-500' },
+  Smartphone: { icon: <Smartphone className="h-8 w-8" />, color: 'text-purple-500' },
+  Gamepad2: { icon: <Gamepad2 className="h-8 w-8" />, color: 'text-pink-500' },
+  Languages: { icon: <Languages className="h-8 w-8" />, color: 'text-indigo-500' },
+  Wrench: { icon: <Wrench className="h-8 w-8" />, color: 'text-orange-500' },
+  Package: { icon: <Package className="h-8 w-8" />, color: 'text-amber-500' },
+  Code: { icon: <Code className="h-8 w-8" />, color: 'text-cyan-500' },
+  Cpu: { icon: <Cpu className="h-8 w-8" />, color: 'text-red-500' },
+  Shield: { icon: <Shield className="h-8 w-8" />, color: 'text-emerald-500' },
+  Zap: { icon: <Zap className="h-8 w-8" />, color: 'text-yellow-500' },
+  FileText: { icon: <FileText className="h-8 w-8" />, color: 'text-slate-500' },
+  Image: { icon: <Image className="h-8 w-8" />, color: 'text-violet-500' },
+  Music: { icon: <Music className="h-8 w-8" />, color: 'text-fuchsia-500' },
+  Film: { icon: <Film className="h-8 w-8" />, color: 'text-rose-500' },
+  MessageSquare: { icon: <MessageSquare className="h-8 w-8" />, color: 'text-sky-500' },
+  Settings: { icon: <Settings className="h-8 w-8" />, color: 'text-gray-500' },
+  Box: { icon: <Box className="h-8 w-8" />, color: 'text-teal-500' },
+};
 
-  const filteredTools = useMemo(() => {
-    const list = tools || [];
-    return list.filter((t) => {
-      if (onlyOfficial && !t.isOfficial) return false;
-      if (pricing === 'all') return true;
-      const ps = Array.isArray(t.pricing) ? t.pricing : (t.pricing ? [t.pricing] : []);
-      return ps.includes(pricing);
-    });
-  }, [tools, onlyOfficial, pricing]);
+// Helper function to get icon component
+const getIconComponent = (iconName: string) => {
+  const iconData = iconMap[iconName] || iconMap['Box'];
+  return (
+    <span className={iconData.color}>
+      {iconData.icon}
+    </span>
+  );
+};
 
-  // Order of OS sections to display
-  const osOrder = ["Windows", "macOS", "Linux", "Android", "iOS", "Web"];
+function ToolCard({ tool, index }: { tool: Tool; index: number }) {
+  const [showVideo, setShowVideo] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+  const [selectedVersionIndex, setSelectedVersionIndex] = useState(0);
 
-  const grouped = osOrder
-    .map((os) => ({ os, items: filteredTools.filter((t) => Array.isArray(t.os) && t.os.includes(os)) }))
-    .filter((g) => g.items.length > 0);
+  const selectedVersion = tool.versions?.[selectedVersionIndex];
+  const youtubeEmbedUrl = selectedVersion?.exampleClip ? getYoutubeEmbedUrl(selectedVersion.exampleClip) : null;
 
-  const byOfficial = (a: Tool, b: Tool) => (a.isOfficial === b.isOfficial ? 0 : a.isOfficial ? -1 : 1);
+  if (!selectedVersion) {
+    return null;
+  }
 
-  const recommendedOS = preferredOS;
-  const recommendedItems = recommendedOS
-    ? filteredTools.filter((t) => Array.isArray(t.os) && t.os.includes(recommendedOS))
-    : [];
-  const recommendedTop = [...recommendedItems].sort(byOfficial).slice(0, 6);
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 30, scale: 0.95 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{
+        duration: 0.5,
+        delay: index * 0.08,
+        type: "spring",
+        stiffness: 100
+      }}
+      onHoverStart={() => setIsHovered(true)}
+      onHoverEnd={() => setIsHovered(false)}
+    >
+      <Card className="group relative border border-gray-200/60 dark:border-gray-800 shadow-lg hover:shadow-2xl transition-all duration-500 bg-white dark:bg-gray-900 rounded-3xl flex flex-col overflow-hidden">
+        {/* Gradient overlay effect on hover */}
+        <motion.div
+          className="absolute inset-0 bg-gradient-to-br from-blue-500/10 via-purple-500/10 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+          animate={isHovered ? { scale: 1.1 } : { scale: 1 }}
+          transition={{ duration: 0.5 }}
+        />
 
-  // Build section items for Jump Nav
-  const sectionItems = useMemo(() => {
-    const items: { id: string; label: string }[] = [];
-    if (recommendedTop.length > 0) items.push({ id: 'recommended', label: 'แนะนำ' });
-    grouped.forEach((g) => items.push({ id: `os-${g.os}`, label: g.os }));
-    return items;
-  }, [recommendedTop, grouped]);
+        {/* Animated border effect */}
+        <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 opacity-0 group-hover:opacity-20 blur-xl transition-opacity duration-500" />
 
-  const navRef = useRef<HTMLDivElement | null>(null);
-  const [navHeight, setNavHeight] = useState(0);
-  useEffect(() => {
-    const measure = () => setNavHeight(navRef.current?.getBoundingClientRect().height || 0);
-    measure();
-    window.addEventListener('resize', measure);
-    return () => window.removeEventListener('resize', measure);
-  }, []);
+        <CardHeader className="relative flex items-start gap-4 p-6 z-10">
+          <motion.span
+            className="inline-flex items-center justify-center h-16 w-16 rounded-2xl bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 border border-gray-200 dark:border-gray-700 shadow-md"
+            whileHover={{ scale: 1.1, rotate: 5 }}
+            transition={{ type: "spring", stiffness: 400, damping: 10 }}
+          >
+            {getIconComponent(tool.icon)}
+          </motion.span>
+          <div className="flex-1">
+            <CardTitle className="text-xl font-bold text-gray-900 dark:text-white mb-2 tracking-tight">
+              {tool.name}
+            </CardTitle>
+            <div className="flex items-center gap-2 flex-wrap">
+              <Badge variant="default" className="bg-gradient-to-r from-blue-500 to-blue-600 border-0 shadow-sm">
+                {selectedVersion.versionNumber}
+              </Badge>
+              {selectedVersionIndex === 0 && (
+                <Badge variant="secondary" className="bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0 shadow-sm">
+                  ใหม่ล่าสุด
+                </Badge>
+              )}
+              {tool.isOfficial && (
+                <Badge variant="secondary" className="bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0 shadow-sm">
+                  <Star className="h-3 w-3 mr-1 fill-white" />
+                  ของเรา
+                </Badge>
+              )}
+            </div>
+          </div>
+        </CardHeader>
 
-  const [activeSection, setActiveSection] = useState<string | null>(sectionItems[0]?.id ?? null);
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setActiveSection(entry.target.id);
-          }
-        });
-      },
-      { rootMargin: `-${navHeight + 24}px 0px -60% 0px` }
-    );
+        <CardContent className="relative flex-1 flex flex-col z-10">
+          <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed mb-6 flex-1">
+            {tool.description}
+          </p>
 
-    const elements = sectionItems
-      .map((s) => document.getElementById(s.id))
-      .filter(Boolean) as HTMLElement[];
+          {/* Version Selector - แสดงเฉพาะเมื่อมีหลายเวอร์ชัน */}
+          {tool.versions && tool.versions.length > 1 && (
+            <div className="mb-6">
+              <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2 block">
+                เลือกเวอร์ชัน:
+              </label>
+              <select
+                value={selectedVersionIndex}
+                onChange={(e) => {
+                  setSelectedVersionIndex(Number(e.target.value));
+                  setShowVideo(false); // ปิดวิดีโอเมื่อเปลี่ยนเวอร์ชัน
+                }}
+                className="w-full px-4 py-2.5 rounded-xl border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300 cursor-pointer hover:border-blue-400"
+              >
+                {tool.versions.map((version, idx) => (
+                  <option key={version._key || idx} value={idx}>
+                    {version.versionNumber}
+                    {idx === 0 && ' (ใหม่ล่าสุด)'}
+                    {version.releaseDate && ` - ${new Date(version.releaseDate).toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric' })}`}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
 
-    elements.forEach((el) => observer.observe(el));
+          {/* Changelog - แสดงเฉพาะเมื่อมี */}
+          {selectedVersion.changelog && (
+            <div className="mb-6 p-4 rounded-xl bg-gradient-to-br  dark:from-gray-800 dark:to-gray-850 border border-blue-200 dark:border-gray-700">
+              <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
+                <Calendar className="h-4 w-4 text-blue-500" />
+                รายละเอียดการอัปเดต
+              </h4>
+              <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-3 whitespace-pre-line">
+                {selectedVersion.changelog}
+              </p>
+            </div>
+          )}
 
-    return () => observer.disconnect();
-  }, [sectionItems, navHeight]);
+          {showVideo && youtubeEmbedUrl && (
+            <div className="mb-4 relative">
+              <div className="aspect-video rounded-2xl overflow-hidden border-2 border-gray-200 dark:border-gray-700 shadow-lg">
+                <iframe
+                  src={youtubeEmbedUrl}
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  title={`Example for ${tool.name}`}
+                  className="w-full h-full"
+                ></iframe>
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute -top-3 -right-3 bg-white dark:bg-gray-800 rounded-full shadow-lg hover:scale-110 transition-transform border border-gray-200 dark:border-gray-700"
+                onClick={() => setShowVideo(false)}
+              >
+                <XCircle className="h-5 w-5 text-gray-700 dark:text-gray-300" />
+              </Button>
+            </div>
+          )}
 
-  const handleNavClick = (id: string) => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    const y = el.getBoundingClientRect().top + window.scrollY - (navHeight + 12);
-    window.scrollTo({ top: y, behavior: 'smooth' });
-  };
+          {/* OS Badges */}
+          <div className="flex flex-wrap gap-2 mb-6">
+            {tool.os?.map((os: string) => (
+              <Badge
+                key={os}
+                variant="outline"
+                className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-medium px-3 py-1"
+              >
+                {os}
+              </Badge>
+            ))}
+          </div>
+
+          {/* Action Buttons */}
+          <div className="mt-auto flex flex-col sm:flex-row gap-3">
+            <motion.a
+              href={selectedVersion.downloadLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 shadow-lg hover:shadow-xl font-semibold"
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <Download className="h-5 w-5" />
+              ดาวน์โหลด
+            </motion.a>
+            {youtubeEmbedUrl && (
+              <motion.div
+                className="flex-1"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <Button
+                  variant="outline"
+                  className="w-full h-full border-2 border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl font-semibold transition-all duration-300"
+                  onClick={() => setShowVideo(!showVideo)}
+                >
+                  <Video className="h-5 w-5 mr-2" />
+                  {showVideo ? 'ซ่อนคลิป' : 'ดูคลิปตัวอย่าง'}
+                </Button>
+              </motion.div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    </motion.div>
+  );
+}
+
+export function ToolsClient({ tools }: { tools: Tool[] }) {
+  const computerPlatforms = ['Windows', 'macOS', 'Linux'];
+  const mobilePlatforms = ['Android', 'iOS'];
+
+  const computerTools = useMemo(() =>
+      tools.filter(tool => tool.os?.some(os => computerPlatforms.includes(os)))
+    , [tools]);
+
+  const mobileTools = useMemo(() =>
+      tools.filter(tool => tool.os?.some(os => mobilePlatforms.includes(os)))
+    , [tools]);
 
   return (
     <main className="container mx-auto px-4 py-12 md:py-20">
-      {/* ส่วนหัวของหน้า */}
       <motion.div
         initial={{ opacity: 0, y: -30 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        className="text-center mb-10 md:mb-16"
+        transition={{ duration: 0.7, type: "spring", stiffness: 100 }}
+        className="text-center mb-12 md:mb-20"
       >
-        <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-gray-900 dark:text-white mb-4">เครื่องมือสุดเจ๋งของเรา</h1>
-        <p className="text-base md:text-lg leading-relaxed text-gray-800 dark:text-gray-300 max-w-3xl mx-auto">
+        <motion.div
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
+          <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-6">
+            เครื่องมือสุดเจ๋งของเรา
+          </h1>
+        </motion.div>
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.4 }}
+          className="text-lg md:text-xl leading-relaxed text-gray-700 dark:text-gray-300 max-w-3xl mx-auto"
+        >
           ค้นพบเครื่องมือที่ช่วยให้คุณจัดการเกม แปลภาษา และใช้งานได้ทุกแพลตฟอร์ม!
-        </p>
+        </motion.p>
       </motion.div>
 
-      {tools?.length === 0 && (
-        <div className="text-center text-gray-500 dark:text-gray-400 mb-8">
-          ยังไม่มีเครื่องมือให้แสดงในขณะนี้
-        </div>
-      )}
-
-      {/* แถบนำทางและตัวกรองแบบติดบน */}
-      {sectionItems.length > 0 && (
-        <div
-          ref={navRef}
-          className="sticky top-16 md:top-20 z-30 -mx-4 px-4 bg-white/80 dark:bg-gray-950/70 backdrop-blur border-y border-gray-200 dark:border-gray-800"
+      {tools.length === 0 && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="text-center text-gray-500 dark:text-gray-400 mb-8 py-20"
         >
-          <div className="py-3 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-            <nav aria-label="ไปยังส่วน" className="flex items-center gap-2 overflow-x-auto">
-              {sectionItems.map((item) => {
-                const isActive = activeSection === item.id;
-                return (
-                  <button
-                    key={item.id}
-                    onClick={() => handleNavClick(item.id)}
-                    className={
-                      (isActive
-                        ? "bg-blue-600 text-white border-blue-600"
-                        : "bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800") +
-                      " px-3 py-1.5 rounded-full text-sm font-medium border transition-colors"
-                    }
-                    aria-current={isActive ? "page" : undefined}
-                  >
-                    {item.label}
-                  </button>
-                );
-              })}
-            </nav>
-
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setOnlyOfficial((v) => !v)}
-                className={
-                  (onlyOfficial
-                    ? "bg-emerald-600 text-white border-emerald-600"
-                    : "bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800") +
-                  " px-3 py-1.5 rounded-full text-sm font-medium border transition-colors"
-                }
-                aria-pressed={onlyOfficial}
-              >
-                ของเราเท่านั้น
-              </button>
-
-              {(["all", "free", "paid"] as const).map((key) => (
-                <button
-                  key={key}
-                  onClick={() => setPricing(key)}
-                  className={
-                    (pricing === key
-                      ? key === "all"
-                        ? "bg-slate-700 text-white border-slate-700"
-                        : key === "free"
-                        ? "bg-green-600 text-white border-green-600"
-                        : "bg-orange-600 text-white border-orange-600"
-                      : "bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-200 border-gray-300 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800") +
-                    " px-3 py-1.5 rounded-full text-sm font-medium border transition-colors"
-                  }
-                  aria-pressed={pricing === key}
-                >
-                  {key === "all" ? "ทั้งหมด" : key === "free" ? "ฟรี" : "เสียเงิน"}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
+          <div className="text-6xl mb-4">🔧</div>
+          <p className="text-xl">ยังไม่มีเครื่องมือให้แสดงในขณะนี้</p>
+        </motion.div>
       )}
 
-      {filteredTools.length === 0 && (
-        <div className="text-center text-gray-500 dark:text-gray-400 my-10">
-          ไม่มีเครื่องมือที่ตรงกับตัวกรอง
-        </div>
-      )}
-
-      {/* แนะนำสำหรับเครื่องของคุณ */}
-      {recommendedTop.length > 0 && (
-        <section aria-labelledby="recommended">
-          <div className="mb-3 flex items-center gap-3">
-            <h2 id="recommended" className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
-              แนะนำสำหรับเครื่องของคุณ
+      {computerTools.length > 0 && (
+        <motion.section
+          className="mb-20"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+        >
+          <div className="flex items-center gap-3 mb-8">
+            <div className="h-1 w-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full" />
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">
+              เครื่องมือสำหรับคอมพิวเตอร์
             </h2>
-            {recommendedOS && (
-              <Badge variant="outline" className="border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300">
-                {recommendedOS}
-              </Badge>
-            )}
           </div>
-          <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">คัดมาให้จากอุปกรณ์ของคุณ — ใช้แถบด้านบนเพื่อกรองหรือข้ามไปยังส่วนที่ต้องการ</p>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {recommendedTop.map((tool, index) => (
-              <motion.div
-                key={`rec-${index}`}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: index * 0.05 }}
-              >
-                <Card className="group border border-gray-200/60 dark:border-gray-800 shadow-md hover:shadow-xl transition-all duration-300 bg-white dark:bg-gray-900 rounded-2xl">
-                  <CardHeader className="flex items-start gap-4 p-6">
-                    <span className="inline-flex items-center justify-center h-14 w-14 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-                      {iconMap[tool.icon] || iconMap['Globe']}
-                    </span>
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <CardTitle className="text-2xl font-semibold text-gray-900 dark:text-white">
-                        {tool.name}
-                      </CardTitle>
-                      {(Array.isArray(tool.pricing) ? tool.pricing : (tool.pricing ? [tool.pricing] : [])).map((p: string, pi: number) => (
-                        <Badge
-                          key={`rec-pricing-${pi}`}
-                          variant={p === 'free' ? 'success' : 'warning'}
-                          aria-label={p === 'free' ? 'ฟรี' : 'เสียเงิน'}
-                        >
-                          {p === 'free' ? 'ฟรี' : 'เสียเงิน'}
-                        </Badge>
-                      ))}
-                      {tool.isOfficial && (
-                        <Badge variant="secondary" aria-label="ของเรา">ของเรา</Badge>
-                      )}
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-gray-800 dark:text-gray-300 text-base leading-relaxed mb-4">{tool.description}</p>
-
-                    {(tool.author || tool.publisher) && (
-                      <div className="flex flex-wrap gap-2 mb-4">
-                        {tool.author && (
-                          <Badge variant="outline" className="border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300">
-                            ผู้สร้าง: {tool.author}
-                          </Badge>
-                        )}
-                        {tool.publisher && tool.publisher !== tool.author && (
-                          <Badge variant="outline" className="border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300">
-                            ผู้เผยแพร่: {tool.publisher}
-                          </Badge>
-                        )}
-                      </div>
-                    )}
-
-                    {Array.isArray(tool.os) && tool.os.length > 0 && (
-                      <div className="flex flex-wrap gap-2 mb-6">
-                        {tool.os.map((os: string) => (
-                          <Badge key={`rec-${index}-${os}`} variant="outline" className="border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300">
-                            {os}
-                          </Badge>
-                        ))}
-                      </div>
-                    )}
-
-                    {tool.link !== '#' ? (
-                      <a
-                        href={tool.link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        aria-label={`เปิดลิงก์ ${tool.name}`}
-                        className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-400 active:bg-blue-800 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:focus-visible:ring-blue-400 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900"
-                      >
-                        <ExternalLink className="h-5 w-5 mr-2" />
-                        ไปที่ {tool.name}
-                      </a>
-                    ) : (
-                      <span className="text-gray-500 dark:text-gray-400 italic text-sm">กำลังพัฒนา...</span>
-                    )}
-                  </CardContent>
-                </Card>
-              </motion.div>
+            {computerTools.map((tool, index) => (
+              <ToolCard key={tool._id || index} tool={tool} index={index} />
             ))}
           </div>
-        </section>
+        </motion.section>
       )}
 
-      {/* จัดหมวดหมู่ตาม OS */}
-      <div className="space-y-14">
-        {grouped.map((group, gi) => (
-          <section key={group.os} aria-labelledby={`os-${group.os}`} className="mt-14 pt-6 border-t border-gray-200 dark:border-gray-800">
-            <h2 id={`os-${group.os}`} className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-6">
-              {group.os}
+      {mobileTools.length > 0 && (
+        <motion.section
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.5 }}
+        >
+          <div className="flex items-center gap-3 mb-8">
+            <div className="h-1 w-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full" />
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">
+              เครื่องมือสำหรับมือถือ
             </h2>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {[...group.items].sort(byOfficial).map((tool, index) => (
-                <motion.div
-                  key={`${group.os}-${index}`}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4, delay: (gi * 0.1) + index * 0.05 }}
-                >
-                  <Card className="group border border-gray-200/60 dark:border-gray-800 shadow-md hover:shadow-xl transition-all duration-300 bg-white dark:bg-gray-900 rounded-2xl">
-                    <CardHeader className="flex items-start gap-4 p-6">
-                      <span className="inline-flex items-center justify-center h-14 w-14 rounded-xl bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-                        {iconMap[tool.icon] || iconMap['Globe']}
-                      </span>
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <CardTitle className="text-2xl font-semibold text-gray-900 dark:text-white">
-                          {tool.name}
-                        </CardTitle>
-                        {(Array.isArray(tool.pricing) ? tool.pricing : (tool.pricing ? [tool.pricing] : [])).map((p: string, pi: number) => (
-                          <Badge
-                            key={`pricing-${pi}`}
-                            variant={p === 'free' ? 'success' : 'warning'}
-                            aria-label={p === 'free' ? 'ฟรี' : 'เสียเงิน'}
-                          >
-                            {p === 'free' ? 'ฟรี' : 'เสียเงิน'}
-                          </Badge>
-                        ))}
-                        {tool.isOfficial && (
-                          <Badge variant="secondary" aria-label="ของเรา">ของเรา</Badge>
-                        )}
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-gray-800 dark:text-gray-300 text-base leading-relaxed mb-4">{tool.description}</p>
-
-                      {(tool.author || tool.publisher) && (
-                        <div className="flex flex-wrap gap-2 mb-4">
-                          {tool.author && (
-                            <Badge variant="outline" className="border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300">
-                              ผู้สร้าง: {tool.author}
-                            </Badge>
-                          )}
-                          {tool.publisher && tool.publisher !== tool.author && (
-                            <Badge variant="outline" className="border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300">
-                              ผู้เผยแพร่: {tool.publisher}
-                            </Badge>
-                          )}
-                        </div>
-                      )}
-
-                      {Array.isArray(tool.os) && tool.os.length > 0 && (
-                        <div className="flex flex-wrap gap-2 mb-6">
-                          {tool.os.map((os: string) => (
-                            <Badge key={os} variant="outline" className="border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300">
-                              {os}
-                            </Badge>
-                          ))}
-                        </div>
-                      )}
-
-                      {tool.link !== '#' ? (
-                        <a
-                          href={tool.link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          aria-label={`เปิดลิงก์ ${tool.name}`}
-                          className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-400 active:bg-blue-800 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:focus-visible:ring-blue-400 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900"
-                        >
-                          <ExternalLink className="h-5 w-5 mr-2" />
-                          ไปที่ {tool.name}
-                        </a>
-                      ) : (
-                        <span className="text-gray-500 dark:text-gray-400 italic text-sm">กำลังพัฒนา...</span>
-                      )}
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              ))}
-            </div>
-          </section>
-        ))}
-      </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {mobileTools.map((tool, index) => (
+              <ToolCard key={tool._id || index} tool={tool} index={index} />
+            ))}
+          </div>
+        </motion.section>
+      )}
     </main>
   );
 }

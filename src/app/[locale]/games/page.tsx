@@ -9,23 +9,20 @@ export const metadata = {
   description: "ค้นหาและสำรวจเกมที่คุณชื่นชอบ",
 }
 
-export const experimental_ppr = true
 export const revalidate = 3600
 
 type PageProps = {
-  searchParams: { [key: string]: string | string[] | undefined }
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }
 
-export default function GamesPage({ searchParams }: PageProps) {
-  const params = searchParams
+export default async function GamesPage({ searchParams }: PageProps) {
+  const params = await searchParams
 
   return (
     <>
       <Navbar />
       <div className="min-h-screen bg-background">
         <div className="container mx-auto px-4 py-8 space-y-8">
-
-
           <section className="space-y-6">
             <SearchControls />
 
