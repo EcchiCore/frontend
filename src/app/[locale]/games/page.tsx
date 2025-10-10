@@ -1,45 +1,40 @@
-// ===============================
-// app/games/page.tsx (Route entry with PPR + streaming)
-// ===============================
-import { Suspense } from "react";
-import Results from "./components/Results";
-import SearchControls from "./components/SearchControls";
-import ResultsSkeleton from "./components/ResultsSkeleton";
-import Navbar from "../components/Navbar";
+import { Suspense } from "react"
+import Results from "./components/Results"
+import SearchControls from "./components/SearchControls"
+import ResultsSkeleton from "./components/ResultsSkeleton"
+import Navbar from "../components/Navbar"
 
 export const metadata = {
-  title: "Games | ChanomHub",
-};
+  title: "เกม | ChanomHub",
+  description: "ค้นหาและสำรวจเกมที่คุณชื่นชอบ",
+}
 
-// ✅ Opt-in Partial Prerendering for this segment
-export const experimental_ppr = true;
-
-// Optional: ensuring the outer shell is static-friendly
-export const revalidate = 3600; // cache shell for 1 hour (dynamic holes still stream)
+export const experimental_ppr = true
+export const revalidate = 3600
 
 type PageProps = {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
-};
+  searchParams: { [key: string]: string | string[] | undefined }
+}
 
-export default async function GamesPage({ searchParams }: PageProps) {
-  // Await the searchParams since it's a Promise with PPR
-  const params = await searchParams;
+export default function GamesPage({ searchParams }: PageProps) {
+  const params = searchParams
 
-  // Note: static shell (header/filters), dynamic list streams inside Suspense
   return (
     <>
       <Navbar />
-      <div className=" mx-auto px-4 py-6 space-y-6 bg-background ">
-        <section className="container mx-auto">
-        {/* Client-side filters that update the URL (and thus stream new results) */}
-        <SearchControls />
+      <div className="min-h-screen bg-background">
+        <div className="container mx-auto px-4 py-8 space-y-8">
 
-        <Suspense fallback={<ResultsSkeleton />}> 
-          {/* Server Component that fetches using current search params */}
-          <Results searchParams={params} />
-        </Suspense>
-        </section>
+
+          <section className="space-y-6">
+            <SearchControls />
+
+            <Suspense fallback={<ResultsSkeleton />}>
+              <Results searchParams={params} />
+            </Suspense>
+          </section>
+        </div>
       </div>
     </>
-  );
+  )
 }

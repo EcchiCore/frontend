@@ -50,7 +50,7 @@ export async function fetchArticles(params: Record<string, string | string[] | u
   // Check for null or undefined before using Object.entries
   if (resolvedParams) {
     Object.entries(resolvedParams).forEach(([k, v]) => {
-      if (typeof v === "string" && v.length) usp.set(k, v);
+      if (typeof v === "string" && v) usp.set(k, v);
       else if (Array.isArray(v)) v.forEach((vv) => vv && usp.append(k, vv));
     });
   }
@@ -62,6 +62,9 @@ export async function fetchArticles(params: Record<string, string | string[] | u
   usp.set("limit", String(pageSize));
   usp.set("offset", String(offset));
   usp.delete("pageSize");
+
+  // Force status to PUBLISHED
+  usp.set("status", "PUBLISHED");
 
   const url = `${API_BASE}/api/articles?${usp.toString()}`;
   console.log('Fetching articles from:', url);
