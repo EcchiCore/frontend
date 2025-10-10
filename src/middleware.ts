@@ -29,7 +29,7 @@ export const config = {
   matcher: [
     '/', // Match the root
     '/(th|en)/:path*', // Match internationalized paths
-    '/((?!api|_next|_vercel|ad-redirect|.*\\..*).*)' // Match all other paths except API, Next.js internals, ad-redirect, and static files
+    '/((?!api|_next|studio|_vercel|ad-redirect|.*\\..*).*)' // Match all other paths except API, Next.js internals, ad-redirect, and static files
   ],
 };
 
