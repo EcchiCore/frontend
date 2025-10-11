@@ -127,14 +127,11 @@
     "sanity": "^4.10.2",
     "shadcn": "^2.10.0",
     "shadcn-ui": "^0.9.5",
-    "sitemap": "^8.0.0",
     "slick-carousel": "^1.8.1",
     "sonner": "^2.0.7",
     "swr": "^2.3.6",
     "tailwind-merge": "^3.3.1",
     "tailwindcss-animate": "^1.0.7",
-    "xml": "^1.0.1",
-    "xmlbuilder2": "^3.1.1",
     "zod": "^3.25.76"
   },
   "devDependencies": {
