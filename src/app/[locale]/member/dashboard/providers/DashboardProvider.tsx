@@ -22,7 +22,7 @@ const getPageFromHash = (): PageType => {
     return 'profile';
   }
   const hash = window.location.hash.replace('#', '') as PageType;
-  const validPages: PageType[] = ['profile', 'articles', 'moderation', 'settings'];
+  const validPages: PageType[] = ['profile', 'articles', 'subscriptions', 'wallet', 'moderation', 'settings'];
   if (validPages.includes(hash)) {
     return hash;
   }

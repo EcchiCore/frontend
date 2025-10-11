@@ -1,5 +1,15 @@
 import { API_URL } from './constants';
-import { UserResponse, ArticlesResponse, Article, DashboardUser, Token, PasswordUpdateData } from './types';
+import {
+  UserResponse,
+  ArticlesResponse,
+  Article,
+  DashboardUser,
+  Token,
+  PasswordUpdateData,
+  Subscription,
+  SubscriptionPlan,
+  RedeemTrueMoneyRequest,
+} from './types';
 
 export const getCookie = (name: string): string | null => {
   if (typeof document === 'undefined') return null;
@@ -138,5 +148,27 @@ export const articlesApi = {
     apiRequest<void>(`/api/articles/${slug}/publish-request`, {
       method: 'POST',
       body: JSON.stringify({}),
+    }),
+};
+
+export const subscriptionApi = {
+  listPlans: () => apiRequest<SubscriptionPlan[]>('/api/subscriptions/plans'),
+  getUserSubscriptions: () => apiRequest<Subscription[]>('/api/subscriptions'),
+  createSubscription: (planId: string) =>
+    apiRequest<Subscription>('/api/subscriptions', {
+      method: 'POST',
+      body: JSON.stringify({ planId }),
+    }),
+  cancelSubscription: (id: number | string) =>
+    apiRequest<Subscription>(`/api/subscriptions/${id}`, {
+      method: 'DELETE',
+    }),
+};
+
+export const walletApi = {
+  redeemTrueMoney: (data: RedeemTrueMoneyRequest) =>
+    apiRequest<{ success?: boolean; message?: string; points?: number }>('/api/wallet/truemoney/redeem', {
+      method: 'POST',
+      body: JSON.stringify(data),
     }),
 };

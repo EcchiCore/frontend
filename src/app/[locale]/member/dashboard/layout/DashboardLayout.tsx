@@ -9,6 +9,8 @@ import { ArticlesPage } from '../pages/ArticlesPage';
 import { ProfilePage } from '../pages/ProfilePage';
 import SettingsPage from '../pages/SettingsPage';
 import { ModerationPage } from '../pages/ModerationPage';
+import { SubscriptionsPage } from '../pages/SubscriptionsPage';
+import { WalletPage } from '../pages/WalletPage';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -60,6 +62,10 @@ export const DashboardLayoutShadcn: React.FC<DashboardLayoutProps> = ({ title })
         return <ProfilePage />;
       case 'articles':
         return <ArticlesPage />;
+      case 'subscriptions':
+        return <SubscriptionsPage />;
+      case 'wallet':
+        return <WalletPage />;
       case 'settings':
         return <SettingsPage />;
       case 'moderation':

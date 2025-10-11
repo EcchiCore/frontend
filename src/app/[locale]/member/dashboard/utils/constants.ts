@@ -16,6 +16,18 @@ export const NAVIGATION_ITEMS: NavigationItem[] = [
     path: '#articles'
   },
   {
+    id: 'subscriptions',
+    label: 'Subscriptions',
+    icon: 'CreditCard',
+    path: '#subscriptions'
+  },
+  {
+    id: 'wallet',
+    label: 'Wallet',
+    icon: 'Wallet',
+    path: '#wallet'
+  },
+  {
     id: 'moderation',
     label: 'Moderate Content',
     icon: 'Shield',

@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { User, FileText, Shield, Settings } from 'lucide-react';
+import { User, FileText, Shield, Settings, CreditCard, Wallet } from 'lucide-react';
 import { useDashboard } from '../providers/DashboardProvider';
 import { useAuthContext } from '../providers/AuthProvider';
 import { NAVIGATION_ITEMS } from '../utils/constants';
@@ -12,6 +12,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 const iconMap = {
   User,
   FileText,
+  CreditCard,
+  Wallet,
   Shield,
   Settings,
 };
