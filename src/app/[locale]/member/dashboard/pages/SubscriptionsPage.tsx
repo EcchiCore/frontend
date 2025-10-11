@@ -150,6 +150,10 @@ export const SubscriptionsPage: React.FC = () => {
         {plans.map((plan) => {
           const active = subscriptions.find((subscription) => subscription.planId === plan.planId && subscription.status === 'ACTIVE');
           const isProcessing = actionTarget === plan.planId || actionTarget === `cancel-${active?.id}`;
+          const planDescription =
+            typeof plan.description === 'string' && plan.description.trim().length > 0
+              ? plan.description
+              : 'No description provided.';
 
           return (
             <Card key={plan.planId} className="flex flex-col justify-between">
@@ -161,7 +165,7 @@ export const SubscriptionsPage: React.FC = () => {
                   </Badge>
                 </CardTitle>
                 <CardDescription className="text-muted-foreground">
-                  {plan.description || 'No description provided.'}
+                  {planDescription}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">

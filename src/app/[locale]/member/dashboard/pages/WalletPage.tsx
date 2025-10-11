@@ -16,9 +16,33 @@ export const WalletPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
 
+  const extractVoucherCode = (value: string) => {
+    const trimmed = value.trim();
+    if (!trimmed) return '';
+
+    try {
+      const url = new URL(trimmed);
+      const codeFromUrl = url.searchParams.get('v') || url.searchParams.get('voucher');
+      if (codeFromUrl) {
+        return codeFromUrl.trim();
+      }
+    } catch {
+      // Not a full URL, continue with pattern matching below
+    }
+
+    const directMatch = trimmed.match(/([?&]v=|v=)([^&\s]+)/i);
+    if (directMatch && directMatch[2]) {
+      return directMatch[2];
+    }
+
+    return trimmed;
+  };
+
   const handleRedeem = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!voucherCode.trim()) {
+    const normalizedCode = extractVoucherCode(voucherCode);
+
+    if (!normalizedCode) {
       setError('Please enter a voucher code.');
       return;
     }
@@ -28,7 +52,8 @@ export const WalletPage: React.FC = () => {
     setMessage(null);
 
     try {
-      const response = await walletApi.redeemTrueMoney({ voucherCode: voucherCode.trim() });
+      setVoucherCode(normalizedCode);
+      const response = await walletApi.redeemTrueMoney({ voucherCode: normalizedCode });
       const successMessage = response?.message || 'Voucher redeemed successfully.';
       setMessage(successMessage);
       setVoucherCode('');
@@ -79,7 +104,7 @@ export const WalletPage: React.FC = () => {
               </label>
               <Input
                 id="voucher-code"
-                placeholder="e.g. ABC123DEF456"
+                placeholder="Paste code or full TrueMoney link"
                 value={voucherCode}
                 onChange={(event) => setVoucherCode(event.target.value)}
                 disabled={loading}
