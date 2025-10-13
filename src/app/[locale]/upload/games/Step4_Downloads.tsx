@@ -17,6 +17,9 @@ export const Step4_Downloads = ({ formData, setFormData }: Step4_DownloadsProps)
   const [sourceUrl, setSourceUrl] = useState('');
   const [downloadUrlError, setDownloadUrlError] = useState('');
   const [sourceUrlError, setSourceUrlError] = useState('');
+  const [purchaseName, setPurchaseName] = useState('');
+  const [purchaseUrl, setPurchaseUrl] = useState('');
+  const [purchaseUrlError, setPurchaseUrlError] = useState('');
 
   const isValidUrl = (url: string) => {
     try {
@@ -51,12 +54,34 @@ export const Step4_Downloads = ({ formData, setFormData }: Step4_DownloadsProps)
     setSourceUrl('');
   };
 
+  const handleAddPurchaseSource = () => {
+    if (!purchaseName || !isValidUrl(purchaseUrl)) {
+      if (!isValidUrl(purchaseUrl)) setPurchaseUrlError('URL must be a valid HTTP or HTTPS URL');
+      return;
+    }
+    setPurchaseUrlError('');
+
+    setFormData((prev: Record<string, any>) => ({
+      ...prev,
+      authorizedPurchaseSources: [...(prev.authorizedPurchaseSources || []), { name: purchaseName, url: purchaseUrl }],
+    }));
+    setPurchaseName('');
+    setPurchaseUrl('');
+  };
+
   const handleRemoveDownload = (indexToRemove: number) => {
     setFormData((prev: Record<string, any>) => ({ ...prev, downloads: prev.downloads.filter((_: any, index: number) => index !== indexToRemove) }));
   };
 
   const handleRemoveSource = (indexToRemove: number) => {
     setFormData((prev: Record<string, any>) => ({ ...prev, sources: prev.sources.filter((_: any, index: number) => index !== indexToRemove) }));
+  };
+
+  const handleRemovePurchaseSource = (indexToRemove: number) => {
+    setFormData((prev: Record<string, any>) => ({
+      ...prev,
+      authorizedPurchaseSources: (prev.authorizedPurchaseSources || []).filter((_: any, index: number) => index !== indexToRemove),
+    }));
   };
 
   return (
@@ -108,6 +133,31 @@ export const Step4_Downloads = ({ formData, setFormData }: Step4_DownloadsProps)
             {sourceUrlError && <p className="text-red-500 text-sm mt-1">{sourceUrlError}</p>}
           </div>
           <Button onClick={handleAddSource}>Add</Button>
+        </div>
+      </div>
+
+      <div>
+        <h3 className="text-lg font-medium">Authorized Purchase Sources</h3>
+        <div className="space-y-4 mt-4">
+          {formData.authorizedPurchaseSources?.map((purchaseSource: { name: string, url: string }, index: number) => (
+            <div key={index} className="flex items-center gap-4">
+              <Input value={purchaseSource.name} disabled />
+              <Input value={purchaseSource.url} disabled />
+              <Button variant="destructive" onClick={() => handleRemovePurchaseSource(index)}>Remove</Button>
+            </div>
+          ))}
+        </div>
+        <div className="flex items-end gap-4 mt-4">
+          <div className="w-full">
+            <Label htmlFor="purchaseSourceName">Name</Label>
+            <Input id="purchaseSourceName" value={purchaseName} onChange={(e: { target: { value: string } }) => setPurchaseName(e.target.value)} />
+          </div>
+          <div className="w-full">
+            <Label htmlFor="purchaseSourceUrl">URL</Label>
+            <Input id="purchaseSourceUrl" value={purchaseUrl} onChange={(e: { target: { value: string } }) => setPurchaseUrl(e.target.value)} />
+            {purchaseUrlError && <p className="text-red-500 text-sm mt-1">{purchaseUrlError}</p>}
+          </div>
+          <Button onClick={handleAddPurchaseSource}>Add</Button>
         </div>
       </div>
     </div>

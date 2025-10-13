@@ -103,6 +103,19 @@ export default function GameUploadForm() {
         }
       }
 
+      if (formData.authorizedPurchaseSources) {
+        for (const purchaseSource of formData.authorizedPurchaseSources) {
+          await fetch(`/${locale}/api/authorized-purchase-sources`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`,
+            },
+            body: JSON.stringify({ ...purchaseSource, articleId }),
+          });
+        }
+      }
+
       alert('Game uploaded successfully!');
     } catch (error) {
       console.error('Upload error:', error);

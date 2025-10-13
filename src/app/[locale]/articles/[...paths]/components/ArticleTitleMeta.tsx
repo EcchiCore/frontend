@@ -321,15 +321,15 @@ const ArticleTitleMeta: React.FC<ArticleTitleMetaProps> = ({ article, isDarkMode
           )}
         </div>
 
-        {/* Thumbnail Grid */}
+        {/* Thumbnail */}
         {imageCount > 1 && (
-          <div className="space-y-4">
-            <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 xl:grid-cols-12 gap-3">
+          <div className="space-y-4 ">
+            <div className="flex flex-wrap gap-3">
               {article.images.map((image, index) => (
                 <button
                   key={index}
                   onClick={() => handleThumbnailSelect(index)}
-                  className={styles.thumbnail(selectedImageIndex === index)}
+                  className={`${styles.thumbnail(selectedImageIndex === index)} w-20 sm:w-24 md:w-28 lg:w-32 xl:w-36`}
                 >
                   <Image
                     src={getImageSrc(image, index)}
