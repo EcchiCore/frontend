@@ -26,6 +26,8 @@ const ArticleTitleMeta: React.FC<ArticleTitleMetaProps> = ({ article, isDarkMode
   // Memoized values
   const hasImages = useMemo(() => article.images && article.images.length > 0, [article.images])
   const imageCount = useMemo(() => article.images?.length || 0, [article.images])
+  const subtitleClass = `text-sm sm:text-base font-medium ${isDarkMode ? "text-gray-300" : "text-gray-700"}`
+  const subtitleValueClass = `${isDarkMode ? "text-white" : "text-gray-900"} font-semibold`
 
   // Combined style classes
   const styles = useMemo(() => ({
@@ -221,7 +223,12 @@ const ArticleTitleMeta: React.FC<ArticleTitleMetaProps> = ({ article, isDarkMode
     return (
       <div className="mb-12">
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-8">
-          <h1 className={`${styles.title} text-2xl sm:text-3xl flex-1`}>{article.title}</h1>
+          <div className="flex-1 space-y-2">
+            <h1 className={`${styles.title} text-2xl sm:text-3xl`}>{article.title}</h1>
+            {article.creator && (
+              <p className={subtitleClass}>Creator / Studio: <span className={subtitleValueClass}>{article.creator}</span></p>
+            )}
+          </div>
           {article.sequentialCode && (
             <div className={styles.badge}>
               <Star className="w-4 h-4 mr-2" />
@@ -239,6 +246,9 @@ const ArticleTitleMeta: React.FC<ArticleTitleMetaProps> = ({ article, isDarkMode
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-6 mb-10">
         <div className="flex-1">
           <h1 className={`${styles.title} mb-4`}>{article.title}</h1>
+          {article.creator && (
+            <p className={`${subtitleClass} mb-2`}>Creator / Studio: <span className={subtitleValueClass}>{article.creator}</span></p>
+          )}
           <div className="flex items-center gap-4">
             <span className={`text-sm font-medium ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
               {imageCount} {imageCount === 1 ? "Image" : "Images"}

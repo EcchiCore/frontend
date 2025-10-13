@@ -45,6 +45,7 @@ interface Article {
   slug: string;
   description: string;
   body: string;
+  creator: string | null;
   author: Author;
   favorited: boolean;
   favoritesCount: number;
@@ -229,6 +230,7 @@ const EditArticlePage: React.FC = () => {
     slug: '',
     description: '',
     body: '',
+    creator: '',
     favorited: false,
     favoritesCount: 0,
     status: 'DRAFT',
@@ -284,7 +286,7 @@ const EditArticlePage: React.FC = () => {
       const coverId = art.coverImage ? items.find(i => i.url === art.coverImage)?.id ?? null : null;
 
       setImageItems(items);
-      setArticle({ ...art, mainImageId: mainId, backgroundImageId: backgroundId, coverImageId: coverId });
+      setArticle({ ...art, creator: art.creator ?? '', mainImageId: mainId, backgroundImageId: backgroundId, coverImageId: coverId });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An unknown error occurred');
     } finally {
@@ -350,7 +352,7 @@ const EditArticlePage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!article.title || !article.description || !article.body) {
+    if (!article.title || !article.description || !article.body || !article.creator) {
       setError('Please fill in all required fields.');
       return;
     }
@@ -447,6 +449,11 @@ const EditArticlePage: React.FC = () => {
                         <div>
                           <Label htmlFor="title" className="text-sm font-medium">Title <span className="text-red-500">*</span></Label>
                           <Input id="title" name="title" value={article.title || ''} onChange={handleInputChange} placeholder="Enter article title" className="mt-1" required />
+                        </div>
+
+                        <div>
+                          <Label htmlFor="creator" className="text-sm font-medium">Creator / Studio <span className="text-red-500">*</span></Label>
+                          <Input id="creator" name="creator" value={article.creator || ''} onChange={handleInputChange} placeholder="Enter creator or studio" className="mt-1" required />
                         </div>
 
                         <div>

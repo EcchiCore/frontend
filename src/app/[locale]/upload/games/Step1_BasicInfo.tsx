@@ -3,7 +3,6 @@
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import dynamic from 'next/dynamic';
 
@@ -24,10 +23,6 @@ export const Step1_BasicInfo = ({ formData, setFormData }: Step1_BasicInfoProps)
   const handleChange = (e: { target: { id: string; value: string } }) => {
     setFormData(prev => ({ ...prev, [e.target.id]: e.target.value }));
   };
-
-  const handleSelectChange = (id: string, value: string) => {
-    setFormData(prev => ({ ...prev, [id]: value }));
-  }
 
   const handleBodyChange = (html: string) => {
     setFormData(prev => ({ ...prev, body: html }));
@@ -51,6 +46,13 @@ export const Step1_BasicInfo = ({ formData, setFormData }: Step1_BasicInfoProps)
           <Label htmlFor="title">Game Title</Label>
           <Input id="title" value={formData.title || ''} onChange={handleChange} placeholder="Enter your game's title" required />
         </div>
+        <div className="space-y-2">
+          <Label htmlFor="creator">Creator / Studio</Label>
+          <Input id="creator" value={formData.creator || ''} onChange={handleChange} placeholder="Enter the creator or studio" required />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
           <Label htmlFor="version">Version</Label>
           <Input id="version" value={formData.version || ''} onChange={handleChange} placeholder="e.g., 1.0.0" />

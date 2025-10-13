@@ -392,6 +392,9 @@
     "searchPlaceholder": "searchPlaceholder",
     "downloadFiles": "downloadFiles",
     "copy": "copy",
+    "copyLink": "Copy link",
+    "copyLinkError": "Unable to copy link",
+    "linkCopied": "Link copied",
     "translationFiles": "translationFiles",
     "sortByDate": "sortByDate",
     "sortByName":  "sortByName",
@@ -453,6 +456,7 @@
       "title": "Article information",
       "published": "Published",
       "updated": "Updated",
+      "creator": "Creator / Studio",
       "engine": "Engine",
       "status": "Status",
       "version": "Edited"

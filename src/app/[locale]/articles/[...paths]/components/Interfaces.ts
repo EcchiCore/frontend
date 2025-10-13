@@ -17,6 +17,7 @@ export interface Article {
   tagList: string[];
   categoryList: string[];
   platformList: string[];
+  creator?: string;
   author: {
     username: string;
     bio: any;

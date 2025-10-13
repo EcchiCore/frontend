@@ -34,7 +34,7 @@ const PLACEHOLDER_IMAGE = '/placeholder-image.png';
 
 import { useDebounce } from "./Debounce";
 import { Download, CalendarDays, Folder, User, Info, Check, Clipboard, Search, Clock, Tag, Cpu } from "lucide-react";
-import { Button, Card, CardContent, CardHeader, CardTitle, Input, Dialog, DialogContent, Tabs, TabsList, TabsTrigger, TabsContent, Select, SelectTrigger, SelectValue, SelectContent, SelectItem, Badge } from "@/components/ui"; // Adjust import based on your UI library
+import { Button, Card, CardContent, CardHeader, CardTitle, Input, Dialog, DialogContent, DialogTitle, Tabs, TabsList, TabsTrigger, TabsContent, Select, SelectTrigger, SelectValue, SelectContent, SelectItem, Badge } from "@/components/ui"; // Adjust import based on your UI library
 import cn from 'classnames';
 import { useTranslations } from 'next-intl';
 import { TextAlign } from "@tiptap/extension-text-align";
@@ -65,6 +65,15 @@ const MobileArticleInfo: React.FC<{ article: Article, formatDate: (date: string)
             </div>
             <span className="text-sm font-semibold">{formatDate(article.updatedAt)}</span>
           </div>
+          {article.creator && (
+            <div className="flex justify-between items-center">
+              <div className="flex items-center gap-2">
+                <User className="w-4 h-4 text-muted-foreground" />
+                <span className="text-sm text-muted-foreground">{t("articleInfo.creator")}:</span>
+              </div>
+              <span className="text-sm font-semibold text-right max-w-[60%] truncate">{article.creator}</span>
+            </div>
+          )}
           {article.engine && (
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-2">
@@ -887,6 +896,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({ article, slug, download
 
       <Dialog open={openDownloadDialog} onOpenChange={setOpenDownloadDialog}>
         <DialogContent className={isMobile ? "max-w-[95vw] h-[80vh] overflow-y-auto" : "max-w-6xl"}>
+          <DialogTitle className="sr-only">{t("downloadsAndTranslations")}</DialogTitle>
 
           <div className="relative mb-4">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 size-5 text-gray-500" />

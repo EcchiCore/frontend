@@ -70,6 +70,7 @@ export async function POST(request: NextRequest) {
       description,
       body,
       ver,
+      creator,
       engine,
       tags,
       categories,
@@ -84,6 +85,7 @@ export async function POST(request: NextRequest) {
     if (!title) missingFields.push('title');
     if (!coverImage) missingFields.push('coverImage');
     if (!engine) missingFields.push('engine');
+    if (!creator) missingFields.push('creator');
 
     if (missingFields.length > 0) {
       return NextResponse.json({ message: `Missing required fields: ${missingFields.join(', ')}` }, { status: 400 });
@@ -106,6 +108,7 @@ export async function POST(request: NextRequest) {
       tagList: tags || [],
       categoryList: categories || [],
       platformList: platforms || [],
+      creator,
     };
 
     if (mainImage) {
