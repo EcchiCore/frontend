@@ -90,19 +90,6 @@ export default function GameUploadForm() {
         }
       }
 
-      if (formData.sources) {
-        for (const source of formData.sources) {
-          await fetch(`/${locale}/api/official-download-sources`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}`,
-            },
-            body: JSON.stringify({ ...source, articleId }),
-          });
-        }
-      }
-
       if (formData.authorizedPurchaseSources) {
         for (const purchaseSource of formData.authorizedPurchaseSources) {
           await fetch(`/${locale}/api/authorized-purchase-sources`, {

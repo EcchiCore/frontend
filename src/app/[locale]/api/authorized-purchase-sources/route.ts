@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { articleId, name, url } = body;
+    const { articleId, name, url, note, submitNote, isActive, vipOnly } = body;
 
     if (!articleId || !name || !url) {
       return NextResponse.json({ message: 'Missing required fields' }, { status: 400 });
@@ -32,6 +32,10 @@ export async function POST(request: NextRequest) {
         articleId,
         name,
         url,
+        note,
+        submitNote,
+        isActive,
+        vipOnly,
       }),
     });
 
