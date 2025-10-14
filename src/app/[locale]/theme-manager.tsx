@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useCookies } from "react-cookie";
+import { getActiveEventTheme } from "@/lib/event-theme";
 
 export default function ThemeManager() {
   const [cookies] = useCookies(["theme", "fontSize"]);
@@ -15,6 +16,18 @@ export default function ThemeManager() {
 
     // Apply theme
     document.documentElement.setAttribute("data-theme", savedTheme);
+
+    const applyEventTheme = () => {
+      const activeTheme = getActiveEventTheme();
+      if (activeTheme) {
+        document.documentElement.setAttribute("data-event-theme", activeTheme.id);
+      } else {
+        document.documentElement.removeAttribute("data-event-theme");
+      }
+    };
+
+    applyEventTheme();
+    const eventThemeInterval = window.setInterval(applyEventTheme, 60 * 60 * 1000);
 
     // Apply font size
     let rootSize = "16px";
@@ -53,7 +66,10 @@ export default function ThemeManager() {
     };
 
     window.addEventListener("storage", handleStorageChange);
-    return () => window.removeEventListener("storage", handleStorageChange);
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      window.clearInterval(eventThemeInterval);
+    };
   }, [cookies.theme, cookies.fontSize]);
 
   return null; // This component doesn't render anything

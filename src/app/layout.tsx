@@ -4,6 +4,7 @@ import './globals.css';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import { siteUrl, defaultMetadataContent, supportedLocales, defaultLocale } from "@/utils/localeUtils";
+import { getActiveEventTheme } from "@/lib/event-theme";
 import Script from "next/script";
 
 const inter = Inter({ subsets: ['latin'] });
@@ -53,8 +54,14 @@ interface RootLayoutProps {
 }
 
 export default function RootLayout({ children }: RootLayoutProps) {
+  const activeEventTheme = getActiveEventTheme();
+
   return (
-    <html lang="th" suppressHydrationWarning>
+    <html
+      lang="th"
+      suppressHydrationWarning
+      data-event-theme={activeEventTheme?.id}
+    >
     <head>
       <meta charSet="utf-8" />
 
@@ -65,6 +72,12 @@ export default function RootLayout({ children }: RootLayoutProps) {
             try {
               const theme = localStorage.getItem('chanomhub-theme') || 'light';
               document.documentElement.classList.add(theme);
+              const eventTheme = ${JSON.stringify(activeEventTheme?.id ?? null)};
+              if (eventTheme) {
+                document.documentElement.setAttribute('data-event-theme', eventTheme);
+              } else {
+                document.documentElement.removeAttribute('data-event-theme');
+              }
             } catch (e) {}
           `
         }}

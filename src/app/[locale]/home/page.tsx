@@ -1,9 +1,10 @@
 import { Inter } from 'next/font/google';
+import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { Search, TrendingUp, MessageSquare, Star } from 'lucide-react';
+import { Search, TrendingUp, MessageSquare, Star, Ghost } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import FeaturedPosts from './components/FeaturedPosts';
 import HomeCarousel from './components/HomeCarousel';
@@ -11,7 +12,8 @@ import CategoriesCard from './components/CategoriesCard';
 import { generatePageMetadata } from '@/utils/metadataUtils';
 import { getTranslations } from 'next-intl/server';
 import { headers } from 'next/headers';
-import { locales } from '@/app/[locale]/lib/navigation'; // Add this line
+import { locales } from '@/app/[locale]/lib/navigation';
+import { getActiveEventTheme } from '@/lib/event-theme';
 
 // Font configuration
 const inter = Inter({ subsets: ['latin'] });
@@ -67,19 +69,57 @@ export default async function HomePage({ params }: { params: { locale: string } 
   const { locale } = params;
   const homeData = await fetchHomeData(locale);
   const t = await getTranslations({ locale, namespace: 'homePage' });
+  const activeEventTheme = getActiveEventTheme();
+  const isHalloween = activeEventTheme?.id === 'halloween';
+  const heroImage = activeEventTheme?.assets?.homeHeroImage;
+
+  const backgroundGradient = isHalloween
+    ? 'from-amber-100/80 via-background to-purple-200/40 dark:from-purple-950/60 dark:via-background dark:to-black'
+    : 'from-slate-50 via-background to-slate-100';
 
   return (
-    <div className={`min-h-screen bg-gradient-to-br from-slate-50 via-background to-slate-100 ${inter.className}`}>
+    <div className={`min-h-screen bg-gradient-to-br ${backgroundGradient} ${inter.className}`}>
       <Navbar />
 
       <main className="bg-background">
-        <section className="text-center py-12 px-4 bg-gradient-to-b from-background to-transparent">
-          <h1 className="text-4xl md:text-5xl font-bold tracking-tight bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent pb-2">
+        <section className="relative overflow-hidden text-center py-16 px-4">
+          {heroImage && (
+            <div className="absolute inset-0">
+              <Image
+                src={heroImage}
+                alt="Halloween celebration"
+                fill
+                priority
+                className="object-cover opacity-70 dark:opacity-60"
+                sizes="100vw"
+              />
+              <div className="absolute inset-0 bg-gradient-to-b from-background/90 via-background/70 to-background" />
+            </div>
+          )}
+          <div className="relative">
+            {isHalloween && (
+              <div className="mb-6 inline-flex items-center gap-3 rounded-full border border-primary/40 bg-primary/10 px-6 py-2 text-primary shadow-sm backdrop-blur-sm">
+                <Ghost className="h-5 w-5" />
+                <span className="text-sm font-semibold uppercase tracking-widest">
+                  Spooky Season Special
+                </span>
+              </div>
+            )}
+          <h1 className="text-4xl md:text-5xl font-bold tracking-tight bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent pb-2 drop-shadow-lg">
             {t('welcomeTo')}<span className="text-foreground">{t('hub')}</span>
           </h1>
           <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
             {t('heroDescription')}
           </p>
+          {isHalloween && (
+            <p className="mt-6 flex items-center justify-center gap-2 text-sm font-medium text-secondary-foreground/80">
+              <span className="inline-flex h-2 w-2 rounded-full bg-primary animate-pulse" />
+              {t('seasonalMessage', {
+                defaultMessage: 'ร่วมฉลองฮาโลวีนกับภารกิจล่าคอนเทนต์สุดพิเศษตลอดเดือนตุลาคม!',
+              })}
+            </p>
+          )}
+          </div>
         </section>
 
         <HomeCarousel articles={homeData.carousel} loading={false} />
