@@ -51,6 +51,7 @@ export default function NotificationDropdown({ isMobile = false }: NotificationD
   const [isMarkingAllAsRead, setIsMarkingAllAsRead] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const pollingRef = useRef<NodeJS.Timeout | null>(null);
+  const hasFetchedOnceRef = useRef(false);
 
   const getAuthHeaders = useCallback(() => {
     const token = Cookies.get("token");
@@ -151,6 +152,7 @@ export default function NotificationDropdown({ isMobile = false }: NotificationD
         {
           method: "PATCH",
           headers,
+          body: JSON.stringify({}),
         }
       );
 
@@ -182,6 +184,7 @@ export default function NotificationDropdown({ isMobile = false }: NotificationD
       const response = await fetch(`${API_BASE_URL}/notifications/read-all`, {
         method: "PATCH",
         headers,
+        body: JSON.stringify({}),
       });
 
       if (!response.ok) {
@@ -270,7 +273,13 @@ export default function NotificationDropdown({ isMobile = false }: NotificationD
   };
 
   useEffect(() => {
-    fetchNotifications(false);
+    if (!hasFetchedOnceRef.current) {
+      hasFetchedOnceRef.current = true;
+      fetchNotifications(false);
+    }
+  }, [fetchNotifications]);
+
+  useEffect(() => {
     pollingRef.current = setInterval(() => {
       fetchNotifications(false);
     }, POLLING_INTERVAL);

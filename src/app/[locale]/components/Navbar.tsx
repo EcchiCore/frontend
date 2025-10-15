@@ -85,6 +85,9 @@ const Navbar = () => {
   const [isClient, setIsClient] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [isDesktop, setIsDesktop] = useState(() =>
+    typeof window !== "undefined" ? window.innerWidth >= 768 : false
+  );
 
   // Fix hydration issues
   useEffect(() => {
@@ -97,14 +100,20 @@ const Navbar = () => {
   useEffect(() => {
     let timeoutId: NodeJS.Timeout | null = null;
 
+    const updateViewport = () => {
+      const desktop = window.innerWidth >= 768;
+      setIsDesktop(desktop);
+      if (desktop) {
+        setIsMenuOpen(false);
+      }
+    };
+
     const debounceResize = () => {
       if (timeoutId) {
         clearTimeout(timeoutId);
       }
       timeoutId = setTimeout(() => {
-        if (window.innerWidth >= 768) {
-          setIsMenuOpen(false);
-        }
+        updateViewport();
       }, 100);
     };
 
@@ -114,7 +123,7 @@ const Navbar = () => {
 
     if (isClient) {
       window.addEventListener("resize", handleResize);
-      handleResize(); // Call once to set initial state
+      updateViewport();
     }
 
     return () => {
@@ -230,7 +239,7 @@ const Navbar = () => {
           <div className="hidden md:flex items-center gap-4">
             <NavbarLinks section="right" onCloseMenu={closeMenu} />
             
-            {hasToken && <NotificationDropdown />}
+            {hasToken && isDesktop && <NotificationDropdown />}
 
             {!hasToken && (
               <Link href="/login">
@@ -243,7 +252,7 @@ const Navbar = () => {
 
           {/* Mobile Section */}
           <div className="flex md:hidden items-center gap-2 ">
-            {hasToken && <NotificationDropdown isMobile />}
+            {hasToken && !isDesktop && <NotificationDropdown isMobile />}
 
             <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
               <SheetTrigger asChild>

@@ -134,6 +134,7 @@ interface ArticleContentProps {
   article: Article;
   slug: string;
   downloads: DownloadFile[];
+  initialComments: Comment[];
 }
 
 const fetcher = (url: string) => {
@@ -146,7 +147,12 @@ const fetcher = (url: string) => {
   });
 };
 
-const ArticleContent: React.FC<ArticleContentProps> = ({ article, slug, downloads: initialDownloads }) => {
+const ArticleContent: React.FC<ArticleContentProps> = ({
+  article,
+  slug,
+  downloads: initialDownloads,
+  initialComments = [],
+}) => {
   const t = useTranslations('ArticleContent');
   // Essential state
   const [isFavorited, setIsFavorited] = useState(article.favorited);
@@ -422,13 +428,19 @@ const ArticleContent: React.FC<ArticleContentProps> = ({ article, slug, download
     immediatelyRender: false,
   });
 
+  const hasInitialComments = initialComments.length > 0;
+
   const { data: commentsData, error: commentsError, isLoading } = useSWR(
     `${API_BASE_URL}/api/articles/${slug}/comments`,
     fetcher,
-    { refreshInterval: 60000 }
+    {
+      refreshInterval: 60000,
+      fallbackData: { comments: initialComments },
+      revalidateOnMount: !hasInitialComments,
+    }
   );
 
-  const [comments, setComments] = useState<Comment[]>([]);
+  const [comments, setComments] = useState<Comment[]>(initialComments);
   const [topCommenters, setTopCommenters] = useState<
     { username: string; count: number }[]
   >([]);
@@ -492,6 +504,10 @@ const ArticleContent: React.FC<ArticleContentProps> = ({ article, slug, download
       editor.view.dom.style.fontSize = `${fontSize}px`;
     }
   }, [fontSize, editor]);
+
+  useEffect(() => {
+    setComments(initialComments);
+  }, [initialComments]);
 
   useEffect(() => {
     if (commentsData) {
@@ -777,7 +793,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({ article, slug, download
                       <CommentsSection
                         isAuthenticated={isAuthenticated}
                         isDarkBackground={isDarkMode}
-                        comments={commentsData?.comments || commentsData || []}
+                        comments={comments}
                         newComment={newComment}
                         setNewComment={setNewComment}
                         handleAddComment={handleAddComment}
@@ -785,7 +801,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({ article, slug, download
                         handleDeleteComment={handleDeleteComment}
                         formatDate={formatDate}
                         commentInputRef={commentInputRef}
-                        isLoading={isLoading}
+                        isLoading={isLoading && comments.length === 0}
                       />
                     </CardContent>
                   </Card>
@@ -861,7 +877,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({ article, slug, download
                       <CommentsSection
                         isAuthenticated={isAuthenticated}
                         isDarkBackground={isDarkMode}
-                        comments={commentsData?.comments || commentsData || []}
+                        comments={comments}
                         newComment={newComment}
                         setNewComment={setNewComment}
                         handleAddComment={handleAddComment}
@@ -869,7 +885,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({ article, slug, download
                         handleDeleteComment={handleDeleteComment}
                         formatDate={formatDate}
                         commentInputRef={commentInputRef}
-                        isLoading={isLoading}
+                        isLoading={isLoading && comments.length === 0}
                       />
                     </CardContent>
                   </Card>

@@ -11,7 +11,7 @@ import {
   generateArticleStructuredData
 } from "@/utils/metadataUtils";
 import { getValidLocale, type Locale } from "@/utils/localeUtils";
-import { Article, ArticleResponse } from "./components/Interfaces";
+import { Article, ArticleResponse, Comment } from "./components/Interfaces";
 
 
 interface MetadataProps {
@@ -66,6 +66,37 @@ async function fetchDownloads(articleId: number): Promise<DownloadFile[]> {
     return data.links || [];
   } catch (error) {
     console.error('Error fetching downloads:', error);
+    return [];
+  }
+}
+
+async function fetchArticleComments(slug: string): Promise<Comment[]> {
+  if (!apiUrl) {
+    return [];
+  }
+
+  try {
+    const response = await fetch(`${apiUrl}/api/articles/${slug}/comments`, {
+      cache: 'no-store'
+    });
+
+    if (!response.ok) {
+      return [];
+    }
+
+    const data = await response.json() as unknown;
+
+    if (Array.isArray(data)) {
+      return data;
+    }
+
+    if (data && typeof data === 'object' && 'comments' in data && Array.isArray((data as { comments: Comment[] }).comments)) {
+      return (data as { comments: Comment[] }).comments;
+    }
+
+    return [];
+  } catch (error) {
+    console.error('Error fetching comments:', error);
     return [];
   }
 }
@@ -197,6 +228,7 @@ export default async function ArticlePage(props: ArticlePageProps) {
   }
 
   const downloads = await fetchDownloads(originalArticle.id);
+  const initialComments = await fetchArticleComments(slug);
 
   // Generate structured data JSON-LD for the article
   const articleJsonLd = generateArticleJsonLd(
@@ -226,6 +258,7 @@ export default async function ArticlePage(props: ArticlePageProps) {
         article={originalArticle}
         slug={slug}
         downloads={downloads}
+        initialComments={initialComments}
       />
     </>
   );
