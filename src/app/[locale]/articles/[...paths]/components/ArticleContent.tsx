@@ -13,7 +13,6 @@ import StarterKit from '@tiptap/starter-kit';
 import { Image as TiptapImage } from '@tiptap/extension-image';
 import { Link as TiptapLink } from '@tiptap/extension-link';
 import Typography from '@tiptap/extension-typography';
-import Heading from '@tiptap/extension-heading';
 import {TextStyle} from '@tiptap/extension-text-style';
 
 import { Color } from '@tiptap/extension-color';
@@ -380,6 +379,14 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
             class: 'mb-4',
           },
         },
+        heading: {
+          levels: [1, 2, 3, 4, 5, 6],
+          HTMLAttributes: {
+            class: 'mb-4 font-bold',
+          },
+        },
+        link: false,
+        underline: false,
       }),
       TextAlign.configure({
         types: ['heading', 'paragraph'],
@@ -407,12 +414,6 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
         validate: href => /^https?:\/\//.test(href),
       }),
       Typography,
-      Heading.configure({
-        levels: [1, 2, 3, 4, 5, 6],
-        HTMLAttributes: {
-          class: 'mb-4 font-bold',
-        },
-      }),
     ],
     content: article.body,
     editable: false,
