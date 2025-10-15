@@ -6,6 +6,8 @@ import { Loader2, Sparkles } from 'lucide-react';
 // ลบ import { motion } from 'framer-motion'; ออกเพราะไม่สามารถใช้ใน server component
 import crypto from 'crypto';
 import type { Metadata } from 'next';
+import Script from 'next/script';
+import { client } from '@/lib/sanity';
 
 function decryptLink(encryptedLink: string, encryptionKey: string): string | null {
   try {
@@ -33,6 +35,78 @@ export const metadata: Metadata = {
   },
 };
 
+interface AdRedirectSettings {
+  shrtflyUrl?: string;
+  apiToken?: string;
+  advertMode?: number;
+  includeDomains?: string[];
+  excludeDomains?: string[];
+  externalScriptLoading?: 'defer' | 'async';
+}
+
+async function getAdRedirectSettings(): Promise<AdRedirectSettings | null> {
+  const query = `*[_type == "adRedirectSettings" && isActive == true][0]{
+    shrtflyUrl,
+    apiToken,
+    advertMode,
+    includeDomains,
+    excludeDomains,
+    externalScriptLoading
+  }`;
+
+  try {
+    const result = await client.fetch<AdRedirectSettings | null>(query);
+    return result ?? null;
+  } catch (error) {
+    console.error('Failed to fetch ad redirect settings from Sanity:', error);
+    return null;
+  }
+}
+
+function normalizeHostname(url: string): string | null {
+  try {
+    return new URL(url).hostname.toLowerCase();
+  } catch {
+    return null;
+  }
+}
+
+function domainListMatches(domains: string[], hostname: string): boolean {
+  return domains
+    .map((domain) => domain.trim().toLowerCase())
+    .filter(Boolean)
+    .some((domain) => {
+      if (domain.startsWith('*.')) {
+        const suffix = domain.slice(2);
+        return hostname === suffix || hostname.endsWith(`.${suffix}`);
+      }
+
+      return hostname === domain;
+    });
+}
+
+function shouldShortenWithShrtfly(targetUrl: string, includeDomains: string[], excludeDomains: string[]): boolean {
+  const hostname = normalizeHostname(targetUrl);
+  if (!hostname) {
+    return false;
+  }
+
+  const includeMatches = includeDomains.length === 0 || domainListMatches(includeDomains, hostname);
+  const excludeMatches = excludeDomains.length > 0 && domainListMatches(excludeDomains, hostname);
+
+  return includeMatches && !excludeMatches;
+}
+
+function ensureTrailingSlash(url: string): string {
+  return url.endsWith('/') ? url : `${url}/`;
+}
+
+function buildShrtflyUrl(baseUrl: string, apiToken: string, destinationUrl: string, advertMode: number): string {
+  const normalizedBase = ensureTrailingSlash(baseUrl);
+  const encodedUrl = Buffer.from(destinationUrl, 'utf8').toString('base64');
+  return `${normalizedBase}full?api=${encodeURIComponent(apiToken)}&url=${encodedUrl}&type=${encodeURIComponent(advertMode.toString())}`;
+}
+
 export default async function Page({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
   const encryptionKey = process.env.ENCRYPTION_KEY || 'w89esQq0cs28f49Gu4e29qC4QARLFXgx';
 
@@ -43,8 +117,72 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ [
     decryptedUrl = decryptLink(resolvedSearchParams.link, encryptionKey);
   }
 
+  const adSettings = await getAdRedirectSettings();
+  const shrtflyBase = adSettings?.shrtflyUrl ?? 'https://shrtfly.com/';
+  const advertMode = typeof adSettings?.advertMode === 'number' ? adSettings.advertMode : 1;
+  const includeDomains = adSettings?.includeDomains ?? [];
+  const excludeDomains = adSettings?.excludeDomains ?? [];
+  const scriptLines: string[] = [];
+  const normalizedBase = ensureTrailingSlash(shrtflyBase);
+  const apiToken = adSettings?.apiToken?.trim();
+
+  let redirectUrl: string | null = decryptedUrl;
+
+  if (
+    decryptedUrl &&
+    apiToken &&
+    shouldShortenWithShrtfly(decryptedUrl, includeDomains, excludeDomains)
+  ) {
+    redirectUrl = buildShrtflyUrl(normalizedBase, apiToken, decryptedUrl, advertMode);
+  }
+
+  if (apiToken) {
+    scriptLines.push(`var app_url = ${JSON.stringify(normalizedBase)};`);
+    scriptLines.push(`var app_api_token = ${JSON.stringify(apiToken)};`);
+    scriptLines.push(`var app_advert = ${advertMode};`);
+
+    if (includeDomains.length > 0) {
+      scriptLines.push(`var app_domains = ${JSON.stringify(includeDomains)};`);
+    }
+
+    if (excludeDomains.length > 0) {
+      scriptLines.push(`var app_exclude_domains = ${JSON.stringify(excludeDomains)};`);
+    }
+  }
+
+  const inlineScriptContent = scriptLines.length > 0 ? scriptLines.join('\n') : null;
+
+  let externalScriptUrl: string | null = null;
+  if (inlineScriptContent) {
+    try {
+      externalScriptUrl = new URL('js/full-page-script.js', normalizedBase).toString();
+    } catch (error) {
+      console.error('Failed to build ShrtFly script URL:', error);
+      externalScriptUrl = 'https://shrtfly.com/js/full-page-script.js';
+    }
+  }
+
   return (
     <>
+      {inlineScriptContent && (
+        <Script
+          id="ad-redirect-inline"
+          type="text/javascript"
+          strategy="beforeInteractive"
+        >
+          {inlineScriptContent}
+        </Script>
+      )}
+
+      {externalScriptUrl && (
+        <Script
+          id="ad-redirect-external"
+          src={externalScriptUrl}
+          strategy="afterInteractive"
+          {...(adSettings.externalScriptLoading === 'async' ? { async: true as const } : { defer: true as const })}
+        />
+      )}
+
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -84,7 +222,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ [
           </div>
         }
       >
-        <AdRedirectContent initialUrl={decryptedUrl} />
+        <AdRedirectContent redirectUrl={redirectUrl} displayUrl={decryptedUrl} />
       </Suspense>
     </>
   );

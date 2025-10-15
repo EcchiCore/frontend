@@ -120,11 +120,6 @@ export default function RootLayout({ children }: RootLayoutProps) {
           `}
       </Script>
 
-      {/* Third-party scripts */}
-      <Script
-        src="//pl26951901.profitableratecpm.com/69/f4/0f/69f40fdf4721c1707c983414b45593b3.js"
-        strategy="lazyOnload"
-      />
     </head>
 
     <body className={inter.className}>

@@ -27,17 +27,24 @@ function getDomain(url: string): string {
 }
 
 interface AdRedirectContentProps {
-  initialUrl: string | null;
+  redirectUrl: string | null;
+  displayUrl: string | null;
 }
 
-export default function AdRedirectContent({ initialUrl }: AdRedirectContentProps): React.ReactElement {
+export default function AdRedirectContent({ redirectUrl, displayUrl }: AdRedirectContentProps): React.ReactElement {
   const [countdown, setCountdown] = useState(5);
-  const [decryptedUrl, setDecryptedUrl] = useState<string | null>(null);
+  const [activeRedirectUrl, setActiveRedirectUrl] = useState<string | null>(null);
+  const [visibleUrl, setVisibleUrl] = useState<string | null>(null);
   const [faviconError, setFaviconError] = useState(false);
 
   useEffect(() => {
-    setDecryptedUrl(initialUrl);
-  }, [initialUrl]);
+    setActiveRedirectUrl(redirectUrl);
+  }, [redirectUrl]);
+
+  useEffect(() => {
+    setVisibleUrl(displayUrl);
+    setFaviconError(false);
+  }, [displayUrl]);
 
   useEffect(() => {
     if (countdown > 0) {
@@ -47,14 +54,16 @@ export default function AdRedirectContent({ initialUrl }: AdRedirectContentProps
   }, [countdown]);
 
   const handleRedirect = () => {
-    if (decryptedUrl) {
-      window.location.href = decryptedUrl;
+    const target = activeRedirectUrl ?? visibleUrl;
+    if (target) {
+      window.location.href = target;
     }
   };
 
   const progressValue = ((5 - countdown) / 5) * 100;
-  const faviconUrl = decryptedUrl ? getFaviconUrl(decryptedUrl) : '';
-  const domain = decryptedUrl ? getDomain(decryptedUrl) : '';
+  const targetUrl = activeRedirectUrl ?? visibleUrl;
+  const faviconUrl = visibleUrl ? getFaviconUrl(visibleUrl) : '';
+  const domain = visibleUrl ? getDomain(visibleUrl) : '';
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 dark:from-slate-900 dark:via-slate-800 dark:to-purple-900 flex justify-center items-center p-4 font-sans relative overflow-hidden">
@@ -99,7 +108,7 @@ export default function AdRedirectContent({ initialUrl }: AdRedirectContentProps
 
           <CardContent className="p-8 relative z-10">
             <AnimatePresence mode="wait">
-              {decryptedUrl ? (
+              {visibleUrl ? (
                 <motion.div
                   key="success"
                   initial={{ opacity: 0, y: 20 }}
@@ -186,7 +195,7 @@ export default function AdRedirectContent({ initialUrl }: AdRedirectContentProps
                       <span className="relative z-10">Please Wait... ⏳</span>
                     </Button>
                   </motion.div>
-                ) : decryptedUrl ? (
+                ) : targetUrl ? (
                   <motion.div
                     key="continue"
                     initial={{ y: 20, opacity: 0 }}
