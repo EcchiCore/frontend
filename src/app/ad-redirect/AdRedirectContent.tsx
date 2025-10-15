@@ -122,13 +122,14 @@ export default function AdRedirectContent({ redirectUrl, displayUrl }: AdRedirec
                   >
                     <div className="absolute inset-0 bg-gradient-to-br from-emerald-400/20 to-blue-400/20 animate-pulse" />
                     {!faviconError && faviconUrl ? (
-                      <img
+                      <Image
                         src={faviconUrl}
                         alt="Site icon"
                         width={36}
                         height={36}
                         onError={() => setFaviconError(true)}
                         className="rounded-lg z-10 relative"
+                        unoptimized
                       />
                     ) : (
                       <ExternalLink className="h-7 w-7 text-emerald-500 relative z-10" />

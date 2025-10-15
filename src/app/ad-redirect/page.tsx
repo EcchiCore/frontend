@@ -125,6 +125,9 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ [
   const scriptLines: string[] = [];
   const normalizedBase = ensureTrailingSlash(shrtflyBase);
   const apiToken = adSettings?.apiToken?.trim();
+  const scriptLoadingAttributes = adSettings?.externalScriptLoading === 'async'
+    ? { async: true as const }
+    : { defer: true as const };
 
   let redirectUrl: string | null = decryptedUrl;
 
@@ -179,7 +182,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ [
           id="ad-redirect-external"
           src={externalScriptUrl}
           strategy="afterInteractive"
-          {...(adSettings.externalScriptLoading === 'async' ? { async: true as const } : { defer: true as const })}
+          {...scriptLoadingAttributes}
         />
       )}
 
