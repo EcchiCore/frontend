@@ -486,19 +486,25 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
     const handleScroll = () => {
       const articleElement = document.querySelector("main");
       if (articleElement) {
-        const { top, height } = articleElement.getBoundingClientRect();
-        setReadingProgress(Math.min(Math.max((window.scrollY - top) / (height - window.innerHeight), 0), 1) * 100);
+        const { height } = articleElement.getBoundingClientRect();
+        const progress = Math.min(
+          Math.max((window.scrollY - articleElement.offsetTop) / (height - window.innerHeight), 0),
+          1
+        );
+        setReadingProgress(progress * 100);
       }
     };
 
-    window.addEventListener("resize", handleResize);
-    window.addEventListener("scroll", handleScroll);
+    window.addEventListener("resize", handleResize, { passive: true });
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleResize();
+    handleScroll();
 
     return () => {
       window.removeEventListener("resize", handleResize);
       window.removeEventListener("scroll", handleScroll);
     };
-  }, [article.id, slug, showAlert, article.author.username, t]);
+  }, [article.id, slug, article.author.username]);
 
   useEffect(() => {
     if (editor) {

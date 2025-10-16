@@ -6,6 +6,7 @@ import { Loader2, Sparkles } from 'lucide-react';
 // ลบ import { motion } from 'framer-motion'; ออกเพราะไม่สามารถใช้ใน server component
 import crypto from 'crypto';
 import type { Metadata } from 'next';
+import { cookies } from 'next/headers';
 import Script from 'next/script';
 import { client } from '@/lib/sanity';
 
@@ -109,6 +110,8 @@ function buildShrtflyUrl(baseUrl: string, apiToken: string, destinationUrl: stri
 
 export default async function Page({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
   const encryptionKey = process.env.ENCRYPTION_KEY || 'w89esQq0cs28f49Gu4e29qC4QARLFXgx';
+  const cookieStore = cookies();
+  const hasAuthToken = Boolean(cookieStore.get('token')?.value);
 
   const resolvedSearchParams = await searchParams; // Await searchParams เพื่อแก้ไข error
 
@@ -116,6 +119,8 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ [
   if (typeof resolvedSearchParams.link === 'string') {
     decryptedUrl = decryptLink(resolvedSearchParams.link, encryptionKey);
   }
+
+  const shouldBypassAds = hasAuthToken;
 
   const adSettings = await getAdRedirectSettings();
   const shrtflyBase = adSettings?.shrtflyUrl ?? 'https://shrtfly.com/';
@@ -132,6 +137,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ [
   let redirectUrl: string | null = decryptedUrl;
 
   if (
+    !shouldBypassAds &&
     decryptedUrl &&
     apiToken &&
     shouldShortenWithShrtfly(decryptedUrl, includeDomains, excludeDomains)
@@ -139,7 +145,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ [
     redirectUrl = buildShrtflyUrl(normalizedBase, apiToken, decryptedUrl, advertMode);
   }
 
-  if (apiToken) {
+  if (!shouldBypassAds && apiToken) {
     scriptLines.push(`var app_url = ${JSON.stringify(normalizedBase)};`);
     scriptLines.push(`var app_api_token = ${JSON.stringify(apiToken)};`);
     scriptLines.push(`var app_advert = ${advertMode};`);
@@ -156,7 +162,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ [
   const inlineScriptContent = scriptLines.length > 0 ? scriptLines.join('\n') : null;
 
   let externalScriptUrl: string | null = null;
-  if (inlineScriptContent) {
+  if (!shouldBypassAds && inlineScriptContent) {
     try {
       externalScriptUrl = new URL('js/full-page-script.js', normalizedBase).toString();
     } catch (error) {
