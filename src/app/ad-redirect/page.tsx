@@ -110,7 +110,7 @@ function buildShrtflyUrl(baseUrl: string, apiToken: string, destinationUrl: stri
 
 export default async function Page({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
   const encryptionKey = process.env.ENCRYPTION_KEY || 'w89esQq0cs28f49Gu4e29qC4QARLFXgx';
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   const hasAuthToken = Boolean(cookieStore.get('token')?.value);
 
   const resolvedSearchParams = await searchParams; // Await searchParams เพื่อแก้ไข error
