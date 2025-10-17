@@ -445,6 +445,30 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
   const [topCommenters, setTopCommenters] = useState<
     { username: string; count: number }[]
   >([]);
+  const hasShownCommentsErrorRef = useRef(false);
+
+  const areCommentsEqual = useCallback((a: Comment[], b: Comment[]) => {
+    if (a.length !== b.length) return false;
+    for (let i = 0; i < a.length; i += 1) {
+      if (a[i]?.id !== b[i]?.id) return false;
+    }
+    return true;
+  }, []);
+
+  const buildTopCommenters = useCallback((commentsList: Comment[]) => {
+    const commentCount: { [key: string]: number } = {};
+    commentsList.forEach((comment: Comment) => {
+      if (comment?.author?.username) {
+        commentCount[comment.author.username] =
+          (commentCount[comment.author.username] || 0) + 1;
+      }
+    });
+
+    return Object.entries(commentCount)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([username, count]) => ({ username, count }));
+  }, []);
 
   const showAlert = useCallback(
     (message: string, severity: "success" | "error") => {
@@ -521,28 +545,29 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
       const commentsArray = Array.isArray(commentsData)
         ? commentsData
         : commentsData.comments || [];
-      setComments(commentsArray);
-
-      const commentCount: { [key: string]: number } = {};
-      commentsArray.forEach((comment: Comment) => {
-        if (comment?.author?.username) {
-          commentCount[comment.author.username] =
-            (commentCount[comment.author.username] || 0) + 1;
-        }
+      setComments((prev) => {
+        if (areCommentsEqual(prev, commentsArray)) return prev;
+        return commentsArray;
       });
 
-      setTopCommenters(
-        Object.entries(commentCount)
-          .sort((a, b) => b[1] - a[1])
-          .slice(0, 5)
-          .map(([username, count]) => ({ username, count }))
-      );
+      const nextTopCommenters = buildTopCommenters(commentsArray);
+      setTopCommenters((prev) => {
+        if (prev.length === nextTopCommenters.length && prev.every((item, index) => item.username === nextTopCommenters[index]?.username && item.count === nextTopCommenters[index]?.count)) {
+          return prev;
+        }
+        return nextTopCommenters;
+      });
     }
 
     if (commentsError) {
-      showAlert("ไม่สามารถโหลดความคิดเห็นได้", "error");
+      if (!hasShownCommentsErrorRef.current) {
+        hasShownCommentsErrorRef.current = true;
+        showAlert("ไม่สามารถโหลดความคิดเห็นได้", "error");
+      }
+    } else {
+      hasShownCommentsErrorRef.current = false;
     }
-  }, [commentsData, commentsError, showAlert]);
+  }, [commentsData, commentsError, showAlert, areCommentsEqual, buildTopCommenters]);
 
   const handleFavorite = useCallback(async () => {
     const token = Cookies.get("token");
