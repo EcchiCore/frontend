@@ -386,10 +386,10 @@
   "ArticleContent": {
     "download_error": "Failed to fetch download files",
     "translation_error": "Failed to translation",
-    "readingTime":   "readingTime",
+    "readingTime": "readingTime",
     "fontSize": "fontSize",
     "title": "title",
-    "description":  "description",
+    "description": "description",
     "searchPlaceholder": "searchPlaceholder",
     "downloadFiles": "downloadFiles",
     "copy": "copy",
@@ -398,10 +398,14 @@
     "linkCopied": "Link copied",
     "translationFiles": "translationFiles",
     "sortByDate": "sortByDate",
-    "sortByName":  "sortByName",
+    "sortByName": "sortByName",
     "noFiles": "noFiles",
     "downloadsAndTranslations": "Downloads and Translations",
-    "viewFiles": "View Files"
+    "viewFiles": "View Files",
+    "commentsLoadError": "Failed to load comments",
+    "tryAgain": "Try again",
+    "error": "Error",
+    "success": "Success"
   },
   "Register": {
     "title": "Register",

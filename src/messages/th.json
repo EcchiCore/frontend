@@ -401,7 +401,11 @@
     "sortByName": "เรียงตามชื่อ",
     "noFiles": "ไม่มีไฟล์",
     "downloadsAndTranslations": "ดาวน์โหลดและการแปล",
-    "viewFiles": "ดูไฟล์"
+    "viewFiles": "ดูไฟล์",
+    "commentsLoadError": "ไม่สามารถโหลดความคิดเห็นได้",
+    "tryAgain": "ลองอีกครั้ง",
+    "error": "ข้อผิดพลาด",
+    "success": "สำเร็จ"
   },
   "Register": {
     "title": "สมัครสมาชิก",

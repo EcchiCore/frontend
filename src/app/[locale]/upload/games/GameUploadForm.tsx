@@ -92,7 +92,7 @@ export default function GameUploadForm() {
 
       if (formData.authorizedPurchaseSources) {
         for (const purchaseSource of formData.authorizedPurchaseSources) {
-          await fetch(`/${locale}/api/authorized-purchase-sources`, {
+          await fetch(`/${locale}/api/official-download-sources`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
