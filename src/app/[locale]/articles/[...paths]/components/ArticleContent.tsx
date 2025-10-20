@@ -582,7 +582,8 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
         `${API_BASE_URL}/api/articles/${slug}/favorite`,
         {
           method: isFavorited ? "DELETE" : "POST",
-          headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" }
+          headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+          body: JSON.stringify({})
         }
       );
       if (!response.ok) throw new Error();
@@ -602,7 +603,8 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
         `${API_BASE_URL}/api/profiles/${article.author.username}/follow`,
         {
           method: isFollowing ? "DELETE" : "POST",
-          headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" }
+          headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+          body: JSON.stringify({})
         }
       );
       if (response.ok) {
