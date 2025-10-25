@@ -14,6 +14,7 @@ import { getTranslations } from 'next-intl/server';
 import { headers } from 'next/headers';
 import { locales } from '@/app/[locale]/lib/navigation';
 import { getActiveEventTheme } from '@/lib/event-theme';
+import VtuberCanvas from '@/components/pixi/Vtuber';
 
 // Font configuration
 const inter = Inter({ subsets: ['latin'] });
@@ -82,6 +83,9 @@ export default async function HomePage({ params }: { params: { locale: string } 
       <Navbar />
 
       <main className="bg-background">
+        <div className="fixed bottom-0 right-0 z-50 hidden md:block">
+          <VtuberCanvas />
+        </div>
         <section className="relative overflow-hidden text-center py-16 px-4">
           {heroImage && (
             <div className="absolute inset-0">
