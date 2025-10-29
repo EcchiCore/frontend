@@ -21,7 +21,7 @@ export type Article = {
   images: string[];
   categories: { name: string }[];
   author: {
-    username: string;
+    name: string;
     bio: string | null;
     image: string | null;
     backgroundImage: string | null;

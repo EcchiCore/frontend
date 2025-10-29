@@ -138,7 +138,7 @@ export default function GameCard({ article }: { article: Article }) {
               {article.author.image ? (
                 <Image
                   src={article.author.image}
-                  alt={article.author.username}
+                  alt={article.author.name}
                   width={20}
                   height={20}
                   className="rounded-full"
@@ -146,7 +146,7 @@ export default function GameCard({ article }: { article: Article }) {
               ) : (
                 <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center">
                   <span className="text-xs font-semibold text-primary">
-                    {article.author.username.charAt(0).toUpperCase()}
+                    {article.author.name.charAt(0).toUpperCase()}
                   </span>
                 </div>
               )}
