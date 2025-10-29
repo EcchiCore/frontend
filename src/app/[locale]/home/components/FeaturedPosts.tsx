@@ -17,14 +17,17 @@ interface Article {
   slug: string;
   description: string;
   author: {
-    username: string;
+    name: string;
+    image: string | null;
   };
-  categoryList: string[];
+  categories: { name: string }[];
   favoritesCount: number;
   createdAt: string;
-  mainImage: string;
-  backgroundImage: string;
-  coverImage: string;
+  mainImage: string | null;
+  backgroundImage: string | null;
+  coverImage: string | null;
+  platforms: { name: string }[];
+  tags: { name: string }[];
 }
 
 interface FeaturedPostsProps {
@@ -61,7 +64,7 @@ export default function FeaturedPosts({ posts, loading }: FeaturedPostsProps) {
       </div>
       {posts.map((post) => {
         const imageUrl = post.coverImage || post.mainImage || post.backgroundImage;
-        const src = typeof imageUrl === 'string' ? imageUrl : (imageUrl as { url?: string })?.url || null;
+        const src = typeof imageUrl === 'string' ? imageUrl : (imageUrl && typeof imageUrl === 'object' && 'url' in imageUrl) ? (imageUrl as { url?: string })?.url : null;
 
         return (
           <Link href={`/articles/${post.slug}`} key={post.id}>
@@ -81,7 +84,7 @@ export default function FeaturedPosts({ posts, loading }: FeaturedPostsProps) {
                   <div className="flex-grow">
                     <div className="flex items-start justify-between mb-3">
                       <Badge variant="secondary" className="group-hover:bg-primary/10 group-hover:text-primary transition-colors">
-                        {post.categoryList[0] || 'ทั่วไป'}
+                        {post.categories[0]?.name || 'ทั่วไป'}
                       </Badge>
                       <div className="flex items-center space-x-4 text-sm text-muted-foreground">
                         <div className="flex items-center space-x-1 group-hover:text-primary transition-colors">
@@ -105,12 +108,22 @@ export default function FeaturedPosts({ posts, loading }: FeaturedPostsProps) {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-3">
                         <Avatar className="h-8 w-8 ring-2 ring-background shadow-sm group-hover:ring-primary/20 transition-all duration-200">
-                          <AvatarFallback className="bg-primary/10 text-primary font-medium">
-                            {post.author.username[0]}
-                          </AvatarFallback>
+                          {post.author.image ? (
+                            <Image
+                              src={post.author.image}
+                              alt={post.author.name}
+                              width={32}
+                              height={32}
+                              className="rounded-full"
+                            />
+                          ) : (
+                            <AvatarFallback className="bg-primary/10 text-primary font-medium">
+                              {post.author.name ? post.author.name[0] : ''}
+                            </AvatarFallback>
+                          )}
                         </Avatar>
                         <span className="text-sm text-foreground font-medium group-hover:text-primary transition-colors">
-                          {post.author.username}
+                          {post.author.name}
                         </span>
                       </div>
                       <div className="flex items-center space-x-1 text-sm text-muted-foreground group-hover:text-primary transition-colors">

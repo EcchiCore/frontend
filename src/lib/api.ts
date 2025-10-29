@@ -8,9 +8,9 @@ export type Article = {
   description: string;
   body: string;
   ver: string;
+  creators: { name: string }[];
   tags: { name: string }[];
   platforms: { name: string }[];
-  version: number;
   createdAt: string;
   updatedAt: string;
   status: 'DRAFT' | 'PENDING_REVIEW' | 'PUBLISHED' | 'ARCHIVED' | 'NOT_APPROVED' | 'NEEDS_REVISION';
