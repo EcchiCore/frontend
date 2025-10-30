@@ -11,95 +11,10 @@ import {
   generateArticleStructuredData
 } from "@/utils/metadataUtils";
 import { getValidLocale, type Locale } from "@/utils/localeUtils";
-import { Article, ArticleResponse, Comment } from "./components/Interfaces";
+import { Article } from "@/types/article";
+import { getArticleBySlug, fetchArticleAndDownloads } from "@/lib/article-api";
 
-
-interface MetadataProps {
-  params: Promise<{ locale: string; paths: string[] }>;
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
-}
-
-interface DownloadFile {
-  id: number;
-  articleId: number;
-  name: string;
-  url: string;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
-
-interface DownloadsResponse {
-  links: DownloadFile[];
-  articleExists: boolean;
-  articleStatus: string;
-}
-
-const apiUrl = process.env.API_URL;
 const siteUrl = process.env.FRONTEND || 'https://chanomhub.online';
-
-async function fetchArticle(slug: string): Promise<Article | null> {
-  try {
-    const response = await fetch(`${apiUrl}/api/articles/${slug}`, {
-      next: { revalidate: 60 }
-    });
-
-    if (!response.ok) return null;
-
-    const data = await response.json() as ArticleResponse;
-    return data.article;
-  } catch (error) {
-    console.error('Error fetching article:', error);
-    return null;
-  }
-}
-
-async function fetchDownloads(articleId: number): Promise<DownloadFile[]> {
-  try {
-    const response = await fetch(`${apiUrl}/api/downloads/article/${articleId}`, {
-      cache: 'no-store'
-    });
-
-    if (!response.ok) return [];
-
-    const data = await response.json() as DownloadsResponse;
-    return data.links || [];
-  } catch (error) {
-    console.error('Error fetching downloads:', error);
-    return [];
-  }
-}
-
-async function fetchArticleComments(slug: string): Promise<Comment[]> {
-  if (!apiUrl) {
-    return [];
-  }
-
-  try {
-    const response = await fetch(`${apiUrl}/api/articles/${slug}/comments`, {
-      cache: 'no-store'
-    });
-
-    if (!response.ok) {
-      return [];
-    }
-
-    const data = await response.json() as unknown;
-
-    if (Array.isArray(data)) {
-      return data;
-    }
-
-    if (data && typeof data === 'object' && 'comments' in data && Array.isArray((data as { comments: Comment[] }).comments)) {
-      return (data as { comments: Comment[] }).comments;
-    }
-
-    return [];
-  } catch (error) {
-    console.error('Error fetching comments:', error);
-    return [];
-  }
-}
 
 // Helper function to create SEO-friendly title
 function createSEOTitle(article: Article): string {
@@ -121,15 +36,14 @@ function constructContentPath(locale: Locale, paths: string[]): string {
   return `articles/${paths[0]}`;
 }
 
-export async function generateMetadata(props: MetadataProps): Promise<Metadata> {
-  const params = await props.params;
+export async function generateMetadata(props: ArticlePageProps): Promise<Metadata> {
+  const params = await Promise.resolve(props.params);
 
   const locale = getValidLocale(params.locale);
   const paths = params.paths;
   const slug = paths[0];
 
-  // First check if original article exists
-  const originalArticle = await fetchArticle(slug);
+  const originalArticle = await getArticleBySlug(slug);
   if (!originalArticle) {
     return {
       title: 'Article Not Found',
@@ -145,11 +59,11 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
   const backgroundImage = originalArticle.backgroundImage;
 
   if (coverImage) {
-    mainImageUrl = typeof coverImage === 'string' ? coverImage : coverImage?.url || null;
+    mainImageUrl = coverImage;
   } else if (mainImage) {
-    mainImageUrl = typeof mainImage === 'string' ? mainImage : mainImage?.url || null;
+    mainImageUrl = mainImage;
   } else if (backgroundImage) {
-    mainImageUrl = typeof backgroundImage === 'string' ? backgroundImage : backgroundImage?.url || null;
+    mainImageUrl = backgroundImage;
   }
 
   // Replace domain if URL exists
@@ -165,13 +79,13 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
   return generatePageMetadata({
     title: seoTitle,
     description: originalArticle.description,
-    keywords: originalArticle.tagList || [],
+    keywords: originalArticle.tags.map(tag => tag.name) || [],
     locale,
     contentPath,
     type: 'article',
     publishedTime: originalArticle.createdAt,
     modifiedTime: originalArticle.updatedAt,
-    authors: [originalArticle.author.username],
+    authors: [originalArticle.author.name],
     images: mainImageUrl ? [{
       url: mainImageUrl,
       width: 1200,
@@ -181,10 +95,6 @@ export async function generateMetadata(props: MetadataProps): Promise<Metadata> 
   });
 }
 
-interface ArticlePageProps {
-  params: Promise<{ locale: string; paths: string[] }>;
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
-}
 
 // Function to generate JSON-LD structured data for the article
 function generateArticleJsonLd(
@@ -192,9 +102,7 @@ function generateArticleJsonLd(
   locale: Locale,
   slug: string
 ) {
-  let mainImageUrl = typeof article.mainImage === 'string'
-    ? article.mainImage
-    : article.mainImage?.url || '';
+  let mainImageUrl = article.mainImage || '';
 
   if (mainImageUrl) {
     mainImageUrl = mainImageUrl.replace('rustgram.onrender.com', 'oi.chanomhub.online');
@@ -207,28 +115,35 @@ function generateArticleJsonLd(
     title: createSEOTitle(article),
     description: article.description,
     url: articleUrl,
+    locale,
     datePublished: article.createdAt,
     dateModified: article.updatedAt,
-    authors: [article.author.username],
-    images: mainImageUrl ? [mainImageUrl] : undefined,
-    locale
+    authors: [article.author.name],
+    images: mainImageUrl ? [mainImageUrl] : undefined
   });
+}
+
+interface ArticlePageProps {
+  params: Promise<{
+    locale: string;
+    paths: string[];
+  }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
 export default async function ArticlePage(props: ArticlePageProps) {
   const params = await props.params;
+  const searchParams = await props.searchParams;
 
   const locale = getValidLocale(params.locale);
   const paths = params.paths;
   const slug = paths[0];
+  const articleId = searchParams.id ? Number(searchParams.id) : undefined;
 
-  const originalArticle = await fetchArticle(slug);
+  const { article: originalArticle, downloads } = await fetchArticleAndDownloads(slug, articleId || 0); // Use articleId from searchParams or a default
   if (!originalArticle) {
     return notFound();
   }
-
-  const downloads = await fetchDownloads(originalArticle.id);
-  const initialComments = await fetchArticleComments(slug);
 
   // Generate structured data JSON-LD for the article
   const articleJsonLd = generateArticleJsonLd(
@@ -250,15 +165,15 @@ export default async function ArticlePage(props: ArticlePageProps) {
       <GTMArticleTracker
         title={originalArticle.title}
         slug={originalArticle.slug}
-        categoryList={originalArticle.categoryList}
-        authorUsername={originalArticle.author.username}
+        categoryList={originalArticle.categories.map(c => c.name)}
+        authorUsername={originalArticle.author.name}
       />
 
       <ArticleContent
         article={originalArticle}
         slug={slug}
-        downloads={downloads}
-        initialComments={initialComments}
+        articleId={articleId}
+        downloads={downloads || []}
       />
     </>
   );

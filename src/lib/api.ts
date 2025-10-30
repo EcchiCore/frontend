@@ -1,37 +1,9 @@
 // ===============================
 // lib/api.ts
 // ===============================
-export type Article = {
-  id: number;
-  title: string;
-  slug: string;
-  description: string;
-  body: string;
-  ver: string;
-  creators: { name: string }[];
-  tags: { name: string }[];
-  platforms: { name: string }[];
-  createdAt: string;
-  updatedAt: string;
-  status: 'DRAFT' | 'PENDING_REVIEW' | 'PUBLISHED' | 'ARCHIVED' | 'NOT_APPROVED' | 'NEEDS_REVISION';
-  engine: 'RENPY' | 'RPGM' | 'UNITY' | 'UNREAL' | 'GODOT' | 'TyranoBuilder' | 'WOLFRPG' | 'KIRIKIRI' | 'FLASH' | 'BakinPlayer';
-  mainImage: string | null;
-  backgroundImage: string | null;
-  coverImage: string | null;
-  images: string[];
-  categories: { name: string }[];
-  author: {
-    name: string;
-    bio: string | null;
-    image: string | null;
-    backgroundImage: string | null;
-    following: boolean;
-    socialMediaLinks: { platform: string; url: string }[];
-  };
-  favorited: boolean;
-  favoritesCount: number;
-  sequentialCode: string | null;
-};
+
+
+import { Article } from "@/types/article";
 
 export type PagedResponse<T> = {
   items: T[];
@@ -178,4 +150,168 @@ export async function fetchArticles(params: Record<string, string | string[] | u
   const total = hasNextPage ? offset + pageSize + 1 : offset + items.length;
 
   return { items, total, page, pageSize } satisfies PagedResponse<Article>;
+}
+
+export async function fetchDownloadsByArticleId(articleId: number): Promise<Article["downloads"] | null> {
+  const query = `query DownloadsByArticleId($articleId: Int!) {
+    downloads(articleId: $articleId) {
+      id
+      isActive
+      name
+      url
+      createdAt
+      vipOnly
+    }
+  }`;
+  const variables = {
+    articleId,
+  };
+
+  const res = await fetch("https://api.chanomhub.online/api/graphql", {
+    method: "POST",
+    headers: {
+      "accept": "application/graphql-response+json, application/json, multipart/mixed",
+      "accept-language": "en-US,en;q=0.7",
+      "cache-control": "no-cache",
+      "content-type": "application/json",
+      "pragma": "no-cache",
+      "sec-ch-ua": "\"Brave\";v=\"141\", \"Not?A_Brand\";v=\"8\", \"Chromium\";v=\"141\"",
+      "sec-ch-ua-mobile": "?0",
+      "sec-ch-ua-platform": "\"Linux\"",
+      "sec-fetch-dest": "empty",
+      "sec-fetch-mode": "cors",
+      "sec-fetch-site": "same-origin",
+      "sec-gpc": "1"
+    },
+    body: JSON.stringify({
+      query,
+      variables,
+      operationName: "DownloadsByArticleId",
+    }),
+    credentials: "include",
+    next: { revalidate: 3600 }
+  });
+
+  if (!res.ok) {
+    const errorBody = await res.text();
+    console.error('API error response:', errorBody);
+    throw new Error(`API error ${res.status} for URL: https://api.chanomhub.online/api/graphql`);
+  }
+
+  const { data, errors } = await res.json();
+
+  if (errors) {
+    console.error("GraphQL Errors:", errors);
+    throw new Error("GraphQL query failed");
+  }
+
+  return data.downloads ?? null;
+}
+
+export async function fetchArticle(slug: string): Promise<Article | null> {
+  const query = `query MyQuery($slug: String!) {
+    article(slug: $slug) {
+      author {
+        image
+        name
+      }
+      backgroundImage
+      body
+      categories {
+        name
+      }
+      coverImage
+      createdAt
+      creators {
+        name
+      }
+      description
+      downloads {
+        id
+        isActive
+        name
+        url
+        createdAt
+        vipOnly
+      }
+      favorited
+      favoritesCount
+      mainImage
+      images {
+        url
+      }
+      mods {
+        downloadLink
+        description
+        creditTo
+        categories {
+          name
+        }
+        images {
+          url
+        }
+        name
+        status
+        version
+      }
+      officialDownloadSources {
+        name
+        url
+        status
+      }
+      platforms {
+        name
+      }
+      status
+      tags {
+        name
+      }
+      title
+      updatedAt
+      ver
+    }
+  }`;
+
+  const variables = {
+    slug,
+  };
+
+  const res = await fetch("https://api.chanomhub.online/api/graphql", {
+    method: "POST",
+    headers: {
+      "accept": "application/graphql-response+json, application/json, multipart/mixed",
+      "accept-language": "en-US,en;q=0.7",
+      "cache-control": "no-cache",
+      "content-type": "application/json",
+      "pragma": "no-cache",
+      "sec-ch-ua": "\"Brave\";v=\"141\", \"Not?A_Brand\";v=\"8\", \"Chromium\";v=\"141\"",      "sec-ch-ua-mobile": "?0",
+      "sec-ch-ua-platform": "\"Linux\"",
+      "sec-fetch-dest": "empty",
+      "sec-fetch-mode": "cors",
+      "sec-fetch-site": "same-origin",
+      "sec-gpc": "1"
+    },
+    body: JSON.stringify({
+      query,
+      variables,
+      operationName: "MyQuery",
+    }),
+    credentials: "include",
+    next: { revalidate: 3600 }
+  });
+
+  if (!res.ok) {
+    const errorBody = await res.text();
+    console.error('API error response:', errorBody);
+    throw new Error(`API error ${res.status} for URL: https://api.chanomhub.online/api/graphql`);
+  }
+
+  const { data, errors } = await res.json();
+
+  if (errors) {
+    console.error("GraphQL Errors:", errors);
+    throw new Error("GraphQL query failed");
+  }
+
+  return data.article ?? null;
 }

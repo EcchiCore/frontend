@@ -2,7 +2,7 @@ import Image from "next/image";
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { Link, User } from "lucide-react";
-import myImageLoader from "../../lib/imageLoader";
+import myImageLoader from "@/lib/imageLoader";
 import UserPageClient from "./UserPageClient";
 import NavbarWrapper from "./NavbarWrapper";
 import BackgroundImage from "./BackgroundImage";

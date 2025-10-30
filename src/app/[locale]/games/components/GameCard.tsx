@@ -1,8 +1,8 @@
-import type { Article } from "@/lib/api"
+import type { Article } from "@/types/article"
 import Link from "next/link"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Heart, Eye, Clock, Star, Sparkles } from "lucide-react"
+import { Heart, Eye, Clock, Star } from "lucide-react"
 import Image from "next/image"
 
 export default function GameCard({ article }: { article: Article }) {
@@ -51,16 +51,10 @@ export default function GameCard({ article }: { article: Article }) {
     return colors[platform] || "bg-gray-600"
   }
 
-  const timeAgo = getTimeAgo(article.createdAt)
-  const isNew = timeAgo === "ใหม่" || timeAgo.includes("ชม.")
-  const randomViews = Math.floor(Math.random() * 50000) + 1000
-  const randomRating = (Math.random() * 2 + 3).toFixed(1)
-  const platformBadge = getPlatformBadge(article.engine)
-
   const imageSrc = article.coverImage || article.mainImage || article.backgroundImage || null
 
   return (
-    <Link href={`/articles/${article.slug}`} className="group block h-full">
+    <Link href={`/articles/${article.slug}?id=${article.id}`} className="group block h-full">
       <Card className="overflow-hidden bg-card/50 backdrop-blur-sm border-border/40 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 h-full flex flex-col">
         {/* Image Container */}
         <div className="relative aspect-[16/10] overflow-hidden bg-gradient-to-br from-muted/50 to-background/50">

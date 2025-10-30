@@ -7,6 +7,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { MessageCircle, Trophy, Medal, Award } from "lucide-react";
 import { SidebarLeftProps } from "./Interfaces";
+import { Article } from "@/types/article";
 
 const SidebarLeft: React.FC<SidebarLeftProps> = ({
                                                    article,
@@ -14,7 +15,7 @@ const SidebarLeft: React.FC<SidebarLeftProps> = ({
                                                  }) => {
 
   const imageUrl = article.coverImage || article.mainImage || article.backgroundImage || null;
-  const mainImageUrl = typeof imageUrl === 'string' ? imageUrl : imageUrl?.url || null;
+  const mainImageUrl = imageUrl;
 
   const getRankingIcon = (index: number) => {
     switch (index) {

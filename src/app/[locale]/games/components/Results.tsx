@@ -1,4 +1,5 @@
-import { fetchArticles, type Article } from "@/lib/api"
+import { fetchArticles } from "@/lib/api"
+import type { Article } from "@/types/article"
 import GameCard from "./GameCard"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"

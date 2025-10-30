@@ -84,7 +84,7 @@ export default function FeaturedPosts({ posts, loading }: FeaturedPostsProps) {
                   <div className="flex-grow">
                     <div className="flex items-start justify-between mb-3">
                       <Badge variant="secondary" className="group-hover:bg-primary/10 group-hover:text-primary transition-colors">
-                        {post.categories[0]?.name || 'ทั่วไป'}
+                        {(post.categories && post.categories.length > 0) ? post.categories[0]?.name : 'ทั่วไป'}
                       </Badge>
                       <div className="flex items-center space-x-4 text-sm text-muted-foreground">
                         <div className="flex items-center space-x-1 group-hover:text-primary transition-colors">

@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import { AvatarImage } from "@/components/ui/avatar";
-import imageLoader from '@/app/[locale]/lib/imageLoader';
+import imageLoader from '@/lib/imageLoader';
 
 const PLACEHOLDER_IMAGE = "/placeholder-image.png";
 
@@ -14,6 +14,8 @@ interface ImageWithFallbackProps {
   fill?: boolean;
   style?: React.CSSProperties;
   type: "nextImage" | "avatarImage";
+  width?: number;
+  height?: number;
 }
 
 const ImageWithFallback: React.FC<ImageWithFallbackProps> = ({
@@ -23,6 +25,8 @@ const ImageWithFallback: React.FC<ImageWithFallbackProps> = ({
   fill,
   style,
   type,
+  width,
+  height,
 }) => {
   const [imageSrc, setImageSrc] = useState(src || PLACEHOLDER_IMAGE);
 
@@ -40,6 +44,8 @@ const ImageWithFallback: React.FC<ImageWithFallbackProps> = ({
         fill={fill}
         style={style}
         onError={handleError}
+        width={width}
+        height={height}
       />
     );
   } else {

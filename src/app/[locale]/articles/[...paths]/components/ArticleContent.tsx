@@ -26,8 +26,9 @@ import CommentsSection from "./CommentsSection";
 import SidebarRight from "./SidebarRight";
 import { getFileIcon, getFileSize } from "@/utils/fileUtils";
 import ArticleTitleMeta from "./ArticleTitleMeta";
-import { Article, DownloadFile, TranslationFile, Comment, TokenPayload, AlertState } from "./Interfaces";
-import myImageLoader from "../../../lib/imageLoader";
+import { Article } from "@/types/article";
+import { TranslationFile, Comment, TokenPayload, AlertState, DownloadFile } from "./Interfaces";
+import myImageLoader from "@/lib/imageLoader";
 
 const PLACEHOLDER_IMAGE = '/placeholder-image.png';
 
@@ -64,13 +65,13 @@ const MobileArticleInfo: React.FC<{ article: Article, formatDate: (date: string)
             </div>
             <span className="text-sm font-semibold">{formatDate(article.updatedAt)}</span>
           </div>
-          {article.creator && (
+          {article.creators && article.creators.length > 0 && (
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-2">
                 <User className="w-4 h-4 text-muted-foreground" />
                 <span className="text-sm text-muted-foreground">{t("articleInfo.creator")}:</span>
               </div>
-              <span className="text-sm font-semibold text-right max-w-[60%] truncate">{article.creator}</span>
+              <span className="text-sm font-semibold text-right max-w-[60%] truncate">{article.creators[0]?.name}</span>
             </div>
           )}
           {article.engine && (
@@ -84,46 +85,59 @@ const MobileArticleInfo: React.FC<{ article: Article, formatDate: (date: string)
           )}
         </div>
 
-        {["platformList", "tagList", "categoryList"].map((key) => {
-          const list = article[key as keyof typeof article] as string[] | undefined;
-          if (!list || list.length === 0) return null;
-
-          const iconMap: Record<string, React.ReactNode> = {
-            platformList: <Cpu className="w-5 h-5 text-warning" />,
-            tagList: <Tag className="w-5 h-5 text-primary" />,
-            categoryList: <Folder className="w-5 h-5 text-secondary" />,
-          };
-
-          const titleMap: Record<string, string> = {
-            platformList: t("platforms.title"),
-            tagList: t("tags.title"),
-            categoryList: t("categories.title"),
-          };
-
-          const linkPrefixMap: Record<string, string> = {
-            platformList: "/platforms/",
-            tagList: "/tag/",
-            categoryList: "/category/",
-          };
-
-          return (
-            <div key={key}>
-              <h3 className="text-lg font-semibold mb-2 flex items-center gap-2">
-                {iconMap[key]}
-                {titleMap[key]}
-              </h3>
-              <div className="flex flex-wrap gap-2">
-                {list.map((item, index) => (
-                  <Link href={`${linkPrefixMap[key]}${encodeURLComponent(item)}`} key={index}>
-                    <Badge variant="outline" className={`cursor-pointer hover:scale-105 transition-transform`}>
-                      {key === "tagList" ? `#${item}` : item}
-                    </Badge>
-                  </Link>
-                ))}
-              </div>
+        {article.platforms && article.platforms.length > 0 && (
+          <div>
+            <h3 className="text-lg font-semibold mb-2 flex items-center gap-2">
+              <Cpu className="w-5 h-5 text-warning" />
+              {t("platforms.title")}
+            </h3>
+            <div className="flex flex-wrap gap-2">
+              {article.platforms.map((platform, index) => (
+                <Link href={`/platforms/${encodeURLComponent(platform.name)}`} key={index}>
+                  <Badge variant="outline" className={`cursor-pointer hover:scale-105 transition-transform`}>
+                    {platform.name}
+                  </Badge>
+                </Link>
+              ))}
             </div>
-          );
-        })}
+          </div>
+        )}
+
+        {article.tags && article.tags.length > 0 && (
+          <div>
+            <h3 className="text-lg font-semibold mb-2 flex items-center gap-2">
+              <Tag className="w-5 h-5 text-primary" />
+              {t("tags.title")}
+            </h3>
+            <div className="flex flex-wrap gap-2">
+              {article.tags.map((tag, index) => (
+                <Link href={`/tag/${encodeURLComponent(tag.name)}`} key={index}>
+                  <Badge variant="outline" className={`cursor-pointer hover:scale-105 transition-transform`}>
+                    #{tag.name}
+                  </Badge>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {article.categories && article.categories.length > 0 && (
+          <div>
+            <h3 className="text-lg font-semibold mb-2 flex items-center gap-2">
+              <Folder className="w-5 h-5 text-secondary" />
+              {t("categories.title")}
+            </h3>
+            <div className="flex flex-wrap gap-2">
+              {article.categories.map((category, index) => (
+                <Link href={`/category/${encodeURLComponent(category.name)}`} key={index}>
+                  <Badge variant="outline" className={`cursor-pointer hover:scale-105 transition-transform`}>
+                    {category.name}
+                  </Badge>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
@@ -132,8 +146,8 @@ const MobileArticleInfo: React.FC<{ article: Article, formatDate: (date: string)
 interface ArticleContentProps {
   article: Article;
   slug: string;
+  articleId?: number;
   downloads: DownloadFile[];
-  initialComments: Comment[];
 }
 
 const fetcher = (url: string) => {
@@ -149,9 +163,9 @@ const fetcher = (url: string) => {
 const ArticleContent: React.FC<ArticleContentProps> = ({
   article,
   slug,
-  downloads: initialDownloads,
-  initialComments = [],
+  downloads,
 }) => {
+  console.log("Downloads prop in ArticleContent:", downloads);
   const t = useTranslations('ArticleContent');
   // Essential state
   const [isFavorited, setIsFavorited] = useState(article.favorited);
@@ -160,7 +174,6 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
   const [isCurrentUserAuthor, setIsCurrentUserAuthor] = useState(false);
   const [alert, setAlert] = useState<AlertState>({ open: false, message: "", severity: "success" });
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [downloads] = useState<DownloadFile[]>(initialDownloads);
   const [openDownloadDialog, setOpenDownloadDialog] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [newComment, setNewComment] = useState("");
@@ -178,7 +191,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
     return [...items].sort((a, b) => {
       let comparison = 0;
 
-      if (sortBy === "name") {
+      if (sortBy === "name" || !("createdAt" in a && "createdAt" in b)) {
         comparison = a.name.localeCompare(b.name);
       } else {
         comparison = new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
@@ -189,6 +202,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
   }, [sortBy, sortOrder]);
 
   const filteredDownloads = React.useMemo(() => {
+    if (!downloads) return [];
     const filtered = downloads.filter((item) =>
       item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       ("description" in item && typeof item.description === 'string' && item.description?.toLowerCase().includes(searchQuery.toLowerCase()))
@@ -244,13 +258,16 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
             </h5>
 
             <div className="space-y-2">
-              <div className={cn(
-                "flex items-center gap-2 text-sm",
-                isDarkMode ? "text-gray-400" : "text-gray-500"
-              )}>
-                <CalendarDays className="size-4" />
-                <span>{formatDate(item.createdAt)}</span>
-              </div>
+              {/* Only display createdAt if it exists (e.g., for TranslationFile) */}
+              {"createdAt" in item && (
+                <div className={cn(
+                  "flex items-center gap-2 text-sm",
+                  isDarkMode ? "text-gray-400" : "text-gray-500"
+                )}>
+                  <CalendarDays className="size-4" />
+                  <span>{formatDate(item.createdAt)}</span>
+                </div>
+              )}
 
               {"size" in item && typeof item.size === 'number' && (
                 <div className={cn(
@@ -429,19 +446,20 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
     immediatelyRender: false,
   });
 
-  const hasInitialComments = initialComments.length > 0;
+
 
   const { data: commentsData, error: commentsError, isLoading } = useSWR(
     `${API_BASE_URL}/api/articles/${slug}/comments`,
     fetcher,
     {
       refreshInterval: 60000,
-      fallbackData: { comments: initialComments },
-      revalidateOnMount: !hasInitialComments,
+      fallbackData: { comments: [] },
+      revalidateOnMount: true,
     }
   );
 
-  const [comments, setComments] = useState<Comment[]>(initialComments);
+
+  const [comments, setComments] = useState<Comment[]>([]);
   const [topCommenters, setTopCommenters] = useState<
     { username: string; count: number }[]
   >([]);
@@ -489,7 +507,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
       try {
         const decoded = jwtDecode<TokenPayload>(token);
         setIsAuthenticated(true);
-        setIsCurrentUserAuthor(decoded.username === article.author.username);
+        setIsCurrentUserAuthor(decoded.username === article.author.name);
       } catch {
         setIsAuthenticated(false);
       }
@@ -528,7 +546,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
       window.removeEventListener("resize", handleResize);
       window.removeEventListener("scroll", handleScroll);
     };
-  }, [article.id, slug, article.author.username]);
+  }, [article.id, slug, article.author.name]);
 
   useEffect(() => {
     if (editor) {
@@ -536,9 +554,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
     }
   }, [fontSize, editor]);
 
-  useEffect(() => {
-    setComments(initialComments);
-  }, [initialComments]);
+
 
   useEffect(() => {
     if (commentsData) {
@@ -600,7 +616,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
 
     try {
       const response = await fetch(
-        `${API_BASE_URL}/api/profiles/${article.author.username}/follow`,
+        `${API_BASE_URL}/api/profiles/${article.author.name}/follow`,
         {
           method: isFollowing ? "DELETE" : "POST",
           headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
@@ -619,7 +635,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
     } catch {
       showAlert("เกิดข้อผิดพลาดในการเชื่อมต่อ", "error");
     }
-  }, [isFollowing, article.author.username, showAlert]);
+  }, [isFollowing, article.author.name, showAlert]);
 
   const handleShare = useCallback(async () => {
     const shareData = {
@@ -706,8 +722,12 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
       day: "numeric",
     });
 
-  const encodeURLComponent = (value: string) =>
-    encodeURIComponent(value.trim()).replace(/%20/g, "%20").replace(/\//g, "%2F");
+  const encodeURLComponent = (value: string | undefined | null) => {
+    if (typeof value !== 'string') {
+      return '';
+    }
+    return encodeURIComponent(value.trim()).replace(/%20/g, "%20").replace(/\//g, "%2F");
+  };
   const wordCount = article.body.split(/\s+/).length;
   const readingTime = Math.ceil(wordCount / 200);
 
@@ -763,8 +783,8 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
                   <div className="card-body flex-row items-center gap-4">
                     <Image
                       loader={myImageLoader}
-                      src={article.author.image}
-                      alt={article.author.username}
+                      src={article.author.image || PLACEHOLDER_IMAGE}
+                      alt={article.author.name}
                       width={48}
                       height={48}
                       className="avatar rounded-full"
@@ -773,11 +793,11 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
                     <div>
                       <Link
                         href={`/profiles/${encodeURLComponent(
-                          article.author.username
+                          article.author.name
                         )}`}
                         className="text-lg font-semibold text-primary hover:underline"
                       >
-                        {article.author.username}
+                        {article.author.name}
                       </Link>
                       <p className="text-sm text-muted-foreground line-clamp-2">
                         {article.author.bio || t("noBio")}
@@ -842,23 +862,6 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
                 </motion.div>
 
                 <MobileArticleInfo article={article} formatDate={formatDate} encodeURLComponent={encodeURLComponent} />
-
-                {(downloads.length > 0) && (
-                  <Card className="md:hidden mt-4">
-                    <CardHeader>
-                      <CardTitle>{t("downloadsAndTranslations")}</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <Button
-                        className="w-full flex items-center justify-center gap-2"
-                        onClick={() => setOpenDownloadDialog(true)}
-                      >
-                        <Download className="w-5 h-5" /> {t("viewFiles")} (
-                        {downloads.length})
-                      </Button>
-                    </CardContent>
-                  </Card>
-                )}
               </main>
             </>
           ) : (
@@ -934,10 +937,10 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
                 isFavorited={isFavorited}
                 handleFavorite={handleFavorite}
                 formatDate={formatDate}
-                downloads={downloads}
                 translationFiles={[]}
                 setOpenDownloadDialog={setOpenDownloadDialog}
                 isDarkBackground={isDarkMode}
+                downloads={downloads}
               />
             </>
           )}

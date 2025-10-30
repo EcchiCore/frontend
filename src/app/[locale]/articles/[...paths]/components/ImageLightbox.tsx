@@ -2,9 +2,7 @@ import { useEffect, useCallback, useState } from "react";
 import Image from "next/image";
 import { ImageLightboxProps } from "./Interfaces";
 
-const myImageLoader = ({ src, width, quality }: { src: string; width: number; quality?: number }) => {
-  return `${src}?w=${width}&q=${quality || 75}`;
-};
+import myImageLoader from "@/lib/imageLoader";
 
 const ImageLightbox = ({
                          open,

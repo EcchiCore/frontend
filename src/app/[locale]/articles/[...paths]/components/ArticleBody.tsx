@@ -74,7 +74,7 @@ const ArticleBody: React.FC<ArticleBodyProps> = ({
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 600px"
                 onClick={() =>
                   handleOpenLightbox(
-                    article.images?.findIndex((img) => img === selectedImage) || 0
+                    article.images?.findIndex((img: { url: string }) => img.url === selectedImage) || 0
                   )}
                 onError={(e) => (e.currentTarget.src = PLACEHOLDER_IMAGE)}
               />
@@ -82,18 +82,18 @@ const ArticleBody: React.FC<ArticleBodyProps> = ({
           </Card>
 
           <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-7 gap-3">
-            {article.images.map((image, index) => (
+            {article.images.map((image: { url: string }, index: number) => (
               <div
                 key={index}
                 className={`relative w-full h-20 rounded-lg overflow-hidden cursor-pointer transition-all duration-200 hover:scale-105 shadow-md ${
-                  selectedImage === image
+                  selectedImage === image.url
                     ? "border-3 border-primary ring-2 ring-primary/50 shadow-lg"
                     : "border-2 border-base-content/20 hover:border-primary hover:shadow-lg"
                 }`}
-                onClick={() => setSelectedImage(image)}
+                onClick={() => setSelectedImage(image.url)}
               >
                 <Image
-                  src={image}
+                  src={image.url}
                   alt={`Thumbnail ${index + 1}`}
                   fill
                   className="object-cover"

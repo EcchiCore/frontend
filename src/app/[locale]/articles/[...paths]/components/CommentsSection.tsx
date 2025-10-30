@@ -1,7 +1,7 @@
 import React from "react";
 import Image from "next/image";
 import { CommentsSectionProps } from "./Interfaces";
-import myImageLoader from "../../../lib/imageLoader";
+import myImageLoader from "@/lib/imageLoader";
 import { Trash } from "lucide-react";
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';

@@ -5,6 +5,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { SidebarRightProps } from "./Interfaces";
+import { Article } from "@/types/article";
+
+const PLACEHOLDER_IMAGE = '/placeholder-image.png';
 
 
 
@@ -12,7 +15,6 @@ import {
   BookmarkIcon as BookmarkOutline,
   UserPlusIcon,
   CheckIcon,
-  CloudArrowDownIcon,
   EyeIcon,
   ClockIcon,
   TagIcon,
@@ -22,6 +24,7 @@ import {
 } from "@heroicons/react/24/outline";
 
 import { BookmarkIcon as BookmarkSolid } from "@heroicons/react/24/solid";
+import { Download } from "lucide-react";
 
 // shadcn/ui components
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -36,9 +39,8 @@ const SidebarRight: React.FC<SidebarRightProps> = ({
   isFavorited,
   handleFavorite,
   formatDate,
-  downloads,
-  translationFiles,
   setOpenDownloadDialog,
+  downloads,
 }) => {
   const t = useTranslations("sidebar");
 
@@ -79,8 +81,8 @@ const SidebarRight: React.FC<SidebarRightProps> = ({
           <div className="flex items-center gap-4">
             <div className="relative">
               <Image
-                src={article.author.image}
-                alt={article.author.username}
+                src={article.author.image || PLACEHOLDER_IMAGE}
+                alt={article.author.name || "Author avatar"}
                 width={56}
                 height={56}
                 className="rounded-full ring-2 ring-primary"
@@ -89,10 +91,10 @@ const SidebarRight: React.FC<SidebarRightProps> = ({
             </div>
             <div>
               <Link
-                href={`/profiles/${encodeURLComponent(article.author.username)}`}
+                href={`/profiles/${encodeURLComponent(article.author.name)}`}
                 className="text-lg font-bold text-primary hover:underline"
               >
-                {article.author.username}
+                {article.author.name}
               </Link>
               <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
                 {article.author.bio || t("author.noBio")}
@@ -124,6 +126,27 @@ const SidebarRight: React.FC<SidebarRightProps> = ({
         </CardContent>
       </Card>
 
+      {/* Downloads Card */}
+      {downloads && downloads.length > 0 && (
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <Download className="w-5 h-5 text-primary" />
+              <CardTitle>{t("downloads.title")}</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <Button
+              className="w-full flex items-center justify-center gap-2"
+              onClick={() => setOpenDownloadDialog(true)}
+            >
+              <Download className="w-5 h-5" />
+              {t("downloads.viewAll")}
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Article Info Card */}
       <Card>
         <CardHeader>
@@ -149,13 +172,13 @@ const SidebarRight: React.FC<SidebarRightProps> = ({
             <span className="text-sm font-semibold">{formatDate(article.updatedAt)}</span>
           </div>
 
-          {article.creator && (
+          {article.creators && article.creators.length > 0 && (
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-2">
                 <UserIcon className="w-4 h-4 text-muted-foreground" />
                 <span className="text-sm text-muted-foreground">{t("articleInfo.creator")}:</span>
               </div>
-              <span className="text-sm font-semibold text-right max-w-[60%] truncate">{article.creator}</span>
+              <span className="text-sm font-semibold text-right max-w-[60%] truncate">{article.creators[0]?.name}</span>
             </div>
           )}
 
@@ -179,63 +202,38 @@ const SidebarRight: React.FC<SidebarRightProps> = ({
             </div>
           )}
 
-          {article.version && (
+          {article.ver && (
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-2">
                 <span className="text-sm text-muted-foreground">{t("articleInfo.version")}:</span>
               </div>
-              <Badge variant="secondary">v{article.version}</Badge>
+              <Badge variant="secondary">v{article.ver}</Badge>
             </div>
           )}
         </CardContent>
       </Card>
 
-      {/* Downloads Card */}
-      {(downloads.length > 0 || translationFiles.length > 0) && (
-        <Card>
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <CloudArrowDownIcon className="w-5 h-5 text-success" />
-              <CardTitle>{t("downloads.title")}</CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <Button
-              variant="default"
-              className="w-full flex items-center justify-center gap-2"
-              onClick={() => setOpenDownloadDialog(true)}
-            >
-              <CloudArrowDownIcon className="w-5 h-5" />
-              {t("downloads.viewFiles", { count: downloads.length + translationFiles.length })}
-              <Badge variant="secondary" className="ml-2">
-                {downloads.length + translationFiles.length}
-              </Badge>
-            </Button>
-          </CardContent>
-        </Card>
-      )}
-
       {/* Platforms, Tags, Categories */}
-      {["platformList", "tagList", "categoryList"].map((key) => {
-        const list = article[key as keyof typeof article] as string[] | undefined;
+      {["platforms", "tags", "categories"].map((key) => {
+        const list = article[key as keyof typeof article] as { name: string }[] | undefined;
         if (!list || list.length === 0) return null;
 
         const iconMap: Record<string, React.ReactNode> = {
-          platformList: <CpuChipIcon className="w-5 h-5 text-warning" />,
-          tagList: <TagIcon className="w-5 h-5 text-primary" />,
-          categoryList: <FolderIcon className="w-5 h-5 text-secondary" />,
+          platforms: <CpuChipIcon className="w-5 h-5 text-warning" />,
+          tags: <TagIcon className="w-5 h-5 text-primary" />,
+          categories: <FolderIcon className="w-5 h-5 text-secondary" />,
         };
 
         const titleMap: Record<string, string> = {
-          platformList: t("platforms.title"),
-          tagList: t("tags.title"),
-          categoryList: t("categories.title"),
+          platforms: t("platforms.title"),
+          tags: t("tags.title"),
+          categories: t("categories.title"),
         };
 
         const linkPrefixMap: Record<string, string> = {
-          platformList: "/platforms/",
-          tagList: "/tag/",
-          categoryList: "/category/",
+          platforms: "/platforms/",
+          tags: "/tag/",
+          categories: "/category/",
         };
 
         return (
@@ -248,9 +246,9 @@ const SidebarRight: React.FC<SidebarRightProps> = ({
             </CardHeader>
             <CardContent className="flex flex-wrap gap-2">
               {list.map((item, index) => (
-                <Link href={`${linkPrefixMap[key]}${encodeURLComponent(item)}`} key={index}>
+                <Link href={`${linkPrefixMap[key]}${encodeURLComponent(item.name)}`} key={index}>
                   <Badge variant="outline" className={`cursor-pointer hover:scale-105 transition-transform`}>
-                    {key === "tagList" ? `#${item}` : item}
+                    {key === "tagList" ? `#${item.name}` : item.name}
                   </Badge>
                 </Link>
               ))}

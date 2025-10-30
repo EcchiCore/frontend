@@ -1,17 +1,35 @@
-export interface ArticleData {
-  id?: string;
+export type Article = {
+  id: number;
   title: string;
   slug: string;
   description: string;
   body: string;
-  ver: string;
-  status: 'DRAFT' | 'PUBLISHED';
-  engine: 'RENPY' | 'UNITY' | 'GODOT' | 'CONSTRUCT3';
-  mainImage: string;
-  backgroundImage: string;
-  coverImage: string;
-  images: string[];
-  tagList: string[];
-  categoryList: string[];
-  platformList: string[];
-}
+  ver: string | null;
+  creators: { name: string }[];
+  tags: { name: string }[];
+  platforms: { name: string }[];
+  createdAt: string;
+  updatedAt: string;
+  status: 'DRAFT' | 'PENDING_REVIEW' | 'PUBLISHED' | 'ARCHIVED' | 'NOT_APPROVED' | 'NEEDS_REVISION';
+  engine: 'RENPY' | 'RPGM' | 'UNITY' | 'UNREAL' | 'GODOT' | 'TyranoBuilder' | 'WOLFRPG' | 'KIRIKIRI' | 'FLASH' | 'BakinPlayer';
+  mainImage: string | null;
+  backgroundImage: string | null;
+  coverImage: string | null;
+  images: { url: string }[];
+  categories: { name: string }[];
+  author: {
+    name: string;
+    bio: string | null;
+    image: string | null;
+    backgroundImage: string | null;
+    following: boolean;
+    socialMediaLinks: { platform: string; url: string }[];
+  };
+  favorited: boolean;
+  favoritesCount: number;
+  sequentialCode: string | null;
+  downloads: { id: number; isActive: boolean; name: string; url: string; vipOnly: boolean }[];
+  mods: { downloadLink: string; description: string; creditTo: string; categories: { name: string }[]; images: { url: string }[]; name: string; status: string; version: string }[];
+  officialDownloadSources: { name: string; url: string; status: string }[];
+  version?: string;
+};

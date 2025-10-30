@@ -3,7 +3,7 @@ import Image from 'next/image';
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import ProfileClient from './ProfileClient';
-import myImageLoader from '../../lib/imageLoader';
+import myImageLoader from '@/lib/imageLoader';
 import SocialLinkItem from './components/SocialLinkItem';
 
 const PLACEHOLDER_IMAGE = '/placeholder-image.png';

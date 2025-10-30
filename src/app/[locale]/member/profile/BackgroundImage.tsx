@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useState } from "react";
-import myImageLoader from "../../lib/imageLoader";
+import myImageLoader from "@/lib/imageLoader";
 
 interface BackgroundImageProps {
   src: string;

@@ -1,45 +1,14 @@
 import { Dispatch, SetStateAction, RefObject } from "react"; // NEW: Import necessary React types
 import { SwipeableHandlers } from "react-swipeable"; // NEW: Import SwipeableHandlers type
+import { Article } from "@/types/article";
 
-export interface Article {
-  id: number;
-  title: string;
-  slug: string;
-  description: string;
-  body: string;
-  createdAt: string;
-  updatedAt: string;
-  status: string;
-  mainImage: string | { url?: string };
-  coverImage: string | { url?: string };
-  backgroundImage: string | { url?: string };
-  images: string[];
-  tagList: string[];
-  categoryList: string[];
-  platformList: string[];
-  creator?: string;
-  author: {
-    username: string;
-    bio: any;
-    image: any;
-    following: boolean;
-  };
-  favorited: boolean;
-  favoritesCount: number;
-  ver?: string;
-  sequentialCode?: string;
-  engine?: string; // Included here
-  version?: number; // Included here
-}
 
-export interface ArticleResponse {
-  article: Article;
-}
 export interface DownloadFile {
   id: number;
   name: string;
   url: string;
-  createdAt: string;
+  isActive: boolean;
+  vipOnly: boolean;
 }
 
 export interface TranslationFile {
@@ -141,10 +110,10 @@ export interface SidebarRightProps {
   isFavorited: boolean;
   handleFavorite: () => void;
   formatDate: (date: string) => string;
-  downloads: DownloadFile[];
-  translationFiles: TranslationFile[];
   setOpenDownloadDialog: (open: boolean) => void;
   isDarkBackground: boolean; // Add this
+  downloads: Article["downloads"];
+  translationFiles: TranslationFile[];
 }
 
 export interface CommentsSectionProps {

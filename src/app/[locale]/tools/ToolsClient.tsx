@@ -2,7 +2,6 @@
 
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import {
-  ExternalLink,
   Download,
   Smartphone,
   Globe,
@@ -10,7 +9,6 @@ import {
   XCircle,
   Star,
   Calendar,
-  User,
   Gamepad2,
   Languages,
   Wrench,
@@ -20,17 +18,17 @@ import {
   Shield,
   Zap,
   FileText,
-  Image,
+  Image as LucideImage,
   Music,
   Film,
   MessageSquare,
   Settings,
   Box
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Badge } from '@/components/ui/badge';
 import { JSX, useMemo, useState } from 'react';
-import { Tool, ToolVersion } from '@/types/tool';
+import { Tool } from '@/types/tool';
 import { Button } from '@/components/ui/button';
 
 // Helper function to get YouTube embed URL
@@ -67,7 +65,7 @@ const iconMap: { [key: string]: { icon: JSX.Element; color: string } } = {
   Shield: { icon: <Shield className="h-8 w-8" />, color: 'text-emerald-500' },
   Zap: { icon: <Zap className="h-8 w-8" />, color: 'text-yellow-500' },
   FileText: { icon: <FileText className="h-8 w-8" />, color: 'text-slate-500' },
-  Image: { icon: <Image className="h-8 w-8" />, color: 'text-violet-500' },
+  Image: { icon: <LucideImage className="h-8 w-8" />, color: 'text-violet-500' },
   Music: { icon: <Music className="h-8 w-8" />, color: 'text-fuchsia-500' },
   Film: { icon: <Film className="h-8 w-8" />, color: 'text-rose-500' },
   MessageSquare: { icon: <MessageSquare className="h-8 w-8" />, color: 'text-sky-500' },

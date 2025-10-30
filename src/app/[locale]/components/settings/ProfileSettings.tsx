@@ -3,7 +3,7 @@
 import React from 'react';
 import Image from 'next/image';
 import { User, Mail, FileText, ImageIcon } from 'lucide-react';
-import imageLoader from '../../lib/imageLoader';
+import imageLoader from '@/lib/imageLoader';
 
 interface UserData {
   username: string;

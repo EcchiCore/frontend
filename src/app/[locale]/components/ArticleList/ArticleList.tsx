@@ -5,7 +5,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Article } from './article';
-import imageLoader from '@/app/[locale]/lib/imageLoader';
+import imageLoader from '@/lib/imageLoader';
 
 interface ArticleListProps {
   articles: Article[];

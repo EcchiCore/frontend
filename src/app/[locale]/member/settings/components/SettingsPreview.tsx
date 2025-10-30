@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import myImageLoader from '../../../lib/imageLoader';
+import myImageLoader from '@/lib/imageLoader';
 
 const PLACEHOLDER_IMAGE = '/placeholder-image.png';
 

@@ -1,16 +1,28 @@
 "use client"
 
-import type React from "react"
-import { useState, useEffect, useCallback, useMemo } from "react"
+import React, { useState, useEffect, useCallback, useMemo } from "react"
 import Image from "next/image"
 import { ChevronLeft, ChevronRight, X, ZoomIn, ZoomOut, RotateCcw, Download, Maximize2, Star } from "lucide-react"
-import { Article } from './Interfaces'
-import myImageLoader from "../../../lib/imageLoader"
+import { Article } from "@/types/article";
+import myImageLoader from "@/lib/imageLoader"
 
 interface ArticleTitleMetaProps {
   article: Article
   isDarkMode: boolean
 }
+
+const MemoizedModalImage: React.FC<{ src: string; alt: string; fill: boolean; sizes: string; className: string; loader: any }> = React.memo(({ src, alt, fill, sizes, className, loader }) => (
+  <Image
+    src={src}
+    alt={alt}
+    fill={fill}
+    sizes={sizes}
+    className={className}
+    loader={loader}
+  />
+));
+
+MemoizedModalImage.displayName = 'MemoizedModalImage';
 
 const ArticleTitleMeta: React.FC<ArticleTitleMetaProps> = ({ article, isDarkMode }) => {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0)
@@ -56,9 +68,11 @@ const ArticleTitleMeta: React.FC<ArticleTitleMetaProps> = ({ article, isDarkMode
 
   const handleImageError = (index: number) => setImageErrors(prev => new Set(prev).add(index))
 
-  const getImageSrc = useCallback((src: string, index: number) => {
-    return imageErrors.has(index) || src.toLowerCase().endsWith(".gif") ? src : src
-  }, [imageErrors])
+  const getImageSrc = useCallback((image: { url: string } | null | undefined) => {
+    const src = image?.url;
+    if (typeof src !== 'string' || !src) return null;
+    return src;
+  }, [])
 
   const preloadImage = useCallback((src: string, index: number) => {
     if (preloadedImages.has(index)) return
@@ -72,8 +86,10 @@ const ArticleTitleMeta: React.FC<ArticleTitleMetaProps> = ({ article, isDarkMode
       handleImageError(index)
       if (index === selectedImageIndex) setIsLoading(false)
     }
-    img.src = getImageSrc(src, index)
-  }, [preloadedImages, selectedImageIndex, getImageSrc])
+    const imageSrc = getImageSrc(article.images[index]);
+    if (!imageSrc) return;
+    img.src = imageSrc;
+  }, [preloadedImages, selectedImageIndex, getImageSrc, article.images])
 
   // Optimized preloading logic
   useEffect(() => {
@@ -82,7 +98,7 @@ const ArticleTitleMeta: React.FC<ArticleTitleMetaProps> = ({ article, isDarkMode
     const currentIndex = isModalOpen ? modalImageIndex : selectedImageIndex
     const totalImages = imageCount
 
-    preloadImage(article.images[currentIndex], currentIndex)
+    preloadImage(article.images[currentIndex].url, currentIndex)
 
     const getPreloadCount = () => {
       if (typeof window === "undefined") return 3
@@ -111,7 +127,7 @@ const ArticleTitleMeta: React.FC<ArticleTitleMetaProps> = ({ article, isDarkMode
     }
 
     indicesToPreload.forEach((index, i) => {
-      setTimeout(() => preloadImage(article.images[index], index), i * 50)
+      setTimeout(() => preloadImage(article.images[index].url, index), i * 50)
     })
   }, [selectedImageIndex, modalImageIndex, isModalOpen, hasImages, imageCount, preloadImage, article.images])
 
@@ -155,7 +171,8 @@ const ArticleTitleMeta: React.FC<ArticleTitleMetaProps> = ({ article, isDarkMode
 
   const downloadImage = async () => {
     if (!hasImages) return
-    const imageUrl = getImageSrc(article.images[modalImageIndex], modalImageIndex)
+    const imageUrl = getImageSrc(article.images[modalImageIndex])
+    if (!imageUrl) return;
     try {
       const response = await fetch(imageUrl)
       const blob = await response.blob()
@@ -225,8 +242,8 @@ const ArticleTitleMeta: React.FC<ArticleTitleMetaProps> = ({ article, isDarkMode
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-8">
           <div className="flex-1 space-y-2">
             <h1 className={`${styles.title} text-2xl sm:text-3xl`}>{article.title}</h1>
-            {article.creator && (
-              <p className={subtitleClass}>Creator / Studio: <span className={subtitleValueClass}>{article.creator}</span></p>
+            {article.creators && article.creators.length > 0 && (
+              <p className={subtitleClass}>Creator / Studio: <span className={subtitleValueClass}>{article.creators[0]?.name}</span></p>
             )}
           </div>
           {article.sequentialCode && (
@@ -246,8 +263,8 @@ const ArticleTitleMeta: React.FC<ArticleTitleMetaProps> = ({ article, isDarkMode
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-6 mb-10">
         <div className="flex-1">
           <h1 className={`${styles.title} mb-4`}>{article.title}</h1>
-          {article.creator && (
-            <p className={`${subtitleClass} mb-2`}>Creator / Studio: <span className={subtitleValueClass}>{article.creator}</span></p>
+          {article.creators && article.creators.length > 0 && (
+            <p className={`${subtitleClass} mb-2`}>Creator / Studio: <span className={subtitleValueClass}>{article.creators[0]?.name}</span></p>
           )}
           <div className="flex items-center gap-4">
             <span className={`text-sm font-medium ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
@@ -281,17 +298,22 @@ const ArticleTitleMeta: React.FC<ArticleTitleMetaProps> = ({ article, isDarkMode
           )}
 
           <div className="relative w-full h-64 sm:h-80 md:h-96 lg:h-[32rem] xl:h-[36rem]">
-            <Image
-              src={getImageSrc(article.images[selectedImageIndex], selectedImageIndex)}
-              alt={`${article.title} - Image ${selectedImageIndex + 1}`}
-              fill
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 90vw, 80vw"
-              className="object-cover transition-all duration-700 group-hover:scale-105"
-              onError={() => handleImageError(selectedImageIndex)}
-              onLoad={() => setIsLoading(false)}
-              priority={selectedImageIndex === 0}
-              loader={myImageLoader}
-            />
+            {(() => {
+              const mainImageSrc = getImageSrc(article.images[selectedImageIndex]);
+              return mainImageSrc && (
+                <Image
+                  src={mainImageSrc}
+                  alt={`${article.title} - Image ${selectedImageIndex + 1}`}
+                  fill
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 90vw, 80vw"
+                  className="object-cover transition-all duration-700 group-hover:scale-105"
+                  onError={() => handleImageError(selectedImageIndex)}
+                  onLoad={() => setIsLoading(false)}
+                  priority={selectedImageIndex === 0}
+                  loader={myImageLoader}
+                />
+              );
+            })()}
           </div>
 
           <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -341,15 +363,20 @@ const ArticleTitleMeta: React.FC<ArticleTitleMetaProps> = ({ article, isDarkMode
                   onClick={() => handleThumbnailSelect(index)}
                   className={`${styles.thumbnail(selectedImageIndex === index)} w-20 sm:w-24 md:w-28 lg:w-32 xl:w-36`}
                 >
-                  <Image
-                    src={getImageSrc(image, index)}
-                    alt={`Thumbnail ${index + 1}`}
-                    fill
-                    sizes="(max-width: 640px) 25vw, (max-width: 768px) 16.67vw, (max-width: 1024px) 12.5vw, 8.33vw"
-                    className="object-cover transition-transform duration-300 hover:scale-110"
-                    onError={() => handleImageError(index)}
-                    loader={myImageLoader}
-                  />
+                  {(() => {
+                    const thumbnailImageSrc = getImageSrc(image);
+                    return thumbnailImageSrc && (
+                      <Image
+                        src={thumbnailImageSrc}
+                        alt={`Thumbnail ${index + 1}`}
+                        fill
+                        sizes="(max-width: 640px) 25vw, (max-width: 768px) 16.67vw, (max-width: 1024px) 12.5vw, 8.33vw"
+                        className="object-cover transition-transform duration-300 hover:scale-110"
+                        onError={() => handleImageError(index)}
+                        loader={myImageLoader}
+                      />
+                    );
+                  })()}
 
                   {selectedImageIndex === index && (
                     <div className="absolute inset-0 bg-violet-500/20 flex items-center justify-center">
@@ -449,13 +476,19 @@ const ArticleTitleMeta: React.FC<ArticleTitleMetaProps> = ({ article, isDarkMode
               onDoubleClick={handleDoubleClick}
               onTouchEnd={handleTouchEnd}
             >
-              <Image
-                src={getImageSrc(article.images[modalImageIndex], modalImageIndex)}
-                alt={`${article.title} - Image ${modalImageIndex + 1}`}
-                fill
-                sizes="100vw"
-                className="object-contain"
+            {(() => {
+              const modalImageSrc = getImageSrc(article.images[modalImageIndex]);
+              return modalImageSrc && (
+                <MemoizedModalImage
+                  src={modalImageSrc}
+                  alt={`${article.title} - Image ${modalImageIndex + 1}`}
+                  fill
+                  sizes="100vw"
+                  className="object-contain"
+                  loader={myImageLoader}
                 />
+              );
+            })()}
             </div>
           </div>
         </div>
