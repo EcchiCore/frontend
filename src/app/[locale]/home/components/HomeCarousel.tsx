@@ -9,9 +9,9 @@ interface Article {
   id: number;
   title: string;
   slug: string;
-  mainImage: string;
-  coverImage?: string;
-  backgroundImage?: string;
+  mainImage: string | null;
+  coverImage: string | null;
+  backgroundImage: string | null;
   description: string;
 }
 
@@ -84,7 +84,7 @@ export default function HomeCarousel({ articles, loading }: HomeCarouselProps) {
 
               return (
                 <div className="w-full flex-shrink-0" key={article.id}>
-                  <Link href={`/articles/${article.slug}`}>
+                  <Link href={`/articles/${article.slug}?id=${article.id}`}>
                     <div className="relative w-full h-96 md:h-[500px]">
                       <ImageContent />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent flex flex-col justify-end p-8 md:p-12">

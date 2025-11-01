@@ -67,7 +67,7 @@ export default function FeaturedPosts({ posts, loading }: FeaturedPostsProps) {
         const src = typeof imageUrl === 'string' ? imageUrl : (imageUrl && typeof imageUrl === 'object' && 'url' in imageUrl) ? (imageUrl as { url?: string })?.url : null;
 
         return (
-          <Link href={`/articles/${post.slug}`} key={post.id}>
+          <Link href={`/articles/${post.slug}?id=${post.id}`} key={post.id}>
             <Card className="hover:shadow-xl transition-all duration-300 cursor-pointer border-border/50 hover:border-primary/20 group">
               <CardContent className="p-6">
                 <div className="flex space-x-4">

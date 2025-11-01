@@ -24,7 +24,7 @@ export async function fetchArticles(params: Record<string, string | string[] | u
   const filter: Record<string, any> = {};
   if (resolvedParams) {
     Object.entries(resolvedParams).forEach(([k, v]) => {
-      if (typeof v === "string" && v && k !== "page" && k !== "pageSize") {
+      if (typeof v === "string" && v && k !== "page" && k !== "pageSize" && k !== "status") {
         if (k === "favorited") {
           if (v === "true") {
             filter[k] = true;

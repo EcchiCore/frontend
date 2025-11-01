@@ -11,10 +11,11 @@ import HomeCarousel from './components/HomeCarousel';
 import CategoriesCard from './components/CategoriesCard';
 import { generatePageMetadata } from '@/utils/metadataUtils';
 import { getTranslations } from 'next-intl/server';
-import { headers } from 'next/headers';
 import { locales } from '@/app/[locale]/lib/navigation';
 import { getActiveEventTheme } from '@/lib/event-theme';
 import VtuberCanvas from '@/components/pixi/Vtuber';
+import { fetchArticles } from '@/lib/api';
+import { Article } from '@/types/article';
 
 // Font configuration
 const inter = Inter({ subsets: ['latin'] });
@@ -41,25 +42,21 @@ export async function generateMetadata({ params }: { params: { locale?: string }
     contentPath: 'home',
   });
 }
+
 // Server-side data fetching
 async function fetchHomeData(locale: string) {
-  const headersList = await headers();
-  const host = headersList.get('host');
-  const protocol = host?.includes('localhost') ? 'http' : 'https';
-  const baseUrl = `${protocol}://${host}`;
   try {
-    const response = await fetch(`${baseUrl}/api/home`, {
-      headers: {
-        'Accept-Language': locale,
-      },
-      next: { revalidate: 3600 }, // Revalidate every hour
-    });
+    const [carouselData, featuredData, latestData] = await Promise.all([
+      fetchArticles({ limit: '3', status: 'PUBLISHED' }),
+      fetchArticles({ platform: 'windows', status: 'PUBLISHED' }),
+      fetchArticles({ status: 'PUBLISHED' }),
+    ]);
 
-    if (!response.ok) {
-      throw new Error('Failed to fetch home page data');
-    }
-
-    return await response.json();
+    return {
+      carousel: carouselData.items || [],
+      featured: featuredData.items || [],
+      latest: latestData.items || [],
+    };
   } catch (error) {
     console.error('Error fetching home page data:', error);
     return { carousel: [], featured: [], latest: [] };
@@ -356,7 +353,7 @@ export default async function HomePage({ params }: { params: { locale: string } 
                   Twitter
                 </a></li>
                 <li><a href="#" className="text-slate-300 hover:text-primary transition-colors duration-200 flex items-center group">
-                  <span className="w-1 h-1 bg-primary rounded-full mr-2 group-hover:scale-150 transition-transform"></span>
+                  <span className="w-1 h-1 bg-primary rounded-full mr-2 group-hover:.scale-150 transition-transform"></span>
                   LINE
                 </a></li>
                 <li><a href="#" className="text-slate-300 hover:text-primary transition-colors duration-200 flex items-center group">
