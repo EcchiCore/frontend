@@ -468,7 +468,8 @@
     },
     "downloads": {
       "title": "Downloads and translations",
-      "viewFiles": "View files ({count})"
+      "viewFiles": "View files ({count})",
+      "viewAll": "View All"
     },
     "platforms": {
       "title": "Platforms"

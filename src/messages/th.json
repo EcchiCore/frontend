@@ -468,7 +468,8 @@
     },
     "downloads": {
       "title": "ดาวน์โหลดและการแปล",
-      "viewFiles": "ดูไฟล์ ({count})"
+      "viewFiles": "ดูไฟล์ ({count})",
+      "viewAll": "ดูทั้งหมด"
     },
     "platforms": {
       "title": "แพลตฟอร์ม"

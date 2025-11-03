@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.chanomhub.online';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.chanomhub.online/api/graphql';
 
 interface ModerationRequest {
   id: number;
@@ -43,34 +43,86 @@ const ModerationPanel: React.FC = () => {
     return cookieValue ? decodeURIComponent(cookieValue) : null;
   };
 
-  const fetchPendingRequests = useCallback(async () => {
+  const fetchData = useCallback(async (query: string, variables: any = {}) => {
     try {
-      setLoading(true);
       const token = getCookie('token');
       if (!token) {
         throw new Error('Authorization token not found. Please log in.');
       }
 
-      const response = await fetch(`${API_URL}/api/moderation/requests?status=PENDING`, {
+      const response = await fetch(API_URL, {
+        method: 'POST',
         headers: {
+          'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
+        },
+        body: JSON.stringify({ query, variables }),
       });
 
       if (!response.ok) {
-        throw new Error(`API error: ${response.statusText}`);
+        const data = await response.json();
+        throw new Error(data.errors?.[0]?.message || `HTTP Error: ${response.status}`);
       }
 
-      const data: ModerationRequest[] = await response.json();
-      setPendingRequests(data);
+      const data = await response.json();
+      if (data.errors) {
+        throw new Error(data.errors[0].message);
+      }
+      return data.data;
+    } catch (err: any) {
+      throw new Error(err.message || "An error occurred while connecting to the server");
+    }
+  }, []);
+
+  const fetchPendingRequests = useCallback(async () => {
+    try {
+      setLoading(true);
+      const query = `
+        query GetPendingModerationRequests {
+          moderate {
+            moderationRequests(status: PENDING) {
+              id
+              entityId
+              entityType
+              status
+              requestNote
+              reviewNote
+              createdAt
+              updatedAt
+              requester {
+                id
+                name
+                image
+              }
+              reviewer {
+                id
+                name
+                image
+              }
+              entityDetails {
+                ... on DownloadLinkDetails {
+                  id
+                  name
+                  url
+                  status
+                }
+                ... on OtherDetails {
+                  id
+                }
+              }
+            }
+          }
+        }
+      `;
+      const result = await fetchData(query);
+      setPendingRequests(result?.moderate.moderationRequests || []);
       setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch pending requests');
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [fetchData]);
 
   useEffect(() => {
     fetchPendingRequests();
@@ -78,24 +130,23 @@ const ModerationPanel: React.FC = () => {
 
   const handleModerate = async (requestId: number, status: 'APPROVED' | 'REJECTED' | 'NEEDS_REVISION', reviewNote: string = '') => {
     try {
-      const token = getCookie('token');
-      if (!token) {
-        throw new Error('Authorization token not found. Please log in.');
-      }
+      const mutation = `
+        mutation UpdateModerationStatus($input: UpdateModerationStatusInput!) {
+          updateModerationStatus(input: $input) {
+            id
+            status
+            reviewNote
+          }
+        }
+      `;
 
-      const response = await fetch(`${API_URL}/api/moderation/requests/${requestId}`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ status, reviewNote })
+      await fetchData(mutation, {
+        input: {
+          id: requestId.toString(),
+          status,
+          reviewNote,
+        }
       });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to update moderation request');
-      }
 
       // Refresh the list of pending requests
       fetchPendingRequests();

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { Search, Eye, Check, X, Clock, Trash2, AlertTriangle, FileText, Link, MessageCircle, RefreshCw, AlertCircle } from 'lucide-react';
 import { useAuthContext } from '../providers/AuthProvider';
@@ -64,9 +63,13 @@ interface Statistics {
 }
 
 // API base URL
-const API_BASE_URL = 'https://api.chanomhub.online/api';
+const API_BASE_URL = 'https://api.chanomhub.online/api/graphql';
 
 const StatusBadge = ({ status }: { status: RequestStatus | EntityStatus }) => {
+  if (!status) {
+    return null;
+  }
+
   const getStatusVariant = (status: string) => {
     switch (status) {
       case 'PENDING':
@@ -133,7 +136,7 @@ export const ModerationPage: React.FC = () => {
   };
 
   // API call helper
-  const fetchData = useCallback(async (url: string, options: RequestInit = {}) => {
+  const fetchData = useCallback(async (query: string, variables: any = {}) => {
     try {
       const token = document.cookie
         .split('; ')
@@ -145,35 +148,27 @@ export const ModerationPage: React.FC = () => {
         return null;
       }
 
-      const response = await fetch(`${API_BASE_URL}${url}`, {
-        ...options,
+      const response = await fetch(API_BASE_URL, {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-          Accept: 'application/json',
-          ...options.headers,
+          'Authorization': `Bearer ${token}`,
         },
-        credentials: 'include',
+        body: JSON.stringify({ query, variables }),
       });
 
       if (!response.ok) {
-        if (response.status === 403) {
-          const data = await response.json();
-          throw new Error(data.message || 'You do not have permission to perform this action');
-        } else if (response.status === 401) {
-          throw new Error('Session expired: Please log in again');
-        } else if (response.status === 404) {
-          throw new Error('Resource not found');
-        } else if (response.status === 204) {
-          return { success: true };
-        }
-        throw new Error(`HTTP Error: ${response.status}`);
+        const data = await response.json();
+        throw new Error(data.errors?.[0]?.message || `HTTP Error: ${response.status}`);
       }
 
       const data = await response.json();
-      return data;
+      if (data.errors) {
+        throw new Error(data.errors[0].message);
+      }
+      return data.data;
     } catch (err: any) {
-      throw new Error(err.message || 'An error occurred while connecting to the server');
+      throw new Error(err.message || "An error occurred while connecting to the server");
     }
   }, []);
 
@@ -183,15 +178,101 @@ export const ModerationPage: React.FC = () => {
       setLoading(true);
       setError(null);
 
+      const pendingQuery = `
+        query GetPendingModerationRequests {
+          moderate {
+            moderationRequests(status: PENDING) {
+              id
+              entityId
+              entityType
+              status
+              requestNote
+              reviewNote
+              createdAt
+              updatedAt
+              requester {
+                id
+                name
+                image
+              }
+              reviewer {
+                id
+                name
+                image
+              }
+              entityDetails {
+                ... on ArticleDetails {
+                  id
+                  title
+                  status
+                }
+                ... on DownloadLinkDetails {
+                  id
+                  name
+                  url
+                  status
+                }
+                ... on OtherDetails {
+                  id
+                }
+              }
+            }
+          }
+        }
+      `;
+
+      const needsRevisionQuery = `
+        query GetNeedsRevisionModerationRequests {
+          moderate {
+            moderationRequests(status: NEEDS_REVISION) {
+              id
+              entityId
+              entityType
+              status
+              requestNote
+              reviewNote
+              createdAt
+              updatedAt
+              requester {
+                id
+                name
+                image
+              }
+              reviewer {
+                id
+                name
+                image
+              }
+              entityDetails {
+                ... on ArticleDetails {
+                  id
+                  title
+                  status
+                }
+                ... on DownloadLinkDetails {
+                  id
+                  name
+                  url
+                  status
+                }
+                ... on OtherDetails {
+                  id
+                }
+              }
+            }
+          }
+        }
+      `;
+
       const [pendingResult, needsRevisionResult] = await Promise.all([
-        fetchData('/moderation/requests?status=PENDING'),
-        fetchData('/moderation/requests?status=NEEDS_REVISION')
+        fetchData(pendingQuery),
+        fetchData(needsRevisionQuery)
       ]);
 
       if (pendingResult || needsRevisionResult) {
         const combinedRequests = [
-          ...(pendingResult || []),
-          ...(needsRevisionResult || []),
+          ...(pendingResult?.moderate.moderationRequests || []),
+          ...(needsRevisionResult?.moderate.moderationRequests || []),
         ];
         setRequests(combinedRequests);
       }
@@ -293,17 +374,22 @@ export const ModerationPage: React.FC = () => {
       setLoading(true);
       setError(null);
 
-      if (action === 'APPROVED' && selectedRequest.entityType === 'ARTICLE' && selectedRequest.entityDetails?.status !== ArticleStatus.PENDING_REVIEW) {
-        setError('Cannot approve: Article must be in PENDING_REVIEW status');
-        return;
-      }
+      const mutation = `
+        mutation UpdateModerationStatus($input: UpdateModerationStatusInput!) {
+          updateModerationStatus(input: $input) {
+            id
+            status
+            reviewNote
+          }
+        }
+      `;
 
-      const result = await fetchData(`/moderation/requests/${selectedRequest.id}`, {
-        method: 'PUT',
-        body: JSON.stringify({
+      const result = await fetchData(mutation, {
+        input: {
+          id: selectedRequest.id.toString(),
           status: action,
           reviewNote: reviewComment,
-        }),
+        }
       });
 
       if (result) {
@@ -311,7 +397,7 @@ export const ModerationPage: React.FC = () => {
         setShowReviewModal(false);
         setSelectedRequest(null);
         setReviewComment('');
-        await loadRequests();
+        await loadRequests(); // Refresh data
       }
     } catch (err: any) {
       setError(err.message);
@@ -332,11 +418,15 @@ export const ModerationPage: React.FC = () => {
       setLoading(true);
       setError(null);
 
-      const result = await fetchData(`/moderation/requests/${requestId}`, {
-        method: 'DELETE',
-      });
+      const mutation = `
+        mutation DeleteModerationRequest($id: ID!) {
+          deleteModerationRequest(id: $id)
+        }
+      `;
 
-      if (result?.success) {
+      const result = await fetchData(mutation, { id: requestId.toString() });
+
+      if (result) {
         setSuccess('Moderation request deleted successfully');
         await loadRequests();
       }
@@ -804,18 +894,17 @@ export const ModerationPage: React.FC = () => {
                 </Alert>
               )}
 
-              {selectedRequest.entityType === 'ARTICLE' &&
-                selectedRequest.entityDetails &&
-                selectedRequest.entityDetails.status !== ArticleStatus.PENDING_REVIEW &&
-                selectedRequest.status === 'PENDING' && (
-                  <Alert variant="destructive">
-                    <AlertTriangle className="w-4 h-4" />
-                    <AlertDescription>
-                      This article is currently {selectedRequest.entityDetails.status}. It must be in PENDING_REVIEW status to be approved.
-                    </AlertDescription>
-                  </Alert>
-                )}
-
+                              {selectedRequest.entityType === 'ARTICLE' &&
+                              selectedRequest.entityDetails &&
+                              (selectedRequest.entityDetails.status !== ArticleStatus.PENDING_REVIEW && selectedRequest.entityDetails.status !== 'PENDING') &&
+                              selectedRequest.status === 'PENDING' && (
+                                <Alert variant="destructive">
+                                  <AlertTriangle className="w-4 h-4" />
+                                  <AlertDescription>
+                                    This article is currently {selectedRequest.entityDetails.status}. It must be in PENDING or PENDING_REVIEW status to be approved.
+                                  </AlertDescription>
+                                </Alert>
+                              )}
               <div className="space-y-2">
                 <Label htmlFor="review-comment" className="font-semibold">Review Comment</Label>
                 <Textarea
@@ -860,7 +949,9 @@ export const ModerationPage: React.FC = () => {
                 !selectedRequest ||
                 selectedRequest.status === 'NEEDS_REVISION' ||
                 (selectedRequest.entityType === 'ARTICLE' &&
-                  (!selectedRequest.entityDetails || selectedRequest.entityDetails.status !== ArticleStatus.PENDING_REVIEW))
+                  (!selectedRequest.entityDetails ||
+                    (selectedRequest.entityDetails.status !== ArticleStatus.PENDING_REVIEW &&
+                      selectedRequest.entityDetails.status !== 'PENDING')))
               }
             >
               {loading ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Check className="w-4 h-4 mr-1" />}

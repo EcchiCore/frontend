@@ -74,7 +74,7 @@ export const ArticlesPage: React.FC = () => {
   const filteredArticles = articles.filter(article =>
     article.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
     article.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    article.author.username.toLowerCase().includes(searchTerm.toLowerCase())
+    (article.author.name && article.author.name.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   // Handle favorite toggle
@@ -290,14 +290,14 @@ export const ArticlesPage: React.FC = () => {
                       <Avatar className="h-6 w-6">
                         <AvatarImage 
                           src={article.author.image ?? ''} 
-                          alt={article.author.username}
+                          alt={article.author.name}
                         />
                         <AvatarFallback className="text-xs">
-                          {article.author.username.charAt(0).toUpperCase()}
+                          {article.author.name && article.author.name.charAt(0).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
                       <span className="text-sm text-muted-foreground">
-                        {article.author.username}
+                        {article.author.name}
                       </span>
                       <span className="text-xs text-muted-foreground">•</span>
                       <span className="text-xs text-muted-foreground">
@@ -328,7 +328,7 @@ export const ArticlesPage: React.FC = () => {
                     </p>
 
                     {/* Tags */}
-                    {article.tagList.length > 0 && (
+                    {(article.tagList && article.tagList.length > 0) && (
                       <div className="flex flex-wrap gap-1 mb-3">
                         {article.tagList.slice(0, 5).map((tag, index) => (
                           <Badge key={index} variant="outline" className="text-xs">
@@ -371,7 +371,7 @@ export const ArticlesPage: React.FC = () => {
                         </Button>
 
                         {/* Show edit/delete only for own articles */}
-                        {!feedMode && article.author.username === user?.username && (
+                        {!feedMode && article.author.name === user?.username && (
                           <>
                             {article.status === ArticleStatus.DRAFT && (
                               <Button

@@ -13,7 +13,7 @@ import { generatePageMetadata } from '@/utils/metadataUtils';
 import { getTranslations } from 'next-intl/server';
 import { locales } from '@/app/[locale]/lib/navigation';
 import { getActiveEventTheme } from '@/lib/event-theme';
-import VtuberCanvas from '@/components/pixi/Vtuber';
+import VtuberPixi from '@/components/pixi/Vtuber';
 import { fetchArticles } from '@/lib/api';
 import { Article } from '@/types/article';
 
@@ -81,7 +81,7 @@ export default async function HomePage({ params }: { params: { locale: string } 
 
       <main className="bg-background">
         <div className="fixed bottom-0 right-0 z-50 hidden md:block">
-          <VtuberCanvas />
+
         </div>
         <section className="relative overflow-hidden text-center py-16 px-4">
           {heroImage && (

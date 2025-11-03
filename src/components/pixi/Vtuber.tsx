@@ -1,241 +1,315 @@
-'use client';
+"use client";
 
-import { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import Script from 'next/script';
 
-const VtuberCanvas = ({ width = 400, height = 400 }) => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-  const [isBlinking, setIsBlinking] = useState(false);
-  const [isSpeaking, setIsSpeaking] = useState(false);
-  const animationRef = useRef<number | null>(null);
-  const timeRef = useRef(0);
+const VtuberPixi = ({
+  modelUrl = "https://cdn.jsdelivr.net/gh/guansss/pixi-live2d-display/test/assets/haru/haru_greeter_t03.model3.json",
+  width = 800,
+  height = 600,
+  backgroundColor = 0x1a1a2e,
+  scale = 0.3,
+  showUI = true,
+  autoInteract = true
+}) => {
+  const containerRef = useRef(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [modelInfo, setModelInfo] = useState(null);
+  const [scriptsLoaded, setScriptsLoaded] = useState({
+    cubism2: false,
+    cubism4: false,
+  });
 
-  // Track mouse movement
+  // Determine model type from URL
+  const isCubism4 = modelUrl.includes('.model3.json');
+  const isCubism2 = modelUrl.includes('.model.json') && !isCubism4;
+
   useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      const canvas = canvasRef.current;
-      if (canvas) {
-        const rect = canvas.getBoundingClientRect();
-        setMousePos({
-          x: e.clientX - rect.left,
-          y: e.clientY - rect.top
+    if (!containerRef.current || typeof window === 'undefined') return;
+
+    // Check if we need to wait for scripts
+    const needsCubism2 = isCubism2 && !scriptsLoaded.cubism2;
+    const needsCubism4 = isCubism4 && !scriptsLoaded.cubism4;
+
+    if (needsCubism2 || needsCubism4) {
+      return; // Wait for scripts to load
+    }
+
+    let app = null;
+    let model = null;
+    let destroyed = false;
+
+    const initLive2D = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+
+        // Import PIXI
+        const PIXI = await import('pixi.js');
+        window.PIXI = PIXI;
+
+        // Import Live2D display
+        const live2d = await import('pixi-live2d-display');
+
+        // Register Cubism 4 if needed
+        if (isCubism4 && window.PIXI.live2d) {
+          // Cubism 4 core should be loaded via script tag
+          if (window.Live2DCubismCore) {
+            window.PIXI.live2d.Live2DModel.registerTicker(PIXI.Ticker);
+          }
+        }
+
+        if (destroyed) return;
+
+        // Create canvas
+        const canvas = document.createElement('canvas');
+        containerRef.current.appendChild(canvas);
+
+        // Create PIXI app
+        app = new PIXI.Application({
+          view: canvas,
+          width,
+          height,
+          backgroundColor,
+          antialias: true,
+          resolution: window.devicePixelRatio || 1,
+          autoDensity: true,
         });
+
+        // Load model
+        model = await live2d.Live2DModel.from(modelUrl, {
+          autoInteract: autoInteract,
+        });
+
+        if (destroyed) {
+          model.destroy();
+          return;
+        }
+
+        app.stage.addChild(model);
+
+        // Position model
+        model.anchor.set(0.5, 0.5);
+        model.scale.set(scale);
+        model.position.set(width / 2, height / 2);
+
+        // Make interactive
+        model.interactive = true;
+        model.cursor = 'pointer';
+
+        // Model info
+        const info = {
+          width: model.width,
+          height: model.height,
+          modelName: model.internalModel?.settings?.name || 'Live2D Model',
+          type: isCubism4 ? 'Cubism 4' : 'Cubism 2',
+        };
+        setModelInfo(info);
+
+        // Mouse tracking
+        let mouseX = width / 2;
+        let mouseY = height / 2;
+
+        canvas.addEventListener('mousemove', (e) => {
+          const rect = canvas.getBoundingClientRect();
+          mouseX = e.clientX - rect.left;
+          mouseY = e.clientY - rect.top;
+        });
+
+        // Update focus
+        app.ticker.add(() => {
+          if (model && !destroyed) {
+            model.focus(mouseX, mouseY);
+          }
+        });
+
+        // Click to play motion
+        model.on('pointerdown', () => {
+          try {
+            if (model.internalModel?.motionManager) {
+              const groups = Object.keys(model.internalModel.motionManager.definitions);
+              if (groups.length > 0) {
+                const group = groups[Math.floor(Math.random() * groups.length)];
+                model.motion(group);
+              }
+            }
+          } catch (e) {
+            console.warn('Motion play failed:', e);
+          }
+        });
+
+        setIsLoading(false);
+
+      } catch (err) {
+        console.error('Failed to initialize Live2D:', err);
+        setError(err.message || 'Failed to load model');
+        setIsLoading(false);
       }
     };
 
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, []);
-
-  // Random blinking
-  useEffect(() => {
-    const blinkInterval = setInterval(() => {
-      setIsBlinking(true);
-      setTimeout(() => setIsBlinking(false), 150);
-    }, Math.random() * 3000 + 2000);
-
-    return () => clearInterval(blinkInterval);
-  }, []);
-
-  // Drawing function
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    const centerX = canvas.width / 2;
-    const centerY = canvas.height / 2;
-
-    const draw = () => {
-      timeRef.current += 0.016;
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      // Calculate head tilt based on mouse position
-      const tiltX = (mousePos.x - centerX) * 0.03;
-      const tiltY = (mousePos.y - centerY) * 0.03;
-
-      // Breathing animation
-      const breathe = Math.sin(timeRef.current * 2) * 3;
-
-      ctx.save();
-      ctx.translate(centerX, centerY + breathe);
-      ctx.rotate(tiltX * 0.01);
-
-      // Head shadow
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
-      ctx.beginPath();
-      ctx.ellipse(0, 80, 60, 15, 0, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Neck
-      ctx.fillStyle = '#ffd4a3';
-      ctx.fillRect(-20, 50, 40, 30);
-
-      // Head
-      ctx.fillStyle = '#ffd4a3';
-      ctx.beginPath();
-      ctx.ellipse(0, 0, 70, 85, 0, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Hair back
-      ctx.fillStyle = '#4a3728';
-      ctx.beginPath();
-      ctx.ellipse(-10, -20, 80, 95, -0.2, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Ears
-      ctx.fillStyle = '#ffd4a3';
-      ctx.beginPath();
-      ctx.ellipse(-65, 0, 12, 18, 0.3, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.beginPath();
-      ctx.ellipse(65, 0, 12, 18, -0.3, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Eyes
-      const eyeOffsetX = tiltX * 0.5;
-      const eyeOffsetY = tiltY * 0.5;
-
-      if (isBlinking) {
-        // Closed eyes
-        ctx.strokeStyle = '#2c1810';
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.moveTo(-30 + eyeOffsetX, -10 + eyeOffsetY);
-        ctx.lineTo(-15 + eyeOffsetX, -10 + eyeOffsetY);
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(15 + eyeOffsetX, -10 + eyeOffsetY);
-        ctx.lineTo(30 + eyeOffsetX, -10 + eyeOffsetY);
-        ctx.stroke();
-      } else {
-        // Left eye
-        ctx.fillStyle = '#ffffff';
-        ctx.beginPath();
-        ctx.ellipse(-25 + eyeOffsetX, -10 + eyeOffsetY, 12, 16, 0, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.fillStyle = '#3d2817';
-        ctx.beginPath();
-        ctx.ellipse(-25 + eyeOffsetX, -8 + eyeOffsetY, 7, 10, 0, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.fillStyle = '#000000';
-        ctx.beginPath();
-        ctx.ellipse(-25 + eyeOffsetX, -6 + eyeOffsetY, 5, 7, 0, 0, Math.PI * 2);
-        ctx.fill();
-        // Highlight
-        ctx.fillStyle = '#ffffff';
-        ctx.beginPath();
-        ctx.ellipse(-27 + eyeOffsetX, -10 + eyeOffsetY, 3, 4, 0, 0, Math.PI * 2);
-        ctx.fill();
-
-        // Right eye
-        ctx.fillStyle = '#ffffff';
-        ctx.beginPath();
-        ctx.ellipse(25 + eyeOffsetX, -10 + eyeOffsetY, 12, 16, 0, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.fillStyle = '#3d2817';
-        ctx.beginPath();
-        ctx.ellipse(25 + eyeOffsetX, -8 + eyeOffsetY, 7, 10, 0, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.fillStyle = '#000000';
-        ctx.beginPath();
-        ctx.ellipse(25 + eyeOffsetX, -6 + eyeOffsetY, 5, 7, 0, 0, Math.PI * 2);
-        ctx.fill();
-        // Highlight
-        ctx.fillStyle = '#ffffff';
-        ctx.beginPath();
-        ctx.ellipse(23 + eyeOffsetX, -10 + eyeOffsetY, 3, 4, 0, 0, Math.PI * 2);
-        ctx.fill();
-      }
-
-      // Eyebrows
-      ctx.strokeStyle = '#2c1810';
-      ctx.lineWidth = 3;
-      ctx.beginPath();
-      ctx.moveTo(-35, -35);
-      ctx.quadraticCurveTo(-25, -38, -15, -35);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(15, -35);
-      ctx.quadraticCurveTo(25, -38, 35, -35);
-      ctx.stroke();
-
-      // Nose
-      ctx.strokeStyle = '#e6b894';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(0, 0);
-      ctx.lineTo(5, 10);
-      ctx.stroke();
-
-      // Mouth
-      const mouthOpen = isSpeaking ? Math.abs(Math.sin(timeRef.current * 10)) * 15 : 0;
-      ctx.fillStyle = '#8b4545';
-      ctx.beginPath();
-      if (isSpeaking && mouthOpen > 5) {
-        ctx.ellipse(0, 25, 15, mouthOpen, 0, 0, Math.PI * 2);
-        ctx.fill();
-        // Tongue
-        ctx.fillStyle = '#d97979';
-        ctx.beginPath();
-        ctx.ellipse(0, 28, 10, mouthOpen * 0.5, 0, 0, Math.PI * 2);
-        ctx.fill();
-      } else {
-        ctx.arc(0, 25, 12, 0.2, Math.PI - 0.2);
-        ctx.stroke();
-      }
-
-      // Blush
-      ctx.fillStyle = 'rgba(255, 150, 150, 0.3)';
-      ctx.beginPath();
-      ctx.ellipse(-45, 10, 15, 10, 0, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.beginPath();
-      ctx.ellipse(45, 10, 15, 10, 0, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Hair front
-      ctx.fillStyle = '#4a3728';
-      ctx.beginPath();
-      ctx.moveTo(-70, -30);
-      ctx.quadraticCurveTo(-60, -80, -40, -70);
-      ctx.quadraticCurveTo(-20, -90, 0, -85);
-      ctx.quadraticCurveTo(20, -90, 40, -70);
-      ctx.quadraticCurveTo(60, -80, 70, -30);
-      ctx.quadraticCurveTo(50, -50, 30, -45);
-      ctx.quadraticCurveTo(0, -60, -30, -45);
-      ctx.quadraticCurveTo(-50, -50, -70, -30);
-      ctx.fill();
-
-      ctx.restore();
-
-      animationRef.current = requestAnimationFrame(draw);
-    };
-
-    draw();
+    initLive2D();
 
     return () => {
-      if (animationRef.current) {
-        cancelAnimationFrame(animationRef.current);
+      destroyed = true;
+      if (model) {
+        try {
+          model.destroy({ children: true });
+        } catch (e) {
+          console.warn('Model destroy error:', e);
+        }
+      }
+      if (app) {
+        try {
+          app.destroy(true, { children: true });
+        } catch (e) {
+          console.warn('App destroy error:', e);
+        }
+      }
+      if (containerRef.current) {
+        containerRef.current.innerHTML = '';
       }
     };
-  }, [mousePos, isBlinking, isSpeaking]);
+  }, [modelUrl, width, height, backgroundColor, scale, autoInteract, scriptsLoaded, isCubism2, isCubism4]);
 
-  const handleClick = () => {
-    setIsSpeaking(!isSpeaking);
-  };
+  if (!showUI) {
+    return (
+      <>
+        {/* Load Cubism 2 runtime if needed */}
+        {isCubism2 && (
+          <Script
+            src="https://cubism.live2d.com/sdk-web/cubismcore/live2dcubismcore.min.js"
+            onLoad={() => setScriptsLoaded(prev => ({ ...prev, cubism2: true }))}
+            strategy="afterInteractive"
+          />
+        )}
+
+        {/* Load Cubism 4 core if needed */}
+        {isCubism4 && (
+          <Script
+            src="https://cdn.jsdelivr.net/gh/dylanNew/live2d/webgl/Live2D/lib/live2d.min.js"
+            onLoad={() => setScriptsLoaded(prev => ({ ...prev, cubism4: true }))}
+            strategy="afterInteractive"
+          />
+        )}
+
+        <div ref={containerRef} className="relative" style={{ width, height }}>
+          {isLoading && (
+            <div className="absolute inset-0 flex items-center justify-center bg-gray-900">
+              <div className="text-white">Loading...</div>
+            </div>
+          )}
+          {error && (
+            <div className="absolute inset-0 flex items-center justify-center bg-red-900">
+              <div className="text-white text-center p-4 text-sm">{error}</div>
+            </div>
+          )}
+        </div>
+      </>
+    );
+  }
 
   return (
-    <canvas
-      ref={canvasRef}
-      width={width}
-      height={height}
-      onClick={handleClick}
-      style={{ display: 'block', cursor: 'pointer' }}
-    />
+    <>
+      {/* Load Cubism 2 runtime */}
+      {isCubism2 && (
+        <Script
+          src="https://cubism.live2d.com/sdk-web/cubismcore/live2dcubismcore.min.js"
+          onLoad={() => {
+            console.log('Cubism 2 loaded');
+            setScriptsLoaded(prev => ({ ...prev, cubism2: true }));
+          }}
+          onError={(e) => {
+            console.error('Failed to load Cubism 2:', e);
+            setError('Failed to load Cubism 2 runtime');
+          }}
+          strategy="afterInteractive"
+        />
+      )}
+
+      {/* Load Cubism 4 core */}
+      {isCubism4 && (
+        <Script
+          src="https://cdn.jsdelivr.net/npm/live2dcubismcore@4.0.0/live2dcubismcore.min.js"
+          onLoad={() => {
+            console.log('Cubism 4 loaded');
+            setScriptsLoaded(prev => ({ ...prev, cubism4: true }));
+          }}
+          onError={(e) => {
+            console.error('Failed to load Cubism 4:', e);
+            setError('Failed to load Cubism 4 runtime');
+          }}
+          strategy="afterInteractive"
+        />
+      )}
+
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 p-4">
+        <div className="bg-gray-800 rounded-lg shadow-2xl p-6 mb-4">
+          <h1 className="text-3xl font-bold text-white mb-2 text-center">
+            Live2D VTuber Character
+          </h1>
+          <p className="text-gray-400 text-center mb-4">
+            {isLoading ? 'Loading model...' : 'Move mouse to interact • Click character'}
+          </p>
+
+          <div
+            ref={containerRef}
+            className="relative rounded-lg overflow-hidden shadow-lg border-4 border-purple-500/30"
+            style={{ width, height }}
+          >
+            {isLoading && (
+              <div className="absolute inset-0 flex items-center justify-center bg-gray-900 bg-opacity-95 z-10">
+                <div className="flex flex-col items-center">
+                  <div className="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+                  <div className="text-white">Loading Live2D Model...</div>
+                  <div className="text-gray-400 text-xs mt-2">
+                    {isCubism4 ? 'Cubism 4' : 'Cubism 2'}
+                  </div>
+                </div>
+              </div>
+            )}
+            {error && (
+              <div className="absolute inset-0 flex items-center justify-center bg-red-900 bg-opacity-95 z-10">
+                <div className="text-white text-center p-4">
+                  <p className="font-bold mb-2">❌ Error</p>
+                  <p className="text-sm mb-3">{error}</p>
+                  <p className="text-xs text-gray-300">
+                    Check console for details
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {modelInfo && (
+            <div className="mt-4 p-3 bg-gray-700 rounded text-sm text-gray-300">
+              <p className="font-semibold text-purple-400 mb-1">✅ Model Loaded</p>
+              <p>Type: {modelInfo.type}</p>
+              <p>Name: {modelInfo.modelName}</p>
+              <p>Size: {Math.round(modelInfo.width)} x {Math.round(modelInfo.height)}px</p>
+            </div>
+          )}
+        </div>
+
+        <div className="bg-gray-800 rounded-lg shadow-xl p-4 max-w-md w-full">
+          <h2 className="text-lg font-semibold text-purple-400 mb-2">🎮 Features</h2>
+          <ul className="text-gray-300 text-sm space-y-1 mb-4">
+            <li>✨ Cubism 2 & 4 support</li>
+            <li>👁️ Eye tracking</li>
+            <li>💬 Click for animations</li>
+            <li>🎭 Interactive areas</li>
+          </ul>
+
+          <div className="p-3 bg-gray-700 rounded text-xs text-gray-300">
+            <p className="font-semibold mb-2">📦 Install:</p>
+            <code className="block bg-gray-900 p-2 rounded">
+              bun add pixi.js pixi-live2d-display
+            </code>
+          </div>
+        </div>
+      </div>
+    </>
   );
 };
 
-export default VtuberCanvas;
+export default VtuberPixi;
