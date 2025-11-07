@@ -3,6 +3,13 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Script from 'next/script';
 
+interface ModelInfo {
+  width: number;
+  height: number;
+  modelName: string;
+  type: string;
+}
+
 const VtuberPixi = ({
   modelUrl = "https://cdn.jsdelivr.net/gh/guansss/pixi-live2d-display/test/assets/haru/haru_greeter_t03.model3.json",
   width = 800,
@@ -12,10 +19,10 @@ const VtuberPixi = ({
   showUI = true,
   autoInteract = true
 }) => {
-  const containerRef = useRef(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [modelInfo, setModelInfo] = useState(null);
+  const [error, setError] = useState<string | null>(null);
+  const [modelInfo, setModelInfo] = useState<ModelInfo | null>(null);
   const [scriptsLoaded, setScriptsLoaded] = useState({
     cubism2: false,
     cubism4: false,
@@ -36,8 +43,8 @@ const VtuberPixi = ({
       return; // Wait for scripts to load
     }
 
-    let app = null;
-    let model = null;
+    let app: any = null;
+    let model: any = null;
     let destroyed = false;
 
     const initLive2D = async () => {
@@ -64,6 +71,7 @@ const VtuberPixi = ({
 
         // Create canvas
         const canvas = document.createElement('canvas');
+        if (!containerRef.current) return;
         containerRef.current.appendChild(canvas);
 
         // Create PIXI app
@@ -143,7 +151,11 @@ const VtuberPixi = ({
 
       } catch (err) {
         console.error('Failed to initialize Live2D:', err);
-        setError(err.message || 'Failed to load model');
+        if (err instanceof Error) {
+          setError(err.message || 'Failed to load model');
+        } else {
+          setError('Failed to load model');
+        }
         setIsLoading(false);
       }
     };

@@ -1,6 +1,6 @@
 
 export interface Author {
-  username: string;
+  name: string;
   bio: string | null;
   image: string | null;
   following: boolean;

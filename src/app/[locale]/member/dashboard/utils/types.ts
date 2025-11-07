@@ -25,7 +25,7 @@ export interface Token {
 }
 
 export interface Author {
-  username: string;
+  name: string;
   bio: string | null;
   image: string | null;
   following: boolean;
@@ -44,7 +44,7 @@ export interface Article {
   mainImage?: string;
   status: ArticleStatus;
   author: {
-    username: string;
+    name: string;
     bio?: string;
     image?: string;
     following: boolean;

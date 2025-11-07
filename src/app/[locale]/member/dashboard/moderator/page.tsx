@@ -726,7 +726,7 @@ export default function ModerationDashboard() {
                 {/* Request Note */}
                 <div>
                   <h4 className="font-semibold mb-2">Request Note</h4>
-                  <p className="text-base-content/70">{selectedRequest..requestNote || "No note provided"}</p>
+                  <p className="text-base-content/70">{selectedRequest.requestNote || "No note provided"}</p>
                 </div>
 
                 {/* Warnings */}
