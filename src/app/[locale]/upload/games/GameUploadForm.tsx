@@ -11,37 +11,17 @@ import { Step4_Downloads } from './Step4_Downloads';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 
-export default function GameUploadForm() {
+export default function GameUploadForm({ availableTags, availableCategories }: { availableTags: string[]; availableCategories: string[]; }) {
   const [activeSection, setActiveSection] = useState('basic');
   const [formData, setFormData] = useState<Record<string, any>>({});
   const [isUploading, setIsUploading] = useState(false);
   const [ongoingUploads, setOngoingUploads] = useState(0);
-  const [availableTags, setAvailableTags] = useState<string[]>([]);
-  const [availableCategories, setAvailableCategories] = useState<string[]>([]);
   const params = useParams();
   const locale = params.locale;
 
   useEffect(() => {
     console.log("formData updated:", JSON.stringify(formData, null, 2));
   }, [formData]);
-
-  useEffect(() => {
-    const fetchTaxonomies = async () => {
-      try {
-        const [tagsRes, catsRes] = await Promise.all([
-          fetch('/api/proxy/tags'),
-          fetch('/api/proxy/categories'),
-        ]);
-        const tagsData = await tagsRes.json();
-        const catsData = await catsRes.json();
-        setAvailableTags(tagsData.tags || []);
-        setAvailableCategories(catsData.categories || []);
-      } catch (error) {
-        console.error('Failed to fetch tags or categories', error);
-      }
-    };
-    fetchTaxonomies();
-  }, []);
 
   const handleSubmit = async () => {
     setIsUploading(true);
@@ -56,7 +36,7 @@ export default function GameUploadForm() {
     const data = { ...formData };
 
     try {
-      const gameResponse = await fetch(`/${locale}/api/games`, {
+      const gameResponse = await fetch(`http://localhost:3001/api/articles`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -74,7 +54,7 @@ export default function GameUploadForm() {
 
       if (formData.downloads) {
         for (const download of formData.downloads) {
-          const downloadResponse = await fetch(`/${locale}/api/downloads`, {
+          const downloadResponse = await fetch(`https://api.chanomhub.online/api/downloads`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -92,7 +72,7 @@ export default function GameUploadForm() {
 
       if (formData.authorizedPurchaseSources) {
         for (const purchaseSource of formData.authorizedPurchaseSources) {
-          await fetch(`/${locale}/api/official-download-sources`, {
+          await fetch(`https://api.chanomhub.online/api/official-download-sources`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',

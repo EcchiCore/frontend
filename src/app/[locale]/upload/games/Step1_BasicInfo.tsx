@@ -54,8 +54,8 @@ export const Step1_BasicInfo = ({ formData, setFormData }: Step1_BasicInfoProps)
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
-          <Label htmlFor="version">Version</Label>
-          <Input id="version" value={formData.version || ''} onChange={handleChange} placeholder="e.g., 1.0.0" />
+          <Label htmlFor="ver">Ver</Label>
+          <Input id="ver" value={formData.ver || ''} onChange={handleChange} placeholder="e.g., 1.0.0" />
         </div>
       </div>
 

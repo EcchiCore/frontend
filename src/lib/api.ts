@@ -62,41 +62,42 @@ export async function fetchArticles(params: Record<string, string | string[] | u
   const fetchLimit = pageSize + 1;
 
   const query = `query MyQuery {
-    articles(${filterArg}limit: ${fetchLimit}, offset: ${offset}, status: PUBLISHED) {
-      id
-      author {
-        image
-        name
-      }
-      categories {
-        name
-      }
-      coverImage
-      createdAt
-      creators {
-        name
-      }
-      favoritesCount
-      favorited
-      mainImage
-      status
-      updatedAt
-      ver
-      platforms {
-        name
-      }
-      tags {
-        name
-      }
-      title
-      author {
-                image
-                name
-              }
-      slug
+  articles(${filterArg}limit: ${fetchLimit}, offset: ${offset}, status: PUBLISHED) {
+    id
+    title 
+    slug
+    status
+    ver
+    coverImage
+    mainImage
+    createdAt
+    updatedAt
+    favoritesCount
+    favorited
+    description
+    author {
+      name
+      image
     }
 
-  }`;
+    creators {
+      name
+    }
+
+    categories {
+      name
+    }
+
+    platforms {
+      name
+    }
+
+    tags {
+      name
+    }
+  }
+}`;
+
   const variables = {}; // No variables are used now
 
   const res = await fetch("https://api.chanomhub.online/api/graphql", {

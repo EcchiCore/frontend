@@ -21,7 +21,7 @@ export default function GameUploadForm() {
   const [gameTitle, setGameTitle] = useState('');
   const [description, setDescription] = useState('');
   const [body, setBody] = useState('');
-  const [version, setVersion] = useState('');
+  const [ver, setVer] = useState('');
   const [engine, setEngine] = useState('');
   const [availableTags, setAvailableTags] = useState<string[]>([]);
   const [availableCategories, setAvailableCategories] = useState<string[]>([]);
@@ -253,12 +253,11 @@ export default function GameUploadForm() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="version">Version</Label>
-              <Input
-                id="version"
-                value={version}
-                onChange={(e) => setVersion(e.target.value)}
-                placeholder="e.g., 1.0.0"
+                        <Label htmlFor="ver">Ver</Label>
+                        <Input
+                          id="ver"
+                          value={ver}
+                          onChange={(e) => setVer(e.target.value)}                placeholder="e.g., 1.0.0"
               />
             </div>
           </div>

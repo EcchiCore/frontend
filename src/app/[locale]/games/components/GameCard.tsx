@@ -20,23 +20,6 @@ export default function GameCard({ article }: { article: Article }) {
     const months = Math.floor(days / 30)
     return `${months} เดือน`
   }
-
-  const getPlatformBadge = (engine: string) => {
-    const badges: Record<string, { label: string; color: string }> = {
-      RENPY: { label: "RenPy", color: "bg-pink-500/10 text-pink-500 border-pink-500/20" },
-      RPGM: { label: "RPG Maker", color: "bg-blue-500/10 text-blue-500 border-blue-500/20" },
-      UNITY: { label: "Unity", color: "bg-purple-500/10 text-purple-500 border-purple-500/20" },
-      UNREAL: { label: "Unreal", color: "bg-cyan-500/10 text-cyan-500 border-cyan-500/20" },
-      GODOT: { label: "Godot", color: "bg-indigo-500/10 text-indigo-500 border-indigo-500/20" },
-      TyranoBuilder: { label: "Tyrano", color: "bg-orange-500/10 text-orange-500 border-orange-500/20" },
-      WOLFRPG: { label: "Wolf RPG", color: "bg-amber-500/10 text-amber-500 border-amber-500/20" },
-      KIRIKIRI: { label: "Kirikiri", color: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" },
-      FLASH: { label: "Flash", color: "bg-red-500/10 text-red-500 border-red-500/20" },
-      BakinPlayer: { label: "Bakin", color: "bg-violet-500/10 text-violet-500 border-violet-500/20" },
-    }
-    return badges[engine] || { label: engine, color: "bg-gray-500/10 text-gray-500 border-gray-500/20" }
-  }
-
   const getPlatformColor = (platform: string) => {
     const colors: Record<string, string> = {
       Windows: "bg-blue-600",
@@ -120,11 +103,25 @@ export default function GameCard({ article }: { article: Article }) {
         </div>
 
         {/* Content */}
+        {/* Content */}
         <div className="p-4 space-y-3 flex-1 flex flex-col">
           {/* Title */}
           <h3 className="font-bold text-base line-clamp-2 text-foreground group-hover:text-primary transition-colors leading-tight min-h-[2.5rem]">
             {article.title}
           </h3>
+
+          {/* Description with glass effect and expand on hover */}
+          {article.description && (
+            <div className="relative overflow-hidden rounded-lg">
+              <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/40 to-background/60 backdrop-blur-sm border border-border/30"></div>
+              <div className="relative p-3 max-h-16 group-hover:max-h-32 transition-all duration-300 overflow-hidden">
+                <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3 group-hover:line-clamp-6">
+                  {article.description}
+                </p>
+                <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-background/80 to-transparent group-hover:opacity-0 transition-opacity"></div>
+              </div>
+            </div>
+          )}
 
           {/* Author */}
           {article.author && (
@@ -139,14 +136,14 @@ export default function GameCard({ article }: { article: Article }) {
                 />
               ) : (
                 <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center">
-                  <span className="text-xs font-semibold text-primary">
-                    {article.author.name.charAt(0).toUpperCase()}
-                  </span>
+          <span className="text-xs font-semibold text-primary">
+            {article.author.name.charAt(0).toUpperCase()}
+          </span>
                 </div>
               )}
               <span className="text-xs text-muted-foreground truncate">
-                {article.author.name}
-              </span>
+        {article.author.name}
+      </span>
             </div>
           )}
 
