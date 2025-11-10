@@ -36,7 +36,7 @@ export default function GameUploadForm({ availableTags, availableCategories }: {
     const data = { ...formData };
 
     try {
-      const gameResponse = await fetch(`http://localhost:3001/api/articles`, {
+      const gameResponse = await fetch(`https://api.chanomhub.online/api/articles`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -50,7 +50,7 @@ export default function GameUploadForm({ availableTags, availableCategories }: {
       }
 
       const gameData = await gameResponse.json();
-      const articleId = gameData.data.article.id;
+      const articleId = gameData.article.id;
 
       if (formData.downloads) {
         for (const download of formData.downloads) {
