@@ -25,13 +25,13 @@ export const metadata: Metadata = {
   },
   description: defaultMetadataContent.en.description,
   keywords: defaultMetadataContent.en.keywords,
-  robots: { index: true, follow: true },
+
   alternates: {
     canonical: siteUrl,
     languages: {
-      'en': `${siteUrl}/en`,
+      'en': siteUrl,
       'th': `${siteUrl}/th`,
-      'x-default': `${siteUrl}/${defaultLocale}`
+      'x-default': siteUrl
     },
   },
   openGraph: {

@@ -1,9 +1,49 @@
+import { Metadata } from 'next';
 // src/app/[locale]/layout.tsx
 import React, { ReactNode } from 'react';
 import { redirect } from 'next/navigation';
 import { routing } from '@/i18n/routing';
 import { NextIntlClientProvider } from 'next-intl';
 import { ThemeProvider } from '@/components/theme-provider';
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const resolvedParams = await params;
+  const { locale } = resolvedParams;
+
+  if (locale === 'th') {
+    return {
+      robots: {
+        index: false,
+        follow: false,
+        nocache: true,
+        googleBot: {
+          index: false,
+          follow: false,
+          noimageindex: true,
+          'max-video-preview': -1,
+          'max-snippet': -1,
+        },
+      },
+    };
+  }
+
+  // For 'en' or any other locale, allow indexing
+  return {
+    robots: {
+      index: true,
+      follow: true,
+      nocache: false,
+      googleBot: {
+        index: true,
+        follow: true,
+        noimageindex: false,
+        'max-video-preview': -1,
+        'max-snippet': -1,
+      },
+    },
+  };
+}
+
 
 // Infer the locale type from routing.locales
 type Locale = typeof routing.locales[number]; // "en" | "th"
