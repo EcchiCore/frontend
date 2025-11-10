@@ -29,7 +29,7 @@ interface NotificationDropdownProps {
   isMobile?: boolean;
 }
 
-const API_BASE_URL = `${process.env.NEXT_PUBLIC_API_URL || 'https://api.chanomhub.online'}/api`;
+const API_BASE_URL = `http://localhost:3001/api`;
 const NOTIFICATION_TYPES = {
   MODERATION_UPDATE: "อัปเดตการตรวจสอบ",
   WARNING: "คำเตือน",
