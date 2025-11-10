@@ -97,7 +97,7 @@ export default function GameUploadForm() {
     formData.append('title', gameTitle);
     formData.append('description', description);
     formData.append('body', body);
-    formData.append('ver', version);
+    formData.append('ver', ver);
     formData.append('engine', engine);
     formData.append('tagList', JSON.stringify(selectedTags));
     formData.append('categoryList', JSON.stringify(selectedCategories));
