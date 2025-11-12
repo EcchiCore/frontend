@@ -40,3 +40,51 @@ export const addLocaleToPathname = (pathname: string, locale: Locale): string =>
   }
   return `/${locale}/${cleanPath}`.replace(/\/$/, '');
 };
+
+// ---------- เพิ่ม export เหล่านี้ ----------
+export interface MetaDict {
+  title: string;
+  description: string;
+  keywords: string[];
+  logo_alt: string;
+}
+
+export const defaultMetadataContent: Record<Locale, MetaDict> = {
+  en: {
+    title: 'ChanomHub',
+    description:
+      'ChanomHub - Your ultimate destination for adult gaming content. Discover free game downloads, translations, mods, and a vibrant community for gaming enthusiasts.',
+    keywords: [
+      'Adult games',
+      'Free game downloads',
+      'Game translations',
+      'Game mods',
+      'Erotic games',
+      'Indie games',
+      'Mature gaming',
+      'Gaming community',
+      'Visual novels',
+      'NSFW games',
+    ],
+    logo_alt: 'ChanomHub Logo',
+  },
+  th: {
+    title: 'ChanomHub - ศูนย์รวมเกมสำหรับผู้ใหญ่',
+    description:
+      'ChanomHub - จุดหมายปลายทางสุดยอดสำหรับเนื้อหาเกมสำหรับผู้ใหญ่ ค้นพบการดาวน์โหลดเกมฟรี การแปล มอด และชุมชนที่มีชีวิตชีวา',
+    keywords: [
+      'เกมผู้ใหญ่',
+      'ดาวน์โหลดเกมฟรี',
+      'แปลเกม',
+      'มอดเกม',
+      'เกมอีโรติก',
+      'เกมอินดี้',
+      'เกมผู้ใหญ่',
+      'ชุมชนเกม',
+      'วิชวลโนเวล',
+      'เกม NSFW',
+    ],
+    logo_alt: 'โลโก้ ChanomHub',
+  },
+};
+// -----------------------------------------

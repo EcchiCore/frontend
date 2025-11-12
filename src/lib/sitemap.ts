@@ -1,5 +1,5 @@
 // src/lib/sitemap.ts
-import { siteUrl } from '@/utils/localeUtils';
+import { siteUrl, Locale } from '@/utils/localeUtils';
 
 export const SITEMAP_ARTICLE_PAGE_SIZE = 10000;
 
