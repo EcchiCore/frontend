@@ -41,7 +41,7 @@ export async function generateMetadata(props: ArticlePageProps): Promise<Metadat
 
   const locale = getValidLocale(params.locale);
   const paths = params.paths;
-  const slug = paths[0];
+  const slug = decodeURIComponent(paths[0]);
 
   const originalArticle = await getArticleBySlug(slug);
   if (!originalArticle) {
@@ -137,7 +137,7 @@ export default async function ArticlePage(props: ArticlePageProps) {
 
   const locale = getValidLocale(params.locale);
   const paths = params.paths;
-  const slug = paths[0];
+  const slug = decodeURIComponent(paths[0]);
   const articleId = searchParams.id ? Number(searchParams.id) : undefined;
 
   const { article: originalArticle, downloads } = await fetchArticleAndDownloads(slug, articleId || 0);
