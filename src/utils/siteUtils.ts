@@ -4,15 +4,13 @@ export const getSiteUrl = (): string => {
     return window.location.origin;
   }
 
-  // Vercel
-  if (process.env.VERCEL_URL) {
-    return `https://${process.env.VERCEL_URL}`;
+  if (process.env.VERCEL_PROJECT_PRODUCTION_URL) {
+    return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`;
   }
 
-  // Custom domain หรือ fallback
-  return process.env.FRONTEND_URL || 'https://chanomhub.online';
-};
+  if (process.env.PRODUCTION_URL) {
+    return `https://${process.env.PRODUCTION_URL}`;
+  }
 
-export const getCanonicalDomain = (): string => {
-  return new URL(getSiteUrl()).host;
+  return 'https://chanomhub.online';
 };

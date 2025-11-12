@@ -1,6 +1,6 @@
 // app/sitemap.xml/route.ts
 import { NextResponse } from 'next/server';
-import { siteUrl } from '@/utils/localeUtils';
+import { getRequestUrl } from '@/lib/requestUtils';
 import {
   SITEMAP_ARTICLE_PAGE_SIZE,
   chunkArray,
@@ -9,6 +9,7 @@ import {
 
 export async function GET() {
   try {
+    const siteUrl = await getRequestUrl(); // ต้อง await!
     const generatedAt = new Date().toISOString();
     const articles = await fetchPublishedArticles(generatedAt);
     const articleChunks = chunkArray(articles, SITEMAP_ARTICLE_PAGE_SIZE);
