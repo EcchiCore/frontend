@@ -479,6 +479,10 @@
     },
     "categories": {
       "title": "Categories"
+    },
+    "relatedGames": {
+      "title": "Related Games",
+      "view": "View Related Games"
     }
   },
   "ad-redirect": {

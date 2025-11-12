@@ -479,6 +479,10 @@
     },
     "categories": {
       "title": "หมวดหมู่"
+    },
+    "relatedGames": {
+      "title": "เกมที่เกี่ยวข้อง",
+      "view": "ดูเกมที่เกี่ยวข้อง"
     }
   },
   "ad-redirect": {

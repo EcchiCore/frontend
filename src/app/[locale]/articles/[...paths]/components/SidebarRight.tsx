@@ -5,11 +5,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { SidebarRightProps } from "./Interfaces";
-import { Article } from "@/types/article";
 
 const PLACEHOLDER_IMAGE = '/placeholder-image.png';
-
-
 
 import {
   BookmarkIcon as BookmarkOutline,
@@ -32,16 +29,16 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
 const SidebarRight: React.FC<SidebarRightProps> = ({
-  article,
-  isCurrentUserAuthor,
-  isFollowing,
-  handleFollow,
-  isFavorited,
-  handleFavorite,
-  formatDate,
-  setOpenDownloadDialog,
-  downloads,
-}) => {
+                                                     article,
+                                                     isCurrentUserAuthor,
+                                                     isFollowing,
+                                                     handleFollow,
+                                                     isFavorited,
+                                                     handleFavorite,
+                                                     formatDate,
+                                                     setOpenDownloadDialog,
+                                                     downloads,
+                                                   }) => {
   const t = useTranslations("sidebar");
 
   const encodeURLComponent = (value: string) =>
@@ -60,12 +57,12 @@ const SidebarRight: React.FC<SidebarRightProps> = ({
     }
   };
 
-  const getStatusVariant = (status: string) => {
+  const getStatusVariant = (status: string): "default" | "success" | "warning" | "secondary" | "destructive" => {
     switch (status) {
       case "PUBLISHED":
-        return "success";
+        return "default";
       case "DRAFT":
-        return "warning";
+        return "secondary";
       case "ARCHIVED":
         return "secondary";
       default:
@@ -77,7 +74,7 @@ const SidebarRight: React.FC<SidebarRightProps> = ({
     <aside className="hidden md:block space-y-6">
       {/* Author Card */}
       <Card>
-        <CardContent className="space-y-4">
+        <CardContent className="pt-6 space-y-4">
           <div className="flex items-center gap-4">
             <div className="relative">
               <Image
@@ -87,12 +84,11 @@ const SidebarRight: React.FC<SidebarRightProps> = ({
                 height={56}
                 className="rounded-full ring-2 ring-primary"
               />
-
             </div>
-            <div>
+            <div className="flex-1 min-w-0">
               <Link
                 href={`/profiles/${encodeURLComponent(article.author.name)}`}
-                className="text-lg font-bold text-primary hover:underline"
+                className="text-lg font-bold text-primary hover:underline block truncate"
               >
                 {article.author.name}
               </Link>
@@ -141,7 +137,7 @@ const SidebarRight: React.FC<SidebarRightProps> = ({
               onClick={() => setOpenDownloadDialog(true)}
             >
               <Download className="w-5 h-5" />
-              {t("downloads.viewAll")}
+              {t("downloads.viewAll")} ({downloads.length})
             </Button>
           </CardContent>
         </Card>
@@ -155,7 +151,7 @@ const SidebarRight: React.FC<SidebarRightProps> = ({
             <CardTitle>{t("articleInfo.title")}</CardTitle>
           </div>
         </CardHeader>
-        <CardContent className="space-y-2">
+        <CardContent className="space-y-3">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-2">
               <ClockIcon className="w-4 h-4 text-muted-foreground" />
@@ -178,7 +174,9 @@ const SidebarRight: React.FC<SidebarRightProps> = ({
                 <UserIcon className="w-4 h-4 text-muted-foreground" />
                 <span className="text-sm text-muted-foreground">{t("articleInfo.creator")}:</span>
               </div>
-              <span className="text-sm font-semibold text-right max-w-[60%] truncate">{article.creators[0]?.name}</span>
+              <span className="text-sm font-semibold text-right max-w-[60%] truncate" title={article.creators[0]?.name}>
+                {article.creators[0]?.name}
+              </span>
             </div>
           )}
 
@@ -213,52 +211,85 @@ const SidebarRight: React.FC<SidebarRightProps> = ({
         </CardContent>
       </Card>
 
-      {/* Platforms, Tags, Categories */}
-      {["platforms", "tags", "categories"].map((key) => {
-        const list = article[key as keyof typeof article] as { name: string }[] | undefined;
-        if (!list || list.length === 0) return null;
-
-        const iconMap: Record<string, React.ReactNode> = {
-          platforms: <CpuChipIcon className="w-5 h-5 text-warning" />,
-          tags: <TagIcon className="w-5 h-5 text-primary" />,
-          categories: <FolderIcon className="w-5 h-5 text-secondary" />,
-        };
-
-        const titleMap: Record<string, string> = {
-          platforms: t("platforms.title"),
-          tags: t("tags.title"),
-          categories: t("categories.title"),
-        };
-
-        const linkPrefixMap: Record<string, string> = {
-          platforms: "/platforms/",
-          tags: "/tag/",
-          categories: "/category/",
-        };
-
-        return (
-          <Card key={key}>
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                {iconMap[key]}
-                <CardTitle>{titleMap[key]}</CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent className="flex flex-wrap gap-2">
-              {list.map((item, index) => (
-                <Link href={`${linkPrefixMap[key]}${encodeURLComponent(item.name)}`} key={index}>
-                  <Badge variant="outline" className={`cursor-pointer hover:scale-105 transition-transform`}>
-                    {key === "tagList" ? `#${item.name}` : item.name}
+      {/* Platforms Card */}
+      {article.platforms && article.platforms.length > 0 && (
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <CpuChipIcon className="w-5 h-5 text-warning" />
+              <CardTitle>{t("platforms.title")}</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap gap-2">
+              {article.platforms.map((platform, index) => (
+                <Link href={`/games?platform=${encodeURLComponent(platform.name)}`} key={index}>
+                  <Badge
+                    variant="outline"
+                    className="cursor-pointer hover:scale-105 hover:bg-primary/10 transition-all duration-200"
+                  >
+                    {platform.name}
                   </Badge>
                 </Link>
               ))}
-            </CardContent>
-          </Card>
-        );
-      })}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Tags Card */}
+      {article.tags && article.tags.length > 0 && (
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <TagIcon className="w-5 h-5 text-primary" />
+              <CardTitle>{t("tags.title")}</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap gap-2">
+              {article.tags.map((tag, index) => (
+                <Link href={`/games?tag=${encodeURLComponent(tag.name)}`} key={index}>
+                  <Badge
+                    variant="outline"
+                    className="cursor-pointer hover:scale-105 hover:bg-primary/10 transition-all duration-200"
+                  >
+                    #{tag.name}
+                  </Badge>
+                </Link>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Categories Card */}
+      {article.categories && article.categories.length > 0 && (
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <FolderIcon className="w-5 h-5 text-secondary" />
+              <CardTitle>{t("categories.title")}</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap gap-2">
+              {article.categories.map((category, index) => (
+                <Link href={`/games?category=${encodeURLComponent(category.name)}`} key={index}>
+                  <Badge
+                    variant="outline"
+                    className="cursor-pointer hover:scale-105 hover:bg-secondary/10 transition-all duration-200"
+                  >
+                    {category.name}
+                  </Badge>
+                </Link>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </aside>
   );
 };
 
 export default SidebarRight;
-

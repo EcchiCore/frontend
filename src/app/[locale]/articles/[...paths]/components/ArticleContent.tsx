@@ -34,7 +34,7 @@ const PLACEHOLDER_IMAGE = '/placeholder-image.png';
 
 import { useDebounce } from "./Debounce";
 import { Download, CalendarDays, Folder, User, Info, Check, Clipboard, Search, Clock, Tag, Cpu } from "lucide-react";
-import { Button, Card, CardContent, CardHeader, CardTitle, Input, Dialog, DialogContent, DialogTitle, Tabs, TabsList, TabsTrigger, TabsContent, Select, SelectTrigger, SelectValue, SelectContent, SelectItem, Badge } from "@/components/ui"; // Adjust import based on your UI library
+import { Button, Card, CardContent, CardHeader, CardTitle, Input, Dialog, DialogContent, DialogTitle, Tabs, TabsList, TabsTrigger, TabsContent, Select, SelectTrigger, SelectValue, SelectContent, SelectItem, Badge } from "@/components/ui";
 import cn from 'classnames';
 import { useTranslations } from 'next-intl';
 import { TextAlign } from "@tiptap/extension-text-align";
@@ -84,60 +84,6 @@ const MobileArticleInfo: React.FC<{ article: Article, formatDate: (date: string)
             </div>
           )}
         </div>
-
-        {article.platforms && article.platforms.length > 0 && (
-          <div>
-            <h3 className="text-lg font-semibold mb-2 flex items-center gap-2">
-              <Cpu className="w-5 h-5 text-warning" />
-              {t("platforms.title")}
-            </h3>
-            <div className="flex flex-wrap gap-2">
-              {article.platforms.map((platform, index) => (
-                <Link href={`/platforms/${encodeURLComponent(platform.name)}`} key={index}>
-                  <Badge variant="outline" className={`cursor-pointer hover:scale-105 transition-transform`}>
-                    {platform.name}
-                  </Badge>
-                </Link>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {article.tags && article.tags.length > 0 && (
-          <div>
-            <h3 className="text-lg font-semibold mb-2 flex items-center gap-2">
-              <Tag className="w-5 h-5 text-primary" />
-              {t("tags.title")}
-            </h3>
-            <div className="flex flex-wrap gap-2">
-              {article.tags.map((tag, index) => (
-                <Link href={`/tag/${encodeURLComponent(tag.name)}`} key={index}>
-                  <Badge variant="outline" className={`cursor-pointer hover:scale-105 transition-transform`}>
-                    #{tag.name}
-                  </Badge>
-                </Link>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {article.categories && article.categories.length > 0 && (
-          <div>
-            <h3 className="text-lg font-semibold mb-2 flex items-center gap-2">
-              <Folder className="w-5 h-5 text-secondary" />
-              {t("categories.title")}
-            </h3>
-            <div className="flex flex-wrap gap-2">
-              {article.categories.map((category, index) => (
-                <Link href={`/category/${encodeURLComponent(category.name)}`} key={index}>
-                  <Badge variant="outline" className={`cursor-pointer hover:scale-105 transition-transform`}>
-                    {category.name}
-                  </Badge>
-                </Link>
-              ))}
-            </div>
-          </div>
-        )}
       </CardContent>
     </Card>
   );
@@ -161,10 +107,10 @@ const fetcher = (url: string) => {
 };
 
 const ArticleContent: React.FC<ArticleContentProps> = ({
-  article,
-  slug,
-  downloads,
-}) => {
+                                                         article,
+                                                         slug,
+                                                         downloads,
+                                                       }) => {
   console.log("Downloads prop in ArticleContent:", downloads);
   const t = useTranslations('ArticleContent');
   // Essential state
@@ -184,7 +130,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState<"name" | "date">("date");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
-  const [copiedLink, setCopiedLink] = useState<string | null>(null); // Added missing state
+  const [copiedLink, setCopiedLink] = useState<string | null>(null);
   const commentInputRef = useRef<HTMLTextAreaElement>(null);
 
   const sortItems = useCallback(<T extends DownloadFile | TranslationFile>(items: T[]): T[] => {
@@ -210,14 +156,11 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
     return sortItems(filtered);
   }, [downloads, searchQuery, sortItems]);
 
-
-
   const handleCopyLink = useCallback(async (url: string) => {
     try {
       await navigator.clipboard.writeText(url);
       setCopiedLink(url);
       setAlert({ open: true, message: t("linkCopied"), severity: "success" });
-      // Clear the copied state after 2 seconds
       setTimeout(() => setAlert((prev) => ({ ...prev, open: false })), 2000);
     } catch {
       setAlert({ open: true, message: t("copyLinkError"), severity: "error" });
@@ -258,7 +201,6 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
             </h5>
 
             <div className="space-y-2">
-              {/* Only display createdAt if it exists (e.g., for TranslationFile) */}
               {"createdAt" in item && (
                 <div className={cn(
                   "flex items-center gap-2 text-sm",
@@ -387,7 +329,6 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
     </div>
   );
 
-  // Tiptap editor for content display
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -446,8 +387,6 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
     immediatelyRender: false,
   });
 
-
-
   const { data: commentsData, error: commentsError, isLoading } = useSWR(
     `${API_BASE_URL}/api/articles/${slug}/comments`,
     fetcher,
@@ -457,7 +396,6 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
       revalidateOnMount: true,
     }
   );
-
 
   const [comments, setComments] = useState<Comment[]>([]);
   const [topCommenters, setTopCommenters] = useState<
@@ -522,8 +460,6 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
       setIsDarkMode(true);
     }
 
-
-
     const handleResize = () => setIsMobile(window.innerWidth <= 768);
     const handleScroll = () => {
       const articleElement = document.querySelector("main");
@@ -553,8 +489,6 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
       editor.view.dom.style.fontSize = `${fontSize}px`;
     }
   }, [fontSize, editor]);
-
-
 
   useEffect(() => {
     if (commentsData) {
@@ -728,6 +662,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
     }
     return encodeURIComponent(value.trim()).replace(/%20/g, "%20").replace(/\//g, "%2F");
   };
+
   const wordCount = article.body.split(/\s+/).length;
   const readingTime = Math.ceil(wordCount / 200);
 
@@ -747,7 +682,6 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
       </div>
 
       <div className="container mx-auto px-4 py-8">
-
         {alert.open && (
           <CustomArticleAlert
             title={alert.severity === "success" ? t("success") : t("error")}
@@ -976,4 +910,3 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
 };
 
 export default ArticleContent;
-

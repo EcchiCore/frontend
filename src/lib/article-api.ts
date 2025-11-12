@@ -1,6 +1,59 @@
 import { Article } from '@/types/article';
 
-export async function fetchDownloadsByArticleId(articleId: number): Promise<Article["downloads"] | null> {
+// ฟังก์ชันช่วยสำหรับเรียก GraphQL API
+async function graphqlRequest<T>(
+  query: string,
+  variables: Record<string, any>,
+  operationName: string
+): Promise<T> {
+  try {
+    const res = await fetch("https://api.chanomhub.online/api/graphql", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        query,
+        variables,
+        operationName,
+      }),
+      credentials: "include",
+      next: { revalidate: 3600 }
+    });
+
+    // Log response status สำหรับ debug
+    console.log(`[${operationName}] Status:`, res.status);
+
+    if (!res.ok) {
+      const errorText = await res.text();
+      console.error(`[${operationName}] HTTP Error:`, {
+        status: res.status,
+        statusText: res.statusText,
+        body: errorText
+      });
+      throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+    }
+
+    const json = await res.json();
+
+    // Log response สำหรับ debug
+    console.log(`[${operationName}] Response:`, json);
+
+    if (json.errors) {
+      console.error(`[${operationName}] GraphQL Errors:`, json.errors);
+      throw new Error(`GraphQL Error: ${json.errors.map((e: any) => e.message).join(', ')}`);
+    }
+
+    return json.data;
+  } catch (error) {
+    console.error(`[${operationName}] Request Failed:`, error);
+    throw error;
+  }
+}
+
+export async function fetchDownloadsByArticleId(
+  articleId: number
+): Promise<Article["downloads"] | null> {
   const query = `query DownloadsByArticleId($articleId: Int!) {
     downloads(articleId: $articleId) {
       id
@@ -11,53 +64,24 @@ export async function fetchDownloadsByArticleId(articleId: number): Promise<Arti
     }
   }`;
 
-  const variables = {
-    articleId,
-  };
-
-  const res = await fetch("https://api.chanomhub.online/api/graphql", {
-    method: "POST",
-    headers: {
-      "accept": "application/graphql-response+json, application/json, multipart/mixed",
-      "accept-language": "en-US,en;q=0.7",
-      "cache-control": "no-cache",
-      "content-type": "application/json",
-      "pragma": "no-cache",
-      "sec-ch-ua": "\"Brave\";v=\"141\", \"Not?A_Brand\";v=\"8\", \"Chromium\";v=\"141\"",
-      "sec-ch-ua-mobile": "?0",
-      "sec-ch-ua-platform": "\"Linux\"",
-      "sec-fetch-dest": "empty",
-      "sec-fetch-mode": "cors",
-      "sec-fetch-site": "same-origin",
-      "sec-gpc": "1"
-    },
-    body: JSON.stringify({
+  try {
+    const data = await graphqlRequest<{ downloads: Article["downloads"] }>(
       query,
-      variables,
-      operationName: "DownloadsByArticleId",
-    }),
-    credentials: "include",
-    next: { revalidate: 3600 }
-  });
-
-  if (!res.ok) {
-    const errorBody = await res.text();
-    console.error('API error response:', errorBody);
-    throw new Error(`API error ${res.status} for URL: https://api.chanomhub.online/api/graphql`);
+      { articleId },
+      "DownloadsByArticleId"
+    );
+    return data.downloads ?? null;
+  } catch (error) {
+    console.error(`Failed to fetch downloads for article ${articleId}:`, error);
+    return null;
   }
-
-  const { data, errors } = await res.json();
-
-  if (errors) {
-    console.error("GraphQL Errors:", errors);
-    throw new Error("GraphQL query failed");
-  }
-
-  return data.downloads ?? null;
 }
 
-export async function fetchArticleAndDownloads(slug: string, downloadsArticleId: number): Promise<{ article: Article | null; downloads: Article["downloads"] | null }> {
-  const query = `query MyQuery($slug: String!, $downloadsArticleId: Int!) {
+export async function fetchArticleAndDownloads(
+  slug: string,
+  downloadsArticleId: number
+): Promise<{ article: Article | null; downloads: Article["downloads"] | null }> {
+  const query = `query ArticleAndDownloads($slug: String!, $downloadsArticleId: Int!) {
     article(slug: $slug) {
       author {
         image
@@ -100,135 +124,72 @@ export async function fetchArticleAndDownloads(slug: string, downloadsArticleId:
     }
   }`;
 
-  const variables = {
-    slug,
-    downloadsArticleId,
-  };
-
-  const res = await fetch("https://api.chanomhub.online/api/graphql", {
-    method: "POST",
-    headers: {
-      "accept": "application/graphql-response+json, application/json, multipart/mixed",
-      "accept-language": "en-US,en;q=0.7",
-      "cache-control": "no-cache",
-      "content-type": "application/json",
-      "pragma": "no-cache",
-      "sec-ch-ua": "\"Brave\";v=\"141\", \"Not?A_Brand\";v=\"8\", \"Chromium\";v=\"141\"",
-      "sec-ch-ua-mobile": "?0",
-      "sec-ch-ua-platform": "\"Linux\"",
-      "sec-fetch-dest": "empty",
-      "sec-fetch-mode": "cors",
-      "sec-fetch-site": "same-origin",
-      "sec-gpc": "1"
-    },
-    body: JSON.stringify({
+  try {
+    const data = await graphqlRequest<{
+      article: Article;
+      downloads: Article["downloads"];
+    }>(
       query,
-      variables,
-      operationName: "MyQuery",
-    }),
-    credentials: "include",
-    next: { revalidate: 3600 }
-  });
+      { slug, downloadsArticleId },
+      "ArticleAndDownloads"
+    );
 
-  if (!res.ok) {
-    const errorBody = await res.text();
-    console.error('API error response:', errorBody);
-    throw new Error(`API error ${res.status} for URL: https://api.chanomhub.online/api/graphql`);
+    return {
+      article: data.article ?? null,
+      downloads: data.downloads ?? null
+    };
+  } catch (error) {
+    console.error(`Failed to fetch article "${slug}" and downloads:`, error);
+    return { article: null, downloads: null };
   }
-
-  const { data, errors } = await res.json();
-
-  if (errors) {
-    console.error("GraphQL Errors:", errors);
-    throw new Error("GraphQL query failed");
-  }
-
-  return { article: data.article ?? null, downloads: data.downloads ?? null };
 }
 
 export async function getArticleBySlug(slug: string): Promise<Article | null> {
-      const query = `query MyQuery($slug: String!) {
-        article(slug: $slug) {
-          author {
-            image
-            name
-          }
-          backgroundImage
-          body
-          categories {
-            name
-          }
-          coverImage
-          createdAt
-          creators {
-            name
-          }
-          description
-          favorited
-          favoritesCount
-          mainImage
-          images {
-            url
-          }
-          platforms {
-            name
-          }
-          status
-          tags {
-            name
-          }
-          title
-          updatedAt
-          ver
-        }
-      }`;
-
-  const variables = {
-    slug,
-  };
-
-  const res = await fetch("https://api.chanomhub.online/api/graphql", {
-    method: "POST",
-    headers: {
-      "accept": "application/graphql-response+json, application/json, multipart/mixed",
-      "accept-language": "en-US,en;q=0.7",
-      "cache-control": "no-cache",
-      "content-type": "application/json",
-      "pragma": "no-cache",
-      "sec-ch-ua": "\"Brave\";v=\"141\", \"Not?A_Brand\";v=\"8\", \"Chromium\";v=\"141\"",
-      "sec-ch-ua-mobile": "?0",
-      "sec-ch-ua-platform": "\"Linux\"",
-      "sec-fetch-dest": "empty",
-      "sec-fetch-mode": "cors",
-      "sec-fetch-site": "same-origin",
-      "sec-gpc": "1"
-    },
-    body: JSON.stringify({
-      query,
-      variables,
-      operationName: "MyQuery",
-    }),
-    credentials: "include",
-    next: { revalidate: 3600 }
-  });
-
-  if (!res.ok) {
-    const errorBody = await res.text();
-    console.error('API error response:', errorBody);
-    throw new Error(`API error ${res.status} for URL: https://api.chanomhub.online/api/graphql`);
-  }
-
-  const { data, errors } = await res.json();
-
-  if (errors || !data) {
-    console.error("GraphQL Errors:", errors);
-    // If article is not found, data.article will be null, so we return null.
-    // Otherwise, re-throw the error if it's a different kind of GraphQL error.
-    if (!data?.article) {
-      return null;
+  const query = `query ArticleBySlug($slug: String!) {
+    article(slug: $slug) {
+      author {
+        image
+        name
+      }
+      backgroundImage
+      body
+      categories {
+        name
+      }
+      coverImage
+      createdAt
+      creators {
+        name
+      }
+      description
+      favorited
+      favoritesCount
+      mainImage
+      images {
+        url
+      }
+      platforms {
+        name
+      }
+      status
+      tags {
+        name
+      }
+      title
+      updatedAt
+      ver
     }
-    throw new Error("GraphQL query failed");
-  }
+  }`;
 
-  return data.article ?? null;
+  try {
+    const data = await graphqlRequest<{ article: Article }>(
+      query,
+      { slug },
+      "ArticleBySlug"
+    );
+    return data.article ?? null;
+  } catch (error) {
+    console.error(`Failed to fetch article by slug "${slug}":`, error);
+    return null;
+  }
 }
