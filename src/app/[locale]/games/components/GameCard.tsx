@@ -74,7 +74,7 @@ export default function GameCard({ article }: { article: Article }) {
 
           <div className="absolute top-2 right-2">
             <Badge className="bg-black/70 text-white text-xs px-2 py-0.5 font-medium border-0 backdrop-blur-sm">
-              v{(Math.random() * 2 + 0.1).toFixed(1)}
+              {article.ver}
             </Badge>
           </div>
 
