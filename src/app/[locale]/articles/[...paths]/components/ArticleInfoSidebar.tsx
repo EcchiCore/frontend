@@ -430,7 +430,7 @@ const ArticleInfoSidebar: React.FC<ArticleInfoSidebarProps> = ({
                 <div className="flex items-center gap-2">
                   <span className="text-sm text-muted-foreground">{t("articleInfo.version")}:</span>
                 </div>
-                <Badge variant="secondary">v{article.ver}</Badge>
+                <Badge variant="secondary">{article.ver}</Badge>
               </div>
             )}
           </CardContent>
