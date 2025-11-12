@@ -1,6 +1,7 @@
 // app/articles/[slug]/components/GTMArticleTracker.tsx
-'use client';
 
+
+"use client";
 import { useEffect } from 'react';
 import { sendGTMEvent } from '@next/third-parties/google';
 
