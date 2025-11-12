@@ -79,7 +79,7 @@ export default function NavbarLinks({ section, onCloseMenu = () => {}, isMobile 
     const leftLinks: NavLink[] = [
       { 
         id: "games", 
-        name: "games", 
+        name: "Games",
         transKey: "games", 
         link: getLocalizedHref("games") 
       },

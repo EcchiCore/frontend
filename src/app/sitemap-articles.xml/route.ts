@@ -1,5 +1,5 @@
+// app/sitemap-articles.xml/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-
 import {
   SITEMAP_ARTICLE_PAGE_SIZE,
   buildArticleFields,
@@ -10,40 +10,24 @@ import {
 
 export async function GET(request: NextRequest) {
   try {
-    const url = new URL(request.url);
-    const pageParam = url.searchParams.get('page') ?? '0';
-    const pageIndex = Number.parseInt(pageParam, 10);
-
-    if (Number.isNaN(pageIndex) || pageIndex < 0) {
-      return new NextResponse('Invalid page parameter', { status: 400 });
-    }
+    const page = Number(request.nextUrl.searchParams.get('page') ?? '0');
+    if (isNaN(page) || page < 0) return new NextResponse('Bad Request', { status: 400 });
 
     const generatedAt = new Date().toISOString();
     const articles = await fetchPublishedArticles(generatedAt);
     const chunks = chunkArray(articles, SITEMAP_ARTICLE_PAGE_SIZE);
-    const chunk = chunks[pageIndex] ?? [];
-
-    if (chunk.length === 0) {
-      const xml = buildSitemapXml([]);
-
-      return new NextResponse(xml, {
-        headers: {
-          'Content-Type': 'application/xml',
-          'Cache-Control': 'public, max-age=60, s-maxage=300',
-        },
-      });
-    }
+    const chunk = chunks[page] || [];
 
     const xml = buildSitemapXml(buildArticleFields(chunk, generatedAt));
 
     return new NextResponse(xml, {
       headers: {
         'Content-Type': 'application/xml',
-        'Cache-Control': 'public, max-age=60, s-maxage=300',
+        'Cache-Control': 'public, max-age=60, s-maxage=3600',
       },
     });
   } catch (error) {
-    console.error('Error generating articles sitemap:', error);
-    return new NextResponse('Internal Server Error', { status: 500 });
+    console.error('Articles sitemap error:', error);
+    return new NextResponse('Error', { status: 500 });
   }
 }

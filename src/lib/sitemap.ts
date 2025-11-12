@@ -1,197 +1,115 @@
-import { generateLanguageAlternates } from '@/utils/metadataUtils';
-import { siteUrl, supportedLocales } from '@/utils/localeUtils';
+// src/lib/sitemap.ts
+import { siteUrl } from '@/utils/localeUtils';
 
-export type ChangeFrequency =
-  | 'always'
-  | 'hourly'
-  | 'daily'
-  | 'weekly'
-  | 'monthly'
-  | 'yearly'
-  | 'never';
+export const SITEMAP_ARTICLE_PAGE_SIZE = 10000;
 
-export interface SitemapField {
-  loc: string;
-  lastmod: string;
-  changefreq: ChangeFrequency;
-  priority: number;
-  contentPath: string;
-}
-
-export interface ArticleSummary {
-  id: number;
+export type Article = {
   slug: string;
-  updatedAt?: string;
-}
+  updatedAt: string;
+  createdAt: string;
+};
 
-const staticRouteMeta: Array<{
-  path: string;
-  changefreq: ChangeFrequency;
-  priority: number;
-}> = [
-  { path: '', changefreq: 'daily', priority: 1.0 },
-  { path: 'home', changefreq: 'daily', priority: 0.9 },
-  { path: 'community', changefreq: 'weekly', priority: 0.6 },
-  { path: 'content', changefreq: 'weekly', priority: 0.6 },
-  { path: 'docs', changefreq: 'weekly', priority: 0.6 },
-  { path: 'games', changefreq: 'weekly', priority: 0.6 },
-  { path: 'contact', changefreq: 'monthly', priority: 0.5 },
-  { path: 'login', changefreq: 'monthly', priority: 0.5 },
-  { path: 'logout', changefreq: 'monthly', priority: 0.4 },
-  { path: 'member/dashboard', changefreq: 'weekly', priority: 0.6 },
-  { path: 'member/dashboard/moderator', changefreq: 'weekly', priority: 0.5 },
-  { path: 'member/dashboard/profile', changefreq: 'weekly', priority: 0.5 },
-  { path: 'member/dashboard/settings', changefreq: 'weekly', priority: 0.5 },
-  { path: 'member/profile', changefreq: 'monthly', priority: 0.5 },
-  { path: 'member/settings', changefreq: 'monthly', priority: 0.4 },
-  { path: 'moderator/pending-posts', changefreq: 'weekly', priority: 0.5 },
-  { path: 'nst', changefreq: 'monthly', priority: 0.4 },
-  { path: 'privacy-policy', changefreq: 'yearly', priority: 0.3 },
-  { path: 'register', changefreq: 'monthly', priority: 0.5 },
-  { path: 's', changefreq: 'weekly', priority: 0.5 },
-  { path: 'search', changefreq: 'weekly', priority: 0.6 },
-  { path: 'tools', changefreq: 'weekly', priority: 0.6 },
-  { path: 'upload/games', changefreq: 'weekly', priority: 0.6 },
-  { path: 'user', changefreq: 'weekly', priority: 0.6 },
-  { path: 'articles', changefreq: 'daily', priority: 0.7 },
-  { path: 'articles/Official/user', changefreq: 'weekly', priority: 0.6 },
-  { path: 'articles/Official/moderator', changefreq: 'weekly', priority: 0.6 },
-];
+export const chunkArray = <T>(array: T[], size: number): T[][] =>
+  Array.from({ length: Math.ceil(array.length / size) }, (_, i) =>
+    array.slice(i * size, i * size + size)
+  );
 
-export const SITEMAP_ARTICLE_PAGE_SIZE = 500;
+const GRAPHQL_ENDPOINT = `${siteUrl}/api/graphql`;
 
-export async function fetchPublishedArticles(fallbackLastMod: string): Promise<ArticleSummary[]> {
-  const apiUrl = process.env.API_URL;
+const GET_ARTICLES = `
+  query GetArticles($limit: Int!, $offset: Int!) {
+    articles(filter: {}, limit: $limit, offset: $offset, status: PUBLISHED) {
+      slug
+      updatedAt
+      createdAt
+    }
+  }
+`;
 
-  if (!apiUrl) {
-    console.warn('API_URL is not defined; skipping article entries.');
-    return [];
+export async function fetchPublishedArticles(generatedAt: string): Promise<Article[]> {
+  const all: Article[] = [];
+  let offset = 0;
+  const limit = 100;
+
+  while (true) {
+    const res = await fetch(GRAPHQL_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        query: GET_ARTICLES,
+        variables: { limit, offset },
+      }),
+      next: { revalidate: 300 },
+    });
+
+    if (!res.ok) break;
+
+    const { data } = await res.json();
+    const articles = data?.articles || [];
+
+    if (articles.length === 0) break;
+
+    all.push(...articles);
+    offset += limit;
   }
 
-  const pageSize = SITEMAP_ARTICLE_PAGE_SIZE;
-  const allArticles: ArticleSummary[] = [];
-
-  try {
-    let offset = 0;
-    let hasNextPage = true;
-    let safetyCounter = 0;
-    let totalCount: number | undefined;
-    const maxPages = 200; // Prevent unbounded loops
-
-    while (hasNextPage && safetyCounter < maxPages) {
-      const response = await fetch(
-        `${apiUrl}/api/articles?status=PUBLISHED&limit=${pageSize}&offset=${offset}`,
-        {
-          headers: { accept: 'application/json' },
-          cache: 'no-store',
-        }
-      );
-
-      if (!response.ok) {
-        console.error('Failed to fetch articles for sitemap:', response.status, response.statusText);
-        break;
-      }
-
-      const data = await response.json();
-      const articles: any[] = Array.isArray(data?.articles) ? data.articles : [];
-      const reportedCount = typeof data?.articlesCount === 'number' ? data.articlesCount : undefined;
-
-      if (typeof totalCount === 'undefined' && typeof reportedCount === 'number') {
-        totalCount = reportedCount;
-      }
-
-      if (articles.length === 0) {
-        break;
-      }
-
-      allArticles.push(
-        ...articles.map(article => ({
-          id: article.id,
-          slug: article.slug,
-          updatedAt: article.updatedAt ?? fallbackLastMod,
-        }))
-      );
-
-      offset += pageSize;
-
-      if (typeof totalCount === 'number') {
-        hasNextPage = offset < totalCount;
-      } else {
-        hasNextPage = articles.length === pageSize;
-      }
-
-      safetyCounter += 1;
-    }
-  } catch (error) {
-    console.error('Unhandled error fetching articles for sitemap:', error);
-  }
-
-  return allArticles;
+  return all;
 }
 
-export function buildStaticFields(lastmod: string): SitemapField[] {
-  const fields: SitemapField[] = [];
+export const getArticleUrl = (slug: string, locale: Locale = 'en'): string => {
+  const base = locale === 'en' ? `/${slug}` : `/${locale}/${slug}`;
+  return `${siteUrl}${base}`;
+};
 
-  staticRouteMeta.forEach(({ path, changefreq, priority }) => {
-    const suffix = path ? `/${path}` : '';
+export const buildArticleFields = (articles: Article[], generatedAt: string) => {
+  return articles.map(article => ({
+    loc: getArticleUrl(article.slug),
+    lastmod: article.updatedAt || article.createdAt || generatedAt,
+    changefreq: 'weekly' as const,
+    priority: 0.7,
+    alternates: {
+      en: getArticleUrl(article.slug, 'en'),
+      th: getArticleUrl(article.slug, 'th'),
+      'x-default': getArticleUrl(article.slug, 'en'),
+    },
+  }));
+};
 
-    for (const locale of supportedLocales) {
-      fields.push({
-        loc: `${siteUrl}/${locale}${suffix}`,
-        lastmod,
-        changefreq,
-        priority,
-        contentPath: path,
-      });
-    }
+export const buildStaticFields = (generatedAt: string) => {
+  const routes = ['', 'articles', 'games', 'search', 'about', 'contact'];
+  return routes.map(route => {
+    const path = route ? `/${route}` : '';
+    return {
+      loc: `${siteUrl}${path}`,
+      lastmod: generatedAt,
+      changefreq: route ? 'daily' : 'hourly',
+      priority: route ? 0.8 : 1.0,
+      alternates: {
+        en: `${siteUrl}${path}`,
+        th: `${siteUrl}/th${path || ''}`,
+        'x-default': `${siteUrl}${path}`,
+      },
+    };
   });
+};
 
-  fields.push({
-    loc: siteUrl,
-    lastmod,
-    changefreq: 'daily',
-    priority: 1.0,
-    contentPath: '',
-  });
-
-  return fields;
-}
-
-export function buildArticleFields(
-  articles: ArticleSummary[],
-  fallbackLastMod: string
-): SitemapField[] {
-  const fields: SitemapField[] = [];
-
-  articles.forEach(article => {
-    if (!article.slug) return;
-
-    const contentPath = `articles/${article.slug}`;
-    const lastmod = article.updatedAt ? new Date(article.updatedAt).toISOString() : fallbackLastMod;
-
-    for (const locale of supportedLocales) {
-      fields.push({
-        loc: `${siteUrl}/${locale}/${contentPath}`,
-        lastmod,
-        changefreq: 'weekly',
-        priority: 0.7,
-        contentPath,
-      });
-    }
-  });
-
-  return fields;
-}
-
-export function buildSitemapXml(fields: SitemapField[]): string {
+export const buildSitemapXml = (fields: any[]) => {
   const urls = fields
-    .map(field => `  <url>
+    .map(field => {
+      const alt = field.alternates
+        ? Object.entries(field.alternates)
+          .map(([lang, href]) => `    <xhtml:link rel="alternate" hreflang="${lang}" href="${href}" />`)
+          .join('\n')
+        : '';
+
+      return `  <url>
     <loc>${field.loc}</loc>
     <lastmod>${field.lastmod}</lastmod>
     <changefreq>${field.changefreq}</changefreq>
     <priority>${field.priority.toFixed(1)}</priority>
-    ${buildAlternateLinks(field.contentPath)}
-  </url>`)
+${alt}
+  </url>`;
+    })
     .join('\n');
 
   return `<?xml version="1.0" encoding="UTF-8"?>
@@ -199,23 +117,4 @@ export function buildSitemapXml(fields: SitemapField[]): string {
         xmlns:xhtml="http://www.w3.org/1999/xhtml">
 ${urls}
 </urlset>`;
-}
-
-export function buildAlternateLinks(contentPath: string): string {
-  const alternates = generateLanguageAlternates(contentPath);
-
-  return Object.entries(alternates)
-    .map(([hreflang, href]) => `<xhtml:link rel="alternate" hreflang="${hreflang}" href="${href}" />`)
-    .join('\n    ');
-}
-
-export function chunkArray<T>(items: T[], chunkSize: number): T[][] {
-  if (chunkSize <= 0) return [items];
-  const chunks: T[][] = [];
-
-  for (let i = 0; i < items.length; i += chunkSize) {
-    chunks.push(items.slice(i, i + chunkSize));
-  }
-
-  return chunks;
-}
+};

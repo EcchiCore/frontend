@@ -1,68 +1,43 @@
 // src/utils/metadataUtils.ts
 import type { Metadata } from 'next';
-import {
-  supportedLocales,
-  siteUrl,
-  defaultLocale,
-  type Locale
-} from './localeUtils';
+import { supportedLocales, defaultLocale, type Locale, siteUrl } from './localeUtils';
 
-/**
- * Generate language alternates for any content path
- * @param contentPath - The content path without locale (e.g., 'articles/some-slug' or 'articles/some-slug/translate?param=value')
- * @returns Object with language alternates
- */
 export function generateLanguageAlternates(
-  contentPath: string = ''
+  contentPath: string = '',
+  baseUrl?: string
 ): Record<string, string> {
+  const url = baseUrl || siteUrl;
   const alternates: Record<string, string> = {};
 
-  // Generate alternates for each supported locale
   supportedLocales.forEach(locale => {
-    if (contentPath) {
-      // Handle paths with query parameters
-      if (contentPath.includes('?')) {
-        const [path, params] = contentPath.split('?');
-        alternates[locale] = `${siteUrl}/${locale}/${path}?${params}`;
-      } else {
-        alternates[locale] = `${siteUrl}/${locale}/${contentPath}`;
-      }
+    const path = contentPath.includes('?')
+      ? contentPath.split('?')[0]
+      : contentPath;
+
+    if (locale === defaultLocale) {
+      alternates[locale] = `${url}/${path}`.replace(/\/$/, '');
     } else {
-      alternates[locale] = `${siteUrl}/${locale}`;
+      alternates[locale] = `${url}/${locale}/${path}`.replace(/\/$/, '');
+    }
+
+    if (contentPath.includes('?')) {
+      const params = contentPath.split('?')[1];
+      alternates[locale] += `?${params}`;
     }
   });
 
-  // Add x-default
-  if (contentPath) {
-    if (contentPath.includes('?')) {
-      const [path, params] = contentPath.split('?');
-      alternates['x-default'] = `${siteUrl}/${defaultLocale}/${path}?${params}`;
-    } else {
-      alternates['x-default'] = `${siteUrl}/${defaultLocale}/${contentPath}`;
-    }
-  } else {
-    alternates['x-default'] = `${siteUrl}/${defaultLocale}`;
+  alternates['x-default'] = `${url}/${contentPath.split('?')[0]}`.replace(/\/$/, '');
+  if (contentPath.includes('?')) {
+    alternates['x-default'] += `?${contentPath.split('?')[1]}`;
   }
 
   return alternates;
 }
 
-/**
- * Generate canonical URL for content
- * @param contentPath - The content path without locale (including query params if any)
- * @returns Canonical URL string
- */
-export function generateCanonicalUrl(
-  contentPath: string = ''
-): string {
-  if (contentPath) {
-    if (contentPath.includes('?')) {
-      const [path, params] = contentPath.split('?');
-      return `${siteUrl}/${defaultLocale}/${path}?${params}`;
-    }
-    return `${siteUrl}/${defaultLocale}/${contentPath}`;
-  }
-  return `${siteUrl}/${defaultLocale}`;
+export function generateCanonicalUrl(contentPath: string = '', baseUrl?: string): string {
+  const url = baseUrl || siteUrl;
+  const path = contentPath.split('?')[0];
+  return `${url}/${path}`.replace(/\/$/, '') + (contentPath.includes('?') ? `?${contentPath.split('?')[1]}` : '');
 }
 
 /**
