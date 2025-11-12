@@ -23,7 +23,7 @@ import { Alert } from "@/components/ui/alert";
 import SidebarLeft from "./SidebarLeft";
 import InteractionBar from "./InteractionBar";
 import CommentsSection from "./CommentsSection";
-import SidebarRight from "./SidebarRight";
+import ArticleInfoSidebar from "./ArticleInfoSidebar"; // New import
 import { getFileIcon, getFileSize } from "@/utils/fileUtils";
 import ArticleTitleMeta from "./ArticleTitleMeta";
 import { Article } from "@/types/article";
@@ -40,54 +40,6 @@ import { useTranslations } from 'next-intl';
 import { TextAlign } from "@tiptap/extension-text-align";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
-
-const MobileArticleInfo: React.FC<{ article: Article, formatDate: (date: string) => string, encodeURLComponent: (value: string) => string }> = ({ article, formatDate, encodeURLComponent }) => {
-  const t = useTranslations("sidebar");
-
-  return (
-    <Card className="md:hidden mt-4">
-      <CardHeader>
-        <CardTitle>{t("articleInfo.title")}</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="space-y-2">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center gap-2">
-              <Clock className="w-4 h-4 text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">{t("articleInfo.published")}:</span>
-            </div>
-            <span className="text-sm font-semibold">{formatDate(article.createdAt)}</span>
-          </div>
-          <div className="flex justify-between items-center">
-            <div className="flex items-center gap-2">
-              <Clock className="w-4 h-4 text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">{t("articleInfo.updated")}:</span>
-            </div>
-            <span className="text-sm font-semibold">{formatDate(article.updatedAt)}</span>
-          </div>
-          {article.creators && article.creators.length > 0 && (
-            <div className="flex justify-between items-center">
-              <div className="flex items-center gap-2">
-                <User className="w-4 h-4 text-muted-foreground" />
-                <span className="text-sm text-muted-foreground">{t("articleInfo.creator")}:</span>
-              </div>
-              <span className="text-sm font-semibold text-right max-w-[60%] truncate">{article.creators[0]?.name}</span>
-            </div>
-          )}
-          {article.engine && (
-            <div className="flex justify-between items-center">
-              <div className="flex items-center gap-2">
-                <Cpu className="w-4 h-4 text-muted-foreground" />
-                <span className="text-sm text-muted-foreground">{t("articleInfo.engine")}:</span>
-              </div>
-              <Badge variant="outline">{article.engine}</Badge>
-            </div>
-          )}
-        </div>
-      </CardContent>
-    </Card>
-  );
-};
 
 interface ArticleContentProps {
   article: Article;
@@ -124,7 +76,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [newComment, setNewComment] = useState("");
   const [isClient, setIsClient] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
+  const [isMobile, setIsMobile] = useState(false); // Keep isMobile for other potential uses
   const [readingProgress, setReadingProgress] = useState(0);
   const [fontSize, setFontSize] = useState(16);
   const [searchQuery, setSearchQuery] = useState("");
@@ -710,174 +662,83 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-[280px_1fr_280px] gap-6">
-          {isMobile ? (
-            <>
-              <main className="min-w-0">
-                <div className="md:hidden mb-6 card bg-background shadow-xl">
-                  <div className="card-body flex-row items-center gap-4">
-                    <Image
-                      loader={myImageLoader}
-                      src={article.author.image || PLACEHOLDER_IMAGE}
-                      alt={article.author.name}
-                      width={48}
-                      height={48}
-                      className="avatar rounded-full"
-                      onError={(e) => (e.currentTarget.src = PLACEHOLDER_IMAGE)}
-                    />
-                    <div>
-                      <Link
-                        href={`/profiles/${encodeURLComponent(
-                          article.author.name
-                        )}`}
-                        className="text-lg font-semibold text-primary hover:underline"
-                      >
-                        {article.author.name}
-                      </Link>
-                      <p className="text-sm text-muted-foreground line-clamp-2">
-                        {article.author.bio || t("noBio")}
-                      </p>
-                    </div>
+          <SidebarLeft
+            article={article}
+            topCommenters={topCommenters}
+            isDarkBackground={isDarkMode}
+          />
+
+          <main className="min-w-0">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <Card>
+                <CardContent>
+                  <ArticleTitleMeta article={article} isDarkMode={isDarkMode} />
+
+                  <div className="mb-6">
+                    <EditorContent editor={editor} />
                   </div>
-                </div>
 
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5 }}
-                >
-                  <Card>
-                    <CardContent>
-                      <ArticleTitleMeta article={article} isDarkMode={isDarkMode} />
+                  <InteractionBar
+                    isCurrentUserAuthor={isCurrentUserAuthor}
+                    isFollowing={isFollowing}
+                    handleFollow={handleFollow}
+                    isFavorited={isFavorited}
+                    favoritesCount={favoritesCount}
+                    handleFavorite={handleFavorite}
+                    handleShare={handleShare}
+                    isDarkBackground={isDarkMode}
+                  />
 
-                      <div className="mb-6">
-                        <EditorContent editor={editor} />
-                      </div>
+                  {commentsError && (
+                    <Alert variant="destructive">
+                      {t("commentsLoadError")}{" "}
+                      <Button
+                        onClick={() =>
+                          mutate(`${API_BASE_URL}/api/articles/${slug}/comments`)
+                        }
+                        variant="link"
+                      >
+                        {t("tryAgain")}
+                      </Button>
+                    </Alert>
+                  )}
 
-                      <InteractionBar
-                        isCurrentUserAuthor={isCurrentUserAuthor}
-                        isFollowing={isFollowing}
-                        handleFollow={handleFollow}
-                        isFavorited={isFavorited}
-                        favoritesCount={favoritesCount}
-                        handleFavorite={handleFavorite}
-                        handleShare={handleShare}
-                        isDarkBackground={isDarkMode}
-                      />
+                  <CommentsSection
+                    isAuthenticated={isAuthenticated}
+                    isDarkBackground={isDarkMode}
+                    comments={comments}
+                    newComment={newComment}
+                    setNewComment={setNewComment}
+                    handleAddComment={handleAddComment}
+                    isCurrentUserAuthor={isCurrentUserAuthor}
+                    handleDeleteComment={handleDeleteComment}
+                    formatDate={formatDate}
+                    commentInputRef={commentInputRef}
+                    isLoading={isLoading && comments.length === 0}
+                  />
+                </CardContent>
+              </Card>
+            </motion.div>
+          </main>
 
-                      {commentsError && (
-                        <Alert variant="destructive">
-                          {t("commentsLoadError")}{" "}
-                          <Button
-                            onClick={() =>
-                              mutate(`${API_BASE_URL}/api/articles/${slug}/comments`)
-                            }
-                            variant="link"
-                          >
-                            {t("tryAgain")}
-                          </Button>
-                        </Alert>
-                      )}
-
-                      <CommentsSection
-                        isAuthenticated={isAuthenticated}
-                        isDarkBackground={isDarkMode}
-                        comments={comments}
-                        newComment={newComment}
-                        setNewComment={setNewComment}
-                        handleAddComment={handleAddComment}
-                        isCurrentUserAuthor={isCurrentUserAuthor}
-                        handleDeleteComment={handleDeleteComment}
-                        formatDate={formatDate}
-                        commentInputRef={commentInputRef}
-                        isLoading={isLoading && comments.length === 0}
-                      />
-                    </CardContent>
-                  </Card>
-                </motion.div>
-
-                <MobileArticleInfo article={article} formatDate={formatDate} encodeURLComponent={encodeURLComponent} />
-              </main>
-            </>
-          ) : (
-            <>
-              <SidebarLeft
-                article={article}
-                topCommenters={topCommenters}
-                isDarkBackground={isDarkMode}
-              />
-
-              <main className="min-w-0">
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5 }}
-                >
-                  <Card>
-                    <CardContent>
-                      <ArticleTitleMeta article={article} isDarkMode={isDarkMode} />
-
-                      <div className="mb-6">
-                        <EditorContent editor={editor} />
-                      </div>
-
-                      <InteractionBar
-                        isCurrentUserAuthor={isCurrentUserAuthor}
-                        isFollowing={isFollowing}
-                        handleFollow={handleFollow}
-                        isFavorited={isFavorited}
-                        favoritesCount={favoritesCount}
-                        handleFavorite={handleFavorite}
-                        handleShare={handleShare}
-                        isDarkBackground={isDarkMode}
-                      />
-
-                      {commentsError && (
-                        <Alert variant="destructive">
-                          {t("commentsLoadError")}{" "}
-                          <Button
-                            onClick={() =>
-                              mutate(`${API_BASE_URL}/api/articles/${slug}/comments`)
-                            }
-                            variant="link"
-                          >
-                            {t("tryAgain")}
-                          </Button>
-                        </Alert>
-                      )}
-
-                      <CommentsSection
-                        isAuthenticated={isAuthenticated}
-                        isDarkBackground={isDarkMode}
-                        comments={comments}
-                        newComment={newComment}
-                        setNewComment={setNewComment}
-                        handleAddComment={handleAddComment}
-                        isCurrentUserAuthor={isCurrentUserAuthor}
-                        handleDeleteComment={handleDeleteComment}
-                        formatDate={formatDate}
-                        commentInputRef={commentInputRef}
-                        isLoading={isLoading && comments.length === 0}
-                      />
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              </main>
-
-              <SidebarRight
-                article={article}
-                isCurrentUserAuthor={isCurrentUserAuthor}
-                isFollowing={isFollowing}
-                handleFollow={handleFollow}
-                isFavorited={isFavorited}
-                handleFavorite={handleFavorite}
-                formatDate={formatDate}
-                translationFiles={[]}
-                setOpenDownloadDialog={setOpenDownloadDialog}
-                isDarkBackground={isDarkMode}
-                downloads={downloads}
-              />
-            </>
-          )}
+          <ArticleInfoSidebar
+            article={article}
+            isCurrentUserAuthor={isCurrentUserAuthor}
+            isFollowing={isFollowing}
+            handleFollow={handleFollow}
+            isFavorited={isFavorited}
+            handleFavorite={handleFavorite}
+            formatDate={formatDate}
+            translationFiles={[]}
+            setOpenDownloadDialog={setOpenDownloadDialog}
+            isDarkBackground={isDarkMode}
+            downloads={downloads}
+            encodeURLComponent={encodeURLComponent}
+          />
         </div>
       </div>
 
