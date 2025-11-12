@@ -112,7 +112,10 @@ export function generatePageMetadata(options: {
     title,
     description,
     keywords,
-    robots: { index: true, follow: true },
+    robots:
+      locale === defaultLocale
+        ? { index: true, follow: true }
+        : { index: false, follow: false },
     openGraph: {
       title,
       description,

@@ -140,12 +140,12 @@ export default async function ArticlePage(props: ArticlePageProps) {
   const slug = paths[0];
   const articleId = searchParams.id ? Number(searchParams.id) : undefined;
 
-  const { article: originalArticle, downloads } = await fetchArticleAndDownloads(slug, articleId || 0); // Use articleId from searchParams or a default
+  const { article: originalArticle, downloads } = await fetchArticleAndDownloads(slug, articleId || 0);
   if (!originalArticle) {
     return notFound();
   }
 
-  // Generate structured data JSON-LD for the article
+  // Generate structured data JSON-LD for the article (only once, SEO handles language)
   const articleJsonLd = generateArticleJsonLd(
     originalArticle,
     locale,
