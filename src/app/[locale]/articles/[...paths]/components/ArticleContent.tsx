@@ -471,6 +471,17 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
     }
   }, [commentsData, commentsError, showAlert, areCommentsEqual, buildTopCommenters]);
 
+  const handleDownloadClick = useCallback(() => {
+    const token = Cookies.get("token");
+    if (!token) {
+      showAlert("กรุณาเข้าสู่ระบบเพื่อดาวน์โหลด", "error");
+      // Redirect to login page
+      window.location.href = `/login?redirect=${encodeURIComponent(window.location.pathname + window.location.search)}`;
+      return;
+    }
+    setOpenDownloadDialog(true);
+  }, [showAlert]);
+
   const handleFavorite = useCallback(async () => {
     const token = Cookies.get("token");
     if (!token) return showAlert("กรุณาเข้าสู่ระบบเพื่อบันทึกบทความนี้", "error");
@@ -734,7 +745,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
             handleFavorite={handleFavorite}
             formatDate={formatDate}
             translationFiles={[]}
-            setOpenDownloadDialog={setOpenDownloadDialog}
+            setOpenDownloadDialog={handleDownloadClick}
             isDarkBackground={isDarkMode}
             downloads={downloads}
             encodeURLComponent={encodeURLComponent}

@@ -140,9 +140,19 @@ export default async function ArticlePage(props: ArticlePageProps) {
   const slug = decodeURIComponent(paths[0]);
   const articleId = searchParams.id ? Number(searchParams.id) : undefined;
 
-  const { article: originalArticle, downloads } = await fetchArticleAndDownloads(slug, articleId || 0);
+  // Only fetch downloads if articleId is provided
+  const { article: originalArticle, downloads } = articleId 
+    ? await fetchArticleAndDownloads(slug, articleId)
+    : { article: await getArticleBySlug(slug), downloads: [] };
+    
   if (!originalArticle) {
     return notFound();
+  }
+
+  // Redirect to URL with id if not provided
+  if (!articleId && originalArticle.id) {
+    const { redirect } = await import('next/navigation');
+    redirect(`/${locale}/articles/${slug}?id=${originalArticle.id}`);
   }
 
   // Generate structured data JSON-LD for the article (only once, SEO handles language)

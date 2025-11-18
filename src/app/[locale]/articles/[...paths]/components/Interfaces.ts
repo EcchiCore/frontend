@@ -110,7 +110,7 @@ export interface SidebarRightProps {
   isFavorited: boolean;
   handleFavorite: () => void;
   formatDate: (date: string) => string;
-  setOpenDownloadDialog: (open: boolean) => void;
+  setOpenDownloadDialog: () => void;
   isDarkBackground: boolean; // Add this
   downloads: Article["downloads"];
   translationFiles: TranslationFile[];

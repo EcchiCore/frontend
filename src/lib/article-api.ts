@@ -83,6 +83,7 @@ export async function fetchArticleAndDownloads(
 ): Promise<{ article: Article | null; downloads: Article["downloads"] | null }> {
   const query = `query ArticleAndDownloads($slug: String!, $downloadsArticleId: Int!) {
     article(slug: $slug) {
+      id
       author {
         image
         name
@@ -147,6 +148,7 @@ export async function fetchArticleAndDownloads(
 export async function getArticleBySlug(slug: string): Promise<Article | null> {
   const query = `query ArticleBySlug($slug: String!) {
     article(slug: $slug) {
+      id
       author {
         image
         name

@@ -134,7 +134,7 @@ const SidebarRight: React.FC<SidebarRightProps> = ({
           <CardContent>
             <Button
               className="w-full flex items-center justify-center gap-2"
-              onClick={() => setOpenDownloadDialog(true)}
+              onClick={() => setOpenDownloadDialog()}
             >
               <Download className="w-5 h-5" />
               {t("downloads.viewAll")} ({downloads.length})

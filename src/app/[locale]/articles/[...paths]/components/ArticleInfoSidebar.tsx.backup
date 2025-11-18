@@ -128,7 +128,8 @@ const ArticleInfoSidebar: React.FC<ArticleInfoSidebarProps> = ({
         </Card>
 
         {/* Downloads Card */}
-        <Card>
+        {downloads && downloads.length > 0 && (
+          <Card>
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Download className="w-5 h-5 text-primary" />
@@ -138,13 +139,14 @@ const ArticleInfoSidebar: React.FC<ArticleInfoSidebarProps> = ({
             <CardContent>
               <Button
                 className="w-full flex items-center justify-center gap-2"
-                onClick={() => setOpenDownloadDialog()}
+                onClick={() => setOpenDownloadDialog(true)}
               >
                 <Download className="w-5 h-5" />
-                {t("downloads.viewAll")}
+                {t("downloads.viewAll")} ({downloads.length})
               </Button>
             </CardContent>
           </Card>
+        )}
 
         {/* Article Info Card */}
         <Card>
@@ -346,7 +348,8 @@ const ArticleInfoSidebar: React.FC<ArticleInfoSidebarProps> = ({
         </Card>
 
         {/* Downloads Card */}
-        <Card>
+        {downloads && downloads.length > 0 && (
+          <Card>
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Download className="w-5 h-5 text-primary" />
@@ -356,13 +359,14 @@ const ArticleInfoSidebar: React.FC<ArticleInfoSidebarProps> = ({
             <CardContent>
               <Button
                 className="w-full flex items-center justify-center gap-2"
-                onClick={() => setOpenDownloadDialog()}
+                onClick={() => setOpenDownloadDialog(true)}
               >
                 <Download className="w-5 h-5" />
-                {t("downloads.viewAll")}
+                {t("downloads.viewAll")} ({downloads.length})
               </Button>
             </CardContent>
           </Card>
+        )}
 
         {/* Article Info Card */}
         <Card>
