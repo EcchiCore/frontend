@@ -48,8 +48,8 @@ async function fetchHomeData(locale: string) {
   try {
     const [carouselData, featuredData, latestData] = await Promise.all([
       fetchArticles({ limit: '3', status: 'PUBLISHED' }),
-      fetchArticles({ platform: 'windows', status: 'PUBLISHED' }),
-      fetchArticles({ status: 'PUBLISHED' }),
+      fetchArticles({ platform: 'windows', status: 'PUBLISHED', limit: '6' }),
+      fetchArticles({ status: 'PUBLISHED', limit: '10' }),
     ]);
 
     return {
@@ -160,11 +160,11 @@ export default async function HomePage({ params }: { params: { locale: string } 
               </div>
 
               <TabsContent value="featured" className="space-y-6">
-                <FeaturedPosts posts={homeData.featured} loading={false} />
+                <FeaturedPosts posts={homeData.featured} loading={false} title="กระทู้แนะนำ" />
               </TabsContent>
 
               <TabsContent value="latest" className="space-y-6">
-                <FeaturedPosts posts={homeData.latest} loading={false} />
+                <FeaturedPosts posts={homeData.latest} loading={false} title="กระทู้ล่าสุด" />
               </TabsContent>
 
               <TabsContent value="trending" className="space-y-6">
@@ -203,49 +203,18 @@ export default async function HomePage({ params }: { params: { locale: string } 
                     <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">
                       #{topic.name}
                     </span>
-                    <div className="flex items-center space-x-2">
-                      <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded-full">
-                        {topic.count.toLocaleString()}
-                      </span>
-                      <div className="w-1 h-1 bg-primary/60 rounded-full group-hover:bg-primary transition-colors"></div>
-                    </div>
+                    {/*<div className="flex items-center space-x-2">*/}
+                    {/*  <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded-full">*/}
+                    {/*    {topic.count.toLocaleString()}*/}
+                    {/*  </span>*/}
+                    {/*  <div className="w-1 h-1 bg-primary/60 rounded-full group-hover:bg-primary transition-colors"></div>*/}
+                    {/*</div>*/}
                   </div>
                 ))}
               </CardContent>
             </Card>
 
-            {/* Enhanced Online Users */}
-            <Card className="border-border/50 shadow-sm hover:shadow-md transition-shadow duration-200">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg flex items-center space-x-2 text-foreground">
-                  <div className="p-1.5 bg-green-500/10 rounded-md">
-                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                  </div>
-                  <span>ผู้ใช้ออนไลน์</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center space-x-2 mb-4 p-3 bg-green-50 dark:bg-green-950/20 rounded-lg border border-green-200 dark:border-green-800">
-                  <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-                  <span className="text-sm font-semibold text-green-700 dark:text-green-300">15,432 คนออนไลน์</span>
-                </div>
-                <div className="space-y-2">
-                  {[1, 2, 3, 4, 5].map((i) => (
-                    <div key={i} className="flex items-center space-x-3 p-2 hover:bg-accent/50 rounded-lg transition-colors group">
-                      <Avatar className="h-7 w-7 ring-2 ring-background shadow-sm">
-                        <AvatarFallback className="text-xs font-medium bg-primary/10 text-primary">
-                          U{i}
-                        </AvatarFallback>
-                      </Avatar>
-                      <span className="text-sm text-foreground font-medium group-hover:text-primary transition-colors">
-                        ผู้ใช้{i}
-                      </span>
-                      <div className="w-2 h-2 bg-green-400 rounded-full ml-auto group-hover:bg-green-500 transition-colors"></div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+
 
             {/* Enhanced Quick Actions */}
             <Card className="border-border/50 shadow-sm hover:shadow-md transition-shadow duration-200">

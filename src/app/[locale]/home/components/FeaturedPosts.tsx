@@ -3,12 +3,6 @@
 import Link from 'next/link';
 
 import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Eye, MessageSquare, Heart, Clock } from 'lucide-react';
-import Image from 'next/image'; // Import Next.js Image component
-
-
 
 // Define the structure of an article from the API
 interface Article {
@@ -33,111 +27,54 @@ interface Article {
 interface FeaturedPostsProps {
   posts: Article[];
   loading: boolean;
+  title: string;
 }
 
-export default function FeaturedPosts({ posts, loading }: FeaturedPostsProps) {
-  
-
-  // Function to calculate time ago
-  const getTimeAgo = (dateString: string) => {
-    const now = new Date();
-    const created = new Date(dateString);
-    const diffInMs = now.getTime() - created.getTime();
-    const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
-    if (diffInHours < 1) return 'เมื่อไม่กี่นาทีที่แล้ว';
-    if (diffInHours < 24) return `${diffInHours} ชั่วโมงที่แล้ว`;
-    const diffInDays = Math.floor(diffInHours / 24);
-    return `${diffInDays} วันที่แล้ว`;
-  };
-
+export default function FeaturedPosts({ posts, loading, title }: FeaturedPostsProps) {
   if (loading) {
     return <div className="text-center">กำลังโหลดกระทู้แนะนำ...</div>;
   }
 
-  
-
   return (
-    <div className="space-y-6">
+    <div className="mb-6">
       <div className="flex items-center space-x-3 mb-6">
         <div className="w-1 h-8 bg-primary rounded-full"></div>
-        <h3 className="text-lg font-semibold text-foreground">กระทู้แนะนำ</h3>
+        <h3 className="text-lg font-semibold text-foreground">{title}</h3>
       </div>
-      {posts.map((post) => {
-        const imageUrl = post.coverImage || post.mainImage || post.backgroundImage;
-        const src = typeof imageUrl === 'string' ? imageUrl : (imageUrl && typeof imageUrl === 'object' && 'url' in imageUrl) ? (imageUrl as { url?: string })?.url : null;
-
-        return (
+      <div className="space-y-4">
+        {posts.map((post) => (
           <Link href={`/articles/${post.slug}?id=${post.id}`} key={post.id}>
-            <Card className="hover:shadow-xl transition-all duration-300 cursor-pointer border-border/50 hover:border-primary/20 group">
-              <CardContent className="p-6">
-                <div className="flex space-x-4">
-                  <div className="w-32 h-20 bg-muted rounded-xl flex-shrink-0 overflow-hidden group-hover:scale-105 transition-transform duration-300 shadow-sm">
-                    <Image
-                      src={src || '/placeholder-image.png'}
-                      alt={post.title}
-                      width={128} // Match w-32 (32 * 4 = 128px)
-                      height={80} // Match h-20 (20 * 4 = 80px)
-                      className="w-full h-full object-cover"
-                      priority={false}
-                    />
-                  </div>
-                  <div className="flex-grow">
-                    <div className="flex items-start justify-between mb-3">
-                      <Badge variant="secondary" className="group-hover:bg-primary/10 group-hover:text-primary transition-colors">
-                        {(post.categories && post.categories.length > 0) ? post.categories[0]?.name : 'ทั่วไป'}
-                      </Badge>
-                      <div className="flex items-center space-x-4 text-sm text-muted-foreground">
-                        <div className="flex items-center space-x-1 group-hover:text-primary transition-colors">
-                          <Eye className="h-4 w-4" />
-                          <span>0</span> {/* Views not in API, fake or omit */}
-                        </div>
-                        <div className="flex items-center space-x-1 group-hover:text-primary transition-colors">
-                          <MessageSquare className="h-4 w-4" />
-                          <span>0</span> {/* Comments not in API */}
-                        </div>
-                        <div className="flex items-center space-x-1 group-hover:text-primary transition-colors">
-                          <Heart className="h-4 w-4" />
-                          <span>{post.favoritesCount}</span>
-                        </div>
-                      </div>
-                    </div>
-                    <h4 className="text-lg font-semibold text-foreground mb-3 group-hover:text-primary transition-colors leading-tight">
+            <Card className="hover:shadow-lg transition-all duration-300 cursor-pointer border-border/50 hover:border-primary/20 group bg-card/50 backdrop-blur-sm">
+              <CardContent className="p-4">
+                <div className="flex justify-between items-center">
+                  <div className="flex-grow pr-4">
+                    <h4 className="font-semibold text-base text-foreground group-hover:text-primary transition-colors">
                       {post.title}
                     </h4>
-                    <p className="text-muted-foreground mb-4 leading-relaxed line-clamp-2">{post.description}</p>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3">
-                        <Avatar className="h-8 w-8 ring-2 ring-background shadow-sm group-hover:ring-primary/20 transition-all duration-200">
-                          {post.author.image ? (
-                            <Image
-                              src={post.author.image}
-                              alt={post.author.name}
-                              width={32}
-                              height={32}
-                              className="rounded-full"
-                            />
-                          ) : (
-                            <AvatarFallback className="bg-primary/10 text-primary font-medium">
-                              {post.author.name ? post.author.name[0] : ''}
-                            </AvatarFallback>
-                          )}
-                        </Avatar>
-                        <span className="text-sm text-foreground font-medium group-hover:text-primary transition-colors">
-                          {post.author.name}
-                        </span>
-                      </div>
-                      <div className="flex items-center space-x-1 text-sm text-muted-foreground group-hover:text-primary transition-colors">
-                        <Clock className="h-4 w-4" />
-                        <span>{getTimeAgo(post.createdAt)}</span>
-                      </div>
+                    <p className="text-xs text-muted-foreground line-clamp-1">
+                      {post.description}
+                    </p>
+                  </div>
+                  <div className="flex-shrink-0 flex flex-col items-end space-y-1 text-xs text-muted-foreground text-right">
+                    <div className="truncate">
+                      <span className="font-semibold text-foreground/80">ผู้เขียน:</span>{' '}
+                      {post.author.name}
+                    </div>
+                    <div className="truncate">
+                      <span className="font-semibold text-foreground/80">หมวดหมู่:</span>{' '}
+                      {post.categories[0]?.name || 'N/A'}
+                    </div>
+                    <div className="truncate">
+                      <span className="font-semibold text-foreground/80">วันที่:</span>{' '}
+                      {new Date(post.createdAt).toLocaleDateString('th-TH', { year: '2-digit', month: 'short', day: 'numeric' })}
                     </div>
                   </div>
                 </div>
               </CardContent>
             </Card>
           </Link>
-        );
-      })}
+        ))}
+      </div>
     </div>
   );
 }
