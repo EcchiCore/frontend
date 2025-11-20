@@ -14,7 +14,7 @@ export const chunkArray = <T>(array: T[], size: number): T[][] =>
     array.slice(i * size, i * size + size)
   );
 
-const GRAPHQL_ENDPOINT = `${siteUrl}/api/graphql`;
+const GRAPHQL_ENDPOINT = `https://api.chanomhub.online/api/graphql`;
 
 const GET_ARTICLES = `
   query GetArticles($limit: Int!, $offset: Int!) {
@@ -42,9 +42,15 @@ export async function fetchPublishedArticles(generatedAt: string): Promise<Artic
       next: { revalidate: 300 },
     });
 
-    if (!res.ok) break;
+    console.log('Sitemap fetch response status:', res.status);
+
+    if (!res.ok) {
+      console.error('Sitemap fetch failed:', await res.text());
+      break;
+    }
 
     const { data } = await res.json();
+    console.log('Sitemap fetch data:', data);
     const articles = data?.articles || [];
 
     if (articles.length === 0) break;
