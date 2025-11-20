@@ -1,9 +1,7 @@
 // src/app/profiles/[username]/page.tsx
-import Image from 'next/image';
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import ProfileClient from './ProfileClient';
-import myImageLoader from '@/lib/imageLoader';
+import ProfileImage from './components/ProfileImage';
 import SocialLinkItem from './components/SocialLinkItem';
 
 const PLACEHOLDER_IMAGE = '/placeholder-image.png';
@@ -122,16 +120,12 @@ export default async function ProfilePage({ params }: Readonly<{ params: Promise
                 {profile.image ? (
                   <div className="avatar">
                     <div className="w-32 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
-                      <Image
-                        loader={myImageLoader}
+                      <ProfileImage
                         src={profile.image}
                         alt={`${profile.username}'s profile image`}
                         width={128}
                         height={128}
-                        sizes="(max-width: 768px) 100vw, 128px"
-                        className="rounded-full"
-                        priority
-                        onError={(e) => (e.currentTarget.src = PLACEHOLDER_IMAGE)}
+                        username={profile.username}
                       />
                     </div>
                   </div>
@@ -152,7 +146,6 @@ export default async function ProfilePage({ params }: Readonly<{ params: Promise
                 </span>
               </div>
 
-              <ProfileClient profile={profile} />
             </div>
           </section>
 

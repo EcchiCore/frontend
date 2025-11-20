@@ -1,5 +1,5 @@
-import { Dispatch, SetStateAction, RefObject } from "react"; // NEW: Import necessary React types
-import { SwipeableHandlers } from "react-swipeable"; // NEW: Import SwipeableHandlers type
+import { Dispatch, SetStateAction } from "react";
+import { SwipeableHandlers } from "react-swipeable";
 import { Article } from "@/types/article";
 
 
@@ -91,6 +91,19 @@ export interface SidebarLeftProps {
   isDarkBackground: boolean; // Add this
 }
 
+export interface SidebarRightProps {
+  article: Article;
+  isCurrentUserAuthor: boolean;
+  isFollowing: boolean;
+  handleFollow: () => void;
+  isFavorited: boolean;
+  handleFavorite: () => void;
+  setOpenDownloadDialog: () => void;
+  isDarkBackground: boolean; // Add this
+  downloads: Article["downloads"];
+  translationFiles: TranslationFile[];
+}
+
 export interface ArticleBodyProps {
   content: React.ReactNode;
   article: Article;
@@ -102,20 +115,6 @@ export interface ArticleBodyProps {
   slug: string;
 }
 
-export interface SidebarRightProps {
-  article: Article;
-  isCurrentUserAuthor: boolean;
-  isFollowing: boolean;
-  handleFollow: () => void;
-  isFavorited: boolean;
-  handleFavorite: () => void;
-  formatDate: (date: string) => string;
-  setOpenDownloadDialog: () => void;
-  isDarkBackground: boolean; // Add this
-  downloads: Article["downloads"];
-  translationFiles: TranslationFile[];
-}
-
 export interface CommentsSectionProps {
   isAuthenticated: boolean;
   isDarkBackground: boolean;
@@ -125,20 +124,7 @@ export interface CommentsSectionProps {
   handleAddComment: () => void;
   isCurrentUserAuthor: boolean;
   handleDeleteComment: (commentId: number) => void;
-  formatDate: (dateString: string) => string;
-  commentInputRef: RefObject<HTMLTextAreaElement | null>;
   isLoading?: boolean; // เพิ่ม prop สำหรับ loading state
-}
-
-export interface DownloadModalProps {
-  openDownloadDialog: boolean;
-  setOpenDownloadDialog: (value: boolean) => void;
-  downloads: DownloadFile[];
-  translationFiles: TranslationFile[];
-  handleOpenDownload: (item: DownloadFile | TranslationFile) => void;
-  handleCopyLink: (url: string) => void;
-  copiedLink: boolean;
-  formatDate: (dateString: string) => string;
 }
 
 export interface ImageLightboxProps {

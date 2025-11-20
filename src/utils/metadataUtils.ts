@@ -1,6 +1,27 @@
 // src/utils/metadataUtils.ts
 import type { Metadata } from 'next';
 import { supportedLocales, defaultLocale, type Locale, siteUrl } from './localeUtils';
+import { Article } from '@/types/article';
+
+// Helper function to create SEO-friendly title
+export function createSEOTitle(article: Article): string {
+  let title = article.title;
+
+  if ('ver' in article && article.ver) {
+    title += ` [${article.ver}]`;
+  }
+
+  if ('sequentialCode' in article && article.sequentialCode) {
+    title += ` (${article.sequentialCode})`;
+  }
+
+  return title;
+}
+
+// Helper function to construct content path for metadata
+export function constructContentPath(locale: Locale, paths: string[]): string {
+  return `articles/${paths[0]}`;
+}
 
 export function generateLanguageAlternates(
   contentPath: string = '',

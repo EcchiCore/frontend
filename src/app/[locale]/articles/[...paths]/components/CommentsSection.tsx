@@ -1,7 +1,6 @@
-import React from "react";
+import React, { useRef } from "react";
 import Image from "next/image";
 import { CommentsSectionProps } from "./Interfaces";
-import myImageLoader from "@/lib/imageLoader";
 import { Trash } from "lucide-react";
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -14,10 +13,18 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({
                                                            handleAddComment,
                                                            isCurrentUserAuthor,
                                                            handleDeleteComment,
-                                                           formatDate,
-                                                           commentInputRef,
                                                            isLoading,
-                                                         }) => (
+                                                         }) => {
+  const commentInputRef = useRef<HTMLTextAreaElement>(null);
+
+  const formatDate = (date: string) =>
+    new Date(date).toLocaleDateString("th-TH", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  
+  return (
   <div className="mt-8 border-t border-border pt-6">
     <h2 className="text-xl font-semibold mb-2 text-foreground">ความคิดเห็น</h2>
 
@@ -63,7 +70,6 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({
                   <div className="flex items-start gap-3">
                     <div className="relative w-10 h-10 shrink-0">
                       <Image
-                        loader={myImageLoader}
                         src={comment.author.image}
                         alt={comment.author.username}
                         fill
@@ -92,6 +98,7 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({
     )}
   </div>
 );
+};
 
 export default CommentsSection;
 

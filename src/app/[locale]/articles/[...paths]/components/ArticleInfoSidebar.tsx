@@ -3,9 +3,11 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useTranslations } from "next-intl";
+import { DownloadFile } from "./Interfaces";
 import { Article } from "@/types/article";
 import { SidebarRightProps } from "./Interfaces"; // Reusing SidebarRightProps for now
+import { encodeURLComponent } from "@/lib/utils";
+import { formatDate } from "@/lib/dateUtils";
 
 const PLACEHOLDER_IMAGE = '/placeholder-image.png';
 
@@ -30,7 +32,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
 interface ArticleInfoSidebarProps extends SidebarRightProps {
-  encodeURLComponent: (value: string | undefined | null) => string;
+  article: Article;
 }
 
 const ArticleInfoSidebar: React.FC<ArticleInfoSidebarProps> = ({
@@ -40,25 +42,24 @@ const ArticleInfoSidebar: React.FC<ArticleInfoSidebarProps> = ({
                                                                  handleFollow,
                                                                  isFavorited,
                                                                  handleFavorite,
-                                                                 formatDate,
                                                                  setOpenDownloadDialog,
-                                                                 downloads,
-                                                                 encodeURLComponent,
                                                                }) => {
-  const t = useTranslations("sidebar");
+  // The t variable is not used in this component, so useTranslations is commented out.
+  // const t = useTranslations("sidebar");
 
   const getStatusText = (status: string) => {
     switch (status) {
       case "PUBLISHED":
-        return t("status.published");
+        return "Published"; // Fallback to string if t is not available
       case "DRAFT":
-        return t("status.draft");
+        return "Draft"; // Fallback to string if t is not available
       case "ARCHIVED":
-        return t("status.archived");
+        return "Archived"; // Fallback to string if t is not available
       default:
         return status;
     }
   };
+
 
   const getStatusVariant = (status: string): "default" | "success" | "warning" | "secondary" | "destructive" => {
     switch (status) {
@@ -98,7 +99,7 @@ const ArticleInfoSidebar: React.FC<ArticleInfoSidebarProps> = ({
                   {article.author.name}
                 </Link>
                 <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
-                  {article.author.bio || t("author.noBio")}
+                  {article.author.bio || "No bio available"}
                 </p>
               </div>
             </div>
@@ -111,7 +112,7 @@ const ArticleInfoSidebar: React.FC<ArticleInfoSidebarProps> = ({
                   onClick={handleFollow}
                 >
                   {isFollowing ? <CheckIcon className="w-5 h-5" /> : <UserPlusIcon className="w-5 h-5" />}
-                  {isFollowing ? t("author.following") : t("author.follow")}
+                  {isFollowing ? "Following" : "Follow"}
                 </Button>
               )}
 
@@ -121,7 +122,7 @@ const ArticleInfoSidebar: React.FC<ArticleInfoSidebarProps> = ({
                 onClick={handleFavorite}
               >
                 {isFavorited ? <BookmarkSolid className="w-5 h-5" /> : <BookmarkOutline className="w-5 h-5" />}
-                {isFavorited ? t("bookmark.bookmarked") : t("bookmark.bookmark")}
+                {isFavorited ? "Bookmarked" : "Bookmark"}
               </Button>
             </div>
           </CardContent>
@@ -132,7 +133,7 @@ const ArticleInfoSidebar: React.FC<ArticleInfoSidebarProps> = ({
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Download className="w-5 h-5 text-primary" />
-                <CardTitle>{t("downloads.title")}</CardTitle>
+                <CardTitle>Downloads</CardTitle>
               </div>
             </CardHeader>
             <CardContent>
@@ -141,7 +142,7 @@ const ArticleInfoSidebar: React.FC<ArticleInfoSidebarProps> = ({
                 onClick={() => setOpenDownloadDialog()}
               >
                 <Download className="w-5 h-5" />
-                {t("downloads.viewAll")}
+                View All
               </Button>
             </CardContent>
           </Card>
@@ -151,14 +152,14 @@ const ArticleInfoSidebar: React.FC<ArticleInfoSidebarProps> = ({
           <CardHeader>
             <div className="flex items-center gap-2">
               <EyeIcon className="w-5 h-5 text-primary" />
-              <CardTitle>{t("articleInfo.title")}</CardTitle>
+              <CardTitle>Article Info</CardTitle>
             </div>
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-2">
                 <ClockIcon className="w-4 h-4 text-muted-foreground" />
-                <span className="text-sm text-muted-foreground">{t("articleInfo.published")}:</span>
+                <span className="text-sm text-muted-foreground">Published:</span>
               </div>
               <span className="text-sm font-semibold">{formatDate(article.createdAt)}</span>
             </div>
@@ -166,7 +167,7 @@ const ArticleInfoSidebar: React.FC<ArticleInfoSidebarProps> = ({
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-2">
                 <ClockIcon className="w-4 h-4 text-muted-foreground" />
-                <span className="text-sm text-muted-foreground">{t("articleInfo.updated")}:</span>
+                <span className="text-sm text-muted-foreground">Updated:</span>
               </div>
               <span className="text-sm font-semibold">{formatDate(article.updatedAt)}</span>
             </div>
@@ -175,7 +176,7 @@ const ArticleInfoSidebar: React.FC<ArticleInfoSidebarProps> = ({
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-2">
                   <UserIcon className="w-4 h-4 text-muted-foreground" />
-                  <span className="text-sm text-muted-foreground">{t("articleInfo.creator")}:</span>
+                  <span className="text-sm text-muted-foreground">Creator:</span>
                 </div>
                 <span className="text-sm font-semibold text-right max-w-[60%] truncate" title={article.creators[0]?.name}>
                   {article.creators[0]?.name}
@@ -187,7 +188,7 @@ const ArticleInfoSidebar: React.FC<ArticleInfoSidebarProps> = ({
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-2">
                   <CpuChipIcon className="w-4 h-4 text-muted-foreground" />
-                  <span className="text-sm text-muted-foreground">{t("articleInfo.engine")}:</span>
+                  <span className="text-sm text-muted-foreground">Engine:</span>
                 </div>
                 <Badge variant="outline">{article.engine}</Badge>
               </div>
@@ -197,7 +198,7 @@ const ArticleInfoSidebar: React.FC<ArticleInfoSidebarProps> = ({
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 bg-current rounded-full"></div>
-                  <span className="text-sm text-muted-foreground">{t("articleInfo.status")}:</span>
+                  <span className="text-sm text-muted-foreground">Status:</span>
                 </div>
                 <Badge variant={getStatusVariant(article.status)}>{getStatusText(article.status)}</Badge>
               </div>
@@ -206,7 +207,7 @@ const ArticleInfoSidebar: React.FC<ArticleInfoSidebarProps> = ({
             {article.ver && (
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground">{t("articleInfo.version")}:</span>
+                  <span className="text-sm text-muted-foreground">Version:</span>
                 </div>
                 <Badge variant="secondary">v{article.ver}</Badge>
               </div>
@@ -220,7 +221,7 @@ const ArticleInfoSidebar: React.FC<ArticleInfoSidebarProps> = ({
             <CardHeader>
               <div className="flex items-center gap-2">
                 <CpuChipIcon className="w-5 h-5 text-warning" />
-                <CardTitle>{t("platforms.title")}</CardTitle>
+                <CardTitle>Platforms</CardTitle>
               </div>
             </CardHeader>
             <CardContent>
@@ -246,7 +247,7 @@ const ArticleInfoSidebar: React.FC<ArticleInfoSidebarProps> = ({
             <CardHeader>
               <div className="flex items-center gap-2">
                 <TagIcon className="w-5 h-5 text-primary" />
-                <CardTitle>{t("tags.title")}</CardTitle>
+                <CardTitle>Tags</CardTitle>
               </div>
             </CardHeader>
             <CardContent>
@@ -272,7 +273,7 @@ const ArticleInfoSidebar: React.FC<ArticleInfoSidebarProps> = ({
             <CardHeader>
               <div className="flex items-center gap-2">
                 <FolderIcon className="w-5 h-5 text-secondary" />
-                <CardTitle>{t("categories.title")}</CardTitle>
+                <CardTitle>Categories</CardTitle>
               </div>
             </CardHeader>
             <CardContent>
@@ -316,7 +317,7 @@ const ArticleInfoSidebar: React.FC<ArticleInfoSidebarProps> = ({
                   {article.author.name}
                 </Link>
                 <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
-                  {article.author.bio || t("author.noBio")}
+                  {article.author.bio || "No bio available"}
                 </p>
               </div>
             </div>
@@ -329,7 +330,7 @@ const ArticleInfoSidebar: React.FC<ArticleInfoSidebarProps> = ({
                   onClick={handleFollow}
                 >
                   {isFollowing ? <CheckIcon className="w-5 h-5" /> : <UserPlusIcon className="w-5 h-5" />}
-                  {isFollowing ? t("author.following") : t("author.follow")}
+                  {isFollowing ? "Following" : "Follow"}
                 </Button>
               )}
 
@@ -339,7 +340,7 @@ const ArticleInfoSidebar: React.FC<ArticleInfoSidebarProps> = ({
                 onClick={handleFavorite}
               >
                 {isFavorited ? <BookmarkSolid className="w-5 h-5" /> : <BookmarkOutline className="w-5 h-5" />}
-                {isFavorited ? t("bookmark.bookmarked") : t("bookmark.bookmark")}
+                {isFavorited ? "Bookmarked" : "Bookmark"}
               </Button>
             </div>
           </CardContent>
@@ -350,7 +351,7 @@ const ArticleInfoSidebar: React.FC<ArticleInfoSidebarProps> = ({
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Download className="w-5 h-5 text-primary" />
-                <CardTitle>{t("downloads.title")}</CardTitle>
+                <CardTitle>Downloads</CardTitle>
               </div>
             </CardHeader>
             <CardContent>
@@ -359,7 +360,7 @@ const ArticleInfoSidebar: React.FC<ArticleInfoSidebarProps> = ({
                 onClick={() => setOpenDownloadDialog()}
               >
                 <Download className="w-5 h-5" />
-                {t("downloads.viewAll")}
+                View All
               </Button>
             </CardContent>
           </Card>
@@ -369,14 +370,14 @@ const ArticleInfoSidebar: React.FC<ArticleInfoSidebarProps> = ({
           <CardHeader>
             <div className="flex items-center gap-2">
               <EyeIcon className="w-5 h-5 text-primary" />
-              <CardTitle>{t("articleInfo.title")}</CardTitle>
+              <CardTitle>Article Info</CardTitle>
             </div>
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-2">
                 <ClockIcon className="w-4 h-4 text-muted-foreground" />
-                <span className="text-sm text-muted-foreground">{t("articleInfo.published")}:</span>
+                <span className="text-sm text-muted-foreground">Published:</span>
               </div>
               <span className="text-sm font-semibold">{formatDate(article.createdAt)}</span>
             </div>
@@ -384,7 +385,7 @@ const ArticleInfoSidebar: React.FC<ArticleInfoSidebarProps> = ({
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-2">
                 <ClockIcon className="w-4 h-4 text-muted-foreground" />
-                <span className="text-sm text-muted-foreground">{t("articleInfo.updated")}:</span>
+                <span className="text-sm text-muted-foreground">Updated:</span>
               </div>
               <span className="text-sm font-semibold">{formatDate(article.updatedAt)}</span>
             </div>
@@ -393,7 +394,7 @@ const ArticleInfoSidebar: React.FC<ArticleInfoSidebarProps> = ({
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-2">
                   <UserIcon className="w-4 h-4 text-muted-foreground" />
-                  <span className="text-sm text-muted-foreground">{t("articleInfo.creator")}:</span>
+                  <span className="text-sm text-muted-foreground">Creator:</span>
                 </div>
                 <span className="text-sm font-semibold text-right max-w-[60%] truncate" title={article.creators[0]?.name}>
                   {article.creators[0]?.name}
@@ -405,7 +406,7 @@ const ArticleInfoSidebar: React.FC<ArticleInfoSidebarProps> = ({
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-2">
                   <CpuChipIcon className="w-4 h-4 text-muted-foreground" />
-                  <span className="text-sm text-muted-foreground">{t("articleInfo.engine")}:</span>
+                  <span className="text-sm text-muted-foreground">Engine:</span>
                 </div>
                 <Badge variant="outline">{article.engine}</Badge>
               </div>
@@ -415,7 +416,7 @@ const ArticleInfoSidebar: React.FC<ArticleInfoSidebarProps> = ({
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 bg-current rounded-full"></div>
-                  <span className="text-sm text-muted-foreground">{t("articleInfo.status")}:</span>
+                  <span className="text-sm text-muted-foreground">Status:</span>
                 </div>
                 <Badge variant={getStatusVariant(article.status)}>{getStatusText(article.status)}</Badge>
               </div>
@@ -424,9 +425,9 @@ const ArticleInfoSidebar: React.FC<ArticleInfoSidebarProps> = ({
             {article.ver && (
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground">{t("articleInfo.version")}:</span>
+                  <span className="text-sm text-muted-foreground">Version:</span>
                 </div>
-                <Badge variant="secondary">{article.ver}</Badge>
+                <Badge variant="secondary">v{article.ver}</Badge>
               </div>
             )}
           </CardContent>
@@ -438,7 +439,7 @@ const ArticleInfoSidebar: React.FC<ArticleInfoSidebarProps> = ({
             <CardHeader>
               <div className="flex items-center gap-2">
                 <CpuChipIcon className="w-5 h-5 text-warning" />
-                <CardTitle>{t("platforms.title")}</CardTitle>
+                <CardTitle>Platforms</CardTitle>
               </div>
             </CardHeader>
             <CardContent>
@@ -464,7 +465,7 @@ const ArticleInfoSidebar: React.FC<ArticleInfoSidebarProps> = ({
             <CardHeader>
               <div className="flex items-center gap-2">
                 <TagIcon className="w-5 h-5 text-primary" />
-                <CardTitle>{t("tags.title")}</CardTitle>
+                <CardTitle>Tags</CardTitle>
               </div>
             </CardHeader>
             <CardContent>
@@ -490,7 +491,7 @@ const ArticleInfoSidebar: React.FC<ArticleInfoSidebarProps> = ({
             <CardHeader>
               <div className="flex items-center gap-2">
                 <FolderIcon className="w-5 h-5 text-secondary" />
-                <CardTitle>{t("categories.title")}</CardTitle>
+                <CardTitle>Categories</CardTitle>
               </div>
             </CardHeader>
             <CardContent>

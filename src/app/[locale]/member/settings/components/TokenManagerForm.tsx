@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import { formatDate } from '@/lib/dateUtils';
 import { AlertCircle, Copy, Loader2, Plus, Trash } from 'lucide-react';
 
 interface Token {
@@ -157,16 +158,7 @@ const TokenManagerForm = ({ token, ranks, setError, setSuccessMessage }: TokenMa
       });
   };
 
-  const formatDate = (dateString: string) => {
-    const options: Intl.DateTimeFormatOptions = {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    };
-    return new Date(dateString).toLocaleDateString(undefined, options);
-  };
+
 
   // Set default rank and fetch tokens on mount
   useEffect(() => {

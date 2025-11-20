@@ -8,7 +8,9 @@ import GTMArticleTracker from './components/GTMArticleTracker';
 import Script from 'next/script';
 import {
   generatePageMetadata,
-  generateArticleStructuredData
+  generateArticleStructuredData,
+  createSEOTitle,
+  constructContentPath,
 } from "@/utils/metadataUtils";
 import { getValidLocale, type Locale } from "@/utils/localeUtils";
 import { Article } from "@/types/article";
@@ -16,25 +18,6 @@ import { getArticleBySlug, fetchArticleAndDownloads } from "@/lib/article-api";
 
 const siteUrl = process.env.FRONTEND || 'https://chanomhub.online';
 
-// Helper function to create SEO-friendly title
-function createSEOTitle(article: Article): string {
-  let title = article.title;
-
-  if ('ver' in article && article.ver) {
-    title += ` [${article.ver}]`;
-  }
-
-  if ('sequentialCode' in article && article.sequentialCode) {
-    title += ` (${article.sequentialCode})`;
-  }
-
-  return title;
-}
-
-// Helper function to construct content path for metadata
-function constructContentPath(locale: Locale, paths: string[]): string {
-  return `articles/${paths[0]}`;
-}
 
 export async function generateMetadata(props: ArticlePageProps): Promise<Metadata> {
   const params = await Promise.resolve(props.params);
@@ -68,7 +51,7 @@ export async function generateMetadata(props: ArticlePageProps): Promise<Metadat
 
   // Replace domain if URL exists
   if (mainImageUrl) {
-    mainImageUrl = mainImageUrl.replace("rustgram.onrender.com", "oi.chanomhub.online");
+    mainImageUrl = mainImageUrl.replace(process.env.IMAGE_SOURCE_DOMAIN!, process.env.IMAGE_TARGET_DOMAIN!);
   }
 
   // Construct content path for hreflang and canonical
@@ -105,7 +88,7 @@ function generateArticleJsonLd(
   let mainImageUrl = article.mainImage || '';
 
   if (mainImageUrl) {
-    mainImageUrl = mainImageUrl.replace('rustgram.onrender.com', 'oi.chanomhub.online');
+    mainImageUrl = mainImageUrl.replace(process.env.IMAGE_SOURCE_DOMAIN!, process.env.IMAGE_TARGET_DOMAIN!);
   }
 
   // Construct the correct article URL with locale
@@ -140,10 +123,16 @@ export default async function ArticlePage(props: ArticlePageProps) {
   const slug = decodeURIComponent(paths[0]);
   const articleId = searchParams.id ? Number(searchParams.id) : undefined;
 
-  // Only fetch downloads if articleId is provided
-  const { article: originalArticle, downloads } = articleId 
-    ? await fetchArticleAndDownloads(slug, articleId)
-    : { article: await getArticleBySlug(slug), downloads: [] };
+  let originalArticle: Article | null;
+  let downloads: Article['downloads'] | null = null;
+
+  if (articleId) {
+    const result = await fetchArticleAndDownloads(slug, articleId);
+    originalArticle = result.article;
+    downloads = result.downloads;
+  } else {
+    originalArticle = await getArticleBySlug(slug);
+  }
     
   if (!originalArticle) {
     return notFound();

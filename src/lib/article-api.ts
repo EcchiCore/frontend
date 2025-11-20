@@ -7,18 +7,33 @@ async function graphqlRequest<T>(
   operationName: string
 ): Promise<T> {
   try {
+    const { cookies } = await import('next/headers');
+    const cookieStore = await cookies();
+    const token = cookieStore.get('token')?.value;
+    
+    console.log(`[${operationName}] Token found:`, !!token);
+    console.log(`[${operationName}] Token value:`, token ? `${token.substring(0, 20)}...` : 'none');
+    
+    const headers: Record<string, string> = {
+      "content-type": "application/json",
+    };
+    
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+    
+    console.log(`[${operationName}] Headers:`, headers);
+    
     const res = await fetch("https://api.chanomhub.online/api/graphql", {
       method: "POST",
-      headers: {
-        "content-type": "application/json",
-      },
+      headers,
       body: JSON.stringify({
         query,
         variables,
         operationName,
       }),
       credentials: "include",
-      next: { revalidate: 3600 }
+      ...(token ? { cache: 'no-store' } : { next: { revalidate: 3600 } })
     });
 
     // Log response status สำหรับ debug
@@ -85,6 +100,8 @@ export async function fetchArticleAndDownloads(
     article(slug: $slug) {
       id
       author {
+        following
+        id
         image
         name
       }
@@ -150,6 +167,8 @@ export async function getArticleBySlug(slug: string): Promise<Article | null> {
     article(slug: $slug) {
       id
       author {
+        following
+        id
         image
         name
       }
@@ -189,6 +208,8 @@ export async function getArticleBySlug(slug: string): Promise<Article | null> {
       { slug },
       "ArticleBySlug"
     );
+    console.log('Article data from API:', data.article);
+    console.log('Author following status:', data.article?.author.following);
     return data.article ?? null;
   } catch (error) {
     console.error(`Failed to fetch article by slug "${slug}":`, error);

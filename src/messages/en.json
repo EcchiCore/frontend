@@ -405,7 +405,8 @@
     "commentsLoadError": "Failed to load comments",
     "tryAgain": "Try again",
     "error": "Error",
-    "success": "Success"
+    "success": "Success",
+    "copied": "Copied"
   },
   "Register": {
     "title": "Register",
