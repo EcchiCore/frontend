@@ -4,6 +4,7 @@ import { siteUrl, Locale } from '@/utils/localeUtils';
 export const SITEMAP_ARTICLE_PAGE_SIZE = 10000;
 
 export type Article = {
+  id: string;
   slug: string;
   updatedAt: string;
   createdAt: string;
@@ -19,6 +20,7 @@ const GRAPHQL_ENDPOINT = `https://api.chanomhub.online/api/graphql`;
 const GET_ARTICLES = `
   query GetArticles($limit: Int!, $offset: Int!) {
     articles(filter: {}, limit: $limit, offset: $offset, status: PUBLISHED) {
+      id
       slug
       updatedAt
       createdAt
@@ -62,21 +64,26 @@ export async function fetchPublishedArticles(generatedAt: string): Promise<Artic
   return all;
 }
 
-export const getArticleUrl = (slug: string, locale: Locale = 'en'): string => {
+export const getArticleUrl = (
+  slug: string,
+  locale: Locale = 'en',
+  id?: string
+): string => {
   const base = locale === 'en' ? `/articles/${slug}` : `/${locale}/articles/${slug}`;
-  return `${siteUrl}${base}`;
+  const query = id ? `?id=${id}` : '';
+  return `${siteUrl}${base}${query}`;
 };
 
 export const buildArticleFields = (articles: Article[], generatedAt: string) => {
   return articles.map(article => ({
-    loc: getArticleUrl(article.slug),
+    loc: getArticleUrl(article.slug, 'en', article.id),
     lastmod: article.updatedAt || article.createdAt || generatedAt,
     changefreq: 'weekly' as const,
     priority: 0.7,
     alternates: {
-      en: getArticleUrl(article.slug, 'en'),
-      th: getArticleUrl(article.slug, 'th'),
-      'x-default': getArticleUrl(article.slug, 'en'),
+      en: getArticleUrl(article.slug, 'en', article.id),
+      th: getArticleUrl(article.slug, 'th', article.id),
+      'x-default': getArticleUrl(article.slug, 'en', article.id),
     },
   }));
 };
