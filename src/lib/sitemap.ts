@@ -63,7 +63,7 @@ export async function fetchPublishedArticles(generatedAt: string): Promise<Artic
 }
 
 export const getArticleUrl = (slug: string, locale: Locale = 'en'): string => {
-  const base = locale === 'en' ? `/${slug}` : `/${locale}/${slug}`;
+  const base = locale === 'en' ? `/articles/${slug}` : `/${locale}/articles/${slug}`;
   return `${siteUrl}${base}`;
 };
 

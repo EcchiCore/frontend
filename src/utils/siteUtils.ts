@@ -4,11 +4,18 @@ export const getSiteUrl = (): string => {
     return window.location.origin;
   }
 
-  if (process.env.VERCEL_PROJECT_PRODUCTION_URL) {
+  // Ensure that the production URL is always chanomhub.online
+  if (
+    process.env.VERCEL_PROJECT_PRODUCTION_URL &&
+    process.env.VERCEL_PROJECT_PRODUCTION_URL.includes('chanomhub.online')
+  ) {
     return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`;
   }
 
-  if (process.env.PRODUCTION_URL) {
+  if (
+    process.env.PRODUCTION_URL &&
+    process.env.PRODUCTION_URL.includes('chanomhub.online')
+  ) {
     return `https://${process.env.PRODUCTION_URL}`;
   }
 
