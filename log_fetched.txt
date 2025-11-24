@@ -1,0 +1,11 @@
+* bb52828 (origin/main, origin/HEAD) Delete .env
+| * 777f06c (HEAD -> main) [UP] ENV
+| * 891b80a feat: Implement AI-powered tag validation and suggestion for game uploads and centralize game engine/platform data.
+|/  
+* b9d6ab2 [UP] ID
+* f6f6441 [FIX] Sitemap
+* 7d40b4d [Modify]
+* e4e18a5 [UP] UI home
+* 737d8a0 [UP] GRAPHQL_ENDPOINT
+* d8868d0 [UP] Downloads
+* d54146a [FIX] JP slug
