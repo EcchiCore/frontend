@@ -6,13 +6,12 @@ import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import dynamic from 'next/dynamic';
 
-const RichTextEditor = dynamic(() => import('@/components/ui/RichTextEditor'), { 
-  ssr: false, 
-  loading: () => <p>Loading editor...</p> 
+const RichTextEditor = dynamic(() => import('@/components/ui/RichTextEditor'), {
+  ssr: false,
+  loading: () => <p>Loading editor...</p>
 });
 
-const engines = ["RENPY", "RPGM", "UNITY", "UNREAL", "Godot", "TyranoBuilder", "WOLFRPG", "KIRIKIRI", "FLASH", "BAKINPLAYER"];
-const platforms = ["Windows", "macOS", "Linux", "Android", "iOS", "Web"];
+import { engines, platforms } from '@/lib/gameData';
 
 interface Step1_BasicInfoProps {
   formData: Record<string, any>;
