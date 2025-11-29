@@ -28,7 +28,7 @@ const GET_ARTICLES = `
   }
 `;
 
-export async function fetchPublishedArticles(generatedAt: string): Promise<Article[]> {
+export async function fetchPublishedArticles(_generatedAt: string): Promise<Article[]> {
   const all: Article[] = [];
   let offset = 0;
   const limit = 100;

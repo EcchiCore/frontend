@@ -13,7 +13,7 @@ interface ProfileImageProps {
   username: string;
 }
 
-const ProfileImage: React.FC<ProfileImageProps> = ({ src, alt, width, height, username }) => {
+const ProfileImage: React.FC<ProfileImageProps> = ({ src, alt, width, height, username: _username }) => {
   return (
     <Image
       loader={myImageLoader}

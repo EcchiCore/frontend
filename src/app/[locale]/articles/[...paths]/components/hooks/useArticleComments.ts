@@ -3,7 +3,6 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 import useSWR, { mutate } from 'swr';
 import Cookies from 'js-cookie';
 import { Comment } from '../Interfaces';
-import { AlertState } from '../Interfaces';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 

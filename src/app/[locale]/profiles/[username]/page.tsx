@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation';
 import ProfileImage from './components/ProfileImage';
 import SocialLinkItem from './components/SocialLinkItem';
 
-const PLACEHOLDER_IMAGE = '/placeholder-image.png';
+
 
 interface SocialMediaLink {
   platform: string;
@@ -21,8 +21,8 @@ interface Profile {
 }
 
 export async function generateMetadata({
-                                         params,
-                                       }: {
+  params,
+}: {
   params: Promise<{ username: string }>;
 }): Promise<Metadata> {
   const { username } = await params;

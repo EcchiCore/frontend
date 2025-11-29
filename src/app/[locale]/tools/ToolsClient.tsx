@@ -270,12 +270,12 @@ export function ToolsClient({ tools }: { tools: Tool[] }) {
   const mobilePlatforms = ['Android', 'iOS'];
 
   const computerTools = useMemo(() =>
-      tools.filter(tool => tool.os?.some(os => computerPlatforms.includes(os)))
-    , [tools]);
+    tools.filter(tool => tool.os?.some(os => computerPlatforms.includes(os)))
+    , [tools, computerPlatforms]);
 
   const mobileTools = useMemo(() =>
-      tools.filter(tool => tool.os?.some(os => mobilePlatforms.includes(os)))
-    , [tools]);
+    tools.filter(tool => tool.os?.some(os => mobilePlatforms.includes(os)))
+    , [tools, mobilePlatforms]);
 
   return (
     <main className="container mx-auto px-4 py-12 md:py-20">

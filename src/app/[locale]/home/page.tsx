@@ -1,22 +1,14 @@
 import { Inter } from 'next/font/google';
-import Image from 'next/image';
-import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { Search, TrendingUp, MessageSquare, Star, Ghost } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import FeaturedPosts from './components/FeaturedPosts';
 import HomeCarousel from './components/HomeCarousel';
-import CategoriesCard from './components/CategoriesCard';
 import CategoryGrid from './components/CategoryGrid';
 import { generatePageMetadata } from '@/utils/metadataUtils';
 import { getTranslations } from 'next-intl/server';
 import { locales } from '@/app/[locale]/lib/navigation';
 import { getActiveEventTheme } from '@/lib/event-theme';
-import VtuberPixi from '@/components/pixi/Vtuber';
 import { fetchArticles } from '@/lib/api';
-import { Article } from '@/types/article';
 import { fetchPlatforms, fetchTags } from '@/app/[locale]/lib/searchUtils';
 import ChristmasCountdown from './components/ChristmasCountdown';
 
@@ -40,7 +32,7 @@ export async function generateMetadata({ params }: { params: { locale?: string }
 }
 
 // Server-side data fetching
-async function fetchHomeData(locale: string) {
+async function fetchHomeData() {
   try {
     const [carouselData, featuredData, latestData, platformsData, tagsData] = await Promise.all([
       fetchArticles({ limit: '3', status: 'PUBLISHED' }),
@@ -65,11 +57,8 @@ async function fetchHomeData(locale: string) {
 
 export default async function HomePage({ params }: { params: { locale: string } }) {
   const { locale } = params;
-  const homeData = await fetchHomeData(locale);
-  const t = await getTranslations({ locale, namespace: 'homePage' });
+  const homeData = await fetchHomeData();
   const activeEventTheme = getActiveEventTheme();
-
-  const heroImage = activeEventTheme?.assets?.homeHeroImage;
 
 
 

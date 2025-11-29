@@ -3,7 +3,7 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { DownloadFile } from "./Interfaces";
+
 import { Article } from "@/types/article";
 import { SidebarRightProps } from "./Interfaces"; // Reusing SidebarRightProps for now
 import { encodeURLComponent } from "@/lib/utils";
@@ -36,14 +36,14 @@ interface ArticleInfoSidebarProps extends SidebarRightProps {
 }
 
 const ArticleInfoSidebar: React.FC<ArticleInfoSidebarProps> = ({
-                                                                 article,
-                                                                 isCurrentUserAuthor,
-                                                                 isFollowing,
-                                                                 handleFollow,
-                                                                 isFavorited,
-                                                                 handleFavorite,
-                                                                 setOpenDownloadDialog,
-                                                               }) => {
+  article,
+  isCurrentUserAuthor,
+  isFollowing,
+  handleFollow,
+  isFavorited,
+  handleFavorite,
+  setOpenDownloadDialog,
+}) => {
   // The t variable is not used in this component, so useTranslations is commented out.
   // const t = useTranslations("sidebar");
 
@@ -130,22 +130,22 @@ const ArticleInfoSidebar: React.FC<ArticleInfoSidebarProps> = ({
 
         {/* Downloads Card */}
         <Card>
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <Download className="w-5 h-5 text-primary" />
-                <CardTitle>Downloads</CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <Button
-                className="w-full flex items-center justify-center gap-2"
-                onClick={() => setOpenDownloadDialog()}
-              >
-                <Download className="w-5 h-5" />
-                View All
-              </Button>
-            </CardContent>
-          </Card>
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <Download className="w-5 h-5 text-primary" />
+              <CardTitle>Downloads</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <Button
+              className="w-full flex items-center justify-center gap-2"
+              onClick={() => setOpenDownloadDialog()}
+            >
+              <Download className="w-5 h-5" />
+              View All
+            </Button>
+          </CardContent>
+        </Card>
 
         {/* Article Info Card */}
         <Card>
@@ -348,22 +348,22 @@ const ArticleInfoSidebar: React.FC<ArticleInfoSidebarProps> = ({
 
         {/* Downloads Card */}
         <Card>
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <Download className="w-5 h-5 text-primary" />
-                <CardTitle>Downloads</CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <Button
-                className="w-full flex items-center justify-center gap-2"
-                onClick={() => setOpenDownloadDialog()}
-              >
-                <Download className="w-5 h-5" />
-                View All
-              </Button>
-            </CardContent>
-          </Card>
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <Download className="w-5 h-5 text-primary" />
+              <CardTitle>Downloads</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <Button
+              className="w-full flex items-center justify-center gap-2"
+              onClick={() => setOpenDownloadDialog()}
+            >
+              <Download className="w-5 h-5" />
+              View All
+            </Button>
+          </CardContent>
+        </Card>
 
         {/* Article Info Card */}
         <Card>

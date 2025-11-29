@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import { motion } from "framer-motion";
@@ -9,7 +9,7 @@ import StarterKit from '@tiptap/starter-kit';
 import { Image as TiptapImage } from '@tiptap/extension-image';
 import { Link as TiptapLink } from '@tiptap/extension-link';
 import Typography from '@tiptap/extension-typography';
-import {TextStyle} from '@tiptap/extension-text-style';
+import { TextStyle } from '@tiptap/extension-text-style';
 import { Color } from '@tiptap/extension-color';
 import Underline from '@tiptap/extension-underline';
 import { TextAlign } from '@tiptap/extension-text-align';
@@ -40,47 +40,47 @@ interface ArticleContentProps {
 }
 
 const ArticleContent: React.FC<ArticleContentProps> = ({
-                                                                                                                   article,
-                                                                                                                                                                                                                                      slug,
-                                                                                                                                                                                                                                     downloads,
-                                                                                                                                                                                                                                   }) => {
-                                                                                                                                                                              console.log("Downloads prop in ArticleContent:", downloads);
-                                                                                                                                                                              const t = useTranslations('ArticleContent');
-                                                                                                                                                                              const {
-                                                                                                                                                                                isFavorited,
-                                                                                                                                                                                favoritesCount,
-                                                                                                                                                                                isFollowing,
-                                                                                                                                                                                alert,
-                                                                                                                                                                                handleFavorite,
-                                                                                                                                                                                handleFollow,
-                                                                                                                                                                                handleShare,
-                                                                                                                                                                                showAlert,
-                                                                                                                                                                              } = useArticleInteractions(article);
-                                                                                                                                                                              const {
-                                                                                                                                                                                comments,
-                                                                                                                                                                                newComment,
-                                                                                                                                                                                setNewComment,
-                                                                                                                                                                                topCommenters,
-                                                                                                                                                                                    commentsError,
-                                                                                                                                                                                    isLoading,
-                                                                                                                                                                                    handleAddComment,
-                                                                                                                                                                                    handleDeleteComment,
-                                                                                                                                                                                  } = useArticleComments(slug, showAlert);
-                                                                                                                                                                                  const {
-                                                                                                                                                                                    isClient,
-                                                                                                                                                                                    isMobile,
-                                                                                                                                                                                    isDarkMode,
-                                                                                                                                                                                    readingProgress,
-                                                                                                                                                                                    fontSize,
-                                                                                                                                                                                    debouncedSetFontSize,
-                                                                                                                                                                                  } = useArticleSettings(article.id);
-                                                                                                                                                                                  const {
-                                                                                                                                                                                    openDownloadDialog,
-                                                                                                                                                                                    setOpenDownloadDialog,
-                                                                                                                                                                                  } = useDownloadDialog(downloads, showAlert);
-                                                                                                                                                                                  // Essential state
-  const [isCurrentUserAuthor, setIsCurrentUserAuthor] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  article,
+  slug,
+  downloads,
+}) => {
+  console.log("Downloads prop in ArticleContent:", downloads);
+  const t = useTranslations('ArticleContent');
+  const {
+    isFavorited,
+    favoritesCount,
+    isFollowing,
+    alert,
+    handleFavorite,
+    handleFollow,
+    handleShare,
+    showAlert,
+  } = useArticleInteractions(article);
+  const {
+    comments,
+    newComment,
+    setNewComment,
+    topCommenters,
+    commentsError,
+    isLoading,
+    handleAddComment,
+    handleDeleteComment,
+  } = useArticleComments(slug, showAlert);
+  const {
+    isClient,
+    isMobile,
+    isDarkMode,
+    readingProgress,
+    fontSize,
+    debouncedSetFontSize,
+  } = useArticleSettings(article.id);
+  const {
+    openDownloadDialog,
+    setOpenDownloadDialog,
+  } = useDownloadDialog(downloads, showAlert);
+  // Essential state
+  const [isCurrentUserAuthor] = useState(false);
+  const [isAuthenticated] = useState(false);
   const handleDownloadClick = () => {
     setOpenDownloadDialog(true);
   };
@@ -148,9 +148,8 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
 
   return (
     <div
-      className={`min-h-screen ${
-        isDarkMode ? "bg-muted text-foreground" : "bg-muted text-foreground"
-      }`}
+      className={`min-h-screen ${isDarkMode ? "bg-muted text-foreground" : "bg-muted text-foreground"
+        }`}
     >
       <div className="fixed top-0 left-0 w-full h-1 bg-muted z-50">
         <div

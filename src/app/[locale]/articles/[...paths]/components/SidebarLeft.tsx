@@ -7,12 +7,11 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { MessageCircle, Trophy, Medal, Award } from "lucide-react";
 import { SidebarLeftProps } from "./Interfaces";
-import { Article } from "@/types/article";
 
 const SidebarLeft: React.FC<SidebarLeftProps> = ({
-                                                   article,
-                                                   topCommenters,
-                                                 }) => {
+  article,
+  topCommenters,
+}) => {
 
   const imageUrl = article.coverImage || article.mainImage || article.backgroundImage || null;
   const mainImageUrl = imageUrl;

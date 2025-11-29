@@ -82,7 +82,7 @@ export const Step4_Downloads = ({ formData, setFormData }: Step4_DownloadsProps)
     try {
       const hostname = new URL(url).hostname;
       const parts = hostname.split('.');
-      let domain = parts.length > 2 ? parts[parts.length - 2] : parts[0];
+      const domain = parts.length > 2 ? parts[parts.length - 2] : parts[0];
 
       // Common domains simplification
       if (domain.includes('mega')) return 'Mega';

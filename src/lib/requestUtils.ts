@@ -16,7 +16,7 @@ export const getRequestUrl = async (): Promise<string> => {
     if (host) {
       return `${proto}://${host}`;
     }
-  } catch (error) {
+  } catch (_error) {
     // headers() จะ error ถ้าเรีย โค้ดรันใน context ที่ไม่มี request
     // เช่น เรียกจากไฟล์ utils ธรรมดา → ปล่อยให้ fallback
   }

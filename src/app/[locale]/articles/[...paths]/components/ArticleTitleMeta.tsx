@@ -26,7 +26,7 @@ MemoizedModalImage.displayName = 'MemoizedModalImage';
 
 const ArticleTitleMeta: React.FC<ArticleTitleMetaProps> = ({ article, isDarkMode }) => {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0)
-  const [imageErrors, setImageErrors] = useState<Set<number>>(new Set())
+  const [_imageErrors, setImageErrors] = useState<Set<number>>(new Set())
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [modalImageIndex, setModalImageIndex] = useState(0)
   const [zoomLevel, setZoomLevel] = useState(1)
@@ -44,26 +44,22 @@ const ArticleTitleMeta: React.FC<ArticleTitleMetaProps> = ({ article, isDarkMode
   // Combined style classes
   const styles = useMemo(() => ({
     title: `text-2xl lg:text-3xl xl:text-4xl font-bold leading-tight ${isDarkMode ? "text-white" : "text-gray-900"}`,
-    badge: `inline-flex items-center px-6 py-3 rounded-2xl text-sm font-semibold transition-all duration-200 hover:scale-105 ${
-      isDarkMode
+    badge: `inline-flex items-center px-6 py-3 rounded-2xl text-sm font-semibold transition-all duration-200 hover:scale-105 ${isDarkMode
         ? "bg-gradient-to-r from-violet-500/20 to-purple-500/20 text-violet-300 border border-violet-500/30 hover:border-violet-400/50 shadow-lg shadow-violet-500/10"
         : "bg-gradient-to-r from-violet-50 to-purple-50 text-violet-700 border border-violet-200 hover:border-violet-300 shadow-lg shadow-violet-500/10"
-    }`,
-    mainImage: `relative rounded-3xl overflow-hidden cursor-pointer group transition-all duration-500 hover:shadow-2xl ${
-      isDarkMode
+      }`,
+    mainImage: `relative rounded-3xl overflow-hidden cursor-pointer group transition-all duration-500 hover:shadow-2xl ${isDarkMode
         ? "bg-gray-800/50 shadow-xl shadow-black/20 hover:shadow-black/40"
         : "bg-gray-50 shadow-xl shadow-gray-500/20 hover:shadow-gray-500/30"
-    }`,
-    controlButton: `p-3 rounded-full backdrop-blur-md transition-all duration-300 hover:scale-110 ${
-      isDarkMode
+      }`,
+    controlButton: `p-3 rounded-full backdrop-blur-md transition-all duration-300 hover:scale-110 ${isDarkMode
         ? "bg-black/60 text-white border border-white/20 hover:bg-black/80"
         : "bg-white/80 text-gray-900 border border-black/10 hover:bg-white/90"
-    }`,
-    thumbnail: (isSelected: boolean) => `relative aspect-square rounded-xl overflow-hidden transition-all duration-300 hover:scale-105 ${
-      isSelected
+      }`,
+    thumbnail: (isSelected: boolean) => `relative aspect-square rounded-xl overflow-hidden transition-all duration-300 hover:scale-105 ${isSelected
         ? "ring-3 ring-violet-500 ring-offset-2 scale-105 shadow-lg shadow-violet-500/25"
         : "hover:shadow-lg opacity-70 hover:opacity-100"
-    } ${isDarkMode ? "bg-gray-800 ring-offset-gray-900" : "bg-gray-100 ring-offset-white"}`
+      } ${isDarkMode ? "bg-gray-800 ring-offset-gray-900" : "bg-gray-100 ring-offset-white"}`
   }), [isDarkMode])
 
   const handleImageError = (index: number) => setImageErrors(prev => new Set(prev).add(index))
@@ -291,9 +287,8 @@ const ArticleTitleMeta: React.FC<ArticleTitleMetaProps> = ({ article, isDarkMode
         <div className={styles.mainImage} onClick={() => openModal(selectedImageIndex)}>
           {isLoading && (
             <div className="absolute inset-0 z-10 flex items-center justify-center">
-              <div className={`animate-spin rounded-full h-12 w-12 border-4 ${
-                isDarkMode ? "border-gray-600 border-t-violet-400" : "border-gray-300 border-t-violet-600"
-              }`} />
+              <div className={`animate-spin rounded-full h-12 w-12 border-4 ${isDarkMode ? "border-gray-600 border-t-violet-400" : "border-gray-300 border-t-violet-600"
+                }`} />
             </div>
           )}
 
@@ -320,9 +315,8 @@ const ArticleTitleMeta: React.FC<ArticleTitleMetaProps> = ({ article, isDarkMode
 
           {/* Controls */}
           <div className="absolute top-6 right-6">
-            <div className={`px-4 py-2 rounded-full text-sm font-semibold backdrop-blur-md transition-all duration-300 ${
-              isDarkMode ? "bg-black/60 text-white border border-white/20" : "bg-white/80 text-gray-900 border border-black/10"
-            }`}>
+            <div className={`px-4 py-2 rounded-full text-sm font-semibold backdrop-blur-md transition-all duration-300 ${isDarkMode ? "bg-black/60 text-white border border-white/20" : "bg-white/80 text-gray-900 border border-black/10"
+              }`}>
               {selectedImageIndex + 1} / {imageCount}
             </div>
           </div>
@@ -385,11 +379,10 @@ const ArticleTitleMeta: React.FC<ArticleTitleMetaProps> = ({ article, isDarkMode
                   )}
 
                   <div className="absolute top-1 right-1">
-                    <span className={`text-xs px-1.5 py-0.5 rounded-md font-medium ${
-                      selectedImageIndex === index
+                    <span className={`text-xs px-1.5 py-0.5 rounded-md font-medium ${selectedImageIndex === index
                         ? "bg-violet-500 text-white"
                         : isDarkMode ? "bg-black/60 text-white" : "bg-white/80 text-gray-900"
-                    }`}>
+                      }`}>
                       {index + 1}
                     </span>
                   </div>
@@ -476,19 +469,19 @@ const ArticleTitleMeta: React.FC<ArticleTitleMetaProps> = ({ article, isDarkMode
               onDoubleClick={handleDoubleClick}
               onTouchEnd={handleTouchEnd}
             >
-            {(() => {
-              const modalImageSrc = getImageSrc(article.images[modalImageIndex]);
-              return modalImageSrc && (
-                <MemoizedModalImage
-                  src={modalImageSrc}
-                  alt={`${article.title} - Image ${modalImageIndex + 1}`}
-                  fill
-                  sizes="100vw"
-                  className="object-contain"
-                  loader={myImageLoader}
-                />
-              );
-            })()}
+              {(() => {
+                const modalImageSrc = getImageSrc(article.images[modalImageIndex]);
+                return modalImageSrc && (
+                  <MemoizedModalImage
+                    src={modalImageSrc}
+                    alt={`${article.title} - Image ${modalImageIndex + 1}`}
+                    fill
+                    sizes="100vw"
+                    className="object-contain"
+                    loader={myImageLoader}
+                  />
+                );
+              })()}
             </div>
           </div>
         </div>
