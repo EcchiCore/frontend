@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useState } from 'react';
 
 interface Article {
   id: number;
@@ -21,105 +20,79 @@ interface HomeCarouselProps {
 }
 
 export default function HomeCarousel({ articles, loading }: HomeCarouselProps) {
-  const [currentSlide, setCurrentSlide] = useState(0);
   const [imageErrors, setImageErrors] = useState<{ [key: number]: boolean }>({});
 
-  const nextSlide = useCallback(() => {
-    setCurrentSlide((prev) => (prev === articles.length - 1 ? 0 : prev + 1));
-  }, [articles.length]);
-
-  const prevSlide = () => {
-    setCurrentSlide((prev) => (prev === 0 ? articles.length - 1 : prev - 1));
-  };
-
-  const handleImageError = (articleId: number, imageUrl: string) => {
-    console.error(`Failed to load image for article ${articleId}:`, imageUrl);
+  const handleImageError = (articleId: number) => {
     setImageErrors(prev => ({ ...prev, [articleId]: true }));
   };
 
-  useEffect(() => {
-    if (articles.length > 0) {
-      const interval = setInterval(nextSlide, 5000);
-      return () => clearInterval(interval);
-    }
-  }, [articles, nextSlide]);
-
   if (loading) {
-    return <div className="container mx-auto px-4 py-8 mb-12"><div className="relative bg-gray-200 rounded-xl shadow-lg h-96 md:h-[500px] animate-pulse"></div></div>;
+    return (
+      <section className="container mx-auto px-2 py-3">
+        <div className="relative bg-muted rounded h-32 animate-pulse"></div>
+      </section>
+    );
   }
 
-  if (articles.length === 0) {
-    return <div className="container mx-auto px-4 py-8 mb-12"><div className="relative bg-gray-100 rounded-xl shadow-lg h-96 md:h-[500px] flex items-center justify-center"><p className="text-gray-500">No articles available</p></div></div>;
+  if (!articles || articles.length === 0) {
+    return null;
   }
+
+  // Show only first 3 articles
+  const displayArticles = articles.slice(0, 3);
 
   return (
-    <section className="container mx-auto px-4 py-8 mb-12">
-      <div className="relative bg-white rounded-2xl shadow-xl overflow-hidden border border-border/20 hover:shadow-2xl transition-shadow duration-300">
-        <div className="relative h-96 md:h-[500px] overflow-hidden">
-          <div className="flex transition-transform duration-500 ease-in-out" style={{ transform: `translateX(-${currentSlide * 100}%)` }}>
-            {articles.map((article, index) => {
-              const src = article.coverImage || article.mainImage || article.backgroundImage || null;
-              const hasError = imageErrors[article.id];
-              const ImageContent = () => {
-                if (src && !hasError) {
-                  return (
+    <section className="container mx-auto px-2 py-3">
+      <div className="flex items-center space-x-2 mb-2 px-1">
+        <div className="w-0.5 h-5 bg-primary"></div>
+        <h3 className="text-sm font-semibold text-foreground">กระทู้เด่นประจำวัน</h3>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+        {displayArticles.map((article) => {
+          const src = article.coverImage || article.mainImage || article.backgroundImage || null;
+          const hasError = imageErrors[article.id];
+
+          return (
+            <Link
+              key={article.id}
+              href={`/articles/${article.slug}?id=${article.id}`}
+              className="group"
+            >
+              <div className="border border-border rounded overflow-hidden hover:border-primary/50 transition-colors bg-card">
+                {/* Compact Image */}
+                <div className="relative w-full h-20 bg-muted">
+                  {src && !hasError ? (
                     <Image
                       src={src}
                       alt={article.title}
                       fill
-                      sizes="100vw"
-                      style={{ objectFit: 'cover' }}
-                      priority={index <= 1}
-                      onError={() => handleImageError(article.id, src)}
+                      sizes="(max-width: 768px) 100vw, 33vw"
+                      className="object-cover"
+                      onError={() => handleImageError(article.id)}
                     />
-                  );
-                } else {
-                  return (
-                    <div className="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-                      <div className="text-white text-center p-4"><div className="text-4xl mb-2">🖼️</div><div className="text-sm opacity-75">Image not available</div></div>
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
+                      <div className="text-2xl">📰</div>
                     </div>
-                  );
-                }
-              };
-
-              return (
-                <div className="w-full flex-shrink-0" key={article.id}>
-                  <Link href={`/articles/${article.slug}?id=${article.id}`}>
-                    <div className="relative w-full h-96 md:h-[500px]">
-                      <ImageContent />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent flex flex-col justify-end p-8 md:p-12">
-                        <div className="max-w-4xl">
-                          <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold text-white mb-4 drop-shadow-2xl leading-tight truncate">{article.title}</h2>
-                          <p className="text-md md:text-lg lg:text-xl text-white/95 max-w-3xl drop-shadow-lg leading-relaxed line-clamp-2">{article.description}</p>
-                        </div>
-                      </div>
-                    </div>
-                  </Link>
+                  )}
+                  {/* Overlay for better text readability */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
                 </div>
-              );
-            })}
-          </div>
-          {articles.length > 1 && (
-            <>
-              <button onClick={prevSlide} className="absolute top-1/2 left-4 transform -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-3 transition-all duration-300 shadow-xl z-10 backdrop-blur-sm hover:scale-110 group" aria-label="Previous Slide">
-                <ChevronLeft className="h-5 w-5 text-gray-800 group-hover:text-primary transition-colors" />
-              </button>
-              <button onClick={nextSlide} className="absolute top-1/2 right-4 transform -translate-y-1/2 bg-white/90 hover:bg-white rounded-full p-3 transition-all duration-300 shadow-xl z-10 backdrop-blur-sm hover:scale-110 group" aria-label="Next Slide">
-                <ChevronRight className="h-5 w-5 text-gray-800 group-hover:text-primary transition-colors" />
-              </button>
-              <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex space-x-3 z-10">
-                {articles.map((_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setCurrentSlide(index)}
-                    className={`w-3 h-3 rounded-full transition-all duration-300 ${currentSlide === index ? 'bg-white scale-125 shadow-xl ring-2 ring-white/50' : 'bg-white/50 hover:bg-white/80 hover:scale-110'}`}
-                    aria-label={`Go to slide ${index + 1}`}
-                  />
-                ))}
+
+                {/* Compact Info */}
+                <div className="p-2">
+                  <h4 className="text-foreground text-xs font-semibold line-clamp-2 group-hover:text-primary transition-colors leading-tight">
+                    {article.title}
+                  </h4>
+                  <p className="text-[10px] text-muted-foreground line-clamp-1 mt-1">
+                    {article.description}
+                  </p>
+                </div>
               </div>
-            </>
-          )}
-        </div>
+            </Link>
+          );
+        })}
       </div>
     </section>
   );

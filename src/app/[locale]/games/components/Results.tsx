@@ -6,8 +6,8 @@ import Link from "next/link"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 
 export default async function Results({
-                                        searchParams,
-                                      }: { searchParams: Record<string, string | string[] | undefined> | null | undefined }) {
+  searchParams,
+}: { searchParams: Record<string, string | string[] | undefined> | null | undefined }) {
   const { items, total, page, pageSize } = await fetchArticles(searchParams)
   const pages = Math.max(1, Math.ceil(total / pageSize))
 
@@ -41,10 +41,10 @@ export default async function Results({
 }
 
 function Pager({
-                 page,
-                 pages,
-                 searchParams,
-               }: { page: number; pages: number; searchParams: Record<string, string | string[] | undefined> | null | undefined }) {
+  page,
+  pages,
+  searchParams,
+}: { page: number; pages: number; searchParams: Record<string, string | string[] | undefined> | null | undefined }) {
   const prev = page > 1 ? page - 1 : 1
   const next = page < pages ? page + 1 : pages
 
@@ -61,7 +61,7 @@ function Pager({
   }
 
   return (
-    <div className="flex items-center justify-center gap-2 pt-6">
+    <div className="flex items-center justify-center gap-2 pt-6 text-foreground">
       <Button asChild variant="outline" size="sm" disabled={page === 1}>
         <Link href={params(prev)}>
           <ChevronLeft className="w-4 h-4" />

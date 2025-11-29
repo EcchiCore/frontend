@@ -237,3 +237,93 @@ html[data-event-theme="halloween"].dark body {
   --shadow-xl: var(--shadow-xl);
   --shadow-2xl: var(--shadow-2xl);
 }
+
+/* Christmas Theme */
+html[data-event-theme="christmas"] {
+  --background: oklch(0.98 0.03 25);
+  --foreground: oklch(0.2 0.04 30);
+  --card: oklch(0.99 0.02 20);
+  --card-foreground: oklch(0.22 0.04 25);
+  --popover: oklch(1 0.01 10);
+  --popover-foreground: oklch(0.25 0.04 30);
+  --primary: oklch(0.52 0.24 25);
+  --primary-foreground: oklch(0.98 0.02 90);
+  --secondary: oklch(0.45 0.16 145);
+  --secondary-foreground: oklch(0.98 0.02 90);
+  --muted: oklch(0.95 0.02 25);
+  --muted-foreground: oklch(0.45 0.04 30);
+  --accent: oklch(0.75 0.15 85);
+  --accent-foreground: oklch(0.25 0.04 20);
+  --destructive: oklch(0.58 0.21 30);
+  --destructive-foreground: oklch(0.98 0.02 100);
+  --border: oklch(0.9 0.02 25);
+  --input: oklch(0.9 0.02 25);
+  --ring: oklch(0.65 0.2 25);
+  --chart-1: oklch(0.52 0.24 25);
+  --chart-2: oklch(0.45 0.16 145);
+  --chart-3: oklch(0.75 0.15 85);
+  --chart-4: oklch(0.6 0.18 10);
+  --chart-5: oklch(0.7 0.12 160);
+  --sidebar: oklch(0.98 0.03 20);
+  --sidebar-foreground: oklch(0.22 0.04 30);
+  --sidebar-primary: oklch(0.52 0.24 25);
+  --sidebar-primary-foreground: oklch(0.99 0.01 90);
+  --sidebar-accent: oklch(0.75 0.15 85);
+  --sidebar-accent-foreground: oklch(0.24 0.04 30);
+  --sidebar-border: oklch(0.9 0.02 25);
+  --sidebar-ring: oklch(0.65 0.2 25);
+}
+
+html[data-event-theme="christmas"].dark {
+  --background: oklch(0.18 0.04 25);
+  --foreground: oklch(0.96 0.03 90);
+  --card: oklch(0.24 0.04 25);
+  --card-foreground: oklch(0.98 0.02 95);
+  --popover: oklch(0.28 0.04 25);
+  --popover-foreground: oklch(0.97 0.03 95);
+  --primary: oklch(0.6 0.22 25);
+  --primary-foreground: oklch(0.98 0.02 100);
+  --secondary: oklch(0.5 0.15 145);
+  --secondary-foreground: oklch(0.97 0.02 100);
+  --muted: oklch(0.28 0.03 25);
+  --muted-foreground: oklch(0.68 0.04 25);
+  --accent: oklch(0.65 0.14 85);
+  --accent-foreground: oklch(0.97 0.02 95);
+  --destructive: oklch(0.55 0.2 30);
+  --destructive-foreground: oklch(0.98 0.02 100);
+  --border: oklch(0.3 0.03 25);
+  --input: oklch(0.32 0.03 25);
+  --ring: oklch(0.55 0.18 25);
+  --chart-1: oklch(0.6 0.22 25);
+  --chart-2: oklch(0.5 0.15 145);
+  --chart-3: oklch(0.65 0.14 85);
+  --chart-4: oklch(0.58 0.16 10);
+  --chart-5: oklch(0.62 0.11 160);
+  --sidebar: oklch(0.22 0.04 25);
+  --sidebar-foreground: oklch(0.96 0.03 90);
+  --sidebar-primary: oklch(0.58 0.22 25);
+  --sidebar-primary-foreground: oklch(0.99 0.02 100);
+  --sidebar-accent: oklch(0.65 0.14 85);
+  --sidebar-accent-foreground: oklch(0.96 0.03 90);
+  --sidebar-border: oklch(0.3 0.03 25);
+  --sidebar-ring: oklch(0.55 0.18 25);
+}
+
+html[data-event-theme="christmas"] body {
+  background-image:
+    radial-gradient(circle at 20% 10%, rgba(220, 38, 38, 0.12), transparent 40%),
+    radial-gradient(circle at 80% 20%, rgba(21, 128, 61, 0.14), transparent 45%),
+    radial-gradient(circle at 50% 80%, rgba(234, 179, 8, 0.08), transparent 50%),
+    linear-gradient(180deg, rgba(255, 250, 245, 0.6), rgba(255, 255, 255, 0));
+  background-attachment: fixed;
+}
+
+html[data-event-theme="christmas"].dark body {
+  background-image:
+    radial-gradient(circle at 20% 10%, rgba(220, 38, 38, 0.18), transparent 45%),
+    radial-gradient(circle at 80% 20%, rgba(21, 128, 61, 0.22), transparent 50%),
+    radial-gradient(circle at 50% 80%, rgba(234, 179, 8, 0.12), transparent 55%),
+    linear-gradient(180deg, rgba(15, 10, 10, 0.95), rgba(20, 15, 15, 0.7));
+  background-color: oklch(0.18 0.04 25);
+  background-attachment: fixed;
+}

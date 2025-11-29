@@ -2,8 +2,6 @@
 
 import Link from 'next/link';
 
-import { Card, CardContent } from '@/components/ui/card';
-
 // Define the structure of an article from the API
 interface Article {
   id: number;
@@ -24,56 +22,114 @@ interface Article {
   tags: { name: string }[];
 }
 
+// ลบ title ออกจาก Interface
 interface FeaturedPostsProps {
   posts: Article[];
   loading: boolean;
-  title: string;
 }
 
-export default function FeaturedPosts({ posts, loading, title }: FeaturedPostsProps) {
+// Helper function to get relative time
+function getRelativeTime(dateString: string): string {
+  const now = new Date();
+  const past = new Date(dateString);
+  const diffMs = now.getTime() - past.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMins / 60);
+  const diffDays = Math.floor(diffHours / 24);
+
+  if (diffMins < 60) return `${diffMins} นาที`;
+  if (diffHours < 24) return `${diffHours} ชม.`;
+  if (diffDays < 7) return `${diffDays} วัน`;
+  return new Date(dateString).toLocaleDateString('th-TH', { day: 'numeric', month: 'short' });
+}
+
+// ลบ title ออกจากการรับค่า function
+export default function FeaturedPosts({ posts, loading }: FeaturedPostsProps) {
   if (loading) {
-    return <div className="text-center">กำลังโหลดกระทู้แนะนำ...</div>;
+    return <div className="text-center text-xs">กำลังโหลด...</div>;
+  }
+
+  if (!posts || posts.length === 0) {
+    return <div className="text-center text-xs text-muted-foreground">ไม่มีกระทู้</div>;
   }
 
   return (
-    <div className="mb-6">
-      <div className="flex items-center space-x-3 mb-6">
-        <div className="w-1 h-8 bg-primary rounded-full"></div>
-        <h3 className="text-lg font-semibold text-foreground">{title}</h3>
-      </div>
-      <div className="space-y-4">
-        {posts.map((post) => (
-          <Link href={`/articles/${post.slug}?id=${post.id}`} key={post.id}>
-            <Card className="hover:shadow-lg transition-all duration-300 cursor-pointer border-border/50 hover:border-primary/20 group bg-card/50 backdrop-blur-sm">
-              <CardContent className="p-4">
-                <div className="flex justify-between items-center">
-                  <div className="flex-grow pr-4">
-                    <h4 className="font-semibold text-base text-foreground group-hover:text-primary transition-colors">
+    <div className="mb-4">
+      {/* ลบส่วน Header ที่แสดง title ออกไปแล้ว */}
+
+      {/* Table Layout */}
+      <div className="border border-border rounded-md overflow-hidden">
+        <table className="w-full text-xs">
+          <thead className="bg-muted/50 border-b border-border text-foreground">
+            <tr>
+              <th className="text-left px-2 py-1.5 font-semibold">หัวข้อกระทู้</th>
+              <th className="text-left px-2 py-1.5 font-semibold hidden md:table-cell w-28">ผู้เขียน</th>
+              <th className="text-left px-2 py-1.5 font-semibold hidden lg:table-cell w-24">หมวดหมู่</th>
+              <th className="text-center px-2 py-1.5 font-semibold hidden xl:table-cell w-16">ตอบกลับ</th>
+              <th className="text-center px-2 py-1.5 font-semibold hidden xl:table-cell w-16">ดู</th>
+              <th className="text-left px-2 py-1.5 font-semibold hidden sm:table-cell w-24">โพสต์ล่าสุด</th>
+            </tr>
+          </thead>
+          <tbody>
+            {posts.map((post, index) => {
+              // Generate mock data for replies and views
+              const replies = Math.floor(Math.random() * 100);
+              const views = Math.floor(Math.random() * 1000) + 100;
+              const relativeTime = getRelativeTime(post.createdAt);
+
+              return (
+                <tr
+                  key={post.id}
+                  className={`border-b border-border last:border-b-0 hover:bg-accent/30 transition-colors ${index % 2 === 1 ? 'bg-muted/20' : ''
+                    }`}
+                >
+                  {/* Title Column */}
+                  <td className="px-2 py-1.5 text-foreground  ">
+                    <Link
+                      href={`/articles/${post.slug}?id=${post.id}`}
+                      className="hover:text-primary hover:underline font-medium line-clamp-2 sm:line-clamp-1"
+                      title={post.description}
+                    >
                       {post.title}
-                    </h4>
-                    <p className="text-xs text-muted-foreground line-clamp-1">
-                      {post.description}
-                    </p>
-                  </div>
-                  <div className="flex-shrink-0 flex flex-col items-end space-y-1 text-xs text-muted-foreground text-right">
-                    <div className="truncate">
-                      <span className="font-semibold text-foreground/80">ผู้เขียน:</span>{' '}
-                      {post.author.name}
+                    </Link>
+                    {/* Show author and category on mobile */}
+                    <div className="md:hidden text-[10px] text-muted-foreground mt-0.5 space-x-2">
+                      <span>โดย {post.author.name}</span>
+                      <span>• {relativeTime}</span>
                     </div>
-                    <div className="truncate">
-                      <span className="font-semibold text-foreground/80">หมวดหมู่:</span>{' '}
-                      {post.categories[0]?.name || 'N/A'}
-                    </div>
-                    <div className="truncate">
-                      <span className="font-semibold text-foreground/80">วันที่:</span>{' '}
-                      {new Date(post.createdAt).toLocaleDateString('th-TH', { year: '2-digit', month: 'short', day: 'numeric' })}
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
-        ))}
+                  </td>
+
+                  {/* Author Column - Hidden on mobile */}
+                  <td className="px-2 py-1.5 text-muted-foreground hidden md:table-cell truncate">
+                    {post.author.name}
+                  </td>
+
+                  {/* Category Column - Hidden on tablet and below */}
+                  <td className="px-2 py-1.5 hidden lg:table-cell">
+                    <span className="text-[10px] px-1.5 py-0.5 bg-primary/10 text-primary rounded truncate inline-block max-w-full">
+                      {post.categories[0]?.name || 'ทั่วไป'}
+                    </span>
+                  </td>
+
+                  {/* Replies Column - Hidden on laptop and below */}
+                  <td className="px-2 py-1.5 text-center text-muted-foreground hidden xl:table-cell">
+                    {replies}
+                  </td>
+
+                  {/* Views Column - Hidden on laptop and below */}
+                  <td className="px-2 py-1.5 text-center text-muted-foreground hidden xl:table-cell">
+                    {views.toLocaleString()}
+                  </td>
+
+                  {/* Last Post Column - Hidden on mobile */}
+                  <td className="px-2 py-1.5 text-muted-foreground hidden sm:table-cell whitespace-nowrap">
+                    {relativeTime}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
       </div>
     </div>
   );

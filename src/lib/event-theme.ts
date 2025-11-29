@@ -1,4 +1,4 @@
-export type EventThemeId = "halloween";
+export type EventThemeId = "halloween" | "christmas";
 
 type EventThemeAssets = {
   homeHeroImage?: string;
@@ -13,10 +13,15 @@ export type EventThemeDefinition = {
 const EVENT_THEMES: EventThemeDefinition[] = [
   {
     id: "halloween",
-    activeMonths: [9],
+    activeMonths: [9], // October
     assets: {
       homeHeroImage: "/Theme/Halloween/df0b3106-9895-4770-a55b-0d2d40a87104.png",
     },
+  },
+  {
+    id: "christmas",
+    activeMonths: [11], // November & December (for testing & actual season)
+    assets: {},
   },
 ];
 

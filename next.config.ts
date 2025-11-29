@@ -16,13 +16,14 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       { protocol: 'http', hostname: 'res.cloudinary.com', pathname: '/**' },
       { protocol: 'https', hostname: 'res.cloudinary.com', pathname: '/**' },
-      { protocol: 'https', hostname: 'rustgram.onrender.com', pathname: '/**'},
-      { protocol: 'https', hostname: 'i.pinimg.com', pathname: '/**'},
+      { protocol: 'https', hostname: 'rustgram.onrender.com', pathname: '/**' },
+      { protocol: 'https', hostname: 'i.pinimg.com', pathname: '/**' },
 
       { protocol: 'https', hostname: 'resize.chanomhub.online', pathname: '/**' },
       { protocol: 'https', hostname: 'cdn.chanomhub.online', pathname: '/**' },
       { protocol: 'https', hostname: 'icons.duckduckgo.com', pathname: '/ip3/**' },
       { protocol: 'https', hostname: 'via.placeholder.com', pathname: '/**' },
+      { protocol: 'https', hostname: 'files.catbox.moe', pathname: '/**' },
     ],
   },
   compiler: { removeConsole: process.env.NODE_ENV === 'production' },
