@@ -3,6 +3,7 @@
 import { ReactNode } from "react";
 import { CookiesProvider } from "react-cookie";
 import ThemeManager from "./theme-manager";
+import { SocketProvider } from "@/contexts/SocketContext";
 
 // Mock only; replace with your actual import
 const IntlayerProvider = ({ children }: { children: ReactNode }) => <>{children}</>;
@@ -16,7 +17,9 @@ export default function ClientLayout({ children }: ClientLayoutProps) {
     <CookiesProvider>
       <IntlayerProvider>
         <ThemeManager />
-        {children}
+        <SocketProvider>
+          {children}
+        </SocketProvider>
       </IntlayerProvider>
     </CookiesProvider>
   );

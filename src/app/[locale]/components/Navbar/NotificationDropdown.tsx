@@ -1,11 +1,13 @@
 "use client";
+
 import { useState, useEffect, useRef, useCallback } from "react";
 import Cookies from "js-cookie";
-import { Bell, Trash2, AlertCircle } from "lucide-react";
+import { Bell, Trash2, AlertCircle, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useSocket } from "@/contexts/SocketContext";
 
 interface Notification {
   id: number;
@@ -13,8 +15,8 @@ interface Notification {
   type: string;
   message: string;
   isRead: boolean;
-  entityId: number;
-  entityType: string;
+  entityId?: number | null;
+  entityType?: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -30,6 +32,8 @@ interface NotificationDropdownProps {
 }
 
 const API_BASE_URL = `${process.env.NEXT_PUBLIC_API_URL}/api`;
+const NOTIFICATIONS_LIMIT = 10;
+
 const NOTIFICATION_TYPES = {
   MODERATION_UPDATE: "อัปเดตการตรวจสอบ",
   WARNING: "คำเตือน",
@@ -37,9 +41,6 @@ const NOTIFICATION_TYPES = {
   INFO: "ข้อมูล",
   SUCCESS: "สำเร็จ",
 } as const;
-
-const POLLING_INTERVAL = 30000;
-const NOTIFICATIONS_LIMIT = 10;
 
 export default function NotificationDropdown({ isMobile = false }: NotificationDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -50,14 +51,11 @@ export default function NotificationDropdown({ isMobile = false }: NotificationD
   const [isMarkingAsRead, setIsMarkingAsRead] = useState<number | null>(null);
   const [isMarkingAllAsRead, setIsMarkingAllAsRead] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const pollingRef = useRef<NodeJS.Timeout | null>(null);
-  const hasFetchedOnceRef = useRef(false);
+  const { socket } = useSocket();
 
   const getAuthHeaders = useCallback(() => {
     const token = Cookies.get("token");
-    if (!token) {
-      throw new Error("No authentication token found");
-    }
+    if (!token) throw new Error("No token");
     return {
       "Accept": "application/json",
       "Content-Type": "application/json",
@@ -65,241 +63,187 @@ export default function NotificationDropdown({ isMobile = false }: NotificationD
     };
   }, []);
 
+  // Click outside → ปิด dropdown
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         setIsOpen(false);
       }
     };
-
-    if (isOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-
+    document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [isOpen]);
+  }, []);
 
-  const fetchNotifications = useCallback(async (showLoader = false) => {
+  // ดึงข้อมูลแจ้งเตือน
+  const fetchNotifications = useCallback(async () => {
+    if (loading) return;
     try {
-      if (showLoader) setLoading(true);
+      setLoading(true);
       setError(null);
 
       const headers = getAuthHeaders();
-      const response = await fetch(
-        `${API_BASE_URL}/notifications?skip=0&take=${NOTIFICATIONS_LIMIT}`,
-        {
-          method: "GET",
-          headers,
-        }
-      );
+      const res = await fetch(`${API_BASE_URL}/notifications?take=${NOTIFICATIONS_LIMIT}`, { headers });
 
-      if (!response.ok) {
-        switch (response.status) {
-          case 401:
-            throw new Error("กรุณาเข้าสู่ระบบใหม่");
-          case 403:
-            throw new Error("ไม่มีสิทธิ์เข้าถึงการแจ้งเตือน");
-          case 404:
-            throw new Error("ไม่พบข้อมูลการแจ้งเตือน");
-          case 500:
-            throw new Error("เกิดข้อผิดพลาดจากเซิร์ฟเวอร์");
-          default:
-            throw new Error(`เกิดข้อผิดพลาด: ${response.status}`);
+      if (!res.ok) {
+        if (res.status === 401) {
+          Cookies.remove("token");
+          window.location.href = "/login";
+          return;
         }
+        throw new Error(`HTTP ${res.status}`);
       }
 
-      const data: NotificationResponse = await response.json();
-      if (!data || !Array.isArray(data.notifications)) {
-        throw new Error("รูปแบบข้อมูลไม่ถูกต้อง");
-      }
-
-      setNotifications(data.notifications);
+      const data: NotificationResponse = await res.json();
+      setNotifications(data.notifications || []);
       setUnreadCount(data.unreadCount || 0);
     } catch (err) {
-      console.error("Failed to fetch notifications:", err);
-      const errorMessage = err instanceof Error ? err.message : "ไม่สามารถโหลดการแจ้งเตือนได้";
-      setError(errorMessage);
-
-      if (err instanceof Error && err.message.includes("เข้าสู่ระบบ")) {
-        if (pollingRef.current) {
-          clearInterval(pollingRef.current);
-          pollingRef.current = null;
-        }
-      }
+      console.error("Fetch notifications failed:", err);
+      setError("โหลดแจ้งเตือนล้มเหลว");
     } finally {
-      if (showLoader) setLoading(false);
+      setLoading(false);
     }
-  }, [getAuthHeaders]);
+  }, [getAuthHeaders, loading]);
 
-  const markAsRead = async (notificationId: number) => {
-    if (isMarkingAsRead === notificationId) return;
+  // ดึงครั้งแรก + ดึงใหม่ทุกครั้งที่เปิด dropdown
+  useEffect(() => {
+    fetchNotifications();
+  }, []); // ครั้งแรกตอน mount
 
+  useEffect(() => {
+    if (isOpen) {
+      fetchNotifications(); // ดึงข้อมูลใหม่ทุกครั้งที่เปิด
+    }
+  }, [isOpen]);
+
+  // Real-time จาก WebSocket
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleNewNotification = (data: any) => {
+      const newNotif: Notification = {
+        id: data.id ?? Date.now(),
+        userId: data.userId ?? 0,
+        type: data.type ?? "INFO",
+        message: data.message ?? "มีแจ้งเตือนใหม่",
+        isRead: false,
+        entityId: data.entityId ?? null,
+        entityType: data.entityType ?? null,
+        createdAt: data.createdAt ?? new Date().toISOString(),
+        updatedAt: data.updatedAt ?? new Date().toISOString(),
+      };
+
+      setNotifications((prev) => [newNotif, ...prev.slice(0, NOTIFICATIONS_LIMIT - 1)]);
+      setUnreadCount((prev) => prev + 1);
+    };
+
+    socket.on("notification", handleNewNotification);
+    return () => {
+      socket.off("notification", handleNewNotification);
+    };
+  }, [socket]);
+
+  // อ่าน 1 รายการ
+  const markAsRead = async (id: number) => {
+    if (isMarkingAsRead === id) return;
     try {
-      setIsMarkingAsRead(notificationId);
-      const originalNotifications = [...notifications];
-      const originalUnreadCount = unreadCount;
+      setIsMarkingAsRead(id);
+      const prevNotifs = [...notifications];
+      const prevCount = unreadCount;
 
-      setNotifications(prev =>
-        prev.map(notif =>
-          notif.id === notificationId ? { ...notif, isRead: true } : notif
-        )
-      );
-      setUnreadCount(prev => Math.max(0, prev - 1));
+      setNotifications((prev) => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
+      setUnreadCount((c) => Math.max(0, c - 1));
 
       const headers = getAuthHeaders();
-      const response = await fetch(
-        `${API_BASE_URL}/notifications/${notificationId}/read`,
-        {
-          method: "PATCH",
-          headers,
-          body: JSON.stringify({}),
-        }
-      );
+      const res = await fetch(`${API_BASE_URL}/notifications/${id}/read`, {
+        method: "PATCH",
+        headers,
+      });
 
-      if (!response.ok) {
-        setNotifications(originalNotifications);
-        setUnreadCount(originalUnreadCount);
-        throw new Error(`ไม่สามารถอัปเดตสถานะการอ่านได้: ${response.status}`);
+      if (!res.ok) {
+        setNotifications(prevNotifs);
+        setUnreadCount(prevCount);
       }
     } catch (err) {
-      console.error("Failed to mark notification as read:", err);
-      setError("ไม่สามารถอัปเดตสถานะการอ่านได้");
+      console.error("Mark as read failed:", err);
+      setError("ไม่สามารถอ่านได้");
     } finally {
       setIsMarkingAsRead(null);
     }
   };
 
+  // อ่านทั้งหมด
   const markAllAsRead = async () => {
     if (isMarkingAllAsRead || unreadCount === 0) return;
-
     try {
       setIsMarkingAllAsRead(true);
-      const originalNotifications = [...notifications];
-      const originalUnreadCount = unreadCount;
+      const prevNotifs = [...notifications];
 
-      setNotifications(prev => prev.map(notif => ({ ...notif, isRead: true })));
+      setNotifications((prev) => prev.map(n => ({ ...n, isRead: true })));
       setUnreadCount(0);
 
       const headers = getAuthHeaders();
-      const response = await fetch(`${API_BASE_URL}/notifications/read-all`, {
+      const res = await fetch(`${API_BASE_URL}/notifications/read-all`, {
         method: "PATCH",
         headers,
-        body: JSON.stringify({}),
       });
 
-      if (!response.ok) {
-        setNotifications(originalNotifications);
-        setUnreadCount(originalUnreadCount);
-        throw new Error(`ไม่สามารถอัปเดตสถานะการอ่านทั้งหมดได้: ${response.status}`);
+      if (!res.ok) {
+        setNotifications(prevNotifs);
+        setUnreadCount(prevNotifs.filter(n => !n.isRead).length);
       }
     } catch (err) {
-      console.error("Failed to mark all notifications as read:", err);
-      setError("ไม่สามารถอัปเดตสถานะการอ่านทั้งหมดได้");
+      console.error("Mark all as read failed:", err);
+      setError("อ่านทั้งหมดล้มเหลว");
     } finally {
       setIsMarkingAllAsRead(false);
     }
   };
 
-  const deleteNotification = async (notificationId: number) => {
+  // ลบ
+  const deleteNotification = async (id: number) => {
     try {
       const headers = getAuthHeaders();
-      const response = await fetch(
-        `${API_BASE_URL}/notifications/${notificationId}`,
-        {
-          method: "DELETE",
-          headers,
-        }
-      );
+      const res = await fetch(`${API_BASE_URL}/notifications/${id}`, {
+        method: "DELETE",
+        headers,
+      });
 
-      if (response.ok) {
-        setNotifications(prev => prev.filter(notif => notif.id !== notificationId));
-        setUnreadCount(prev => {
-          const notification = notifications.find(n => n.id === notificationId);
-          return notification && !notification.isRead ? Math.max(0, prev - 1) : prev;
+      if (res.ok) {
+        setNotifications((prev) => prev.filter(n => n.id !== id));
+        setUnreadCount((prev) => {
+          const notif = notifications.find(n => n.id === id);
+          return notif && !notif.isRead ? Math.max(0, prev - 1) : prev;
         });
       }
     } catch (err) {
-      console.error("Failed to delete notification:", err);
-      setError("ไม่สามารถลบการแจ้งเตือนได้");
+      setError("ลบไม่สำเร็จ");
     }
   };
 
-  const formatDate = (dateString: string) => {
-    try {
-      const date = new Date(dateString);
-      const now = new Date();
-      const diff = now.getTime() - date.getTime();
-      const minutes = Math.floor(diff / (1000 * 60));
-      const hours = Math.floor(diff / (1000 * 60 * 60));
-      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const formatDate = (dateStr: string) => {
+    const now = Date.now();
+    const date = new Date(dateStr).getTime();
+    const diff = now - date;
+    const minutes = Math.floor(diff / 60000);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
 
-      if (minutes < 1) return "เมื่อสักครู่";
-      if (minutes < 60) return `${minutes} นาทีที่แล้ว`;
-      if (hours < 24) return `${hours} ชั่วโมงที่แล้ว`;
-      if (days < 7) return `${days} วันที่แล้ว`;
-
-      return date.toLocaleDateString("th-TH", {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric'
-      });
-    } catch (error) {
-      console.error("Error formatting date:", error);
-      return "ไม่ทราบวันที่";
-    }
+    if (minutes < 1) return "เมื่อสักครู่";
+    if (minutes < 60) return `${minutes} นาทีที่แล้ว`;
+    if (hours < 24) return `${hours} ชม.ที่แล้ว`;
+    if (days < 7) return `${days} วันที่แล้ว`;
+    return new Date(dateStr).toLocaleDateString("th-TH", { month: "short", day: "numeric" });
   };
 
   const getTypeInfo = (type: string) => {
     switch (type) {
-      case "MODERATION_UPDATE":
-        return { variant: "secondary" as const, label: NOTIFICATION_TYPES.MODERATION_UPDATE };
-      case "WARNING":
-        return { variant: "outline" as const, label: NOTIFICATION_TYPES.WARNING };
-      case "ERROR":
-        return { variant: "destructive" as const, label: NOTIFICATION_TYPES.ERROR };
-      case "SUCCESS":
-        return { variant: "secondary" as const, label: NOTIFICATION_TYPES.SUCCESS };
-      case "INFO":
-      default:
-        return { variant: "default" as const, label: NOTIFICATION_TYPES.INFO };
+      case "MODERATION_UPDATE": return { variant: "secondary" as const, label: "อัปเดตการตรวจสอบ" };
+      case "WARNING": return { variant: "outline" as const, label: "คำเตือน" };
+      case "ERROR": return { variant: "destructive" as const, label: "ข้อผิดพลาด" };
+      case "SUCCESS": return { variant: "secondary" as const, label: "สำเร็จ" };
+      default: return { variant: "default" as const, label: "ข้อมูล" };
     }
   };
-
-  const toggleDropdown = () => {
-    if (!isOpen) {
-      fetchNotifications(true);
-    }
-    setIsOpen(!isOpen);
-  };
-
-  useEffect(() => {
-    if (!hasFetchedOnceRef.current) {
-      hasFetchedOnceRef.current = true;
-      fetchNotifications(false);
-    }
-  }, [fetchNotifications]);
-
-  useEffect(() => {
-    pollingRef.current = setInterval(() => {
-      fetchNotifications(false);
-    }, POLLING_INTERVAL);
-
-    return () => {
-      if (pollingRef.current) {
-        clearInterval(pollingRef.current);
-        pollingRef.current = null;
-      }
-    };
-  }, [fetchNotifications]);
-
-  useEffect(() => {
-    if (error) {
-      const timer = setTimeout(() => {
-        setError(null);
-      }, 5000);
-      return () => clearTimeout(timer);
-    }
-  }, [error]);
 
   return (
     <div className={`relative ${isMobile ? 'mr-2' : 'ml-2'}`} ref={dropdownRef}>
@@ -308,139 +252,94 @@ export default function NotificationDropdown({ isMobile = false }: NotificationD
           <Button
             variant="ghost"
             size="icon"
-            onClick={toggleDropdown}
-            disabled={loading}
-            className="relative hover:bg-accent/50 transition-all duration-200 hover:scale-105"
+            className="relative hover:scale-110 transition-transform"
           >
             <Bell className="h-5 w-5" />
             {unreadCount > 0 && (
-              <Badge
-                variant="destructive"
-                className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-[10px] animate-pulse"
-              >
-                {unreadCount > 99 ? '99+' : unreadCount}
+              <Badge variant="destructive" className="absolute -top-1 -right-1 h-5 w-5 p-0 text-[10px] animate-pulse">
+                {unreadCount > 99 ? "99+" : unreadCount}
               </Badge>
             )}
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-80 max-h-96 border-border/50 shadow-xl">
-          <div className="p-4 border-b border-border/50 bg-gradient-to-r from-primary/5 to-transparent">
+
+        <DropdownMenuContent align="end" className="w-80 p-0">
+          {/* Header */}
+          <div className="p-4 border-b bg-gradient-to-r from-primary/5">
             <div className="flex items-center justify-between">
-              <h3 className="font-semibold text-lg flex items-center gap-2">
-                <div className="w-1 h-6 bg-primary rounded-full"></div>
-                แจ้งเตือน
-              </h3>
-              {unreadCount > 0 && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={markAllAsRead}
-                  disabled={isMarkingAllAsRead}
-                  className="text-xs hover:bg-primary/10 hover:text-primary transition-all duration-200"
-                >
-                  {isMarkingAllAsRead && (
-                    <span className="loading loading-spinner loading-xs mr-1"></span>
-                  )}
-                  อ่านทั้งหมด
+              <h3 className="font-semibold text-lg">แจ้งเตือน</h3>
+              <div className="flex items-center gap-1">
+                {unreadCount > 0 && (
+                  <Button variant="ghost" size="sm" onClick={markAllAsRead} disabled={isMarkingAllAsRead}>
+                    {isMarkingAllAsRead ? <RefreshCw className="h-3 w-3 animate-spin" /> : "อ่านทั้งหมด"}
+                  </Button>
+                )}
+                <Button variant="ghost" size="icon" onClick={fetchNotifications} disabled={loading}>
+                  <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
                 </Button>
-              )}
+              </div>
             </div>
             {unreadCount > 0 && (
-              <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
-                <div className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse"></div>
-                คุณมีการแจ้งเตือนใหม่ {unreadCount} รายการ
+              <p className="text-xs text-muted-foreground mt-1">
+                มีแจ้งเตือนใหม่ {unreadCount} รายการ
               </p>
             )}
           </div>
 
+          {/* Error */}
           {error && (
-            <div className="p-3 border-b bg-destructive/10">
-              <div className="flex items-center gap-2">
-                <AlertCircle className="w-4 h-4 text-destructive" />
-                <span className="text-xs text-destructive">{error}</span>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setError(null)}
-                  className="ml-auto text-destructive hover:text-destructive-foreground"
-                >
-                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-                  </svg>
-                </Button>
+            <div className="p-3 bg-destructive/10 border-b">
+              <div className="flex items-center gap-2 text-xs text-destructive">
+                <AlertCircle className="h-4 w-4" />
+                {error}
               </div>
             </div>
           )}
 
-          <ScrollArea className="max-h-64">
-            {loading ? (
-              <div className="p-4 text-center">
-                <span className="loading loading-spinner loading-md"></span>
-                <p className="text-sm text-muted-foreground mt-2">กำลังโหลด...</p>
+          {/* List */}
+          <ScrollArea className="max-h-96">
+            {loading && notifications.length === 0 ? (
+              <div className="p-8 text-center">
+                <RefreshCw className="h-8 w-8 mx-auto animate-spin text-muted-foreground" />
               </div>
             ) : notifications.length === 0 ? (
-              <div className="p-4 text-center">
-                <Bell className="w-12 h-12 mx-auto text-muted-foreground mb-2" />
-                <p className="text-sm text-muted-foreground">ไม่มีการแจ้งเตือน</p>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => fetchNotifications(true)}
-                  className="mt-2"
-                >
-                  รีเฟรช
-                </Button>
+              <div className="p-8 text-center text-muted-foreground">
+                <Bell className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                <p>ไม่มีการแจ้งเตือน</p>
               </div>
             ) : (
-              notifications.map((notification) => {
-                const typeInfo = getTypeInfo(notification.type);
+              notifications.map((n) => {
+                const { variant, label } = getTypeInfo(n.type);
                 return (
                   <div
-                    key={notification.id}
-                    className={`p-3 border-b last:border-b-0 cursor-pointer transition-all duration-200 group ${
-                      !notification.isRead ? 'bg-accent/50 hover:bg-accent' : 'hover:bg-accent/50'
-                    }`}
-                    onClick={() => !notification.isRead && markAsRead(notification.id)}
+                    key={n.id}
+                    className={`p-3 border-b last:border-b-0 cursor-pointer transition-colors ${!n.isRead ? "bg-accent/50" : "hover:bg-accent/30"}`}
+                    onClick={() => !n.isRead && markAsRead(n.id)}
                   >
                     <div className="flex items-start gap-3">
-                      <div className={`w-2 h-2 rounded-full mt-2 ${
-                        !notification.isRead ? 'bg-primary' : 'bg-muted'
-                      }`} />
+                      {!n.isRead && <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0" />}
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between mb-1">
-                          <div className="flex items-center gap-2">
-                            <Badge variant={typeInfo.variant} className="text-xs">
-                              {typeInfo.label}
-                            </Badge>
-                            <span className="text-xs text-muted-foreground">
-                              {formatDate(notification.createdAt)}
-                            </span>
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <Badge variant={variant} className="text-xs">{label}</Badge>
+                            <span className="text-xs text-muted-foreground">{formatDate(n.createdAt)}</span>
                           </div>
                           <Button
                             variant="ghost"
                             size="icon"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              deleteNotification(notification.id);
-                            }}
-                            className="opacity-0 group-hover:opacity-100 hover:text-destructive hover:bg-destructive/10 transition-all duration-200"
-                            title="ลบการแจ้งเตือน"
+                            className="h-7 w-7 opacity-0 group-hover:opacity-100"
+                            onClick={(e) => { e.stopPropagation(); deleteNotification(n.id); }}
                           >
-                            <Trash2 className="w-3 h-3" />
+                            <Trash2 className="h-3 w-3" />
                           </Button>
                         </div>
-                        <p className="text-sm line-clamp-2 leading-relaxed">
-                          {notification.message}
-                        </p>
-                        {notification.entityType && (
+                        <p className="text-sm mt-1 line-clamp-2">{n.message}</p>
+                        {n.entityType && n.entityId && (
                           <p className="text-xs text-muted-foreground mt-1">
-                            {notification.entityType} #{notification.entityId}
+                            {n.entityType} #{n.entityId}
                           </p>
                         )}
                       </div>
-                      {isMarkingAsRead === notification.id && (
-                        <span className="loading loading-spinner loading-xs"></span>
-                      )}
                     </div>
                   </div>
                 );
@@ -448,15 +347,11 @@ export default function NotificationDropdown({ isMobile = false }: NotificationD
             )}
           </ScrollArea>
 
+          {/* Footer */}
           {notifications.length > 0 && (
             <div className="p-3 border-t text-center">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => window.location.href = '/notifications'}
-                className="text-xs"
-              >
-                ดูทั้งหมด
+              <Button variant="ghost" size="sm" onClick={() => window.location.href = "/notifications"}>
+                ดูทั้งหมด →
               </Button>
             </div>
           )}
@@ -464,4 +359,4 @@ export default function NotificationDropdown({ isMobile = false }: NotificationD
       </DropdownMenu>
     </div>
   );
-};
+}
