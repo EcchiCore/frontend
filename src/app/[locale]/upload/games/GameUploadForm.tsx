@@ -17,7 +17,6 @@ export default function GameUploadForm({ availableTags, availableCategories }: {
   const [isUploading, setIsUploading] = useState(false);
   const [ongoingUploads, setOngoingUploads] = useState(0);
   const params = useParams();
-  const _locale = params.locale;
 
   useEffect(() => {
     console.log("formData updated:", JSON.stringify(formData, null, 2));

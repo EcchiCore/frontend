@@ -34,13 +34,7 @@ interface NotificationDropdownProps {
 const API_BASE_URL = `${process.env.NEXT_PUBLIC_API_URL}/api`;
 const NOTIFICATIONS_LIMIT = 10;
 
-const NOTIFICATION_TYPES = {
-  MODERATION_UPDATE: "อัปเดตการตรวจสอบ",
-  WARNING: "คำเตือน",
-  ERROR: "ข้อผิดพลาด",
-  INFO: "ข้อมูล",
-  SUCCESS: "สำเร็จ",
-} as const;
+
 
 export default function NotificationDropdown({ isMobile = false }: NotificationDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -107,13 +101,13 @@ export default function NotificationDropdown({ isMobile = false }: NotificationD
   // ดึงครั้งแรก + ดึงใหม่ทุกครั้งที่เปิด dropdown
   useEffect(() => {
     fetchNotifications();
-  }, []); // ครั้งแรกตอน mount
+  }, [fetchNotifications]); // ครั้งแรกตอน mount
 
   useEffect(() => {
     if (isOpen) {
       fetchNotifications(); // ดึงข้อมูลใหม่ทุกครั้งที่เปิด
     }
-  }, [isOpen]);
+  }, [isOpen, fetchNotifications]);
 
   // Real-time จาก WebSocket
   useEffect(() => {
@@ -215,7 +209,7 @@ export default function NotificationDropdown({ isMobile = false }: NotificationD
           return notif && !notif.isRead ? Math.max(0, prev - 1) : prev;
         });
       }
-    } catch (err) {
+    } catch {
       setError("ลบไม่สำเร็จ");
     }
   };

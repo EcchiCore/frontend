@@ -11,7 +11,7 @@ export async function GET() {
   try {
     const siteUrl = await getRequestUrl(); // ต้อง await!
     const generatedAt = new Date().toISOString();
-    const articles = await fetchPublishedArticles(generatedAt);
+    const articles = await fetchPublishedArticles();
     const articleChunks = chunkArray(articles, SITEMAP_ARTICLE_PAGE_SIZE);
 
     const sitemapEntries = [
@@ -22,11 +22,11 @@ export async function GET() {
     const body = `<?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${sitemapEntries
-      .map(entry => `  <sitemap>
+        .map(entry => `  <sitemap>
     <loc>${entry}</loc>
     <lastmod>${generatedAt}</lastmod>
   </sitemap>`)
-      .join('\n')}
+        .join('\n')}
 </sitemapindex>`;
 
     return new NextResponse(body, {

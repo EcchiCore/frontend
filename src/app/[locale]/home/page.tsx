@@ -56,9 +56,7 @@ async function fetchHomeData() {
 }
 
 export default async function HomePage({ params }: { params: { locale: string } }) {
-  const { locale } = params;
   const homeData = await fetchHomeData();
-  const activeEventTheme = getActiveEventTheme();
 
 
 

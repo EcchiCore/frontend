@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
     if (isNaN(page) || page < 0) return new NextResponse('Bad Request', { status: 400 });
 
     const generatedAt = new Date().toISOString();
-    const articles = await fetchPublishedArticles(generatedAt);
+    const articles = await fetchPublishedArticles();
     const chunks = chunkArray(articles, SITEMAP_ARTICLE_PAGE_SIZE);
     const chunk = chunks[page] || [];
 

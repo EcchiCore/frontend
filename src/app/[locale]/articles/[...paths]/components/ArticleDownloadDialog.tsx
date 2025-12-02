@@ -21,7 +21,6 @@ interface ArticleDownloadDialogProps {
 }
 
 const ArticleDownloadDialog: React.FC<ArticleDownloadDialogProps> = ({
-  article: _article,
   downloads,
   isMobile,
   isDarkMode,

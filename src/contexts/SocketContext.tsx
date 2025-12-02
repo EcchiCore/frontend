@@ -6,6 +6,8 @@ import { io, Socket } from "socket.io-client";
 import Cookies from "js-cookie";
 import { toast } from "sonner";
 
+import { jwtDecode } from "jwt-decode";
+
 interface SocketContextType {
     socket: Socket | null;
     isConnected: boolean;
@@ -22,10 +24,9 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     const [socket, setSocket] = useState<Socket | null>(null);
     const [isConnected, setIsConnected] = useState(false);
     const socketRef = useRef<Socket | null>(null);
+    const token = typeof window !== "undefined" ? Cookies.get("token") : null;
 
     useEffect(() => {
-        const token = Cookies.get("token");
-
         // ถ้ายังไม่มี token → disconnect
         if (!token) {
             if (socketRef.current) {
@@ -45,7 +46,6 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
         // ดึง userId จาก JWT
         let userId: string | undefined;
         try {
-            const { jwtDecode } = require("jwt-decode");
             const decoded: any = jwtDecode(token);
             userId = (decoded.id || decoded.sub || decoded.userId)?.toString();
         } catch (e) {
@@ -93,7 +93,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
         return () => {
             newSocket.disconnect();
         };
-    }, [typeof window !== "undefined" ? Cookies.get("token") : null]); // re-run เมื่อ token เปลี่ยน
+    }, [token]); // re-run เมื่อ token เปลี่ยน
 
     return (
         <SocketContext.Provider value={{ socket, isConnected }}>

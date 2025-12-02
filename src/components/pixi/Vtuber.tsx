@@ -160,6 +160,8 @@ const VtuberPixi = ({
       }
     };
 
+    const container = containerRef.current;
+
     initLive2D();
 
     return () => {
@@ -178,8 +180,8 @@ const VtuberPixi = ({
           console.warn('App destroy error:', e);
         }
       }
-      if (containerRef.current) {
-        containerRef.current.innerHTML = '';
+      if (container) {
+        container.innerHTML = '';
       }
     };
   }, [modelUrl, width, height, backgroundColor, scale, autoInteract, scriptsLoaded, isCubism2, isCubism4]);

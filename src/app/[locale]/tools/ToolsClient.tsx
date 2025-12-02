@@ -265,17 +265,17 @@ function ToolCard({ tool, index }: { tool: Tool; index: number }) {
   );
 }
 
-export function ToolsClient({ tools }: { tools: Tool[] }) {
-  const computerPlatforms = ['Windows', 'macOS', 'Linux'];
-  const mobilePlatforms = ['Android', 'iOS'];
+const computerPlatforms = ['Windows', 'macOS', 'Linux'];
+const mobilePlatforms = ['Android', 'iOS'];
 
+export function ToolsClient({ tools }: { tools: Tool[] }) {
   const computerTools = useMemo(() =>
     tools.filter(tool => tool.os?.some(os => computerPlatforms.includes(os)))
-    , [tools, computerPlatforms]);
+    , [tools]);
 
   const mobileTools = useMemo(() =>
     tools.filter(tool => tool.os?.some(os => mobilePlatforms.includes(os)))
-    , [tools, mobilePlatforms]);
+    , [tools]);
 
   return (
     <main className="container mx-auto px-4 py-12 md:py-20">
