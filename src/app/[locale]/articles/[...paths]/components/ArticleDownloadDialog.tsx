@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { useTranslations } from 'next-intl';
 import cn from 'classnames';
 import { Dialog, DialogContent, DialogTitle, Tabs, TabsList, TabsTrigger, TabsContent, Select, SelectTrigger, SelectValue, SelectContent, SelectItem, Button, Input } from '@/components/ui';
-import { Download, CalendarDays, Folder, User, Info, Check, Clipboard, Search } from 'lucide-react';
+import { Download, CalendarDays, Folder, User, Info, Check, Clipboard, Search, ShieldCheck } from 'lucide-react';
 import { getFileIcon, getFileSize } from "@/utils/fileUtils";
 import { DownloadFile, TranslationFile } from "./Interfaces";
 import { useDownloadDialog } from './hooks/useDownloadDialog';
@@ -131,7 +131,7 @@ const ArticleDownloadDialog: React.FC<ArticleDownloadDialogProps> = ({
           </div>
         </div>
 
-        <div className="flex gap-3 mt-4">
+        <div className="flex gap-3 mt-4 text-foreground">
           <Button
             className="flex-1"
             onClick={() => handleOpenDownload(item)}
@@ -152,7 +152,7 @@ const ArticleDownloadDialog: React.FC<ArticleDownloadDialogProps> = ({
               </>
             ) : (
               <>
-                <Clipboard className="size-5 mr-2" />
+                <Clipboard className="size-5 mr-2 " />
                 <span>{t("copy")}</span>
               </>
             )}
@@ -239,6 +239,24 @@ const ArticleDownloadDialog: React.FC<ArticleDownloadDialogProps> = ({
             {renderFileItems(filteredDownloads, t("downloadFiles"))}
           </TabsContent>
         </Tabs>
+
+        <div className="mt-6 pt-4 border-t flex justify-center">
+          {isMobile ? (
+            <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
+              <ShieldCheck className="size-5" />
+              <span className="text-sm font-medium">Scanned with VirusTotal</span>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 opacity-80 hover:opacity-100 transition-opacity">
+              {/* Placeholder for VirusTotal Logo - Replace with local asset if available */}
+              <img
+                src="https://upload.wikimedia.org/wikipedia/commons/b/b7/VirusTotal_logo.svg"
+                alt="Scanned with VirusTotal"
+                className="h-8 w-auto"
+              />
+            </div>
+          )}
+        </div>
       </DialogContent>
     </Dialog>
   );
