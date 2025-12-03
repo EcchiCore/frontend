@@ -17,8 +17,8 @@ interface ArticleListProps {
 const ArticleItem: React.FC<{
   article: Article;
   locale: string;
-  PLACEHOLDER_IMAGE: string;
-}> = ({ article, locale, PLACEHOLDER_IMAGE }) => {
+
+}> = ({ article, locale }) => {
   const [mainImageSrc, setMainImageSrc] = useState(article.mainImage);
   const [authorImageSrc, setAuthorImageSrc] = useState(article.author.image);
 
@@ -36,23 +36,23 @@ const ArticleItem: React.FC<{
           fill
           className="object-cover"
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-          onError={() => setMainImageSrc(PLACEHOLDER_IMAGE)}
+          unoptimized
         />
       </div>
       <div className="p-4">
-        <h2 className="text-xl font-semibold mb-2 line-clamp-2">{article.title}</h2>
+        <h2 className="text-xl font-semibold mb-2 line-clamp-2 text-foreground">{article.title}</h2>
         <p className="text-gray-600 line-clamp-3">{article.description}</p>
         <div className="mt-4 flex items-center">
           <Image
             loader={imageLoader}
             src={authorImageSrc}
-            alt={article.author.username}
+            alt={article.author.name}
             width={32}
             height={32}
             className="rounded-full"
-            onError={() => setAuthorImageSrc(PLACEHOLDER_IMAGE)}
+            unoptimized
           />
-          <span className="ml-2 text-sm text-gray-500">{article.author.username}</span>
+          <span className="ml-2 text-sm text-gray-500">{article.author.name}</span>
         </div>
       </div>
     </Link>
@@ -65,7 +65,6 @@ export default function ArticleList({
   slug,
   locale,
 }: ArticleListProps) {
-  const PLACEHOLDER_IMAGE = '/placeholder-image.png';
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -81,7 +80,7 @@ export default function ArticleList({
               key={article.id}
               article={article}
               locale={locale}
-              PLACEHOLDER_IMAGE={PLACEHOLDER_IMAGE}
+
             />
           ))}
         </div>

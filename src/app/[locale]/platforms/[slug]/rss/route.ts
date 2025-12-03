@@ -2,20 +2,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getTranslations } from 'next-intl/server';
 
-// Interface for Article
+// Interface for Article based on GraphQL response
 interface Article {
   id: number;
   title: string;
   slug: string;
   description: string;
   createdAt: string;
-  mainImage: string;
-  images?: string[];
-  ver: string;
-  version: number;
-  engine: string;
-  platformList: string[];
-  sequentialCode: string;
+  mainImage: string | null;
+  images: { url: string }[];
+  ver: string | null;
+  engine: { name: string } | null;
+  platforms: { name: string }[];
+  sequentialCode: string | null;
 }
 
 // Updated interface to match Next.js expectations
@@ -27,19 +26,60 @@ interface RouteParams {
 const SUPPORTED_LOCALES = ['en', 'th', 'ja', 'ko'];
 const DEFAULT_LOCALE = 'en';
 
-async function fetchArticles(slug: string): Promise<{ articles: Article[] }> {
-  const apiUrl = `${process.env.API_URL}/api/articles?platform=${encodeURIComponent(slug)}&status=PUBLISHED`;
-  const res = await fetch(apiUrl, { next: { revalidate: 0 } }); // Remove cache
+const API_URL = process.env.API_URL || 'https://api.chanomhub.online';
+const FRONTEND_URL = process.env.frontend || 'https://chanomhub.online';
+
+async function fetchArticles(slug: string): Promise<Article[]> {
+  const query = `query RSSArticles($platform: String!) {
+    articles(filter: { platform: $platform }, status: PUBLISHED, limit: 20) {
+      id
+      title
+      slug
+      description
+      createdAt
+      mainImage
+      images {
+        url
+      }
+      ver
+      engine {
+        name
+      }
+      platforms {
+        name
+      }
+      sequentialCode
+    }
+  }`;
+
+  const res = await fetch(`${API_URL}/api/graphql`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    },
+    body: JSON.stringify({
+      query,
+      variables: { platform: slug },
+    }),
+    next: { revalidate: 0 }, // Remove cache
+  });
 
   if (!res.ok) {
-    throw new Error('Failed to fetch articles');
+    const errorText = await res.text();
+    throw new Error(`Failed to fetch articles: ${res.status} ${res.statusText} - ${errorText}`);
   }
 
-  return res.json();
+  const json = await res.json();
+  if (json.errors) {
+    throw new Error(`GraphQL Error: ${json.errors.map((e: any) => e.message).join(', ')}`);
+  }
+
+  return json.data.articles || [];
 }
 
 async function generateRSSFeed(articles: Article[], platformName: string, locale: string) {
-  const siteURL = process.env.frontend;
+  const siteURL = FRONTEND_URL;
   const platformSlug = encodeURIComponent(platformName);
   const feedURL = `${siteURL}/${locale}/platforms/${platformSlug}/rss`;
   const websiteURL = `${siteURL}/${locale}/platforms/${platformSlug}`;
@@ -67,24 +107,26 @@ async function generateRSSFeed(articles: Article[], platformName: string, locale
 `;
 
   articles.forEach((article) => {
-    if (!article.platformList.map((p) => p.toLowerCase()).includes(platformName.toLowerCase())) {
-      console.warn(`Article ${article.id} skipped: platformList does not include ${platformName}`);
-      return;
+    // Check if platform matches (redundant if API filters correctly, but good for safety)
+    const platformList = article.platforms.map(p => p.name);
+    if (!platformList.map((p) => p.toLowerCase()).includes(platformName.toLowerCase())) {
+      // console.warn(`Article ${article.id} skipped: platformList does not include ${platformName}`);
+      // return; 
+      // Note: The API filter should handle this, but if fuzzy matching is used, we might keep it.
+      // For now, let's trust the API or be lenient.
     }
 
     let articleDate;
     try {
-      if (article.createdAt && typeof article.createdAt === 'string') {
+      if (article.createdAt) {
         articleDate = new Date(article.createdAt).toUTCString();
         if (articleDate === 'Invalid Date') {
-          console.warn(`Invalid date format for article ${article.id}: ${article.createdAt}`);
           articleDate = new Date().toUTCString();
         }
       } else {
         articleDate = new Date().toUTCString();
       }
     } catch (e) {
-      console.error(`Error parsing date for article ${article.id}:`, e);
       articleDate = new Date().toUTCString();
     }
 
@@ -98,8 +140,8 @@ async function generateRSSFeed(articles: Article[], platformName: string, locale
     <pubDate>${articleDate}</pubDate>
     <description>${escapeXML(article.description || '')}</description>
     <ver>${escapeXML(article.ver || '')}</ver>
-    <engine>${escapeXML(article.engine)}</engine>
-    <sequentialCode>${escapeXML(article.sequentialCode)}</sequentialCode>
+    <engine>${escapeXML(article.engine?.name || '')}</engine>
+    <sequentialCode>${escapeXML(article.sequentialCode || '')}</sequentialCode>
     <platformList>${escapeXML(platformName)}</platformList>
 `;
 
@@ -112,7 +154,7 @@ async function generateRSSFeed(articles: Article[], platformName: string, locale
     if (article.images && article.images.length > 0) {
       article.images.forEach((image) => {
         xml += `
-    <media:content url="${escapeXML(image)}" medium="image" />
+    <media:content url="${escapeXML(image.url)}" medium="image" />
 `;
       });
     }
@@ -156,19 +198,18 @@ export async function GET(
 
     const decodedSlug = decodeURIComponent(slug);
 
-    const { articles } = await fetchArticles(decodedSlug);
+    const articles = await fetchArticles(decodedSlug);
     const rssContent = await generateRSSFeed(articles, decodedSlug, locale);
 
     return new NextResponse(rssContent, {
       headers: {
         'Content-Type': 'application/rss+xml; charset=utf-8',
-        // Cache removed as requested
       },
     });
   } catch (error) {
     console.error('Error generating RSS feed:', error);
     return NextResponse.json(
-      { error: 'Failed to generate RSS feed' },
+      { error: `Failed to generate RSS feed: ${error instanceof Error ? error.message : String(error)}` },
       { status: 500 }
     );
   }

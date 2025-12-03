@@ -1,5 +1,5 @@
 export interface Author {
-  username: string;
+  name: string;
   bio: string;
   image: string;
   backgroundImage: string;
@@ -26,7 +26,7 @@ export interface Article {
   status: string;
   mainImage: string;
   images: string[];
-  engine?: string;
+  engine?: string | { name: string; id?: number };
   ver?: string;
   sequentialCode?: string;
 }

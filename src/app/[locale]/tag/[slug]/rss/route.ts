@@ -2,25 +2,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getTranslations } from 'next-intl/server';
 
-// Interface for Article (adjust based on your actual Article interface)
+// Interface for Article based on GraphQL response
 interface Article {
   id: number;
   title: string;
   slug: string;
   description: string;
   createdAt: string;
-  mainImage: string;
-  images?: string[];
-  ver?: string;
-  engine?: string;
-  sequentialCode?: string;
+  mainImage: string | null;
+  images: { url: string }[];
+  ver: string | null;
+  engine: { name: string } | null;
+  sequentialCode: string | null;
   author: {
-    username: string;
+    name: string; // Changed from username to name as per GraphQL schema
   };
-}
-
-interface ArticlesResponse {
-  articles: Article[];
 }
 
 // Updated interface to match Next.js expectations
@@ -32,20 +28,60 @@ interface RouteParams {
 const SUPPORTED_LOCALES = ['en', 'th', 'ja', 'ko'];
 const DEFAULT_LOCALE = 'en';
 
-// Fetch articles without locale in API call
-async function fetchArticles(slug: string): Promise<ArticlesResponse> {
-  const apiUrl = `${process.env.API_URL}/api/articles?tag=${encodeURIComponent(slug)}&status=PUBLISHED`;
-  const res = await fetch(apiUrl, { next: { revalidate: 0 } }); // Remove cache
+const API_URL = process.env.API_URL || 'https://api.chanomhub.online';
+const FRONTEND_URL = process.env.frontend || 'https://chanomhub.online';
+
+async function fetchArticles(slug: string): Promise<Article[]> {
+  const query = `query RSSTagArticles($tag: String!) {
+    articles(filter: { tag: $tag }, status: PUBLISHED, limit: 20) {
+      id
+      title
+      slug
+      description
+      createdAt
+      mainImage
+      images {
+        url
+      }
+      ver
+      engine {
+        name
+      }
+      sequentialCode
+      author {
+        name
+      }
+    }
+  }`;
+
+  const res = await fetch(`${API_URL}/api/graphql`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    },
+    body: JSON.stringify({
+      query,
+      variables: { tag: slug },
+    }),
+    next: { revalidate: 0 }, // Remove cache
+  });
 
   if (!res.ok) {
-    throw new Error('Failed to fetch articles');
+    const errorText = await res.text();
+    throw new Error(`Failed to fetch articles: ${res.status} ${res.statusText} - ${errorText}`);
   }
 
-  return res.json();
+  const json = await res.json();
+  if (json.errors) {
+    throw new Error(`GraphQL Error: ${json.errors.map((e: any) => e.message).join(', ')}`);
+  }
+
+  return json.data.articles || [];
 }
 
 async function generateRSSFeed(articles: Article[], tagName: string, locale: string) {
-  const siteURL = process.env.frontend;
+  const siteURL = FRONTEND_URL;
   const tagSlug = encodeURIComponent(tagName);
   const feedURL = `${siteURL}/${locale}/tag/${tagSlug}/rss`;
   const websiteURL = `${siteURL}/${locale}/tag/${tagSlug}`;
@@ -76,15 +112,13 @@ async function generateRSSFeed(articles: Article[], tagName: string, locale: str
     // Handle article date safely
     let articleDate;
     try {
-      articleDate = article.createdAt && typeof article.createdAt === 'string'
+      articleDate = article.createdAt
         ? new Date(article.createdAt).toUTCString()
         : new Date().toUTCString();
       if (articleDate === 'Invalid Date') {
-        console.warn(`Invalid date format for article ${article.id}: ${article.createdAt}`);
         articleDate = new Date().toUTCString();
       }
     } catch (e) {
-      console.error(`Error parsing date for article ${article.id}:`, e);
       articleDate = new Date().toUTCString();
     }
 
@@ -97,9 +131,9 @@ async function generateRSSFeed(articles: Article[], tagName: string, locale: str
     <guid>${articleUrl}</guid>
     <pubDate>${articleDate}</pubDate>
     <description>${escapeXML(article.description || '')}</description>
-    <author>${escapeXML(article.author.username)}</author>
+    <author>${escapeXML(article.author?.name || '')}</author>
     <ver>${escapeXML(article.ver || '')}</ver>
-    <engine>${escapeXML(article.engine || '')}</engine>
+    <engine>${escapeXML(article.engine?.name || '')}</engine>
     <sequentialCode>${escapeXML(article.sequentialCode || '')}</sequentialCode>
 `;
 
@@ -114,7 +148,7 @@ async function generateRSSFeed(articles: Article[], tagName: string, locale: str
     if (article.images && article.images.length > 0) {
       article.images.forEach((image) => {
         xml += `
-    <media:content url="${escapeXML(image)}" medium="image" />
+    <media:content url="${escapeXML(image.url)}" medium="image" />
 `;
       });
     }
@@ -158,19 +192,18 @@ export async function GET(
 
     const decodedSlug = decodeURIComponent(slug);
 
-    const { articles } = await fetchArticles(decodedSlug);
+    const articles = await fetchArticles(decodedSlug);
     const rssContent = await generateRSSFeed(articles, decodedSlug, locale);
 
     return new NextResponse(rssContent, {
       headers: {
         'Content-Type': 'application/rss+xml; charset=utf-8',
-        // Cache removed as requested
       },
     });
   } catch (error) {
     console.error('Error generating RSS feed:', error);
     return NextResponse.json(
-      { error: 'Failed to generate RSS feed' },
+      { error: `Failed to generate RSS feed: ${error instanceof Error ? error.message : String(error)}` },
       { status: 500 }
     );
   }

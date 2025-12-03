@@ -25,21 +25,119 @@ interface DynamicFilterPageProps {
   hasRss?: boolean; // Optional: whether to show RSS link
 }
 
-// Fetch articles based on filter type
+// Fetch articles based on filter type using GraphQL
 async function fetchArticles(slug: string, locale: string, filterType: FilterType): Promise<ArticlesResponse> {
-  const queryParam = filterType === 'platforms' ? 'platforms' : filterType;
   const decodedSlug = decodeURIComponent(slug);
-  const apiUrl = `${process.env.API_URL}/api/articles?${queryParam}=${encodeURIComponent(decodedSlug)}&locale=${encodeURIComponent(locale)}`;
+  const apiUrl = `${process.env.API_URL || 'https://api.chanomhub.online'}/api/graphql`;
 
-  console.log('Fetching from URL:', apiUrl); // Debug log
+  let filterArg = '';
+  if (filterType === 'platforms') {
+    filterArg = `platform: "${decodedSlug}"`;
+  } else if (filterType === 'tag') {
+    filterArg = `tag: "${decodedSlug}"`;
+  } else if (filterType === 'category') {
+    filterArg = `category: "${decodedSlug}"`;
+  }
 
-  const res = await fetch(apiUrl, { next: { revalidate: 60 } }); // Use ISR for caching
+  const query = `query DynamicFilterArticles {
+    articles(filter: { ${filterArg} }, status: PUBLISHED, limit: 50) {
+      id
+      title
+      slug
+      description
+      createdAt
+      favoritesCount
+      mainImage
+      images {
+        url
+      }
+      ver
+      engine {
+        name
+      }
+      platforms {
+        name
+      }
+      tags {
+        name
+      }
+      categories {
+        name
+      }
+      author {
+        name
+        image
+      }
+      sequentialCode
+    }
+  }`;
+
+  // Note: We are fetching up to 50 items. For full pagination, we would need to implement it properly.
+  // The REST API returned 'articlesCount', but the simple 'articles' query might not return total count directly
+  // unless we use a paginated query structure if available.
+  // For now, we'll use the length of returned articles as a proxy or if the API supports a separate count query.
+  // Given the previous REST API usage, let's stick to fetching the list.
+
+  const res = await fetch(apiUrl, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    },
+    body: JSON.stringify({ query }),
+    next: { revalidate: 60 },
+  });
 
   if (!res.ok) {
     throw new Error(`Failed to fetch articles for ${filterType}`);
   }
 
-  return res.json();
+  const json = await res.json();
+  if (json.errors) {
+    console.error('GraphQL Errors:', json.errors);
+    throw new Error(`GraphQL Error: ${json.errors.map((e: any) => e.message).join(', ')}`);
+  }
+
+  const articlesData = json.data.articles || [];
+
+  // Map GraphQL data to Article interface
+  const articles = articlesData.map((item: any) => ({
+    id: item.id,
+    title: item.title,
+    slug: item.slug,
+    description: item.description,
+    createdAt: item.createdAt,
+    favoritesCount: item.favoritesCount || 0,
+    mainImage: item.mainImage || '',
+    images: item.images?.map((img: any) => img.url) || [],
+    ver: item.ver,
+    engine: item.engine, // Object or null
+    platformList: item.platforms?.map((p: any) => p.name) || [],
+    tagList: item.tags?.map((t: any) => t.name) || [],
+    categoryList: item.categories?.map((c: any) => c.name) || [],
+    author: {
+      name: item.author?.name || 'Unknown',
+      image: item.author?.image || '',
+      // Default values for missing fields
+      bio: '',
+      backgroundImage: '',
+      following: false
+    },
+    sequentialCode: item.sequentialCode,
+    // Default values for fields not in this specific GraphQL query but in interface
+    excerpt: '',
+    publishedAt: item.createdAt,
+    body: '',
+    version: 0,
+    favorited: false,
+    updatedAt: item.createdAt,
+    status: 'PUBLISHED',
+  }));
+
+  return {
+    articles,
+    articlesCount: articles.length, // Approximate count based on fetched limit
+  };
 }
 
 // Generate metadata
@@ -113,14 +211,14 @@ export default async function DynamicFilterPage({ params, filterType, hasRss = t
 
     // Calculate comprehensive statistics
     const totalFavorites = articles.reduce((sum, article) => sum + article.favoritesCount, 0);
-    const uniqueAuthors = new Set(articles.map(article => article.author.username)).size;
+    const uniqueAuthors = new Set(articles.map(article => article.author.name)).size;
     const allTags = articles.flatMap(article => article.tagList);
     const uniqueTags = new Set(allTags).size;
     const allCategories = articles.flatMap(article => article.categoryList);
     const uniqueCategories = new Set(allCategories).size;
     const allPlatforms = articles.flatMap(article => article.platformList);
     const uniquePlatforms = new Set(allPlatforms).size;
-    const engines = articles.map(article => article.engine).filter(Boolean);
+    const engines = articles.map(article => typeof article.engine === 'object' ? article.engine?.name : article.engine).filter(Boolean);
     const uniqueEngines = new Set(engines).size;
 
     // Most popular tags
@@ -135,18 +233,18 @@ export default async function DynamicFilterPage({ params, filterType, hasRss = t
 
     // Author statistics
     const authorStats = articles.reduce((acc, article) => {
-      const username = article.author.username;
-      if (!acc[username]) {
-        acc[username] = {
+      const name = article.author.name;
+      if (!acc[name]) {
+        acc[name] = {
           author: article.author,
           articleCount: 0,
           totalFavorites: 0,
           articles: [],
         };
       }
-      acc[username].articleCount++;
-      acc[username].totalFavorites += article.favoritesCount;
-      acc[username].articles.push(article);
+      acc[name].articleCount++;
+      acc[name].totalFavorites += article.favoritesCount;
+      acc[name].articles.push(article);
       return acc;
     }, {} as Record<string, any>);
 
@@ -303,13 +401,13 @@ export default async function DynamicFilterPage({ params, filterType, hasRss = t
                 <CardContent>
                   <div className="space-y-3">
                     {topAuthors.map((authorStat: any, index) => (
-                      <div key={authorStat.author.username} className="flex items-center gap-3 p-2 bg-muted rounded-lg">
+                      <div key={authorStat.author.name} className="flex items-center gap-3 p-2 bg-muted rounded-lg">
                         <Avatar className="w-8 h-8">
-                          <AvatarImage src={authorStat.author.image || '/default-avatar.png'} alt={authorStat.author.username} />
-                          <AvatarFallback>{authorStat.author.username.charAt(0)}</AvatarFallback>
+                          <AvatarImage src={authorStat.author.image || '/default-avatar.png'} alt={authorStat.author.name} />
+                          <AvatarFallback>{authorStat.author.name.charAt(0)}</AvatarFallback>
                         </Avatar>
                         <div className="flex-1">
-                          <div className="font-semibold text-sm text-foreground">{authorStat.author.username}</div>
+                          <div className="font-semibold text-sm text-foreground">{authorStat.author.name}</div>
                           <div className="text-xs text-muted-foreground">
                             {t('author_stats', {
                               articleCount: authorStat.articleCount,
@@ -383,7 +481,9 @@ export default async function DynamicFilterPage({ params, filterType, hasRss = t
                             <div className="text-xs text-muted-foreground">
                               {new Date(article.createdAt).toLocaleDateString(locale === 'th' ? 'th-TH' : 'en-US')}
                             </div>
-                            <Badge variant="secondary" className="text-xs">{article.engine}</Badge>
+                            <Badge variant="secondary" className="text-xs">
+                              {typeof article.engine === 'object' ? article.engine?.name : article.engine}
+                            </Badge>
                           </div>
                           <div className="flex items-center gap-1 mt-1">
                             <Heart className="w-3 h-3" />
@@ -422,9 +522,11 @@ export default async function DynamicFilterPage({ params, filterType, hasRss = t
                           </h4>
                           <div className="flex items-center gap-2 mt-1">
                             <div className="text-xs text-muted-foreground">
-                              {t('by_author', { username: article.author.username })}
+                              {t('by_author', { username: article.author.name })}
                             </div>
-                            <Badge variant="secondary" className="text-xs">{article.engine}</Badge>
+                            <Badge variant="secondary" className="text-xs">
+                              {typeof article.engine === 'object' ? article.engine?.name : article.engine}
+                            </Badge>
                           </div>
                           <div className="flex items-center gap-2 mt-1">
                             <div className="flex items-center gap-1 text-red-500">
