@@ -34,6 +34,7 @@ import { useDownloadDialog } from "./hooks/useDownloadDialog";
 import ArticleDownloadDialog from "./ArticleDownloadDialog";
 import { Button, Card, CardContent } from "@/components/ui";
 import { useTranslations } from 'next-intl';
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 interface ArticleContentProps {
@@ -226,7 +227,10 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
             >
               <Card>
                 <CardContent>
-                  <ArticleTitleMeta article={article} isDarkMode={isDarkMode} />
+                  <ArticleTitleMeta
+                    article={article}
+                    isDarkMode={isDarkMode}
+                  />
 
                   <div className="mb-6">
                     <EditorContent editor={editor} />

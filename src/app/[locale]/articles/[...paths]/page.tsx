@@ -127,13 +127,13 @@ export default async function ArticlePage(props: ArticlePageProps) {
   let downloads: Article['downloads'] | null = null;
 
   if (articleId) {
-    const result = await fetchArticleAndDownloads(slug, articleId);
+    const result = await fetchArticleAndDownloads(slug, articleId, locale);
     originalArticle = result.article;
     downloads = result.downloads;
   } else {
-    originalArticle = await getArticleBySlug(slug);
+    originalArticle = await getArticleBySlug(slug, locale);
   }
-    
+
   if (!originalArticle) {
     return notFound();
   }

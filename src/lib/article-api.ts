@@ -10,20 +10,20 @@ async function graphqlRequest<T>(
     const { cookies } = await import('next/headers');
     const cookieStore = await cookies();
     const token = cookieStore.get('token')?.value;
-    
+
     console.log(`[${operationName}] Token found:`, !!token);
     console.log(`[${operationName}] Token value:`, token ? `${token.substring(0, 20)}...` : 'none');
-    
+
     const headers: Record<string, string> = {
       "content-type": "application/json",
     };
-    
+
     if (token) {
       headers["Authorization"] = `Bearer ${token}`;
     }
-    
+
     console.log(`[${operationName}] Headers:`, headers);
-    
+
     const res = await fetch("https://api.chanomhub.online/api/graphql", {
       method: "POST",
       headers,
@@ -94,10 +94,11 @@ export async function fetchDownloadsByArticleId(
 
 export async function fetchArticleAndDownloads(
   slug: string,
-  downloadsArticleId: number
+  downloadsArticleId: number,
+  language?: string
 ): Promise<{ article: Article | null; downloads: Article["downloads"] | null }> {
-  const query = `query ArticleAndDownloads($slug: String!, $downloadsArticleId: Int!) {
-    article(slug: $slug) {
+  const query = `query ArticleAndDownloads($slug: String!, $downloadsArticleId: Int!, $language: String) {
+    article(slug: $slug, language: $language) {
       id
       author {
         following
@@ -148,7 +149,7 @@ export async function fetchArticleAndDownloads(
       downloads: Article["downloads"];
     }>(
       query,
-      { slug, downloadsArticleId },
+      { slug, downloadsArticleId, language },
       "ArticleAndDownloads"
     );
 
@@ -162,9 +163,9 @@ export async function fetchArticleAndDownloads(
   }
 }
 
-export async function getArticleBySlug(slug: string): Promise<Article | null> {
-  const query = `query ArticleBySlug($slug: String!) {
-    article(slug: $slug) {
+export async function getArticleBySlug(slug: string, language?: string): Promise<Article | null> {
+  const query = `query ArticleBySlug($slug: String!, $language: String) {
+    article(slug: $slug, language: $language) {
       id
       author {
         following
@@ -205,7 +206,7 @@ export async function getArticleBySlug(slug: string): Promise<Article | null> {
   try {
     const data = await graphqlRequest<{ article: Article }>(
       query,
-      { slug },
+      { slug, language },
       "ArticleBySlug"
     );
     console.log('Article data from API:', data.article);
