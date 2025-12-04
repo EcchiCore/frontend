@@ -327,3 +327,71 @@ html[data-event-theme="christmas"].dark body {
   background-color: oklch(0.18 0.04 25);
   background-attachment: fixed;
 }
+
+/* Tiptap Table Styles */
+.ProseMirror table {
+  border-collapse: collapse;
+  margin: 1rem 0;
+  overflow: hidden;
+  table-layout: fixed;
+  width: 100%;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+}
+
+.ProseMirror table td,
+.ProseMirror table th {
+  border: 1px solid var(--border);
+  box-sizing: border-box;
+  min-width: 1em;
+  padding: 0.5rem 1rem;
+  position: relative;
+  vertical-align: top;
+}
+
+.ProseMirror table td>*,
+.ProseMirror table th>* {
+  margin-bottom: 0;
+}
+
+.ProseMirror table th {
+  background-color: var(--muted);
+  font-weight: 600;
+  text-align: left;
+}
+
+.ProseMirror table .selectedCell:after {
+  background: var(--primary);
+  opacity: 0.15;
+  content: "";
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  pointer-events: none;
+  position: absolute;
+  z-index: 2;
+}
+
+.ProseMirror table .column-resize-handle {
+  background-color: var(--primary);
+  bottom: -2px;
+  pointer-events: none;
+  position: absolute;
+  right: -2px;
+  top: 0;
+  width: 4px;
+}
+
+.ProseMirror.resize-cursor {
+  cursor: col-resize;
+}
+
+/* Responsive table handling */
+@media (max-width: 640px) {
+  .ProseMirror table {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+}

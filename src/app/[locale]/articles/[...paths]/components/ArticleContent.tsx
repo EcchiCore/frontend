@@ -13,6 +13,10 @@ import { TextStyle } from '@tiptap/extension-text-style';
 import { Color } from '@tiptap/extension-color';
 import Underline from '@tiptap/extension-underline';
 import { TextAlign } from '@tiptap/extension-text-align';
+import { Table } from '@tiptap/extension-table';
+import { TableRow } from '@tiptap/extension-table-row';
+import { TableCell } from '@tiptap/extension-table-cell';
+import { TableHeader } from '@tiptap/extension-table-header';
 
 import CustomArticleAlert from "./Alert";
 import { Alert } from "@/components/ui/alert";
@@ -127,6 +131,27 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
         validate: href => /^https?:\/\//.test(href),
       }),
       Typography,
+      Table.configure({
+        resizable: true,
+        HTMLAttributes: {
+          class: 'border-collapse table-auto w-full my-4',
+        },
+      }),
+      TableRow.configure({
+        HTMLAttributes: {
+          class: 'border-b border-border',
+        },
+      }),
+      TableHeader.configure({
+        HTMLAttributes: {
+          class: 'border border-border px-4 py-2 text-left font-bold bg-muted',
+        },
+      }),
+      TableCell.configure({
+        HTMLAttributes: {
+          class: 'border border-border px-4 py-2',
+        },
+      }),
     ],
     content: article.body,
     editable: false,
