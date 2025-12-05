@@ -26,7 +26,7 @@ export async function generateMetadata(props: ArticlePageProps): Promise<Metadat
   const paths = params.paths;
   const slug = decodeURIComponent(paths[0]);
 
-  const originalArticle = await getArticleBySlug(slug);
+  const originalArticle = await getArticleBySlug(slug, locale);
   if (!originalArticle) {
     return {
       title: 'Article Not Found',
