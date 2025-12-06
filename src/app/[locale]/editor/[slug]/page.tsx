@@ -23,6 +23,7 @@ import Image from 'next/image';
  *   the user selected, even when two images share the same URL.
  * - On submit we convert local image objects back to the API shape (array of URLs, and URL fields).
  * - Component split is done as inner components so you can easily extract them into separate files.
+ * - Data fetching is now done via GraphQL.
  */
 
 interface Author {
@@ -34,6 +35,17 @@ interface Author {
 
 interface ImageItem {
   id: string;
+  url: string;
+}
+
+// Helper interfaces for API response handling
+interface ApiEngine {
+  id: number;
+  name: string;
+}
+
+interface ApiImage {
+  id: number;
   url: string;
 }
 
@@ -52,10 +64,10 @@ interface Article {
   createdAt: string;
   updatedAt: string;
   status: string;
-  mainImage: string | null; // kept for API compatibility
+  mainImage: string | null;
   backgroundImage: string | null;
   coverImage: string | null;
-  images: string[]; // kept for API compatibility
+  images: string[]; // For specific use in the editor form state (URLs)
   ver: string | null;
   version: number;
   engine: string | null;
@@ -66,7 +78,17 @@ interface Article {
   coverImageId?: string | null;
 }
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.chanomhub.online/api';
+const GRAPHQL_URL = `${API_URL}/api/graphql`;
+
+const getCookie = (name: string): string | null => {
+  if (typeof document === 'undefined') return null;
+  const cookieValue = document.cookie
+    .split('; ')
+    .find(row => row.startsWith(`${name}=`))
+    ?.split('=')[1];
+  return cookieValue ? decodeURIComponent(cookieValue) : null;
+};
 
 /* ---------------------- Small inner components (extractable) ---------------------- */
 
@@ -75,10 +97,15 @@ const TagsInput: React.FC<{
   onAdd: (v: string) => void;
   onRemove: (v: string) => void;
   placeholder?: string;
-}> = ({ items = [], onAdd, onRemove, placeholder }) => {
+  suggestions?: string[];
+}> = ({ items = [], onAdd, onRemove, placeholder, suggestions = [] }) => {
   const [input, setInput] = useState('');
+  const [showSuggestions, setShowSuggestions] = useState(false);
+
+  const filteredSuggestions = suggestions.filter(s => s.toLowerCase().includes(input.toLowerCase()) && !items.includes(s));
+
   return (
-    <div>
+    <div className="relative">
       <div className="mt-2 flex flex-wrap gap-2">
         {items.map((it) => (
           <Badge key={it} variant="secondary" className="group relative">
@@ -90,17 +117,41 @@ const TagsInput: React.FC<{
       <Input
         placeholder={placeholder}
         value={input}
-        onChange={(e) => setInput(e.target.value)}
+        onChange={(e) => {
+          setInput(e.target.value);
+          setShowSuggestions(true);
+        }}
+        onFocus={() => setShowSuggestions(true)}
+        onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
         onKeyDown={(e) => {
           if (e.key === 'Enter') {
             e.preventDefault();
             const v = input.trim();
-            if (v) onAdd(v);
-            setInput('');
+            if (v) {
+              onAdd(v);
+              setInput('');
+            }
           }
         }}
         className="mt-2"
       />
+      {showSuggestions && input && filteredSuggestions.length > 0 && (
+        <div className="absolute z-10 w-full bg-white border rounded-md shadow-lg mt-1 max-h-40 overflow-y-auto">
+          {filteredSuggestions.map((s) => (
+            <div
+              key={s}
+              className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm"
+              onClick={() => {
+                onAdd(s);
+                setInput('');
+                setShowSuggestions(false);
+              }}
+            >
+              {s}
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
@@ -243,6 +294,12 @@ const EditArticlePage: React.FC = () => {
     sequentialCode: null,
   });
 
+  // Available options from GraphQL
+  const [availableTags, setAvailableTags] = useState<string[]>([]);
+  const [availableCategories, setAvailableCategories] = useState<string[]>([]);
+  const [availablePlatforms, setAvailablePlatforms] = useState<string[]>([]);
+  const [availableEngines, setAvailableEngines] = useState<{ id: number; name: string }[]>([]);
+
   // Local structured image items
   const [imageItems, setImageItems] = useState<ImageItem[]>([]);
 
@@ -251,52 +308,155 @@ const EditArticlePage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  const getCookie = (name: string): string | null => {
-    if (typeof document === 'undefined') return null;
-    const cookieValue = document.cookie
-      .split('; ')
-      .find(row => row.startsWith(`${name}=`))
-      ?.split('=')[1];
-    return cookieValue ? decodeURIComponent(cookieValue) : null;
-  };
+  const graphqlRequest = useCallback(async (query: string, variables: any = {}) => {
+    const token = getCookie('token');
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
 
-  const fetchArticle = useCallback(async () => {
+    const res = await fetch(GRAPHQL_URL, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ query, variables }),
+    });
+
+    if (!res.ok) {
+      const errorText = await res.text();
+      throw new Error(`HTTP Error: ${res.status} ${errorText}`);
+    }
+
+    const json = await res.json();
+    if (json.errors) {
+      throw new Error(json.errors[0].message);
+    }
+    return json.data;
+  }, []);
+
+  const fetchArticleAndOptions = useCallback(async () => {
     if (!slug) return;
     try {
       setLoading(true);
       setError(null);
-      const token = getCookie('token');
-      if (!token) throw new Error('Authorization token not found. Please log in.');
 
-      const response = await fetch(`${API_URL}/api/articles/${slug}`, {
-        headers: { 'Authorization': `Bearer ${token}` },
-      });
+      const query = `
+        query GetEditArticleData($slug: String!) {
+          article(slug: $slug) {
+            title
+            slug
+            description
+            body
+            creator { name }
+            status
+            ver
+            version
+            sequentialCode
+            mainImage
+            backgroundImage
+            coverImage
+            images { url }
+            engine { id name }
+            tags { name }
+            categories { name }
+            platforms { name }
+            favorited
+            favoritesCount
+            updatedAt
+          }
+          tags { name }
+          categories { name }
+          platforms { name }
+          engines { id name }
+        }
+      `;
 
-      if (!response.ok) throw new Error('Failed to fetch article');
+      const data = await graphqlRequest(query, { slug });
 
-      const data = await response.json();
-      const art: Article = { ...data.article } as Article;
+      const apiArticle = data.article;
+      if (!apiArticle) throw new Error('Article not found');
+
+      // Populate options
+      if (data.tags) setAvailableTags(data.tags.map((t: any) => t.name));
+      if (data.categories) setAvailableCategories(data.categories.map((c: any) => c.name));
+      if (data.platforms) setAvailablePlatforms(data.platforms.map((p: any) => p.name));
+      if (data.engines) setAvailableEngines(data.engines.map((e: any) => ({ id: e.id, name: e.name })));
+
+      // Extract Engine Name
+      let engineName = null;
+      if (apiArticle.engine && typeof apiArticle.engine === 'object') {
+        engineName = apiArticle.engine.name; // Use name for the select value as UI expects string currently
+      } else if (typeof apiArticle.engine === 'string') {
+        engineName = apiArticle.engine;
+      }
+
+      // Extract Images
+      const rawImages = apiArticle.images;
+      let imageUrls: string[] = [];
+      if (Array.isArray(rawImages)) {
+        imageUrls = rawImages.map((img: string | ApiImage) => {
+          if (typeof img === 'string') return img;
+          return img.url;
+        });
+      }
+
+      // Extract Special Images (handle both object and string cases)
+      const extractUrl = (img: string | { url: string } | null): string | null => {
+        if (!img) return null;
+        if (typeof img === 'string') return img;
+        return img.url;
+      }
+
+      const mainImageUrl = extractUrl(apiArticle.mainImage);
+      const bgImageUrl = extractUrl(apiArticle.backgroundImage);
+      const coverImageUrl = extractUrl(apiArticle.coverImage);
+
+      // Extract Lists
+      const tagList = apiArticle.tags ? apiArticle.tags.map((t: any) => t.name) : [];
+      const categoryList = apiArticle.categories ? apiArticle.categories.map((c: any) => c.name) : [];
+      const platformList = apiArticle.platforms ? apiArticle.platforms.map((p: any) => p.name) : [];
+      // Handle creator logic (api returns array or object? Schema said creators array or creator string. Just in case handle both)
+      // Actually schema says `creators` array `{ name }` but DTO says `creator` string.
+      // Let's assume `creator: { name: ... }` from our query above `creator { name }`.
+      // Or if it's null, we fall back to empty.
+      const creatorName = apiArticle.creator?.name || (typeof apiArticle.creator === 'string' ? apiArticle.creator : '') || '';
+
+
+      const art: Partial<Article> = {
+        ...apiArticle,
+        tagList,
+        categoryList,
+        platformList,
+        creator: creatorName,
+        engine: engineName,
+        mainImage: mainImageUrl,
+        backgroundImage: bgImageUrl,
+        coverImage: coverImageUrl,
+        images: imageUrls,
+      };
 
       // convert images (strings) to ImageItem[] with unique ids
-      const items: ImageItem[] = (art.images || []).map(url => ({ id: typeof crypto !== 'undefined' && (crypto as any).randomUUID ? (crypto as any).randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`, url }));
+      const items: ImageItem[] = (imageUrls || []).map(url => ({
+        id: typeof crypto !== 'undefined' && (crypto as any).randomUUID ? (crypto as any).randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+        url
+      }));
 
       // find matching ids for special images (if any URLs match)
-      const mainId = art.mainImage ? items.find(i => i.url === art.mainImage)?.id ?? null : null;
-      const backgroundId = art.backgroundImage ? items.find(i => i.url === art.backgroundImage)?.id ?? null : null;
-      const coverId = art.coverImage ? items.find(i => i.url === art.coverImage)?.id ?? null : null;
+      const mainId = mainImageUrl ? items.find(i => i.url === mainImageUrl)?.id ?? null : null;
+      const backgroundId = bgImageUrl ? items.find(i => i.url === bgImageUrl)?.id ?? null : null;
+      const coverId = coverImageUrl ? items.find(i => i.url === coverImageUrl)?.id ?? null : null;
 
       setImageItems(items);
-      setArticle({ ...art, creator: art.creator ?? '', mainImageId: mainId, backgroundImageId: backgroundId, coverImageId: coverId });
+      setArticle({ ...art, mainImageId: mainId, backgroundImageId: backgroundId, coverImageId: coverId });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An unknown error occurred');
     } finally {
       setLoading(false);
     }
-  }, [slug]);
+  }, [slug, graphqlRequest]);
 
   useEffect(() => {
-    fetchArticle();
-  }, [fetchArticle]);
+    fetchArticleAndOptions();
+  }, [fetchArticleAndOptions]);
 
   /* ---------------------- Handlers ---------------------- */
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -366,15 +526,35 @@ const EditArticlePage: React.FC = () => {
       if (!token) throw new Error('Authorization token not found. Please log in.');
 
       // Build payload: convert local imageItems to API shape
-      const payloadArticle: Partial<Article> = {
+      const payloadArticle: any = {
         ...article,
-        images: imageItems.map(i => i.url),
+        otherImages: imageItems.map(i => i.url),
         mainImage: article.mainImageId ? imageItems.find(i => i.id === article.mainImageId)?.url ?? null : (article.mainImage ?? null),
         backgroundImage: article.backgroundImageId ? imageItems.find(i => i.id === article.backgroundImageId)?.url ?? null : (article.backgroundImage ?? null),
         coverImage: article.coverImageId ? imageItems.find(i => i.id === article.coverImageId)?.url ?? null : (article.coverImage ?? null),
       };
 
-      const response = await fetch(`${API_URL}/api/articles/${slug}`, {
+      // Remove the local-only 'images' array from payload to prevent confusion if API doesn't strip it
+      delete payloadArticle.images;
+      // Clean up local IDs
+      delete payloadArticle.mainImageId;
+      delete payloadArticle.backgroundImageId;
+      delete payloadArticle.coverImageId;
+
+      // Ensure lists are sent as arrays of strings (API expects this)
+      // `tags` in payload should be `tags`, `categories` -> `categories`, `platforms` -> `platforms`
+      // But our local state use `tagList` etc.
+      // API DTO `UpdateArticleDTO` uses keys: `tags`, `categories`, `platforms`.
+      payloadArticle.tags = article.tagList;
+      payloadArticle.categories = article.categoryList;
+      payloadArticle.platforms = article.platformList;
+
+      delete payloadArticle.tagList;
+      delete payloadArticle.categoryList;
+      delete payloadArticle.platformList;
+
+
+      const response = await fetch(`${API_URL}/articles/${slug}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ article: payloadArticle }),
@@ -386,7 +566,7 @@ const EditArticlePage: React.FC = () => {
       }
 
       setSuccessMessage('Article updated successfully!');
-      // directly navigate after a short visible success (no setTimeout to avoid async waiting); using router.push immediately
+      // directly navigate after a short visible success 
       router.push(`/articles/${slug}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An unknown error occurred');
@@ -521,17 +701,17 @@ const EditArticlePage: React.FC = () => {
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div>
                           <Label className="text-sm font-medium">Tags</Label>
-                          <TagsInput items={article.tagList || []} onAdd={(v) => addItem('tagList', v)} onRemove={(v) => removeItem('tagList', v)} placeholder="Add tag and press Enter" />
+                          <TagsInput items={article.tagList || []} onAdd={(v) => addItem('tagList', v)} onRemove={(v) => removeItem('tagList', v)} placeholder="Add tag and press Enter" suggestions={availableTags} />
                         </div>
 
                         <div>
                           <Label className="text-sm font-medium">Categories</Label>
-                          <TagsInput items={article.categoryList || []} onAdd={(v) => addItem('categoryList', v)} onRemove={(v) => removeItem('categoryList', v)} placeholder="Add category and press Enter" />
+                          <TagsInput items={article.categoryList || []} onAdd={(v) => addItem('categoryList', v)} onRemove={(v) => removeItem('categoryList', v)} placeholder="Add category and press Enter" suggestions={availableCategories} />
                         </div>
 
                         <div>
                           <Label className="text-sm font-medium">Platforms</Label>
-                          <TagsInput items={article.platformList || []} onAdd={(v) => addItem('platformList', v)} onRemove={(v) => removeItem('platformList', v)} placeholder="Add platform and press Enter" />
+                          <TagsInput items={article.platformList || []} onAdd={(v) => addItem('platformList', v)} onRemove={(v) => removeItem('platformList', v)} placeholder="Add platform and press Enter" suggestions={availablePlatforms} />
                         </div>
                       </div>
 
@@ -542,11 +722,19 @@ const EditArticlePage: React.FC = () => {
                             <SelectValue placeholder="Select engine" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="RENPY">Ren&#39;Py</SelectItem>
-                            <SelectItem value="RPGM">RPG Maker</SelectItem>
-                            <SelectItem value="UNITY">Unity</SelectItem>
-                            <SelectItem value="UNREAL">Unreal Engine</SelectItem>
-                            <SelectItem value="GODOT">Godot</SelectItem>
+                            {availableEngines.length > 0 ? (
+                              availableEngines.map((eng) => (
+                                <SelectItem key={eng.id} value={eng.name}>{eng.name}</SelectItem>
+                              ))
+                            ) : (
+                              <>
+                                <SelectItem value="RENPY">Ren&#39;Py</SelectItem>
+                                <SelectItem value="RPGM">RPG Maker</SelectItem>
+                                <SelectItem value="UNITY">Unity</SelectItem>
+                                <SelectItem value="UNREAL">Unreal Engine</SelectItem>
+                                <SelectItem value="GODOT">Godot</SelectItem>
+                              </>
+                            )}
                           </SelectContent>
                         </Select>
                       </div>
@@ -620,4 +808,3 @@ const EditArticlePage: React.FC = () => {
 };
 
 export default EditArticlePage;
-

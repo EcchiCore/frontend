@@ -555,94 +555,94 @@ export default function ModerationDashboard() {
             <div className="overflow-x-auto">
               <table className="table table-zebra">
                 <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Type</th>
-                  <th>Content</th>
-                  <th>Requester</th>
-                  <th>Status</th>
-                  <th>Created</th>
-                  <th>Actions</th>
-                </tr>
+                  <tr>
+                    <th>ID</th>
+                    <th>Type</th>
+                    <th>Content</th>
+                    <th>Requester</th>
+                    <th>Status</th>
+                    <th>Created</th>
+                    <th>Actions</th>
+                  </tr>
                 </thead>
                 <tbody>
-                {!loading && currentRequests.length === 0 && (
-                  <tr>
-                    <td colSpan={7} className="text-center py-8">
-                      <div className="text-base-content/50">
-                        {filteredRequests.length === 0 && requests.length === 0
-                          ? "No moderation requests found"
-                          : "No requests found matching your criteria"
-                        }
-                      </div>
-                    </td>
-                  </tr>
-                )}
-                {currentRequests.map((request) => (
-                  <tr key={request.id} className="hover">
-                    <td className="font-mono text-sm">#{request.id}</td>
-                    <td>
-                      <div className="flex items-center gap-2">
-                        <EntityIcon type={request.entityType} />
-                        <span className="text-sm">{request.entityType.replace("_", " ")}</span>
-                      </div>
-                    </td>
-                    <td>
-                      <div className="max-w-xs">
-                        <div className="font-medium truncate">
-                          {request.entityType === "ARTICLE" && (request.entityDetails.title || "Untitled Article")}
-                          {request.entityType === "DOWNLOAD_LINK" && (request.entityDetails.name || "Unnamed Link")}
-                          {request.entityType === "COMMENT" &&
-                            (request.entityDetails.content?.substring(0, 50) || "No content") +
-                            (request.entityDetails.content && request.entityDetails.content.length > 50 ? "..." : "")
+                  {!loading && currentRequests.length === 0 && (
+                    <tr>
+                      <td colSpan={7} className="text-center py-8">
+                        <div className="text-base-content/50">
+                          {filteredRequests.length === 0 && requests.length === 0
+                            ? "No moderation requests found"
+                            : "No requests found matching your criteria"
                           }
                         </div>
-                        <div className="text-sm text-base-content/70 truncate">
-                          {request.requestNote}
+                      </td>
+                    </tr>
+                  )}
+                  {currentRequests.map((request) => (
+                    <tr key={request.id} className="hover">
+                      <td className="font-mono text-sm">#{request.id}</td>
+                      <td>
+                        <div className="flex items-center gap-2">
+                          <EntityIcon type={request.entityType} />
+                          <span className="text-sm">{request.entityType.replace("_", " ")}</span>
                         </div>
-                      </div>
-                    </td>
-                    <td>
-                      <div className="flex items-center gap-2">
-                        <div className="avatar placeholder">
-                          <div className="bg-neutral text-neutral-content rounded-full w-8 h-8">
-                            <span className="text-xs">{request.requester.name.charAt(0)}</span>
+                      </td>
+                      <td>
+                        <div className="max-w-xs">
+                          <div className="font-medium truncate">
+                            {request.entityType === "ARTICLE" && (request.entityDetails.title || "Untitled Article")}
+                            {request.entityType === "DOWNLOAD_LINK" && (request.entityDetails.name || "Unnamed Link")}
+                            {request.entityType === "COMMENT" &&
+                              (request.entityDetails.content?.substring(0, 50) || "No content") +
+                              (request.entityDetails.content && request.entityDetails.content.length > 50 ? "..." : "")
+                            }
+                          </div>
+                          <div className="text-sm text-base-content/70 truncate">
+                            {request.requestNote}
                           </div>
                         </div>
-                        <div className="text-sm">{request.requester.name}</div>
-                      </div>
-                    </td>
-                    <td>
-                      <StatusBadge status={request.status} />
-                    </td>
-                    <td className="text-sm text-base-content/70">
-                      {formatDate(request.createdAt)}
-                    </td>
-                    <td>
-                      <div className="flex gap-2">
-                        {(request.status === "PENDING" || request.status === "NEEDS_REVISION") && (
-                          <button
-                            className="btn btn-primary btn-sm"
-                            onClick={() => handleReviewRequest(request)}
-                            disabled={loading}
-                          >
-                            <Eye className="w-4 h-4" />
-                            Review
-                          </button>
-                        )}
-                        {userRole === "ADMIN" && (
-                          <button
-                            className="btn btn-error btn-sm"
-                            onClick={() => handleDeleteRequest(request.id)}
-                            disabled={loading}
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                      </td>
+                      <td>
+                        <div className="flex items-center gap-2">
+                          <div className="avatar placeholder">
+                            <div className="bg-neutral text-neutral-content rounded-full w-8 h-8">
+                              <span className="text-xs">{request.requester.name.charAt(0)}</span>
+                            </div>
+                          </div>
+                          <div className="text-sm">{request.requester.name}</div>
+                        </div>
+                      </td>
+                      <td>
+                        <StatusBadge status={request.status} />
+                      </td>
+                      <td className="text-sm text-base-content/70">
+                        {formatDate(request.createdAt)}
+                      </td>
+                      <td>
+                        <div className="flex gap-2">
+                          {(request.status === "PENDING" || request.status === "NEEDS_REVISION") && (
+                            <button
+                              className="btn btn-primary btn-sm"
+                              onClick={() => handleReviewRequest(request)}
+                              disabled={loading}
+                            >
+                              <Eye className="w-4 h-4" />
+                              Review
+                            </button>
+                          )}
+                          {userRole === "ADMIN" && (
+                            <button
+                              className="btn btn-error btn-sm"
+                              onClick={() => handleDeleteRequest(request.id)}
+                              disabled={loading}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>

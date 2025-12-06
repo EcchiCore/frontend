@@ -11,6 +11,7 @@ import { getActiveEventTheme } from '@/lib/event-theme';
 import { fetchArticles } from '@/lib/api';
 import { fetchPlatforms, fetchTags } from '@/app/[locale]/lib/searchUtils';
 import ChristmasCountdown from './components/ChristmasCountdown';
+import DiscordWidget from './components/DiscordWidget';
 
 
 // Font configuration
@@ -184,6 +185,9 @@ export default async function HomePage({ params }: { params: { locale: string } 
                 ))}
               </div>
             </div> */}
+
+            {/* Discord Widget */}
+            <DiscordWidget />
           </div>
         </div>
       </main>

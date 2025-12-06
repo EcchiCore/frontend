@@ -497,9 +497,9 @@ export const ModerationPage: React.FC = () => {
           <AlertCircle className="w-4 h-4" />
           <AlertDescription>
             {error}
-            <Button 
-              variant="ghost" 
-              size="sm" 
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => setError(null)}
               className="ml-2"
             >
@@ -514,9 +514,9 @@ export const ModerationPage: React.FC = () => {
           <Check className="w-4 h-4" />
           <AlertDescription>
             {success}
-            <Button 
-              variant="ghost" 
-              size="sm" 
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => setSuccess(null)}
               className="ml-2"
             >
@@ -894,17 +894,17 @@ export const ModerationPage: React.FC = () => {
                 </Alert>
               )}
 
-                              {selectedRequest.entityType === 'ARTICLE' &&
-                              selectedRequest.entityDetails &&
-                              (selectedRequest.entityDetails.status !== ArticleStatus.PENDING_REVIEW && selectedRequest.entityDetails.status !== 'PENDING') &&
-                              selectedRequest.status === 'PENDING' && (
-                                <Alert variant="destructive">
-                                  <AlertTriangle className="w-4 h-4" />
-                                  <AlertDescription>
-                                    This article is currently {selectedRequest.entityDetails.status}. It must be in PENDING or PENDING_REVIEW status to be approved.
-                                  </AlertDescription>
-                                </Alert>
-                              )}
+              {selectedRequest.entityType === 'ARTICLE' &&
+                selectedRequest.entityDetails &&
+                (selectedRequest.entityDetails.status !== ArticleStatus.PENDING_REVIEW && selectedRequest.entityDetails.status !== 'PENDING') &&
+                selectedRequest.status === 'PENDING' && (
+                  <Alert variant="destructive">
+                    <AlertTriangle className="w-4 h-4" />
+                    <AlertDescription>
+                      This article is currently {selectedRequest.entityDetails.status}. It must be in PENDING or PENDING_REVIEW status to be approved.
+                    </AlertDescription>
+                  </Alert>
+                )}
               <div className="space-y-2">
                 <Label htmlFor="review-comment" className="font-semibold">Review Comment</Label>
                 <Textarea
