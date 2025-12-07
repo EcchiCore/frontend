@@ -7,6 +7,7 @@ import { ThemeProvider } from '@/components/theme-provider';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import { siteUrl, defaultMetadataContent, supportedLocales, defaultLocale } from "@/utils/localeUtils";
+import Footer from '@/components/Footer';
 import { getActiveEventTheme } from "@/lib/event-theme";
 import Script from "next/script";
 
@@ -99,13 +100,13 @@ export default async function LocaleSegmentLayout({
       suppressHydrationWarning
       data-event-theme={activeEventTheme?.id}
     >
-    <head>
-      <meta charSet="utf-8" />
+      <head>
+        <meta charSet="utf-8" />
 
-      {/* Prevent flash of unstyled content */}
-      <script
-        dangerouslySetInnerHTML={{
-          __html: `
+        {/* Prevent flash of unstyled content */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
             try {
               const theme = localStorage.getItem('chanomhub-theme') || 'light';
               document.documentElement.classList.add(theme);
@@ -117,65 +118,66 @@ export default async function LocaleSegmentLayout({
               }
             } catch (e) {}
           `
-        }}
-      />
+          }}
+        />
 
-      {/* Structured Data */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "WebSite",
-            "name": "ChanomHub",
-            "url": siteUrl,
-            "potentialAction": {
-              "@type": "SearchAction",
-              "target": `${siteUrl}/search?q={search_term_string}`,
-              "query-input": "required name=search_term_string"
-            },
-            "inLanguage": supportedLocales,
-            "availableLanguage": supportedLocales.map(lang => ({
-              "@type": "Language",
-              "name": lang === 'en' ? 'English' : 'Thai',
-              "alternateName": lang
-            }))
-          })
-        }}
-      />
+        {/* Structured Data */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebSite",
+              "name": "ChanomHub",
+              "url": siteUrl,
+              "potentialAction": {
+                "@type": "SearchAction",
+                "target": `${siteUrl}/search?q={search_term_string}`,
+                "query-input": "required name=search_term_string"
+              },
+              "inLanguage": supportedLocales,
+              "availableLanguage": supportedLocales.map(lang => ({
+                "@type": "Language",
+                "name": lang === 'en' ? 'English' : 'Thai',
+                "alternateName": lang
+              }))
+            })
+          }}
+        />
 
-      <link rel="webmention" href="https://webmention.io/chanomhub.online/webmention" />
+        <link rel="webmention" href="https://webmention.io/chanomhub.online/webmention" />
 
-      {/* Google Tag Manager */}
-      <Script id="google-tag-manager" strategy="lazyOnload">
-        {`
+        {/* Google Tag Manager */}
+        <Script id="google-tag-manager" strategy="lazyOnload">
+          {`
             (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
             new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
             j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
             'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
             })(window,document,'script','dataLayer','GTM-PLNDF549');
           `}
-      </Script>
+        </Script>
 
-    </head>
+      </head>
 
-    <body className={inter.className}>
-      <ThemeProvider defaultTheme="dark" storageKey="chanomhub-theme">
-        <NextIntlClientProvider locale={validLocale} messages={messages}>
-          {children}
-        </NextIntlClientProvider>
-      </ThemeProvider>
+      <body className={inter.className}>
+        <ThemeProvider defaultTheme="dark" storageKey="chanomhub-theme">
+          <NextIntlClientProvider locale={validLocale} messages={messages}>
+            {children}
+            <Footer />
+          </NextIntlClientProvider>
+        </ThemeProvider>
 
-      {/* Google Tag Manager (noscript) */}
-      <noscript>
-        <iframe
-          src="https://www.googletagmanager.com/ns.html?id=GTM-PLNDF549"
-          height="0"
-          width="0"
-          style={{display: 'none', visibility: 'hidden'}}
-        />
-      </noscript>
-    </body>
+        {/* Google Tag Manager (noscript) */}
+        <noscript>
+          <iframe
+            src="https://www.googletagmanager.com/ns.html?id=GTM-PLNDF549"
+            height="0"
+            width="0"
+            style={{ display: 'none', visibility: 'hidden' }}
+          />
+        </noscript>
+      </body>
     </html>
   );
 }

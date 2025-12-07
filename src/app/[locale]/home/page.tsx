@@ -192,21 +192,6 @@ export default async function HomePage({ params }: { params: { locale: string } 
         </div>
       </main>
 
-      {/* Compact Footer */}
-      <footer className="bg-muted/30 border-t border-border py-3 mt-8">
-        <div className="container mx-auto px-2">
-          <div className="flex flex-col md:flex-row justify-between items-center space-y-2 md:space-y-0 text-xs text-muted-foreground">
-            <p>
-              &copy; 2025 <span className="text-primary font-semibold">ChanomHub</span>
-            </p>
-            <div className="flex space-x-4">
-              <a href="#" className="hover:text-primary transition-colors">นโยบาย</a>
-              <a href="#" className="hover:text-primary transition-colors">เงื่อนไข</a>
-              <a href="#" className="hover:text-primary transition-colors">ติดต่อ</a>
-            </div>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }

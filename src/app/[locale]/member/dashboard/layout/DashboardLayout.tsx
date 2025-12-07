@@ -1,20 +1,22 @@
 'use client';
 
-import React from 'react';
+import React, { Suspense } from 'react';
 import { SidebarShadcn as Sidebar } from './Sidebar';
 import { TopBarShadcn as TopBar } from './TopBar';
 import { useDashboard } from '../providers/DashboardProvider';
 import { useAuthContext } from '../providers/AuthProvider';
-import { ArticlesPage } from '../pages/ArticlesPage';
-import { ProfilePage } from '../pages/ProfilePage';
-import SettingsPage from '../pages/SettingsPage';
-import { ModerationPage } from '../pages/ModerationPage';
-import { SubscriptionsPage } from '../pages/SubscriptionsPage';
-import { WalletPage } from '../pages/WalletPage';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Loader2, AlertCircle } from 'lucide-react';
+
+// Lazy load pages
+const ArticlesPage = React.lazy(() => import('../pages/ArticlesPage').then(module => ({ default: module.ArticlesPage })));
+const ProfilePage = React.lazy(() => import('../pages/ProfilePage').then(module => ({ default: module.ProfilePage })));
+const SettingsPage = React.lazy(() => import('../pages/SettingsPage'));
+const ModerationPage = React.lazy(() => import('../pages/ModerationPage').then(module => ({ default: module.ModerationPage })));
+const SubscriptionsPage = React.lazy(() => import('../pages/SubscriptionsPage').then(module => ({ default: module.SubscriptionsPage })));
+const WalletPage = React.lazy(() => import('../pages/WalletPage').then(module => ({ default: module.WalletPage })));
 
 interface DashboardLayoutProps {
   title: string;
@@ -24,6 +26,15 @@ interface DashboardLayoutProps {
 export const DashboardLayoutShadcn: React.FC<DashboardLayoutProps> = ({ title }) => {
   const { currentPage, mobileOpen, setMobileOpen } = useDashboard();
   const { loading, error } = useAuthContext();
+
+  const LoadingFallback = () => (
+    <div className="min-h-[50vh] flex items-center justify-center">
+      <div className="text-center">
+        <Loader2 className="mx-auto h-12 w-12 animate-spin text-primary" />
+        <p className="mt-4 text-muted-foreground">Loading...</p>
+      </div>
+    </div>
+  );
 
   // Loading state
   if (loading) {
@@ -104,7 +115,9 @@ export const DashboardLayoutShadcn: React.FC<DashboardLayoutProps> = ({ title })
           <main className="flex-1 relative overflow-y-auto focus:outline-none">
             <div className="py-4 sm:py-6">
               <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
-                {renderPage()}
+                <Suspense fallback={<LoadingFallback />}>
+                  {renderPage()}
+                </Suspense>
               </div>
             </div>
           </main>
