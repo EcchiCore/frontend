@@ -10,7 +10,7 @@ import { locales } from '@/app/[locale]/lib/navigation';
 import { getActiveEventTheme } from '@/lib/event-theme';
 import { fetchArticles } from '@/lib/api';
 import { fetchPlatforms, fetchTags } from '@/app/[locale]/lib/searchUtils';
-import ChristmasCountdown from './components/ChristmasCountdown';
+import NewYearCountdown from './components/NewYearCountdown';
 import DiscordWidget from './components/DiscordWidget';
 
 
@@ -69,7 +69,7 @@ export default async function HomePage({ params }: { params: { locale: string } 
         <section className="border-b border-border py-2 px-2">
           <div className="container mx-auto">
             <div className="flex items-center justify-center">
-              <ChristmasCountdown />
+              <NewYearCountdown />
             </div>
           </div>
         </section>
