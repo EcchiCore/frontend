@@ -406,7 +406,9 @@
     "tryAgain": "Try again",
     "error": "Error",
     "success": "Success",
-    "copied": "Copied"
+    "copied": "Copied",
+    "next": "Next",
+    "previous": "Previous"
   },
   "Register": {
     "title": "Register",

@@ -162,59 +162,108 @@ const ArticleDownloadDialog: React.FC<ArticleDownloadDialogProps> = ({
     </motion.div>
   );
 
-  const renderFileItems = (items: (DownloadFile | TranslationFile)[], title: string) => (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <h4 className="text-lg font-semibold flex items-center gap-2 text-foreground">
-          <Folder className="size-5" />
-          {title} ({items.length})
-        </h4>
+  const ITEMS_PER_PAGE = isMobile ? 4 : 12;
+  const [currentPage, setCurrentPage] = React.useState(1);
 
-        <div className="flex items-center gap-2 text-foreground w-full sm:w-auto">
-          <Select value={sortBy} onValueChange={(value) => setSortBy(value as "name" | "date")}>
-            <SelectTrigger className="w-full sm:w-[180px]">
-              <SelectValue placeholder="Sort by" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="date">{t("sortByDate")}</SelectItem>
-              <SelectItem value="name">{t("sortByName")}</SelectItem>
-            </SelectContent>
-          </Select>
+  // Reset page when filters change or dialog opens
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, sortBy, sortOrder, openDownloadDialog, isMobile]);
 
-          <Button
-            variant="outline"
-            onClick={() => setSortOrder(prev => prev === "asc" ? "desc" : "asc")}
+  const renderFileItems = (items: (DownloadFile | TranslationFile)[], title: string) => {
+    const totalPages = Math.ceil(items.length / ITEMS_PER_PAGE);
+    const visibleItems = items.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+
+    const handleNext = () => {
+      setCurrentPage((prev) => Math.min(prev + 1, totalPages));
+    };
+
+    const handlePrev = () => {
+      setCurrentPage((prev) => Math.max(prev - 1, 1));
+    };
+
+    return (
+      <div className="space-y-6">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <h4 className="text-lg font-semibold flex items-center gap-2 text-foreground">
+            <Folder className="size-5" />
+            {title} ({items.length})
+          </h4>
+
+          <div className="flex items-center gap-2 text-foreground w-full sm:w-auto">
+            <Select value={sortBy} onValueChange={(value) => setSortBy(value as "name" | "date")}>
+              <SelectTrigger className="w-full sm:w-[180px]">
+                <SelectValue placeholder="Sort by" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="date">{t("sortByDate")}</SelectItem>
+                <SelectItem value="name">{t("sortByName")}</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Button
+              variant="outline"
+              onClick={() => setSortOrder(prev => prev === "asc" ? "desc" : "asc")}
+            >
+              {sortOrder === "asc" ? "↑" : "↓"}
+            </Button>
+          </div>
+        </div>
+
+        {items.length > 0 ? (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+              {visibleItems.map((item, index) => (
+                <FileCard key={item.id} item={item} index={index} />
+              ))}
+            </div>
+
+            {totalPages > 1 && (
+              <div className="flex items-center justify-center gap-4 mt-8 text-foreground">
+                <Button
+                  onClick={handlePrev}
+                  variant="outline"
+                  disabled={currentPage === 1}
+                  className="min-w-[100px]"
+                >
+                  {t("previous") || "Previous"}
+                </Button>
+
+                <span className="text-sm font-medium text-muted-foreground">
+                  {currentPage} / {totalPages}
+                </span>
+
+                <Button
+                  onClick={handleNext}
+                  variant="outline"
+                  disabled={currentPage === totalPages}
+                  className="min-w-[100px]"
+                >
+                  {t("next") || "Next"}
+                </Button>
+              </div>
+            )}
+          </>
+        ) : (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center py-12"
           >
-            {sortOrder === "asc" ? "↑" : "↓"}
-          </Button>
-        </div>
-      </div>
-
-      {items.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-          {items.map((item, index) => (
-            <FileCard key={item.id} item={item} index={index} />
-          ))}
-        </div>
-      ) : (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center py-12"
-        >
-          <Folder className="size-16 mx-auto mb-4 text-gray-400" />
-          <p className="text-lg font-medium mb-2 text-gray-500">
-            {searchQuery ? t("noSearchResults") : t("noFiles")}
-          </p>
-          {searchQuery && (
-            <p className="text-sm text-gray-400">
-              {t("tryDifferentSearch")}
+            <Folder className="size-16 mx-auto mb-4 text-gray-400" />
+            <p className="text-lg font-medium mb-2 text-gray-500">
+              {searchQuery ? t("noSearchResults") : t("noFiles")}
             </p>
-          )}
-        </motion.div>
-      )}
-    </div>
-  );
+            {searchQuery && (
+              <p className="text-sm text-gray-400">
+                {t("tryDifferentSearch")}
+              </p>
+            )}
+          </motion.div>
+        )}
+      </div>
+    );
+  };
 
   return (
     <Dialog open={openDownloadDialog} onOpenChange={setOpenDownloadDialog}>
