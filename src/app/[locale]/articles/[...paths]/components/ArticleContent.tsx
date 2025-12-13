@@ -170,11 +170,12 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
   const wordCount = article.body.split(/\s+/).length;
   const readingTime = Math.ceil(wordCount / 200);
 
-  if (!isClient) return <Skeleton height={400} containerClassName="min-h-screen bg-background" />;
+  // No longer returning skeleton - SSR content is rendered by ArticleBodyServer
+  // This component hydrates on client side
 
   return (
     <div
-      className={`min-h-screen ${isDarkMode ? "bg-muted text-foreground" : "bg-muted text-foreground"
+      className={`client-article-loaded min-h-screen ${isDarkMode ? "bg-muted text-foreground" : "bg-muted text-foreground"
         }`}
     >
       <div className="fixed top-0 left-0 w-full h-1 bg-muted z-50">

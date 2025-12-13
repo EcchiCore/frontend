@@ -2,8 +2,10 @@
 
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
+import { Suspense } from 'react';
 import Navbar from './../../components/Navbar';
 import ArticleContent from './components/ArticleContent';
+import ArticleBodyServer from './components/ArticleBodyServer';
 import GTMArticleTracker from './components/GTMArticleTracker';
 import Script from 'next/script';
 import {
@@ -168,12 +170,20 @@ export default async function ArticlePage(props: ArticlePageProps) {
         authorUsername={originalArticle.author.name}
       />
 
-      <ArticleContent
-        article={originalArticle}
-        slug={slug}
-        articleId={articleId}
-        downloads={downloads || []}
-      />
+      {/* SSR Content: Rendered on server for SEO - Google will index this */}
+      <div className="ssr-article-content">
+        <ArticleBodyServer article={originalArticle} />
+      </div>
+
+      {/* Client Content: Hydrates after JS loads - replaces SSR content */}
+      <Suspense fallback={null}>
+        <ArticleContent
+          article={originalArticle}
+          slug={slug}
+          articleId={articleId}
+          downloads={downloads || []}
+        />
+      </Suspense>
     </>
   );
 }

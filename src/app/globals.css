@@ -395,3 +395,34 @@ html[data-event-theme="christmas"].dark body {
     white-space: nowrap;
   }
 }
+
+/* SSR Article Content Visibility Management
+ * By default, SSR content is visible for crawlers/bots
+ * When JS loads, client content takes over */
+.ssr-article-content {
+  /* Default: visible for SSR (Google can see this) */
+  display: block;
+}
+
+/* When client content is rendered, hide SSR fallback */
+.ssr-article-content:has(+ .client-article-loaded) {
+  display: none;
+}
+
+/* Alternative approach using sibling selector */
+.client-article-loaded~.ssr-article-content,
+.client-article-loaded+.ssr-article-content {
+  display: none;
+}
+
+/* Article SSR content styling */
+.article-ssr-content {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+/* Hide SSR content when client is active via data attribute */
+[data-ssr-hidden="true"] .ssr-article-content {
+  display: none;
+}
