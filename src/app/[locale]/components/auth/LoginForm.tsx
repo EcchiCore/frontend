@@ -10,6 +10,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { useTranslations } from 'next-intl';
 import axios from "axios";
 import Cookies from 'js-cookie';
+import { supabase } from "@/lib/supabaseClient";
 
 export function LoginForm({ onSwitch }: { onSwitch: () => void }) {
   const t = useTranslations('Login');
@@ -23,9 +24,24 @@ export function LoginForm({ onSwitch }: { onSwitch: () => void }) {
     setLoading(true);
 
     try {
+      // 1. Supabase Login
+      const { data, error: supabaseError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (supabaseError) {
+        throw supabaseError;
+      }
+
+      if (!data.session?.access_token) {
+        throw new Error("No access token from Supabase");
+      }
+
+      // 2. Exchange token with backend
       const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/users/login`,
-        { user: { email, password } }
+        `${process.env.NEXT_PUBLIC_API_URL}/api/users/login-supabase`,
+        { accessToken: data.session.access_token }
       );
 
       if (response.data.user?.token) {
@@ -42,6 +58,9 @@ export function LoginForm({ onSwitch }: { onSwitch: () => void }) {
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
         toast.error(error.response?.data?.message || t('invalidCredentialsMessage'));
+      } else if (error instanceof Error) {
+        // Handle Supabase or generic errors
+        toast.error(error.message || t('unexpectedErrorMessage'));
       } else {
         toast.error(t('unexpectedErrorMessage'));
       }
