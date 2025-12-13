@@ -36,7 +36,7 @@ const NOTIFICATIONS_LIMIT = 10;
 const INITIAL_POLLING_INTERVAL = 5 * 60 * 1000; // 5 minutes
 const MAX_POLLING_INTERVAL = 60 * 60 * 1000; // 1 hour
 const POLLING_BACKOFF_FACTOR = 1.5;
-const IDLE_TIMEOUT = 10 * 60 * 1000; // 10 minutes (user considered idle)
+const IDLE_TIMEOUT = 10 * 60 * 1000; // 10 minutes
 
 export default function NotificationDropdown({ isMobile = false }: NotificationDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -47,11 +47,11 @@ export default function NotificationDropdown({ isMobile = false }: NotificationD
   const [isMarkingAsRead, setIsMarkingAsRead] = useState<number | null>(null);
   const [isMarkingAllAsRead, setIsMarkingAllAsRead] = useState(false);
 
-  // Polling & Activity Tracking
-  const [pollingInterval, setPollingInterval] = useState(INITIAL_POLLING_INTERVAL);
+  // Refs for polling (no re-renders)
+  const pollingIntervalRef = useRef(INITIAL_POLLING_INTERVAL);
   const lastActivityRef = useRef(Date.now());
-  const pollingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const isIdleRef = useRef(false);
+  const isFetchingRef = useRef(false);
+  const timeoutIdRef = useRef<NodeJS.Timeout | null>(null);
 
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { socket } = useSocket();
@@ -60,35 +60,28 @@ export default function NotificationDropdown({ isMobile = false }: NotificationD
     const token = Cookies.get("token");
     if (!token) throw new Error("No token");
     return {
-      "Accept": "application/json",
+      Accept: "application/json",
       "Content-Type": "application/json",
-      "Authorization": `Bearer ${token}`,
+      Authorization: `Bearer ${token}`,
     };
   }, []);
 
-  // Track User Activity to reset idle state
+  // Track user activity
   useEffect(() => {
     const handleActivity = () => {
       lastActivityRef.current = Date.now();
-      if (isIdleRef.current) {
-        isIdleRef.current = false;
-      }
     };
-
     window.addEventListener("mousemove", handleActivity);
     window.addEventListener("keydown", handleActivity);
     window.addEventListener("click", handleActivity);
-    window.addEventListener("scroll", handleActivity);
-
     return () => {
       window.removeEventListener("mousemove", handleActivity);
       window.removeEventListener("keydown", handleActivity);
       window.removeEventListener("click", handleActivity);
-      window.removeEventListener("scroll", handleActivity);
     };
   }, []);
 
-  // Click outside → Close dropdown
+  // Click outside → close dropdown
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
@@ -99,83 +92,100 @@ export default function NotificationDropdown({ isMobile = false }: NotificationD
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Fetch Notifications
-  const fetchNotifications = useCallback(async (isAutoPoll = false) => {
-    if (loading && !isAutoPoll) return;
+  // Fetch notifications (stable callback, uses refs)
+  const fetchNotificationsInternal = useCallback(
+    async (showLoading: boolean) => {
+      if (isFetchingRef.current) return;
+      try {
+        isFetchingRef.current = true;
+        if (showLoading) setLoading(true);
+        setError(null);
 
-    try {
-      if (!isAutoPoll) setLoading(true);
-      setError(null);
+        const headers = getAuthHeaders();
+        const res = await fetch(`${API_BASE_URL}/notifications?take=${NOTIFICATIONS_LIMIT}`, { headers });
 
-      const headers = getAuthHeaders();
-      const res = await fetch(`${API_BASE_URL}/notifications?take=${NOTIFICATIONS_LIMIT}`, { headers });
-
-      if (!res.ok) {
-        if (res.status === 401) {
-          Cookies.remove("token");
-          if (!isAutoPoll) window.location.href = "/login";
-          return;
+        if (!res.ok) {
+          if (res.status === 401) {
+            Cookies.remove("token");
+            if (showLoading) window.location.href = "/login";
+            return;
+          }
+          throw new Error(`HTTP ${res.status}`);
         }
-        throw new Error(`HTTP ${res.status}`);
+
+        const data: NotificationResponse = await res.json();
+        setNotifications(data.notifications || []);
+        setUnreadCount(data.unreadCount || 0);
+      } catch (err) {
+        console.error("Fetch notifications failed:", err);
+        if (showLoading) setError("โหลดแจ้งเตือนล้มเหลว");
+      } finally {
+        isFetchingRef.current = false;
+        if (showLoading) setLoading(false);
       }
+    },
+    [getAuthHeaders]
+  );
 
-      const data: NotificationResponse = await res.json();
-      setNotifications(data.notifications || []);
-      setUnreadCount(data.unreadCount || 0);
-    } catch (err) {
-      console.error("Fetch notifications failed:", err);
-      if (!isAutoPoll) setError("โหลดแจ้งเตือนล้มเหลว");
-    } finally {
-      if (!isAutoPoll) setLoading(false);
-    }
-  }, [getAuthHeaders, loading]);
-
-  // Adaptive Polling Logic
+  // Polling loop (runs once on mount, uses refs to avoid re-init)
   useEffect(() => {
+    let isMounted = true;
+
     const scheduleNextPoll = () => {
-      const timeSinceLastActivity = Date.now() - lastActivityRef.current;
-      isIdleRef.current = timeSinceLastActivity > IDLE_TIMEOUT;
+      if (!isMounted) return;
 
-      let nextInterval = pollingInterval;
+      const delay = pollingIntervalRef.current;
 
-      if (isIdleRef.current) {
-        nextInterval = MAX_POLLING_INTERVAL;
-      }
+      timeoutIdRef.current = setTimeout(async () => {
+        if (!isMounted) return;
 
-      pollingTimeoutRef.current = setTimeout(async () => {
-        await fetchNotifications(true);
+        // Check idle
+        const timeSinceLastActivity = Date.now() - lastActivityRef.current;
+        const isIdle = timeSinceLastActivity > IDLE_TIMEOUT;
 
-        setPollingInterval((prev) => {
-          const newInterval = Math.min(prev * POLLING_BACKOFF_FACTOR, MAX_POLLING_INTERVAL);
-          return newInterval;
-        });
+        if (isIdle) {
+          pollingIntervalRef.current = MAX_POLLING_INTERVAL;
+        }
 
+        // Fetch (background, no loading spinner)
+        await fetchNotificationsInternal(false);
+
+        // Backoff (only if not idle, as idle already maxed out)
+        if (!isIdle) {
+          pollingIntervalRef.current = Math.min(
+            pollingIntervalRef.current * POLLING_BACKOFF_FACTOR,
+            MAX_POLLING_INTERVAL
+          );
+        }
+
+        // Schedule next
         scheduleNextPoll();
-      }, pollingInterval);
+      }, delay);
     };
 
     scheduleNextPoll();
 
     return () => {
-      if (pollingTimeoutRef.current) clearTimeout(pollingTimeoutRef.current);
+      isMounted = false;
+      if (timeoutIdRef.current) clearTimeout(timeoutIdRef.current);
     };
-  }, [pollingInterval, fetchNotifications]);
+  }, [fetchNotificationsInternal]);
 
-  // Reset polling interval when dropdown is opened
+  // Reset polling on dropdown open
   useEffect(() => {
     if (isOpen) {
-      fetchNotifications();
-      setPollingInterval(INITIAL_POLLING_INTERVAL);
+      fetchNotificationsInternal(true);
+      pollingIntervalRef.current = INITIAL_POLLING_INTERVAL;
       lastActivityRef.current = Date.now();
     }
-  }, [isOpen, fetchNotifications]);
+  }, [isOpen, fetchNotificationsInternal]);
 
-  // Initial Fetch on mount
+  // Initial fetch
   useEffect(() => {
-    fetchNotifications();
-  }, [fetchNotifications]);
+    fetchNotificationsInternal(true);
+  }, [fetchNotificationsInternal]);
 
-  // Real-time from WebSocket
+  // WebSocket realtime
   useEffect(() => {
     if (!socket) return;
 
@@ -202,7 +212,7 @@ export default function NotificationDropdown({ isMobile = false }: NotificationD
     };
   }, [socket]);
 
-  // Mark as Read
+  // Actions
   const markAsRead = async (id: number) => {
     if (isMarkingAsRead === id) return;
     try {
@@ -210,14 +220,11 @@ export default function NotificationDropdown({ isMobile = false }: NotificationD
       const prevNotifs = [...notifications];
       const prevCount = unreadCount;
 
-      setNotifications((prev) => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
+      setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, isRead: true } : n)));
       setUnreadCount((c) => Math.max(0, c - 1));
 
       const headers = getAuthHeaders();
-      const res = await fetch(`${API_BASE_URL}/notifications/${id}/read`, {
-        method: "PATCH",
-        headers,
-      });
+      const res = await fetch(`${API_BASE_URL}/notifications/${id}/read`, { method: "PATCH", headers });
 
       if (!res.ok) {
         setNotifications(prevNotifs);
@@ -231,25 +238,21 @@ export default function NotificationDropdown({ isMobile = false }: NotificationD
     }
   };
 
-  // Mark All as Read
   const markAllAsRead = async () => {
     if (isMarkingAllAsRead || unreadCount === 0) return;
     try {
       setIsMarkingAllAsRead(true);
       const prevNotifs = [...notifications];
 
-      setNotifications((prev) => prev.map(n => ({ ...n, isRead: true })));
+      setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
       setUnreadCount(0);
 
       const headers = getAuthHeaders();
-      const res = await fetch(`${API_BASE_URL}/notifications/read-all`, {
-        method: "PATCH",
-        headers,
-      });
+      const res = await fetch(`${API_BASE_URL}/notifications/read-all`, { method: "PATCH", headers });
 
       if (!res.ok) {
         setNotifications(prevNotifs);
-        setUnreadCount(prevNotifs.filter(n => !n.isRead).length);
+        setUnreadCount(prevNotifs.filter((n) => !n.isRead).length);
       }
     } catch (err) {
       console.error("Mark all as read failed:", err);
@@ -259,19 +262,15 @@ export default function NotificationDropdown({ isMobile = false }: NotificationD
     }
   };
 
-  // Delete Notification
   const deleteNotification = async (id: number) => {
     try {
       const headers = getAuthHeaders();
-      const res = await fetch(`${API_BASE_URL}/notifications/${id}`, {
-        method: "DELETE",
-        headers,
-      });
+      const res = await fetch(`${API_BASE_URL}/notifications/${id}`, { method: "DELETE", headers });
 
       if (res.ok) {
-        setNotifications((prev) => prev.filter(n => n.id !== id));
+        setNotifications((prev) => prev.filter((n) => n.id !== id));
         setUnreadCount((prev) => {
-          const notif = notifications.find(n => n.id === id);
+          const notif = notifications.find((n) => n.id === id);
           return notif && !notif.isRead ? Math.max(0, prev - 1) : prev;
         });
       }
@@ -297,26 +296,30 @@ export default function NotificationDropdown({ isMobile = false }: NotificationD
 
   const getTypeInfo = (type: string) => {
     switch (type) {
-      case "MODERATION_UPDATE": return { variant: "secondary" as const, label: "อัปเดตการตรวจสอบ" };
-      case "WARNING": return { variant: "outline" as const, label: "คำเตือน" };
-      case "ERROR": return { variant: "destructive" as const, label: "ข้อผิดพลาด" };
-      case "SUCCESS": return { variant: "secondary" as const, label: "สำเร็จ" };
-      default: return { variant: "default" as const, label: "ข้อมูล" };
+      case "MODERATION_UPDATE":
+        return { variant: "secondary" as const, label: "อัปเดตการตรวจสอบ" };
+      case "WARNING":
+        return { variant: "outline" as const, label: "คำเตือน" };
+      case "ERROR":
+        return { variant: "destructive" as const, label: "ข้อผิดพลาด" };
+      case "SUCCESS":
+        return { variant: "secondary" as const, label: "สำเร็จ" };
+      default:
+        return { variant: "default" as const, label: "ข้อมูล" };
     }
   };
 
   return (
-    <div className={`relative ${isMobile ? 'mr-2' : 'ml-2'}`} ref={dropdownRef}>
+    <div className={`relative ${isMobile ? "mr-2" : "ml-2"}`} ref={dropdownRef}>
       <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
         <DropdownMenuTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="relative hover:scale-110 transition-transform"
-          >
+          <Button variant="ghost" size="icon" className="relative hover:scale-110 transition-transform">
             <Bell className="h-5 w-5" />
             {unreadCount > 0 && (
-              <Badge variant="destructive" className="absolute -top-1 -right-1 h-5 w-5 p-0 text-[10px] animate-pulse">
+              <Badge
+                variant="destructive"
+                className="absolute -top-1 -right-1 h-5 w-5 p-0 text-[10px] animate-pulse"
+              >
                 {unreadCount > 99 ? "99+" : unreadCount}
               </Badge>
             )}
@@ -334,15 +337,18 @@ export default function NotificationDropdown({ isMobile = false }: NotificationD
                     {isMarkingAllAsRead ? <RefreshCw className="h-3 w-3 animate-spin" /> : "อ่านทั้งหมด"}
                   </Button>
                 )}
-                <Button variant="ghost" size="icon" onClick={() => fetchNotifications(false)} disabled={loading}>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => fetchNotificationsInternal(true)}
+                  disabled={loading}
+                >
                   <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
                 </Button>
               </div>
             </div>
             {unreadCount > 0 && (
-              <p className="text-xs text-muted-foreground mt-1">
-                มีแจ้งเตือนใหม่ {unreadCount} รายการ
-              </p>
+              <p className="text-xs text-muted-foreground mt-1">มีแจ้งเตือนใหม่ {unreadCount} รายการ</p>
             )}
           </div>
 
@@ -373,7 +379,8 @@ export default function NotificationDropdown({ isMobile = false }: NotificationD
                 return (
                   <div
                     key={n.id}
-                    className={`p-3 border-b last:border-b-0 cursor-pointer transition-colors ${!n.isRead ? "bg-accent/50" : "hover:bg-accent/30"}`}
+                    className={`p-3 border-b last:border-b-0 cursor-pointer transition-colors ${!n.isRead ? "bg-accent/50" : "hover:bg-accent/30"
+                      }`}
                     onClick={() => !n.isRead && markAsRead(n.id)}
                   >
                     <div className="flex items-start gap-3">
@@ -381,14 +388,19 @@ export default function NotificationDropdown({ isMobile = false }: NotificationD
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between gap-2">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <Badge variant={variant} className="text-xs">{label}</Badge>
+                            <Badge variant={variant} className="text-xs">
+                              {label}
+                            </Badge>
                             <span className="text-xs text-muted-foreground">{formatDate(n.createdAt)}</span>
                           </div>
                           <Button
                             variant="ghost"
                             size="icon"
                             className="h-7 w-7 opacity-0 group-hover:opacity-100"
-                            onClick={(e) => { e.stopPropagation(); deleteNotification(n.id); }}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              deleteNotification(n.id);
+                            }}
                           >
                             <Trash2 className="h-3 w-3" />
                           </Button>
@@ -410,7 +422,7 @@ export default function NotificationDropdown({ isMobile = false }: NotificationD
           {/* Footer */}
           {notifications.length > 0 && (
             <div className="p-3 border-t text-center">
-              <Button variant="ghost" size="sm" onClick={() => window.location.href = "/notifications"}>
+              <Button variant="ghost" size="sm" onClick={() => (window.location.href = "/notifications")}>
                 ดูทั้งหมด →
               </Button>
             </div>
