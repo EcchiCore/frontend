@@ -131,14 +131,34 @@ export async function fetchArticles(params: Record<string, string | string[] | u
     throw new Error(`API error ${res.status} for URL: https://api.chanomhub.online/api/graphql`);
   }
 
-  const { data, errors } = await res.json();
+  const responseText = await res.text();
+  let data, errors;
 
-  if (errors) {
-    console.error("GraphQL Errors:", errors);
-    throw new Error("GraphQL query failed");
+  try {
+    const json = JSON.parse(responseText);
+    data = json.data;
+    errors = json.errors;
+
+    if (errors) {
+      console.error("=== GraphQL Errors Detail ===");
+      console.error("Full Response:", responseText);
+      console.error("Parsed Errors:", JSON.stringify(errors, null, 2));
+      errors.forEach((err: any, idx: number) => {
+        console.error(`Error ${idx + 1}:`, {
+          message: err.message,
+          path: err.path,
+          locations: err.locations,
+          extensions: err.extensions,
+        });
+      });
+      console.error("=== End GraphQL Errors ===");
+    }
+  } catch (parseError) {
+    console.error("Failed to parse GraphQL response:", responseText);
+    throw new Error("Invalid JSON response from GraphQL");
   }
 
-  const allItems: Article[] = data.articles ?? [];
+  const allItems: Article[] = data?.articles ?? [];
 
   // Check if there's a next page by seeing if we got more items than requested
   const hasNextPage = allItems.length > pageSize;
@@ -285,7 +305,7 @@ export async function fetchArticle(slug: string): Promise<Article | null> {
       "cache-control": "no-cache",
       "content-type": "application/json",
       "pragma": "no-cache",
-      "sec-ch-ua": "\"Brave\";v=\"141\", \"Not?A_Brand\";v=\"8\", \"Chromium\";v=\"141\"",      "sec-ch-ua-mobile": "?0",
+      "sec-ch-ua": "\"Brave\";v=\"141\", \"Not?A_Brand\";v=\"8\", \"Chromium\";v=\"141\"", "sec-ch-ua-mobile": "?0",
       "sec-ch-ua-platform": "\"Linux\"",
       "sec-fetch-dest": "empty",
       "sec-fetch-mode": "cors",
