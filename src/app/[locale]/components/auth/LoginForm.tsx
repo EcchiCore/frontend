@@ -1,5 +1,5 @@
 'use client';
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import { Button } from "@/components/ui/button";
@@ -63,7 +63,7 @@ export function LoginForm({ onSwitch }: { onSwitch: () => void }) {
   };
 
   // Check for Supabase session on mount (handling redirect from OAuth)
-  useState(() => {
+  useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
         exchangeSupabaseToken(session);
@@ -79,7 +79,7 @@ export function LoginForm({ onSwitch }: { onSwitch: () => void }) {
     });
 
     return () => subscription.unsubscribe();
-  });
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
