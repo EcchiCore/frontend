@@ -33,8 +33,10 @@ interface NotificationDropdownProps {
 
 const API_BASE_URL = `${process.env.NEXT_PUBLIC_API_URL}/api`;
 const NOTIFICATIONS_LIMIT = 10;
-
-
+const INITIAL_POLLING_INTERVAL = 5 * 60 * 1000; // 5 minutes
+const MAX_POLLING_INTERVAL = 60 * 60 * 1000; // 1 hour
+const POLLING_BACKOFF_FACTOR = 1.5;
+const IDLE_TIMEOUT = 10 * 60 * 1000; // 10 minutes (user considered idle)
 
 export default function NotificationDropdown({ isMobile = false }: NotificationDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -44,6 +46,13 @@ export default function NotificationDropdown({ isMobile = false }: NotificationD
   const [error, setError] = useState<string | null>(null);
   const [isMarkingAsRead, setIsMarkingAsRead] = useState<number | null>(null);
   const [isMarkingAllAsRead, setIsMarkingAllAsRead] = useState(false);
+
+  // Polling & Activity Tracking
+  const [pollingInterval, setPollingInterval] = useState(INITIAL_POLLING_INTERVAL);
+  const lastActivityRef = useRef(Date.now());
+  const pollingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const isIdleRef = useRef(false);
+
   const dropdownRef = useRef<HTMLDivElement>(null);
   const { socket } = useSocket();
 
@@ -57,7 +66,29 @@ export default function NotificationDropdown({ isMobile = false }: NotificationD
     };
   }, []);
 
-  // Click outside → ปิด dropdown
+  // Track User Activity to reset idle state
+  useEffect(() => {
+    const handleActivity = () => {
+      lastActivityRef.current = Date.now();
+      if (isIdleRef.current) {
+        isIdleRef.current = false;
+      }
+    };
+
+    window.addEventListener("mousemove", handleActivity);
+    window.addEventListener("keydown", handleActivity);
+    window.addEventListener("click", handleActivity);
+    window.addEventListener("scroll", handleActivity);
+
+    return () => {
+      window.removeEventListener("mousemove", handleActivity);
+      window.removeEventListener("keydown", handleActivity);
+      window.removeEventListener("click", handleActivity);
+      window.removeEventListener("scroll", handleActivity);
+    };
+  }, []);
+
+  // Click outside → Close dropdown
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
@@ -68,11 +99,12 @@ export default function NotificationDropdown({ isMobile = false }: NotificationD
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // ดึงข้อมูลแจ้งเตือน
-  const fetchNotifications = useCallback(async () => {
-    if (loading) return;
+  // Fetch Notifications
+  const fetchNotifications = useCallback(async (isAutoPoll = false) => {
+    if (loading && !isAutoPoll) return;
+
     try {
-      setLoading(true);
+      if (!isAutoPoll) setLoading(true);
       setError(null);
 
       const headers = getAuthHeaders();
@@ -81,7 +113,7 @@ export default function NotificationDropdown({ isMobile = false }: NotificationD
       if (!res.ok) {
         if (res.status === 401) {
           Cookies.remove("token");
-          window.location.href = "/login";
+          if (!isAutoPoll) window.location.href = "/login";
           return;
         }
         throw new Error(`HTTP ${res.status}`);
@@ -92,24 +124,58 @@ export default function NotificationDropdown({ isMobile = false }: NotificationD
       setUnreadCount(data.unreadCount || 0);
     } catch (err) {
       console.error("Fetch notifications failed:", err);
-      setError("โหลดแจ้งเตือนล้มเหลว");
+      if (!isAutoPoll) setError("โหลดแจ้งเตือนล้มเหลว");
     } finally {
-      setLoading(false);
+      if (!isAutoPoll) setLoading(false);
     }
   }, [getAuthHeaders, loading]);
 
-  // ดึงครั้งแรก + ดึงใหม่ทุกครั้งที่เปิด dropdown
+  // Adaptive Polling Logic
   useEffect(() => {
-    fetchNotifications();
-  }, [fetchNotifications]); // ครั้งแรกตอน mount
+    const scheduleNextPoll = () => {
+      const timeSinceLastActivity = Date.now() - lastActivityRef.current;
+      isIdleRef.current = timeSinceLastActivity > IDLE_TIMEOUT;
 
+      let nextInterval = pollingInterval;
+
+      if (isIdleRef.current) {
+        nextInterval = MAX_POLLING_INTERVAL;
+      }
+
+      pollingTimeoutRef.current = setTimeout(async () => {
+        await fetchNotifications(true);
+
+        setPollingInterval((prev) => {
+          const newInterval = Math.min(prev * POLLING_BACKOFF_FACTOR, MAX_POLLING_INTERVAL);
+          return newInterval;
+        });
+
+        scheduleNextPoll();
+      }, pollingInterval);
+    };
+
+    scheduleNextPoll();
+
+    return () => {
+      if (pollingTimeoutRef.current) clearTimeout(pollingTimeoutRef.current);
+    };
+  }, [pollingInterval, fetchNotifications]);
+
+  // Reset polling interval when dropdown is opened
   useEffect(() => {
     if (isOpen) {
-      fetchNotifications(); // ดึงข้อมูลใหม่ทุกครั้งที่เปิด
+      fetchNotifications();
+      setPollingInterval(INITIAL_POLLING_INTERVAL);
+      lastActivityRef.current = Date.now();
     }
   }, [isOpen, fetchNotifications]);
 
-  // Real-time จาก WebSocket
+  // Initial Fetch on mount
+  useEffect(() => {
+    fetchNotifications();
+  }, [fetchNotifications]);
+
+  // Real-time from WebSocket
   useEffect(() => {
     if (!socket) return;
 
@@ -136,7 +202,7 @@ export default function NotificationDropdown({ isMobile = false }: NotificationD
     };
   }, [socket]);
 
-  // อ่าน 1 รายการ
+  // Mark as Read
   const markAsRead = async (id: number) => {
     if (isMarkingAsRead === id) return;
     try {
@@ -165,7 +231,7 @@ export default function NotificationDropdown({ isMobile = false }: NotificationD
     }
   };
 
-  // อ่านทั้งหมด
+  // Mark All as Read
   const markAllAsRead = async () => {
     if (isMarkingAllAsRead || unreadCount === 0) return;
     try {
@@ -193,7 +259,7 @@ export default function NotificationDropdown({ isMobile = false }: NotificationD
     }
   };
 
-  // ลบ
+  // Delete Notification
   const deleteNotification = async (id: number) => {
     try {
       const headers = getAuthHeaders();
@@ -268,7 +334,7 @@ export default function NotificationDropdown({ isMobile = false }: NotificationD
                     {isMarkingAllAsRead ? <RefreshCw className="h-3 w-3 animate-spin" /> : "อ่านทั้งหมด"}
                   </Button>
                 )}
-                <Button variant="ghost" size="icon" onClick={fetchNotifications} disabled={loading}>
+                <Button variant="ghost" size="icon" onClick={() => fetchNotifications(false)} disabled={loading}>
                   <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
                 </Button>
               </div>
