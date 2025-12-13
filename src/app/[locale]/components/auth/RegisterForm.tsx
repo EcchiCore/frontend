@@ -72,11 +72,29 @@ export function RegisterForm({ onSwitch }: { onSwitch: () => void }) {
   };
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        exchangeSupabaseToken(session);
+    const handleSession = async () => {
+      // Check if we have a hash with access_token (Implicit Grant)
+      if (window.location.hash && window.location.hash.includes('access_token')) {
+        try {
+          const { data: { session }, error } = await supabase.auth.getSession();
+          if (session) {
+            exchangeSupabaseToken(session);
+            window.history.replaceState(null, '', window.location.pathname);
+            return;
+          }
+        } catch (e) {
+          console.error("Error processing hash session:", e);
+        }
       }
-    });
+
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        if (session) {
+          exchangeSupabaseToken(session);
+        }
+      });
+    };
+
+    handleSession();
 
     const {
       data: { subscription },
