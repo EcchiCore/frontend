@@ -12,16 +12,49 @@ interface ArticleBodyServerProps {
     article: Article;
 }
 
-// Simple HTML sanitizer for SSR - removes script tags and event handlers
+// Comprehensive HTML sanitizer for SSR - removes all JavaScript and unnecessary attributes
+// This ensures Google sees clean HTML without JS artifacts
 function sanitizeHtml(html: string): string {
     if (!html) return "";
 
-    // Remove script tags
-    let sanitized = html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "");
+    let sanitized = html;
 
-    // Remove event handlers
+    // 1. Remove script tags completely
+    sanitized = sanitized.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "");
+
+    // 2. Remove noscript tags
+    sanitized = sanitized.replace(/<noscript\b[^<]*(?:(?!<\/noscript>)<[^<]*)*<\/noscript>/gi, "");
+
+    // 3. Remove all event handlers (onclick, onload, onerror, etc.)
     sanitized = sanitized.replace(/\s+on\w+\s*=\s*["'][^"']*["']/gi, "");
     sanitized = sanitized.replace(/\s+on\w+\s*=\s*[^\s>]*/gi, "");
+
+    // 4. Remove javascript: URLs
+    sanitized = sanitized.replace(/href\s*=\s*["']javascript:[^"']*["']/gi, 'href="#"');
+    sanitized = sanitized.replace(/src\s*=\s*["']javascript:[^"']*["']/gi, "");
+
+    // 5. Remove data-* attributes (often contain JSON/state that looks like JS)
+    sanitized = sanitized.replace(/\s+data-[a-z0-9-]+\s*=\s*["'][^"']*["']/gi, "");
+    sanitized = sanitized.replace(/\s+data-[a-z0-9-]+\s*=\s*[^\s>]*/gi, "");
+
+    // 6. Remove style attributes with potential JS (expression, behavior, etc.)
+    sanitized = sanitized.replace(/style\s*=\s*["'][^"']*expression\([^"']*["']/gi, "");
+    sanitized = sanitized.replace(/style\s*=\s*["'][^"']*behavior\s*:[^"']*["']/gi, "");
+    sanitized = sanitized.replace(/style\s*=\s*["'][^"']*javascript:[^"']*["']/gi, "");
+
+    // 7. Remove contenteditable attributes
+    sanitized = sanitized.replace(/\s+contenteditable\s*=\s*["'][^"']*["']/gi, "");
+    sanitized = sanitized.replace(/\s+contenteditable\s*=\s*[^\s>]*/gi, "");
+
+    // 8. Remove draggable, spellcheck and other interactive attributes
+    sanitized = sanitized.replace(/\s+(draggable|spellcheck|tabindex)\s*=\s*["'][^"']*["']/gi, "");
+
+    // 9. Remove empty paragraphs and excessive whitespace
+    sanitized = sanitized.replace(/<p>\s*<\/p>/gi, "");
+    sanitized = sanitized.replace(/<p>\s*<br\s*\/?>\s*<\/p>/gi, "");
+
+    // 10. Remove Tiptap/ProseMirror specific classes that contain "ProseMirror"
+    sanitized = sanitized.replace(/class\s*=\s*["'][^"']*ProseMirror[^"']*["']/gi, "");
 
     return sanitized;
 }
