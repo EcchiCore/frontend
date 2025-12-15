@@ -21,22 +21,27 @@ import { useAuthContext } from '../providers/AuthProvider';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
 // Custom Components
-import { ArticleModerationCard, ArticleWithRequests, ModerationRequest, EntityType, RequestStatus } from '../components/moderator/ArticleModerationCard';
+import {
+  ArticleModerationCard,
+  ArticleModerationGroup,
+  ModerationRequest,
+  EntityType,
+  RequestStatus
+} from '../components/moderator/ArticleModerationCard';
 import { BulkActionBar } from '../components/moderator/BulkActionBar';
 
 // API base URL
 const API_BASE_URL = 'https://api.chanomhub.online/api/graphql';
 
 interface Statistics {
-  pendingRequests: number;
-  needsRevisionRequests: number;
+  totalGroups: number;
+  totalRequests: number;
   articleRequests: number;
-  downloadLinkRequests: number;
-  officialSourceRequests: number;
+  downloadRequests: number;
+  officialRequests: number;
   commentRequests: number;
 }
 
@@ -44,7 +49,7 @@ export const ModerationPage: React.FC = () => {
   const { user, loading: authLoading, error: authError } = useAuthContext();
 
   // Data states
-  const [requests, setRequests] = useState<ModerationRequest[]>([]);
+  const [groups, setGroups] = useState<ArticleModerationGroup[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -56,7 +61,6 @@ export const ModerationPage: React.FC = () => {
   const [expandedArticle, setExpandedArticle] = useState<number | null>(null);
   const [selectedArticles, setSelectedArticles] = useState<Set<number>>(new Set());
   const [selectedRequests, setSelectedRequests] = useState<Set<number>>(new Set());
-  const [userRole, setUserRole] = useState<'MODERATOR' | 'ADMIN' | null>(null);
 
   // API call helper
   const fetchData = useCallback(async (query: string, variables: object = {}) => {
@@ -96,64 +100,54 @@ export const ModerationPage: React.FC = () => {
     }
   }, []);
 
-  // Load moderation requests
-  const loadRequests = useCallback(async () => {
+  // Load moderation groups using new API
+  const loadGroups = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
 
       const query = `
-        query GetModerationRequests($status: RequestStatus!) {
+        query GetArticleModerationGroups($status: RequestStatus!) {
           moderate {
-            moderationRequests(status: $status) {
-              id
-              entityId
-              entityType
-              status
-              requestNote
-              reviewNote
-              createdAt
-              updatedAt
-              requester {
+            articleModerationGroups(status: $status) {
+              article {
                 id
-                name
-                image
-              }
-              reviewer {
-                id
-                name
-                image
-              }
-              entityDetails {
-                ... on ArticleDetails {
-                  id
-                  title
-                  slug
-                  status
-                  description
-                  mainImage
-                  images { url }
-                  author { name, image }
-                }
-                ... on DownloadLinkDetails {
+                title
+                slug
+                mainImage
+                description
+                images { url }
+                author {
                   id
                   name
-                  url
-                  status
-                  articleId
+                  image
                 }
-                ... on OfficialDownloadSourceDetails {
+              }
+              requests {
+                id
+                entityId
+                entityType
+                status
+                requestNote
+                reviewNote
+                createdAt
+                requester {
                   id
                   name
-                  url
-                  status
-                  articleId
+                  image
                 }
-                ... on CommentDetails {
-                  id
-                  content
-                  status
-                  articleId
+                entityDetails {
+                  ... on DownloadLinkDetails {
+                    name
+                    url
+                  }
+                  ... on OfficialDownloadSourceDetails {
+                    name
+                    url
+                  }
+                  ... on CommentDetails {
+                    content
+                  }
                 }
               }
             }
@@ -166,27 +160,37 @@ export const ModerationPage: React.FC = () => {
         fetchData(query, { status: 'NEEDS_REVISION' }),
       ]);
 
-      if (pendingResult || needsRevisionResult) {
-        const combinedRequests = [
-          ...(pendingResult?.moderate?.moderationRequests || []),
-          ...(needsRevisionResult?.moderate?.moderationRequests || []),
-        ];
-        setRequests(combinedRequests);
-      }
+      // Merge results from both statuses
+      const pendingGroups = pendingResult?.moderate?.articleModerationGroups || [];
+      const revisionGroups = needsRevisionResult?.moderate?.articleModerationGroups || [];
+
+      // Merge groups by article ID
+      const groupMap = new Map<number, ArticleModerationGroup>();
+
+      [...pendingGroups, ...revisionGroups].forEach((group: ArticleModerationGroup) => {
+        const articleId = group.article.id;
+        if (groupMap.has(articleId)) {
+          // Merge requests
+          const existing = groupMap.get(articleId)!;
+          const existingIds = new Set(existing.requests.map(r => r.id));
+          group.requests.forEach(req => {
+            if (!existingIds.has(req.id)) {
+              existing.requests.push(req);
+            }
+          });
+        } else {
+          groupMap.set(articleId, { ...group });
+        }
+      });
+
+      setGroups(Array.from(groupMap.values()));
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Failed to load requests';
+      const message = err instanceof Error ? err.message : 'Failed to load';
       setError(message);
     } finally {
       setLoading(false);
     }
   }, [fetchData]);
-
-  // Check user role
-  useEffect(() => {
-    if (user?.rank) {
-      setUserRole(user.rank === 'ADMIN' ? 'ADMIN' : 'MODERATOR');
-    }
-  }, [user]);
 
   // Auto-dismiss messages
   useEffect(() => {
@@ -205,123 +209,50 @@ export const ModerationPage: React.FC = () => {
 
   // Initialize data
   useEffect(() => {
-    loadRequests();
-  }, [loadRequests]);
+    loadGroups();
+  }, [loadGroups]);
 
   // Calculate statistics
-  const stats: Statistics = useMemo(() => ({
-    pendingRequests: requests.filter(r => r.status === 'PENDING').length,
-    needsRevisionRequests: requests.filter(r => r.status === 'NEEDS_REVISION').length,
-    articleRequests: requests.filter(r => r.entityType === 'ARTICLE').length,
-    downloadLinkRequests: requests.filter(r => r.entityType === 'DOWNLOAD_LINK').length,
-    officialSourceRequests: requests.filter(r => r.entityType === 'OFFICIAL_DOWNLOAD_SOURCE').length,
-    commentRequests: requests.filter(r => r.entityType === 'COMMENT').length,
-  }), [requests]);
+  const stats: Statistics = useMemo(() => {
+    const allRequests = groups.flatMap(g => g.requests);
+    return {
+      totalGroups: groups.length,
+      totalRequests: allRequests.length,
+      articleRequests: allRequests.filter(r => r.entityType === 'ARTICLE').length,
+      downloadRequests: allRequests.filter(r => r.entityType === 'DOWNLOAD_LINK').length,
+      officialRequests: allRequests.filter(r => r.entityType === 'OFFICIAL_DOWNLOAD_SOURCE').length,
+      commentRequests: allRequests.filter(r => r.entityType === 'COMMENT').length,
+    };
+  }, [groups]);
 
-  // Group requests by article (for article-centric view)
-  const articlesWithRequests: ArticleWithRequests[] = useMemo(() => {
-    const articleMap = new Map<number, ArticleWithRequests>();
-
-    requests.forEach((request) => {
-      let articleId: number;
-      let articleTitle: string;
-      let articleSlug: string;
-      let articleDescription: string;
-      let mainImage: string | null = null;
-      let images: { url: string }[] = [];
-      let author: { name: string; image: string | null } | null = null;
-
-      if (request.entityType === 'ARTICLE' && request.entityDetails) {
-        articleId = request.entityDetails.id;
-        articleTitle = request.entityDetails.title || 'Untitled Article';
-        articleSlug = request.entityDetails.slug || '';
-        articleDescription = request.entityDetails.description || '';
-        mainImage = request.entityDetails.mainImage || null;
-        images = request.entityDetails.images || [];
-        author = request.entityDetails.author || null;
-      } else if (request.entityDetails?.articleId) {
-        articleId = request.entityDetails.articleId;
-        // For non-article entities, we need to find the article info from other requests
-        const articleRequest = requests.find(
-          r => r.entityType === 'ARTICLE' && r.entityDetails?.id === articleId
-        );
-        if (articleRequest?.entityDetails) {
-          articleTitle = articleRequest.entityDetails.title || 'Untitled Article';
-          articleSlug = articleRequest.entityDetails.slug || '';
-          articleDescription = articleRequest.entityDetails.description || '';
-          mainImage = articleRequest.entityDetails.mainImage || null;
-          images = articleRequest.entityDetails.images || [];
-          author = articleRequest.entityDetails.author || null;
-        } else {
-          articleTitle = `Article #${articleId}`;
-          articleSlug = '';
-          articleDescription = '';
-        }
-      } else {
-        // For entities without articleId, group by negative entityId to keep them separate
-        articleId = -request.entityId;
-        articleTitle = request.entityDetails?.name || request.entityDetails?.content?.substring(0, 30) || 'Unknown';
-        articleSlug = '';
-        articleDescription = '';
-      }
-
-      if (!articleMap.has(articleId)) {
-        articleMap.set(articleId, {
-          articleId,
-          articleTitle,
-          articleSlug,
-          articleDescription,
-          mainImage,
-          images,
-          author,
-          requests: [],
-          requester: request.requester,
-        });
-      }
-
-      const article = articleMap.get(articleId)!;
-      article.requests.push(request);
-
-      // Update article info if we have better data
-      if (request.entityType === 'ARTICLE' && request.entityDetails) {
-        article.mainImage = request.entityDetails.mainImage || article.mainImage;
-        article.images = request.entityDetails.images || article.images;
-        article.author = request.entityDetails.author || article.author;
-        article.articleDescription = request.entityDetails.description || article.articleDescription;
-      }
-    });
-
-    return Array.from(articleMap.values());
-  }, [requests]);
-
-  // Filter articles based on search and filter
-  const filteredArticles = useMemo(() => {
-    let filtered = articlesWithRequests;
+  // Filter groups based on search and filter
+  const filteredGroups = useMemo(() => {
+    let filtered = groups;
 
     // Filter by entity type
     if (activeFilter !== 'ALL') {
-      filtered = filtered.filter(article =>
-        article.requests.some(r => r.entityType === activeFilter)
+      filtered = filtered.filter(group =>
+        group.requests.some(r => r.entityType === activeFilter)
       );
     }
 
     // Filter by search term
     if (searchTerm) {
       const search = searchTerm.toLowerCase();
-      filtered = filtered.filter(article =>
-        article.articleTitle.toLowerCase().includes(search) ||
-        article.articleDescription.toLowerCase().includes(search) ||
-        article.requester.name.toLowerCase().includes(search)
+      filtered = filtered.filter(group =>
+        group.article.title.toLowerCase().includes(search) ||
+        group.article.slug.toLowerCase().includes(search) ||
+        group.requests.some(r => r.requester.name.toLowerCase().includes(search))
       );
     }
 
     return filtered;
-  }, [articlesWithRequests, activeFilter, searchTerm]);
+  }, [groups, activeFilter, searchTerm]);
 
   // Handle refresh
   const handleRefresh = async () => {
     setRefreshing(true);
-    await loadRequests();
+    await loadGroups();
     setRefreshing(false);
   };
 
@@ -358,10 +289,10 @@ export const ModerationPage: React.FC = () => {
 
   // Select all
   const handleSelectAll = () => {
-    if (selectedArticles.size === filteredArticles.length) {
+    if (selectedArticles.size === filteredGroups.length) {
       setSelectedArticles(new Set());
     } else {
-      setSelectedArticles(new Set(filteredArticles.map(a => a.articleId)));
+      setSelectedArticles(new Set(filteredGroups.map(g => g.article.id)));
     }
   };
 
@@ -392,10 +323,9 @@ export const ModerationPage: React.FC = () => {
       setLoading(true);
       await updateModerationStatus(requestId, 'APPROVED', reviewNote);
       setSuccess('Request approved successfully');
-      await loadRequests();
+      await loadGroups();
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Failed to approve';
-      setError(message);
+      setError(err instanceof Error ? err.message : 'Failed to approve');
     } finally {
       setLoading(false);
     }
@@ -407,10 +337,9 @@ export const ModerationPage: React.FC = () => {
       setLoading(true);
       await updateModerationStatus(requestId, 'REJECTED', reviewNote);
       setSuccess('Request rejected successfully');
-      await loadRequests();
+      await loadGroups();
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Failed to reject';
-      setError(message);
+      setError(err instanceof Error ? err.message : 'Failed to reject');
     } finally {
       setLoading(false);
     }
@@ -423,11 +352,10 @@ export const ModerationPage: React.FC = () => {
       for (const id of requestIds) {
         await updateModerationStatus(id, 'APPROVED', reviewNote);
       }
-      setSuccess(`${requestIds.length} requests approved successfully`);
-      await loadRequests();
+      setSuccess(`${requestIds.length} requests approved`);
+      await loadGroups();
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Failed to approve';
-      setError(message);
+      setError(err instanceof Error ? err.message : 'Failed to approve');
     } finally {
       setLoading(false);
     }
@@ -440,11 +368,10 @@ export const ModerationPage: React.FC = () => {
       for (const id of requestIds) {
         await updateModerationStatus(id, 'REJECTED', reviewNote);
       }
-      setSuccess(`${requestIds.length} requests rejected successfully`);
-      await loadRequests();
+      setSuccess(`${requestIds.length} requests rejected`);
+      await loadGroups();
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Failed to reject';
-      setError(message);
+      setError(err instanceof Error ? err.message : 'Failed to reject');
     } finally {
       setLoading(false);
     }
@@ -452,18 +379,18 @@ export const ModerationPage: React.FC = () => {
 
   // Bulk approve selected articles
   const handleApproveSelected = async () => {
-    const requestIds = filteredArticles
-      .filter(a => selectedArticles.has(a.articleId))
-      .flatMap(a => a.requests.map(r => r.id));
+    const requestIds = filteredGroups
+      .filter(g => selectedArticles.has(g.article.id))
+      .flatMap(g => g.requests.map(r => r.id));
     await handleApproveAll(requestIds, '');
     setSelectedArticles(new Set());
   };
 
   // Bulk reject selected articles
   const handleRejectSelected = async () => {
-    const requestIds = filteredArticles
-      .filter(a => selectedArticles.has(a.articleId))
-      .flatMap(a => a.requests.map(r => r.id));
+    const requestIds = filteredGroups
+      .filter(g => selectedArticles.has(g.article.id))
+      .flatMap(g => g.requests.map(r => r.id));
     await handleRejectAll(requestIds, '');
     setSelectedArticles(new Set());
   };
@@ -499,7 +426,7 @@ export const ModerationPage: React.FC = () => {
               Moderation Dashboard
             </h1>
             <p className="text-muted-foreground">
-              Article-centric review • {filteredArticles.length} articles with pending requests
+              {filteredGroups.length} articles • {stats.totalRequests} pending requests
             </p>
           </div>
           <Button
@@ -507,8 +434,6 @@ export const ModerationPage: React.FC = () => {
             size="icon"
             onClick={handleRefresh}
             disabled={refreshing}
-            title="Refresh"
-            className="bg-white/50 hover:bg-white/80 dark:bg-gray-800/50"
           >
             <RefreshCw className={`w-5 h-5 ${refreshing ? 'animate-spin' : ''}`} />
           </Button>
@@ -531,88 +456,18 @@ export const ModerationPage: React.FC = () => {
       {success && (
         <Alert className="border-green-200 bg-green-50 text-green-800 dark:border-green-800 dark:bg-green-950/20 dark:text-green-400">
           <Check className="w-4 h-4" />
-          <AlertDescription className="flex items-center justify-between">
-            {success}
-            <Button variant="ghost" size="sm" onClick={() => setSuccess(null)}>
-              <X className="w-4 h-4" />
-            </Button>
-          </AlertDescription>
+          <AlertDescription>{success}</AlertDescription>
         </Alert>
       )}
 
       {/* Statistics */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-        <Card className="bg-gradient-to-br from-yellow-50 to-amber-50 dark:from-yellow-950/20 dark:to-amber-950/20 border-yellow-200/50">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-medium text-yellow-600">Pending</p>
-                <p className="text-2xl font-bold text-yellow-900 dark:text-yellow-100">{stats.pendingRequests}</p>
-              </div>
-              <Clock className="h-5 w-5 text-yellow-600" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 border-blue-200/50">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-medium text-blue-600">Needs Revision</p>
-                <p className="text-2xl font-bold text-blue-900 dark:text-blue-100">{stats.needsRevisionRequests}</p>
-              </div>
-              <AlertTriangle className="h-5 w-5 text-blue-600" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-purple-50 to-violet-50 dark:from-purple-950/20 dark:to-violet-950/20 border-purple-200/50">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-medium text-purple-600">Articles</p>
-                <p className="text-2xl font-bold text-purple-900 dark:text-purple-100">{stats.articleRequests}</p>
-              </div>
-              <FileText className="h-5 w-5 text-purple-600" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 border-green-200/50">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-medium text-green-600">Downloads</p>
-                <p className="text-2xl font-bold text-green-900 dark:text-green-100">{stats.downloadLinkRequests}</p>
-              </div>
-              <Link className="h-5 w-5 text-green-600" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-orange-50 to-amber-50 dark:from-orange-950/20 dark:to-amber-950/20 border-orange-200/50">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-medium text-orange-600">Official</p>
-                <p className="text-2xl font-bold text-orange-900 dark:text-orange-100">{stats.officialSourceRequests}</p>
-              </div>
-              <ShoppingCart className="h-5 w-5 text-orange-600" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-pink-50 to-rose-50 dark:from-pink-950/20 dark:to-rose-950/20 border-pink-200/50">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs font-medium text-pink-600">Comments</p>
-                <p className="text-2xl font-bold text-pink-900 dark:text-pink-100">{stats.commentRequests}</p>
-              </div>
-              <MessageCircle className="h-5 w-5 text-pink-600" />
-            </div>
-          </CardContent>
-        </Card>
+        <StatCard icon={Clock} label="Articles" value={stats.totalGroups} color="yellow" />
+        <StatCard icon={AlertTriangle} label="Requests" value={stats.totalRequests} color="blue" />
+        <StatCard icon={FileText} label="Article" value={stats.articleRequests} color="purple" />
+        <StatCard icon={Link} label="Downloads" value={stats.downloadRequests} color="green" />
+        <StatCard icon={ShoppingCart} label="Official" value={stats.officialRequests} color="orange" />
+        <StatCard icon={MessageCircle} label="Comments" value={stats.commentRequests} color="pink" />
       </div>
 
       {/* Search & Filter */}
@@ -628,39 +483,39 @@ export const ModerationPage: React.FC = () => {
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
-                placeholder="Search articles, authors..."
+                placeholder="Search articles..."
                 className="pl-10"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
             <div className="flex flex-wrap gap-2">
-              {(['ALL', 'ARTICLE', 'DOWNLOAD_LINK', 'OFFICIAL_DOWNLOAD_SOURCE', 'COMMENT'] as const).map((filter) => (
-                <Button
-                  key={filter}
-                  variant={activeFilter === filter ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setActiveFilter(filter)}
-                  className={activeFilter === filter ? 'bg-purple-600 hover:bg-purple-700' : ''}
-                >
-                  {filter === 'ALL' && 'All'}
-                  {filter === 'ARTICLE' && <><FileText className="w-4 h-4 mr-1" /> Articles</>}
-                  {filter === 'DOWNLOAD_LINK' && <><Link className="w-4 h-4 mr-1" /> Downloads</>}
-                  {filter === 'OFFICIAL_DOWNLOAD_SOURCE' && <><ShoppingCart className="w-4 h-4 mr-1" /> Official</>}
-                  {filter === 'COMMENT' && <><MessageCircle className="w-4 h-4 mr-1" /> Comments</>}
-                </Button>
-              ))}
+              <FilterButton active={activeFilter === 'ALL'} onClick={() => setActiveFilter('ALL')}>
+                All
+              </FilterButton>
+              <FilterButton active={activeFilter === 'ARTICLE'} onClick={() => setActiveFilter('ARTICLE')}>
+                <FileText className="w-4 h-4" /> Articles
+              </FilterButton>
+              <FilterButton active={activeFilter === 'DOWNLOAD_LINK'} onClick={() => setActiveFilter('DOWNLOAD_LINK')}>
+                <Link className="w-4 h-4" /> Downloads
+              </FilterButton>
+              <FilterButton active={activeFilter === 'OFFICIAL_DOWNLOAD_SOURCE'} onClick={() => setActiveFilter('OFFICIAL_DOWNLOAD_SOURCE')}>
+                <ShoppingCart className="w-4 h-4" /> Official
+              </FilterButton>
+              <FilterButton active={activeFilter === 'COMMENT'} onClick={() => setActiveFilter('COMMENT')}>
+                <MessageCircle className="w-4 h-4" /> Comments
+              </FilterButton>
             </div>
           </div>
         </CardContent>
       </Card>
 
       {/* Bulk Action Bar */}
-      {filteredArticles.length > 0 && (
+      {filteredGroups.length > 0 && (
         <BulkActionBar
-          totalCount={filteredArticles.length}
+          totalCount={filteredGroups.length}
           selectedCount={selectedArticles.size}
-          isAllSelected={selectedArticles.size === filteredArticles.length && filteredArticles.length > 0}
+          isAllSelected={selectedArticles.size === filteredGroups.length && filteredGroups.length > 0}
           onSelectAll={handleSelectAll}
           onApproveSelected={handleApproveSelected}
           onRejectSelected={handleRejectSelected}
@@ -671,40 +526,31 @@ export const ModerationPage: React.FC = () => {
       {/* Loading State */}
       {loading && !refreshing && (
         <div className="flex justify-center py-12">
-          <div className="flex flex-col items-center gap-3">
-            <Loader2 className="h-8 w-8 animate-spin text-purple-600" />
-            <p className="text-sm text-muted-foreground">Loading moderation requests...</p>
-          </div>
+          <Loader2 className="h-8 w-8 animate-spin text-purple-600" />
         </div>
       )}
 
-      {/* Articles List */}
-      {!loading && filteredArticles.length === 0 && (
+      {/* Empty State */}
+      {!loading && filteredGroups.length === 0 && (
         <Card className="py-12">
           <CardContent className="flex flex-col items-center justify-center gap-3 text-center">
-            <div className="p-3 bg-gray-100 dark:bg-gray-800 rounded-full">
-              <FileText className="h-8 w-8 text-muted-foreground" />
-            </div>
+            <FileText className="h-8 w-8 text-muted-foreground" />
             <p className="font-medium text-muted-foreground">
-              {requests.length === 0 ? 'No moderation requests' : 'No results matching your search'}
+              {groups.length === 0 ? 'No pending requests' : 'No results matching your search'}
             </p>
-            {searchTerm && (
-              <Button variant="link" size="sm" onClick={() => setSearchTerm('')}>
-                Clear search
-              </Button>
-            )}
           </CardContent>
         </Card>
       )}
 
-      {!loading && filteredArticles.length > 0 && (
+      {/* Article Groups List */}
+      {!loading && filteredGroups.length > 0 && (
         <div className="space-y-3">
-          {filteredArticles.map((article) => (
+          {filteredGroups.map((group) => (
             <ArticleModerationCard
-              key={article.articleId}
-              article={article}
-              isSelected={selectedArticles.has(article.articleId)}
-              isExpanded={expandedArticle === article.articleId}
+              key={group.article.id}
+              group={group}
+              isSelected={selectedArticles.has(group.article.id)}
+              isExpanded={expandedArticle === group.article.id}
               selectedRequests={selectedRequests}
               onToggleSelect={toggleArticleSelect}
               onToggleExpand={toggleExpand}
@@ -721,5 +567,40 @@ export const ModerationPage: React.FC = () => {
     </div>
   );
 };
+
+// Helper components
+const StatCard = ({ icon: Icon, label, value, color }: {
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  value: number;
+  color: string;
+}) => (
+  <Card className={`bg-gradient-to-br from-${color}-50 to-${color}-50/50 dark:from-${color}-950/20 dark:to-${color}-950/10 border-${color}-200/50`}>
+    <CardContent className="p-4">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className={`text-xs font-medium text-${color}-600`}>{label}</p>
+          <p className={`text-2xl font-bold text-${color}-900 dark:text-${color}-100`}>{value}</p>
+        </div>
+        <Icon className={`h-5 w-5 text-${color}-600`} />
+      </div>
+    </CardContent>
+  </Card>
+);
+
+const FilterButton = ({ active, onClick, children }: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) => (
+  <Button
+    variant={active ? 'default' : 'outline'}
+    size="sm"
+    onClick={onClick}
+    className={`gap-1 ${active ? 'bg-purple-600 hover:bg-purple-700' : ''}`}
+  >
+    {children}
+  </Button>
+);
 
 export default ModerationPage;

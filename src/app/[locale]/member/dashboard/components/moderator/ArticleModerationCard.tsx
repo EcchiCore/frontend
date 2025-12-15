@@ -10,65 +10,55 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Textarea } from '@/components/ui/textarea';
 
-// Types
+// Types matching new backend API
 export type RequestStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'NEEDS_REVISION';
 export type EntityType = 'ARTICLE' | 'DOWNLOAD_LINK' | 'OFFICIAL_DOWNLOAD_SOURCE' | 'COMMENT';
 export type EntityStatus = 'DRAFT' | 'PUBLISHED' | 'ARCHIVED' | 'DELETED' | 'PENDING_REVIEW' | 'PENDING' | 'NEEDS_REVISION';
+
+// New API response types
+export interface ArticleInfo {
+    id: number;
+    title: string;
+    slug: string;
+    mainImage: string | null;
+    description?: string;
+    images?: { url: string }[];
+    author?: {
+        id: number;
+        name: string;
+        image: string | null;
+    };
+}
 
 export interface ModerationRequest {
     id: number;
     entityId: number;
     entityType: EntityType;
-    requesterId: number;
-    reviewerId: number | null;
     status: RequestStatus;
     requestNote: string;
     reviewNote: string | null;
     createdAt: string;
-    updatedAt: string;
     requester: {
         id: number;
         name: string;
         image: string | null;
     };
-    reviewer: {
-        id: number;
-        name: string;
-        image: string | null;
-    } | null;
     entityDetails: {
-        id: number;
-        title?: string;
-        slug?: string;
-        description?: string;
-        mainImage?: string | null;
-        images?: { url: string }[];
-        url?: string;
+        // For DOWNLOAD_LINK or OFFICIAL_DOWNLOAD_SOURCE
         name?: string;
+        url?: string;
+        // For COMMENT
         content?: string;
-        status: EntityStatus;
-        articleId?: number;
-        author?: {
-            name: string;
-            image: string | null;
-        };
     } | null;
 }
 
-export interface ArticleWithRequests {
-    articleId: number;
-    articleTitle: string;
-    articleSlug: string;
-    articleDescription: string;
-    mainImage: string | null;
-    images: { url: string }[];
-    author: { name: string; image: string | null } | null;
+export interface ArticleModerationGroup {
+    article: ArticleInfo;
     requests: ModerationRequest[];
-    requester: { id: number; name: string; image: string | null };
 }
 
 interface ArticleModerationCardProps {
-    article: ArticleWithRequests;
+    group: ArticleModerationGroup;
     isSelected: boolean;
     isExpanded: boolean;
     selectedRequests: Set<number>;
@@ -98,64 +88,40 @@ const EntityIcon = ({ type }: { type: EntityType }) => {
 };
 
 const EntityTypeBadge = ({ type }: { type: EntityType }) => {
-    const getVariant = () => {
-        switch (type) {
-            case 'ARTICLE': return 'default';
-            case 'DOWNLOAD_LINK': return 'secondary';
-            case 'OFFICIAL_DOWNLOAD_SOURCE': return 'outline';
-            case 'COMMENT': return 'destructive';
-            default: return 'secondary';
-        }
-    };
-
-    const getLabel = () => {
-        switch (type) {
-            case 'ARTICLE': return 'Article';
-            case 'DOWNLOAD_LINK': return 'Download';
-            case 'OFFICIAL_DOWNLOAD_SOURCE': return 'Official Source';
-            case 'COMMENT': return 'Comment';
-            default: return type;
-        }
-    };
+    const config = {
+        ARTICLE: { variant: 'default', label: 'Article' },
+        DOWNLOAD_LINK: { variant: 'secondary', label: 'Download' },
+        OFFICIAL_DOWNLOAD_SOURCE: { variant: 'outline', label: 'Official' },
+        COMMENT: { variant: 'destructive', label: 'Comment' },
+    }[type] || { variant: 'secondary', label: type };
 
     return (
-        <Badge variant={getVariant() as any} className="gap-1 text-xs">
+        <Badge variant={config.variant as 'default' | 'secondary' | 'outline' | 'destructive'} className="gap-1 text-xs">
             <EntityIcon type={type} />
-            {getLabel()}
+            {config.label}
         </Badge>
     );
 };
 
-const StatusBadge = ({ status }: { status: RequestStatus | EntityStatus }) => {
+const StatusBadge = ({ status }: { status: RequestStatus }) => {
     if (!status) return null;
 
-    const getVariant = () => {
-        switch (status) {
-            case 'PENDING':
-            case 'PENDING_REVIEW':
-                return 'secondary';
-            case 'APPROVED':
-            case 'PUBLISHED':
-                return 'default';
-            case 'REJECTED':
-            case 'DELETED':
-                return 'destructive';
-            case 'NEEDS_REVISION':
-                return 'outline';
-            default:
-                return 'secondary';
-        }
-    };
+    const config = {
+        PENDING: 'secondary',
+        APPROVED: 'default',
+        REJECTED: 'destructive',
+        NEEDS_REVISION: 'outline',
+    }[status] || 'secondary';
 
     return (
-        <Badge variant={getVariant() as any} className="text-xs">
+        <Badge variant={config as 'default' | 'secondary' | 'outline' | 'destructive'} className="text-xs">
             {status.replace('_', ' ')}
         </Badge>
     );
 };
 
 export const ArticleModerationCard: React.FC<ArticleModerationCardProps> = ({
-    article,
+    group,
     isSelected,
     isExpanded,
     selectedRequests,
@@ -169,14 +135,11 @@ export const ArticleModerationCard: React.FC<ArticleModerationCardProps> = ({
     loading,
 }) => {
     const [reviewNote, setReviewNote] = React.useState('');
-    const pendingCount = article.requests.filter(r => r.status === 'PENDING' || r.status === 'NEEDS_REVISION').length;
-    const requestIds = article.requests.map(r => r.id);
+    const { article, requests } = group;
+    const requestIds = requests.map(r => r.id);
 
-    // Group requests by type
-    const articleRequests = article.requests.filter(r => r.entityType === 'ARTICLE');
-    const downloadRequests = article.requests.filter(r => r.entityType === 'DOWNLOAD_LINK');
-    const officialSourceRequests = article.requests.filter(r => r.entityType === 'OFFICIAL_DOWNLOAD_SOURCE');
-    const commentRequests = article.requests.filter(r => r.entityType === 'COMMENT');
+    // Get first requester for display
+    const firstRequester = requests[0]?.requester;
 
     return (
         <Card className="overflow-hidden transition-all duration-200 hover:shadow-md border-l-4 border-l-purple-500">
@@ -186,7 +149,7 @@ export const ArticleModerationCard: React.FC<ArticleModerationCardProps> = ({
                     {/* Checkbox */}
                     <Checkbox
                         checked={isSelected}
-                        onCheckedChange={() => onToggleSelect(article.articleId)}
+                        onCheckedChange={() => onToggleSelect(article.id)}
                         className="h-5 w-5"
                     />
 
@@ -195,7 +158,7 @@ export const ArticleModerationCard: React.FC<ArticleModerationCardProps> = ({
                         {article.mainImage ? (
                             <img
                                 src={article.mainImage}
-                                alt={article.articleTitle}
+                                alt={article.title}
                                 className="w-full h-full object-cover"
                             />
                         ) : (
@@ -207,33 +170,35 @@ export const ArticleModerationCard: React.FC<ArticleModerationCardProps> = ({
 
                     {/* Article Info */}
                     <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-lg truncate">{article.articleTitle}</h3>
+                        <h3 className="font-semibold text-lg truncate">{article.title}</h3>
                         <p className="text-sm text-muted-foreground line-clamp-1">
-                            {article.articleDescription || 'No description'}
+                            {article.description || article.slug}
                         </p>
-                        <div className="flex items-center gap-2 mt-1">
-                            <Avatar className="h-5 w-5">
-                                <AvatarImage src={article.requester?.image || undefined} />
-                                <AvatarFallback className="text-xs">
-                                    {article.requester?.name?.charAt(0) || '?'}
-                                </AvatarFallback>
-                            </Avatar>
-                            <span className="text-xs text-muted-foreground">
-                                {article.requester?.name || 'Unknown'}
-                            </span>
-                        </div>
+                        {firstRequester && (
+                            <div className="flex items-center gap-2 mt-1">
+                                <Avatar className="h-5 w-5">
+                                    <AvatarImage src={firstRequester.image || undefined} />
+                                    <AvatarFallback className="text-xs">
+                                        {firstRequester.name?.charAt(0) || '?'}
+                                    </AvatarFallback>
+                                </Avatar>
+                                <span className="text-xs text-muted-foreground">
+                                    {firstRequester.name}
+                                </span>
+                            </div>
+                        )}
                     </div>
 
                     {/* Pending Count Badge */}
                     <Badge variant="secondary" className="text-sm px-3 py-1">
-                        {pendingCount} pending
+                        {requests.length} pending
                     </Badge>
 
                     {/* Expand Button */}
                     <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => onToggleExpand(article.articleId)}
+                        onClick={() => onToggleExpand(article.id)}
                         className="ml-2"
                     >
                         {isExpanded ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
@@ -257,70 +222,15 @@ export const ArticleModerationCard: React.FC<ArticleModerationCardProps> = ({
                                                 className="h-20 w-auto rounded-md object-cover flex-shrink-0"
                                             />
                                         ))}
-                                        {article.images.length > 5 && (
-                                            <div className="h-20 w-20 rounded-md bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-sm">
-                                                +{article.images.length - 5}
-                                            </div>
-                                        )}
                                     </div>
-                                </div>
-                            )}
-
-                            {/* Description */}
-                            {article.articleDescription && (
-                                <div>
-                                    <h4 className="text-sm font-medium mb-2">Description</h4>
-                                    <p className="text-sm text-muted-foreground line-clamp-3">
-                                        {article.articleDescription}
-                                    </p>
                                 </div>
                             )}
 
                             {/* Pending Requests */}
                             <div>
-                                <h4 className="text-sm font-medium mb-2">Pending Requests ({article.requests.length})</h4>
+                                <h4 className="text-sm font-medium mb-2">Pending Requests ({requests.length})</h4>
                                 <div className="space-y-2">
-                                    {/* Article Requests */}
-                                    {articleRequests.map((request) => (
-                                        <RequestRow
-                                            key={request.id}
-                                            request={request}
-                                            isSelected={selectedRequests.has(request.id)}
-                                            onToggleSelect={() => onToggleRequestSelect(request.id)}
-                                            onApprove={() => onApproveRequest(request.id, reviewNote)}
-                                            onReject={() => onRejectRequest(request.id, reviewNote)}
-                                            loading={loading}
-                                        />
-                                    ))}
-
-                                    {/* Download Link Requests */}
-                                    {downloadRequests.map((request) => (
-                                        <RequestRow
-                                            key={request.id}
-                                            request={request}
-                                            isSelected={selectedRequests.has(request.id)}
-                                            onToggleSelect={() => onToggleRequestSelect(request.id)}
-                                            onApprove={() => onApproveRequest(request.id, reviewNote)}
-                                            onReject={() => onRejectRequest(request.id, reviewNote)}
-                                            loading={loading}
-                                        />
-                                    ))}
-
-                                    {/* Official Source Requests */}
-                                    {officialSourceRequests.map((request) => (
-                                        <RequestRow
-                                            key={request.id}
-                                            request={request}
-                                            isSelected={selectedRequests.has(request.id)}
-                                            onToggleSelect={() => onToggleRequestSelect(request.id)}
-                                            onApprove={() => onApproveRequest(request.id, reviewNote)}
-                                            onReject={() => onRejectRequest(request.id, reviewNote)}
-                                            loading={loading}
-                                        />
-                                    ))}
-
-                                    {/* Comment Requests */}
-                                    {commentRequests.map((request) => (
+                                    {requests.map((request) => (
                                         <RequestRow
                                             key={request.id}
                                             request={request}
@@ -391,17 +301,16 @@ const RequestRow: React.FC<RequestRowProps> = ({
     loading,
 }) => {
     const getEntityLabel = () => {
-        switch (request.entityType) {
-            case 'ARTICLE':
-                return request.entityDetails?.title || 'Untitled Article';
-            case 'DOWNLOAD_LINK':
-            case 'OFFICIAL_DOWNLOAD_SOURCE':
-                return request.entityDetails?.name || request.entityDetails?.url || 'Unnamed Link';
-            case 'COMMENT':
-                return request.entityDetails?.content?.substring(0, 50) + '...' || 'No content';
-            default:
-                return `Entity #${request.entityId}`;
+        if (request.entityType === 'ARTICLE') {
+            return 'Article Review Request';
         }
+        if (request.entityDetails?.name) {
+            return request.entityDetails.name;
+        }
+        if (request.entityDetails?.content) {
+            return request.entityDetails.content.substring(0, 50) + '...';
+        }
+        return `Entity #${request.entityId}`;
     };
 
     return (
