@@ -6,7 +6,8 @@ async function fetchTags() {
     console.error('Failed to fetch tags from backend');
     return [];
   }
-  const data = await response.json();
+  const json = await response.json();
+  const data = json.data || json;
   return data.tags || [];
 }
 
@@ -16,7 +17,8 @@ async function fetchCategories() {
     console.error('Failed to fetch categories from backend');
     return [];
   }
-  const data = await response.json();
+  const json = await response.json();
+  const data = json.data || json;
   return data.categories || [];
 }
 

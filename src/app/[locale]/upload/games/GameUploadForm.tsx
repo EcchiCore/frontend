@@ -48,7 +48,8 @@ export default function GameUploadForm({ availableTags, availableCategories }: {
         throw new Error('Failed to create game article');
       }
 
-      const gameData = await gameResponse.json();
+      const gameJson = await gameResponse.json();
+      const gameData = gameJson.data || gameJson;
       const articleId = gameData.article.id;
 
       if (formData.downloads) {
@@ -61,7 +62,8 @@ export default function GameUploadForm({ availableTags, availableCategories }: {
             },
             body: JSON.stringify({ ...download, articleId }),
           });
-          const downloadResult = await downloadResponse.json();
+          const downloadJson = await downloadResponse.json();
+          const downloadResult = downloadJson.data || downloadJson;
           if (!downloadResponse.ok) {
             console.error('Failed to upload download:', downloadResult);
             // Optionally, throw an error or alert the user
