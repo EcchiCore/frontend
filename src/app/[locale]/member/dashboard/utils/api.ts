@@ -83,7 +83,8 @@ export const apiRequest = async <T>(endpoint: string, options: RequestInit = {})
       return {} as T;
     }
 
-    return await response.json();
+    const json = await response.json();
+    return json.data ? json.data : json;
   } catch (error) {
     if (error instanceof ApiError) {
       throw error;

@@ -46,13 +46,29 @@ export function LoginForm({ onSwitch }: { onSwitch: () => void }) {
         { accessToken: session.access_token }
       );
 
-      if (response.data.user?.token) {
+      // Handle new backend response structure
+      const responseData = response.data?.data || response.data;
+      const user = responseData?.user;
+      const token = user?.token;
+      const refreshToken = responseData?.refreshToken;
+
+      if (token) {
         toast.success(t('successMessage'), { autoClose: 2000 });
-        Cookies.set("token", response.data.user.token, {
+
+        Cookies.set("token", token, {
           secure: true,
           sameSite: "strict",
           expires: 7,
         });
+
+        if (refreshToken) {
+          Cookies.set("refreshToken", refreshToken, {
+            secure: true,
+            sameSite: "strict",
+            expires: 7,
+          });
+        }
+
         // Force reload to update auth state or redirect
         setTimeout(() => router.push("/"), 1000);
       }
@@ -62,7 +78,7 @@ export function LoginForm({ onSwitch }: { onSwitch: () => void }) {
     }
   };
 
-  // Check for Supabase session on mount (handling redirect from OAuth)
+
   // Check for Supabase session on mount (handling redirect from OAuth)
   useEffect(() => {
     const handleSession = async () => {
@@ -114,13 +130,31 @@ export function LoginForm({ onSwitch }: { onSwitch: () => void }) {
         { user: { email, password } }
       );
 
-      if (response.data.user?.token) {
+      // Handle new backend response structure: { data: { user: { ... }, refreshToken: ... } }
+      const responseData = response.data?.data || response.data;
+      const user = responseData?.user;
+      const token = user?.token;
+      const refreshToken = responseData?.refreshToken;
+
+      if (token) {
         toast.success(t('successMessage'), { autoClose: 2000 });
-        Cookies.set("token", response.data.user.token, {
+
+        // Set Access Token
+        Cookies.set("token", token, {
           secure: true,
           sameSite: "strict",
           expires: 7,
         });
+
+        // Set Refresh Token if available
+        if (refreshToken) {
+          Cookies.set("refreshToken", refreshToken, {
+            secure: true,
+            sameSite: "strict",
+            expires: 7,
+          });
+        }
+
         setTimeout(() => router.push("/"), 2000);
       } else {
         toast.error(t('invalidResponseMessage'));

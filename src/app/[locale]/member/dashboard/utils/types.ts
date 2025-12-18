@@ -8,6 +8,7 @@ export interface DashboardUser {
   shrtflyApiKey?: string | null;
   socialMediaLinks?: SocialMediaLink[];
   rank?: string;
+  roles?: string[];
   createdAt: string;
   points?: number;
 }
