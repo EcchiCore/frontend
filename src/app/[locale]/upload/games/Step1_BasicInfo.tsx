@@ -5,6 +5,8 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import dynamic from 'next/dynamic';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { updateFormData } from '@/store/features/upload/uploadSlice';
 
 const RichTextEditor = dynamic(() => import('@/components/ui/RichTextEditor'), {
   ssr: false,
@@ -13,28 +15,24 @@ const RichTextEditor = dynamic(() => import('@/components/ui/RichTextEditor'), {
 
 import { engines, platforms } from '@/lib/gameData';
 
-interface Step1_BasicInfoProps {
-  formData: Record<string, any>;
-  setFormData: (updater: (prev: Record<string, any>) => Record<string, any>) => void;
-}
+export const Step1_BasicInfo = () => {
+  const dispatch = useAppDispatch();
+  const formData = useAppSelector((state) => state.upload.formData);
 
-export const Step1_BasicInfo = ({ formData, setFormData }: Step1_BasicInfoProps) => {
   const handleChange = (e: { target: { id: string; value: string } }) => {
-    setFormData(prev => ({ ...prev, [e.target.id]: e.target.value }));
+    dispatch(updateFormData({ [e.target.id]: e.target.value }));
   };
 
   const handleBodyChange = (html: string) => {
-    setFormData(prev => ({ ...prev, body: html }));
+    dispatch(updateFormData({ body: html }));
   };
 
   const handlePlatformChange = (platform: string) => {
-    setFormData(prev => {
-      const currentPlatforms = prev.platforms || [];
-      const newPlatforms = currentPlatforms.includes(platform)
-        ? currentPlatforms.filter((p: string) => p !== platform)
-        : [...currentPlatforms, platform];
-      return { ...prev, platforms: newPlatforms };
-    });
+    const currentPlatforms = formData.platforms || [];
+    const newPlatforms = currentPlatforms.includes(platform)
+      ? currentPlatforms.filter((p: string) => p !== platform)
+      : [...currentPlatforms, platform];
+    dispatch(updateFormData({ platforms: newPlatforms }));
   };
 
 

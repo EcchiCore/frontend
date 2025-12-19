@@ -1,12 +1,12 @@
+
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useAppDispatch } from '@/store/hooks';
+import { updateFormData, incrementOngoingUploads, decrementOngoingUploads } from '@/store/features/upload/uploadSlice';
 
-interface Step3_MediaProps {
-  setFormData: (data: Record<string, any>) => void;
-  setOngoingUploads: (updater: (prev: number) => number) => void;
-}
+export const Step3_Media = () => {
+  const dispatch = useAppDispatch();
 
-export const Step3_Media = ({ setFormData, setOngoingUploads }: Step3_MediaProps) => {
   const getUploadUrl = () => {
     return 'https://oi.chanomhub.online/upload';
   };
@@ -66,7 +66,7 @@ export const Step3_Media = ({ setFormData, setOngoingUploads }: Step3_MediaProps
   const handleFileChange = async (e: { target: { id: string; files: FileList | null } }) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      setOngoingUploads(prev => prev + 1);
+      dispatch(incrementOngoingUploads());
       try {
         const initialResult = await uploadFileWithRetry(file, getUploadUrl());
 
@@ -79,13 +79,13 @@ export const Step3_Media = ({ setFormData, setOngoingUploads }: Step3_MediaProps
           throw new Error('Upload initiation failed or did not return a status or final URL.');
         }
 
-        setFormData((prevFormData: Record<string, any>) => ({ ...prevFormData, [e.target.id]: finalUrl }));
+        dispatch(updateFormData({ [e.target.id]: finalUrl }));
 
       } catch (error) {
         console.error('Error during file upload process:', error);
         alert(`An error occurred during upload: ${error instanceof Error ? error.message : 'Unknown error'}`);
       } finally {
-        setOngoingUploads(prev => prev - 1);
+        dispatch(decrementOngoingUploads());
       }
     }
   };
@@ -93,7 +93,7 @@ export const Step3_Media = ({ setFormData, setOngoingUploads }: Step3_MediaProps
   const handleMultipleFileChange = async (e: { target: { id: string; files: FileList | null } }) => {
     if (e.target.files) {
       const files = Array.from(e.target.files);
-      setOngoingUploads(prev => prev + files.length);
+      for (let i = 0; i < files.length; i++) dispatch(incrementOngoingUploads());
 
       const uploadAndPoll = async (file: File): Promise<string> => {
         try {
@@ -106,13 +106,13 @@ export const Step3_Media = ({ setFormData, setOngoingUploads }: Step3_MediaProps
             throw new Error(`Upload initiation failed for ${file.name}`);
           }
         } finally {
-          setOngoingUploads(prev => prev - 1);
+          dispatch(decrementOngoingUploads());
         }
       };
 
       try {
         const urls = await Promise.all(files.map(uploadAndPoll));
-        setFormData((prevFormData: Record<string, any>) => ({ ...prevFormData, [e.target.id]: urls }));
+        dispatch(updateFormData({ [e.target.id]: urls }));
       } catch (error) {
         console.error('Error uploading multiple files:', error);
         alert(`An error occurred during upload: ${error instanceof Error ? error.message : 'Unknown error'}`);

@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -8,6 +9,8 @@ import { Switch } from '@/components/ui/switch';
 import { Card, CardContent } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { platforms as allPlatforms } from '@/lib/gameData';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { updateFormData, DownloadEntry, AuthorizedSourceEntry } from '@/store/features/upload/uploadSlice';
 import {
   Dialog,
   DialogContent,
@@ -30,31 +33,10 @@ import {
   ExternalLink,
 } from 'lucide-react';
 
-interface DownloadEntry {
-  name: string;
-  url: string;
-  submitNote?: string;
-  isActive?: boolean;
-  vipOnly?: boolean;
-}
+export const Step4_Downloads = () => {
+  const dispatch = useAppDispatch();
+  const formData = useAppSelector((state) => state.upload.formData);
 
-interface AuthorizedSourceEntry {
-  name: string;
-  url: string;
-  submitNote?: string;
-}
-
-interface Step4_DownloadsProps {
-  formData: {
-    downloads?: DownloadEntry[];
-    authorizedPurchaseSources?: AuthorizedSourceEntry[];
-    platforms?: string[];
-    [key: string]: unknown;
-  };
-  setFormData: (data: Record<string, any>) => void;
-}
-
-export const Step4_Downloads = ({ formData, setFormData }: Step4_DownloadsProps) => {
   const [downloadUrl, setDownloadUrl] = useState('');
   const [downloadSubmitNote, setDownloadSubmitNote] = useState('');
   const [downloadIsActive, setDownloadIsActive] = useState(true);
@@ -120,19 +102,18 @@ export const Step4_Downloads = ({ formData, setFormData }: Step4_DownloadsProps)
       return;
     }
 
-    setFormData((prev: Record<string, any>) => ({
-      ...prev,
-      downloads: [
-        ...(prev.downloads || []),
-        {
-          name: `[${downloadPlatforms.join('/')}] ${getDomainName(downloadUrl)}`,
-          url: downloadUrl.trim(),
-          submitNote: downloadSubmitNote.trim() || undefined,
-          isActive: downloadIsActive,
-          vipOnly: downloadVipOnly,
-        },
-      ],
-    }));
+    const newDownloads = [
+      ...downloads,
+      {
+        name: `[${downloadPlatforms.join('/')}] ${getDomainName(downloadUrl)}`,
+        url: downloadUrl.trim(),
+        submitNote: downloadSubmitNote.trim() || undefined,
+        isActive: downloadIsActive,
+        vipOnly: downloadVipOnly,
+      },
+    ];
+
+    dispatch(updateFormData({ downloads: newDownloads }));
 
     setDownloadUrl('');
     setDownloadSubmitNote('');
@@ -149,17 +130,16 @@ export const Step4_Downloads = ({ formData, setFormData }: Step4_DownloadsProps)
       return;
     }
 
-    setFormData((prev: Record<string, any>) => ({
-      ...prev,
-      authorizedPurchaseSources: [
-        ...(prev.authorizedPurchaseSources || []),
-        {
-          name: purchaseName.trim(),
-          url: purchaseUrl.trim(),
-          submitNote: purchaseSubmitNote.trim() || undefined,
-        },
-      ],
-    }));
+    const newSources = [
+      ...authorizedPurchaseSources,
+      {
+        name: purchaseName.trim(),
+        url: purchaseUrl.trim(),
+        submitNote: purchaseSubmitNote.trim() || undefined,
+      },
+    ];
+
+    dispatch(updateFormData({ authorizedPurchaseSources: newSources }));
 
     setPurchaseName('');
     setPurchaseUrl('');
@@ -169,14 +149,13 @@ export const Step4_Downloads = ({ formData, setFormData }: Step4_DownloadsProps)
   };
 
   const handleRemoveDownload = (indexToRemove: number) => {
-    setFormData((prev: Record<string, any>) => ({ ...prev, downloads: prev.downloads.filter((_: any, index: number) => index !== indexToRemove) }));
+    const newDownloads = downloads.filter((_: any, index: number) => index !== indexToRemove);
+    dispatch(updateFormData({ downloads: newDownloads }));
   };
 
   const handleRemovePurchaseSource = (indexToRemove: number) => {
-    setFormData((prev: Record<string, any>) => ({
-      ...prev,
-      authorizedPurchaseSources: (prev.authorizedPurchaseSources || []).filter((_: any, index: number) => index !== indexToRemove),
-    }));
+    const newSources = authorizedPurchaseSources.filter((_: any, index: number) => index !== indexToRemove);
+    dispatch(updateFormData({ authorizedPurchaseSources: newSources }));
   };
 
   const getPlatformIcon = (name: string) => {
@@ -444,4 +423,3 @@ export const Step4_Downloads = ({ formData, setFormData }: Step4_DownloadsProps)
     </div>
   );
 };
-

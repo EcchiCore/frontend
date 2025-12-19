@@ -6,37 +6,35 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { updateFormData } from '@/store/features/upload/uploadSlice';
 
 interface Step2_CategorizationProps {
-  formData: Record<string, any>;
-  setFormData: (data: Record<string, any>) => void;
   availableTags: string[];
   availableCategories: string[];
 }
 
-export const Step2_Categorization = ({ formData, setFormData, availableTags, availableCategories }: Step2_CategorizationProps) => {
+export const Step2_Categorization = ({ availableTags, availableCategories }: Step2_CategorizationProps) => {
+  const dispatch = useAppDispatch();
+  const formData = useAppSelector((state) => state.upload.formData);
   const [newTag, setNewTag] = useState('');
   const [suggestedTags, setSuggestedTags] = useState<string[]>([]);
   const [isSuggesting, setIsSuggesting] = useState(false);
 
   const handleTagChange = (tag: string) => {
-    setFormData((prev: Record<string, any>) => {
-      const currentTags = prev.tags || [];
-      const newTags = currentTags.includes(tag)
-        ? currentTags.filter((t: string) => t !== tag)
-        : [...currentTags, tag];
-      return { ...prev, tags: newTags };
-    });
+    const currentTags = formData.tags || [];
+    const newTags = currentTags.includes(tag)
+      ? currentTags.filter((t: string) => t !== tag)
+      : [...currentTags, tag];
+    dispatch(updateFormData({ tags: newTags }));
   };
 
   const handleCategoryChange = (category: string) => {
-    setFormData((prev: Record<string, any>) => {
-      const currentCategories = prev.categories || [];
-      const newCategories = currentCategories.includes(category)
-        ? currentCategories.filter((c: string) => c !== category)
-        : [...currentCategories, category];
-      return { ...prev, categories: newCategories };
-    });
+    const currentCategories = formData.categories || [];
+    const newCategories = currentCategories.includes(category)
+      ? currentCategories.filter((c: string) => c !== category)
+      : [...currentCategories, category];
+    dispatch(updateFormData({ categories: newCategories }));
   };
 
   const handleAddManualTag = async () => {
@@ -108,32 +106,29 @@ export const Step2_Categorization = ({ formData, setFormData, availableTags, ava
 
     if (validTags.length === 0) return;
 
-    setFormData((prev: Record<string, any>) => {
-      const currentTags = prev.tags || [];
-      const newTags = [...currentTags];
+    const currentTags = formData.tags || [];
+    const newTags = [...currentTags];
 
-      validTags.forEach(tagInput => {
-        // Check if tag exists in availableTags (case-insensitive) again just in case
-        const canonicalTag = availableTags.find(
-          t => t.toLowerCase() === tagInput.toLowerCase()
-        );
+    validTags.forEach(tagInput => {
+      // Check if tag exists in availableTags (case-insensitive) again just in case
+      const canonicalTag = availableTags.find(
+        t => t.toLowerCase() === tagInput.toLowerCase()
+      );
 
-        const tagToUse = canonicalTag || tagInput;
+      const tagToUse = canonicalTag || tagInput;
 
-        // Add if not already present
-        if (!newTags.includes(tagToUse)) {
-          newTags.push(tagToUse);
-        }
-      });
-
-      return { ...prev, tags: newTags };
+      // Add if not already present
+      if (!newTags.includes(tagToUse)) {
+        newTags.push(tagToUse);
+      }
     });
+
+    dispatch(updateFormData({ tags: newTags }));
 
     setNewTag('');
   };
 
   const handleSuggestTags = async () => {
-    console.log("Available Tags sent to API:", availableTags);
     // Relaxed validation: Check if at least one context field is present
     if (!formData.title && !formData.description && !formData.engine) {
       toast.error("Please provide at least a Title, Description, or Engine in Step 1 for AI suggestions.");
