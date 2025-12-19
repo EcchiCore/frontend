@@ -5,6 +5,10 @@ import { userApi, ApiError } from '../utils/api';
 
 const CACHE_KEY = 'dashboard_user';
 
+/**
+ * @deprecated This hook is deprecated. Use Redux `authSlice` via `useAppSelector` or `useAppDispatch` instead.
+ * Evolution: Moved to src/store/features/auth/authSlice.ts
+ */
 export const useAuth = () => {
   const [user, setUser] = useState<DashboardUser | null>(null);
   const [loading, setLoading] = useState(true);

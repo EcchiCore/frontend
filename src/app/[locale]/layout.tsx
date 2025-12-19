@@ -10,6 +10,7 @@ import { siteUrl, defaultMetadataContent, supportedLocales, defaultLocale } from
 import Footer from '@/components/Footer';
 import { getActiveEventTheme } from "@/lib/event-theme";
 import Script from "next/script";
+import { ReduxProvider } from "@/store/ReduxProvider";
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -161,11 +162,14 @@ export default async function LocaleSegmentLayout({
       </head>
 
       <body className={inter.className}>
+
         <ThemeProvider defaultTheme="dark" storageKey="chanomhub-theme">
-          <NextIntlClientProvider locale={validLocale} messages={messages}>
-            {children}
-            <Footer />
-          </NextIntlClientProvider>
+          <ReduxProvider>
+            <NextIntlClientProvider locale={validLocale} messages={messages}>
+              {children}
+              <Footer />
+            </NextIntlClientProvider>
+          </ReduxProvider>
         </ThemeProvider>
 
         {/* Google Tag Manager (noscript) */}
