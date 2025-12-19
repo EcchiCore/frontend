@@ -99,7 +99,7 @@ const ProfilePage: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Profile</h1>
+          <h1 className="text-2xl font-bold text-foreground">Profile</h1>
           <p className="text-muted-foreground">Manage your account settings and profile information</p>
         </div>
         <div className="flex gap-2">

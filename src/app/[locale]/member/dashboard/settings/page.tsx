@@ -431,7 +431,7 @@ const SettingsPage: React.FC = () => {
         {/* Sidebar Navigation */}
         <div className="lg:col-span-1">
           <div className="sticky top-4">
-            <h2 className="text-lg font-bold mb-4">Settings</h2>
+            <h2 className="text-lg font-bold mb-4 text-foreground">Settings</h2>
             <Card>
               <CardContent className="p-2">
                 <nav className="space-y-1">
@@ -513,7 +513,7 @@ const SettingsPage: React.FC = () => {
 
         {/* Content Area */}
         <div className="lg:col-span-2">
-          <h1 className="text-2xl font-bold mb-6">Your Settings</h1>
+          <h1 className="text-2xl font-bold mb-6 text-foreground">Your Settings</h1>
 
           {/* Mobile Tabs */}
           <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as typeof activeTab)} className="lg:hidden mb-6">
@@ -540,7 +540,7 @@ const SettingsPage: React.FC = () => {
 
           {/* Profile Tab */}
           {activeTab === 'profile' && (
-            <form onSubmit={handleProfileUpdate} className="space-y-6">
+            <form onSubmit={handleProfileUpdate} className="space-y-6 text-foreground">
               <div className="space-y-2">
                 <Label htmlFor="image">Profile Picture URL</Label>
                 <Input
@@ -658,7 +658,7 @@ const SettingsPage: React.FC = () => {
 
           {/* Security Tab */}
           {activeTab === 'security' && (
-            <form onSubmit={handlePasswordChange} className="space-y-6">
+            <form onSubmit={handlePasswordChange} className="space-y-6 text-foreground">
               <div className="space-y-2">
                 <Label htmlFor="currentPassword">Current Password</Label>
                 <Input
@@ -711,7 +711,7 @@ const SettingsPage: React.FC = () => {
 
           {/* Notifications Tab */}
           {activeTab === 'notifications' && (
-            <div className="space-y-6">
+            <div className="space-y-6 text-foreground">
               <h3 className="text-lg font-medium">Email Notifications</h3>
               {Object.entries(notificationSettings)
                 .filter(([key]) => key.startsWith('email'))
@@ -745,7 +745,7 @@ const SettingsPage: React.FC = () => {
 
           {/* Privacy Tab */}
           {activeTab === 'privacy' && (
-            <div className="space-y-6">
+            <div className="space-y-6 text-foreground">
               <div className="space-y-2">
                 <Label>Profile Visibility</Label>
                 <Select
@@ -798,7 +798,7 @@ const SettingsPage: React.FC = () => {
 
           {/* Appearance Tab */}
           {activeTab === 'appearance' && (
-            <form onSubmit={handleAppearanceUpdate} className="space-y-6">
+            <form onSubmit={handleAppearanceUpdate} className="space-y-6 text-foreground">
               <div className="space-y-2">
                 <Label>Theme</Label>
                 <Select
