@@ -2,7 +2,6 @@
 
 import React from 'react';
 import { Bell, UserCircle, LogOut, Settings, Menu } from 'lucide-react';
-import { useDashboard } from '../providers/DashboardProvider';
 import { useAuthContext } from '../providers/AuthProvider';
 import { Button } from '@/components/ui/button';
 import {
@@ -14,19 +13,25 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useAppDispatch } from '@/store/hooks';
+import { toggleMobile } from '@/store/features/dashboard/dashboardSlice';
 
 interface TopBarProps {
   title: string;
 }
 
 export const TopBarShadcn: React.FC<TopBarProps> = ({ title }) => {
-  const { toggleMobile } = useDashboard();
+  const dispatch = useAppDispatch();
   const { user, logout } = useAuthContext();
 
   const handleLogout = () => {
     if (window.confirm('Are you sure you want to logout?')) {
       logout();
     }
+  };
+
+  const handleNav = (hash: string) => {
+    window.location.hash = hash;
   };
 
   return (
@@ -36,7 +41,7 @@ export const TopBarShadcn: React.FC<TopBarProps> = ({ title }) => {
         <Button
           variant="ghost"
           size="icon"
-          onClick={toggleMobile}
+          onClick={() => dispatch(toggleMobile())}
           aria-label="Toggle menu"
         >
           <Menu className="h-6 w-6" />
@@ -79,11 +84,11 @@ export const TopBarShadcn: React.FC<TopBarProps> = ({ title }) => {
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>{user?.username}</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => window.location.hash = 'profile'}>
+            <DropdownMenuItem onClick={() => handleNav('profile')}>
               <UserCircle className="mr-2 h-4 w-4" />
               <span>Profile</span>
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => window.location.hash = 'settings'}>
+            <DropdownMenuItem onClick={() => handleNav('settings')}>
               <Settings className="mr-2 h-4 w-4" />
               <span>Settings</span>
             </DropdownMenuItem>

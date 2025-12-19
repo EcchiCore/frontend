@@ -2,12 +2,13 @@
 
 import React from 'react';
 import { User, FileText, Shield, Settings, CreditCard, Wallet } from 'lucide-react';
-import { useDashboard } from '../providers/DashboardProvider';
 import { useAuthContext } from '../providers/AuthProvider';
 import { NAVIGATION_ITEMS } from '../utils/constants';
 import { NavigationItem, PageType } from '../utils/types';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { setCurrentPage, setMobileOpen } from '@/store/features/dashboard/dashboardSlice';
 
 const iconMap = {
   User,
@@ -23,7 +24,8 @@ interface SidebarProps {
 }
 
 export const SidebarShadcn: React.FC<SidebarProps> = ({ className = '' }) => {
-  const { currentPage, navigateTo } = useDashboard();
+  const dispatch = useAppDispatch();
+  const currentPage = useAppSelector((state) => state.dashboard.currentPage);
   const { user } = useAuthContext();
 
   const hasRequiredRank = (item: NavigationItem): boolean => {
@@ -37,7 +39,9 @@ export const SidebarShadcn: React.FC<SidebarProps> = ({ className = '' }) => {
   };
 
   const handleNavigation = (pageId: PageType) => {
-    navigateTo(pageId);
+    window.location.hash = pageId;
+    dispatch(setCurrentPage(pageId));
+    dispatch(setMobileOpen(false));
   };
 
   const visibleItems = NAVIGATION_ITEMS.filter(hasRequiredRank);
@@ -64,9 +68,8 @@ export const SidebarShadcn: React.FC<SidebarProps> = ({ className = '' }) => {
             <Button
               key={item.id}
               variant={currentPage === item.id ? 'default' : 'ghost'}
-              className={`w-full justify-start gap-3 ${
-                currentPage === item.id ? 'bg-gray-300 text-black' : 'bg-transparent text-foreground'
-              }`}
+              className={`w-full justify-start gap-3 ${currentPage === item.id ? 'bg-gray-300 text-black' : 'bg-transparent text-foreground'
+                }`}
               onClick={() => handleNavigation(item.id)}
             >
               {getIcon(item.icon as keyof typeof iconMap)}

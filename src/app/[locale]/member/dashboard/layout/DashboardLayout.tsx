@@ -1,14 +1,16 @@
 'use client';
 
-import React, { Suspense } from 'react';
+import React, { Suspense, useEffect, useCallback } from 'react';
 import { SidebarShadcn as Sidebar } from './Sidebar';
 import { TopBarShadcn as TopBar } from './TopBar';
-import { useDashboard } from '../providers/DashboardProvider';
 import { useAuthContext } from '../providers/AuthProvider';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Loader2, AlertCircle } from 'lucide-react';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { setCurrentPage, setMobileOpen } from '@/store/features/dashboard/dashboardSlice';
+import { PageType } from '../utils/types';
 
 // Lazy load pages
 const ArticlesPage = React.lazy(() => import('../pages/ArticlesPage').then(module => ({ default: module.ArticlesPage })));
@@ -23,9 +25,41 @@ interface DashboardLayoutProps {
   children?: React.ReactNode;
 }
 
+const getPageFromHash = (): PageType => {
+  if (typeof window === 'undefined') {
+    return 'profile';
+  }
+  const hash = window.location.hash.replace('#', '') as PageType;
+  const validPages: PageType[] = ['profile', 'articles', 'subscriptions', 'wallet', 'moderation', 'settings'];
+  if (validPages.includes(hash)) {
+    return hash;
+  }
+  return 'profile';
+};
+
 export const DashboardLayoutShadcn: React.FC<DashboardLayoutProps> = ({ title }) => {
-  const { currentPage, mobileOpen, setMobileOpen } = useDashboard();
+  const dispatch = useAppDispatch();
+  const { currentPage, mobileOpen } = useAppSelector((state) => state.dashboard);
   const { loading, error } = useAuthContext();
+
+  const handleMobileOpenChange = useCallback((open: boolean) => {
+    dispatch(setMobileOpen(open));
+  }, [dispatch]);
+
+  // Sync hash with Redux state on mount and hashchange
+  useEffect(() => {
+    const handleHashChange = () => {
+      dispatch(setCurrentPage(getPageFromHash()));
+    };
+
+    // Initial load
+    handleHashChange();
+
+    window.addEventListener('hashchange', handleHashChange);
+    return () => {
+      window.removeEventListener('hashchange', handleHashChange);
+    };
+  }, [dispatch]);
 
   const LoadingFallback = () => (
     <div className="min-h-[50vh] flex items-center justify-center">
@@ -88,7 +122,7 @@ export const DashboardLayoutShadcn: React.FC<DashboardLayoutProps> = ({ title })
 
   return (
     <div className="min-h-screen bg-background">
-      <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
+      <Sheet open={mobileOpen} onOpenChange={handleMobileOpenChange}>
         <SheetContent side="left" className="p-0 w-64">
           <SheetHeader className="sr-only">
             <SheetTitle>Sidebar Navigation</SheetTitle>

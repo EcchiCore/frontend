@@ -1,6 +1,5 @@
 import React from 'react';
 import { AuthProvider } from './providers/AuthProvider';
-import { DashboardProvider } from './providers/DashboardProvider';
 
 export default function DashboardSegmentLayout({
   children,
@@ -9,9 +8,7 @@ export default function DashboardSegmentLayout({
 }) {
   return (
     <AuthProvider>
-      <DashboardProvider>
-        {children}
-      </DashboardProvider>
+      {children}
     </AuthProvider>
   );
 }
