@@ -2,7 +2,6 @@
 
 import React from 'react';
 import { Bell, UserCircle, LogOut, Settings, Menu } from 'lucide-react';
-import { useAuthContext } from '../providers/AuthProvider';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -13,8 +12,9 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { useAppDispatch } from '@/store/hooks';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { toggleMobile } from '@/store/features/dashboard/dashboardSlice';
+import { logout } from '@/store/features/auth/authSlice';
 
 interface TopBarProps {
   title: string;
@@ -22,11 +22,12 @@ interface TopBarProps {
 
 export const TopBarShadcn: React.FC<TopBarProps> = ({ title }) => {
   const dispatch = useAppDispatch();
-  const { user, logout } = useAuthContext();
+  const user = useAppSelector((state) => state.auth.user);
 
   const handleLogout = () => {
     if (window.confirm('Are you sure you want to logout?')) {
-      logout();
+      dispatch(logout());
+      window.location.href = '/login';
     }
   };
 

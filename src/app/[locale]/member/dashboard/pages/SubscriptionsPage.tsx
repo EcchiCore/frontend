@@ -8,7 +8,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Loader2 } from 'lucide-react';
-import { useAuthContext } from '../providers/AuthProvider';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { fetchUser } from '@/store/features/auth/authSlice';
 
 const statusVariant: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
   ACTIVE: 'default',
@@ -43,7 +44,9 @@ const formatDuration = (days: number) => {
 };
 
 export const SubscriptionsPage: React.FC = () => {
-  const { user, refreshUser } = useAuthContext();
+  const dispatch = useAppDispatch();
+  const user = useAppSelector((state) => state.auth.user);
+
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [loading, setLoading] = useState(true);
@@ -81,7 +84,7 @@ export const SubscriptionsPage: React.FC = () => {
       await subscriptionApi.createSubscription(planId);
       setMessage('Subscription activated successfully.');
       await fetchData();
-      await refreshUser();
+      await dispatch(fetchUser());
     } catch (err) {
       const message = err instanceof ApiError ? err.message : 'Unable to activate subscription';
       setError(message);
@@ -99,7 +102,7 @@ export const SubscriptionsPage: React.FC = () => {
       await subscriptionApi.cancelSubscription(subscriptionId);
       setMessage('Subscription canceled.');
       await fetchData();
-      await refreshUser();
+      await dispatch(fetchUser());
     } catch (err) {
       const message = err instanceof ApiError ? err.message : 'Unable to cancel subscription';
       setError(message);

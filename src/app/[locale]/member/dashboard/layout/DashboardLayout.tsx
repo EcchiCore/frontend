@@ -3,7 +3,6 @@
 import React, { Suspense, useEffect, useCallback } from 'react';
 import { SidebarShadcn as Sidebar } from './Sidebar';
 import { TopBarShadcn as TopBar } from './TopBar';
-import { useAuthContext } from '../providers/AuthProvider';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -13,9 +12,10 @@ import { setCurrentPage, setMobileOpen } from '@/store/features/dashboard/dashbo
 import { PageType } from '../utils/types';
 
 // Lazy load pages
+// Lazy load pages
 const ArticlesPage = React.lazy(() => import('../pages/ArticlesPage').then(module => ({ default: module.ArticlesPage })));
-const ProfilePage = React.lazy(() => import('../pages/ProfilePage').then(module => ({ default: module.ProfilePage })));
-const SettingsPage = React.lazy(() => import('../pages/SettingsPage'));
+const ProfilePage = React.lazy(() => import('../profile/page'));
+const SettingsPage = React.lazy(() => import('../settings/page'));
 const ModerationPage = React.lazy(() => import('../pages/ModerationPage').then(module => ({ default: module.ModerationPage })));
 const SubscriptionsPage = React.lazy(() => import('../pages/SubscriptionsPage').then(module => ({ default: module.SubscriptionsPage })));
 const WalletPage = React.lazy(() => import('../pages/WalletPage').then(module => ({ default: module.WalletPage })));
@@ -40,7 +40,7 @@ const getPageFromHash = (): PageType => {
 export const DashboardLayoutShadcn: React.FC<DashboardLayoutProps> = ({ title }) => {
   const dispatch = useAppDispatch();
   const { currentPage, mobileOpen } = useAppSelector((state) => state.dashboard);
-  const { loading, error } = useAuthContext();
+  const { loading, error } = useAppSelector((state) => state.auth);
 
   const handleMobileOpenChange = useCallback((open: boolean) => {
     dispatch(setMobileOpen(open));

@@ -12,7 +12,6 @@ import {
   CheckIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline';
-import { useAuthContext } from '../providers/AuthProvider';
 import { userApi, ApiError, getCookie, setCookie } from '../utils/api';
 import { DashboardUser, SocialMediaLink, Token } from '../utils/types';
 import Link from 'next/link';
@@ -37,6 +36,9 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Label } from '@/components/ui/label';
+
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { updateUserLocal } from '@/store/features/auth/authSlice';
 
 interface SettingsFormData {
   username: string;
@@ -76,7 +78,9 @@ interface AppearanceSettings {
 }
 
 const SettingsPage: React.FC = () => {
-  const { user, updateUser } = useAuthContext();
+  const dispatch = useAppDispatch();
+  const user = useAppSelector((state) => state.auth.user);
+
   const [activeTab, setActiveTab] = useState<
     'profile' | 'security' | 'notifications' | 'privacy' | 'appearance' | 'tokens' | 'danger'
   >('profile');
@@ -177,35 +181,11 @@ const SettingsPage: React.FC = () => {
     }
   }, [user, fetchTokens, hasTokenAccess]);
 
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      window.location.hash = activeTab;
-    }
-  }, [activeTab]);
 
-  useEffect(() => {
-    const handleHashChange = () => {
-      const hash = window.location.hash.replace('#', '');
-      const validTabs = [
-        'profile',
-        'security',
-        'notifications',
-        'privacy',
-        'appearance',
-        'tokens',
-        'danger',
-      ] as const;
-      if (validTabs.includes(hash as any)) {
-        setActiveTab(hash as typeof validTabs[number]);
-      } else {
-        setActiveTab('profile');
-      }
-    };
-
-    window.addEventListener('hashchange', handleHashChange);
-    handleHashChange();
-    return () => window.removeEventListener('hashchange', handleHashChange);
-  }, []);
+  /* 
+  * Conflicting with DashboardLayout hash routing.
+  * Disabling hash sync for tabs.
+  */
 
   const applyTheme = (theme: string) => {
     document.documentElement.setAttribute('data-theme', theme);
@@ -302,7 +282,7 @@ const SettingsPage: React.FC = () => {
       };
 
       await userApi.updateUser(updateData);
-      updateUser(updateData);
+      dispatch(updateUserLocal(updateData));
       showMessage('success', 'Profile updated successfully!');
     } catch (error) {
       const errorMessage = error instanceof ApiError ? error.message : 'Failed to update profile';

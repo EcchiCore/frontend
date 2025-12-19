@@ -15,13 +15,8 @@ import {
 import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
 import { useRouter } from 'next/navigation';
 import { useUserData } from '../hooks/useUserData';
-import { useAuthContext } from '../providers/AuthProvider';
 import { Article, ArticleStatus } from '../utils/types';
 import { ITEMS_PER_PAGE_OPTIONS } from '../utils/constants';
-
-
-
-
 
 // shadcn/ui imports
 import { Button } from '@/components/ui/button';
@@ -35,9 +30,10 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Switch } from '@/components/ui/switch';
 import { Loader2 } from 'lucide-react';
 import Link from "next/link";
+import { useAppSelector } from '@/store/hooks';
 
 export const ArticlesPage: React.FC = () => {
-  const { user } = useAuthContext();
+  const user = useAppSelector((state) => state.auth.user);
   const router = useRouter();
   const [publishingSlug, setPublishingSlug] = useState<string | null>(null);
   const {
@@ -272,8 +268,8 @@ export const ArticlesPage: React.FC = () => {
             {searchTerm
               ? 'Try adjusting your search terms or filters'
               : (feedMode
-                  ? 'Follow some writers to see their articles here'
-                  : 'Create your first article to get started'
+                ? 'Follow some writers to see their articles here'
+                : 'Create your first article to get started'
               )
             }
           </p>
@@ -288,8 +284,8 @@ export const ArticlesPage: React.FC = () => {
                     {/* Article Header */}
                     <div className="flex items-center gap-2 mb-2">
                       <Avatar className="h-6 w-6">
-                        <AvatarImage 
-                          src={article.author.image ?? ''} 
+                        <AvatarImage
+                          src={article.author.image ?? ''}
                           alt={article.author.name}
                         />
                         <AvatarFallback className="text-xs">
@@ -305,13 +301,13 @@ export const ArticlesPage: React.FC = () => {
                       </span>
 
                       {/* Status Badge */}
-                      <Badge 
+                      <Badge
                         variant={
                           article.status === ArticleStatus.PUBLISHED ? 'default' :
-                          article.status === ArticleStatus.DRAFT ? 'secondary' :
-                          article.status === ArticleStatus.PENDING_REVIEW ? 'outline' :
-                          article.status === ArticleStatus.ARCHIVED ? 'secondary' :
-                          'destructive'
+                            article.status === ArticleStatus.DRAFT ? 'secondary' :
+                              article.status === ArticleStatus.PENDING_REVIEW ? 'outline' :
+                                article.status === ArticleStatus.ARCHIVED ? 'secondary' :
+                                  'destructive'
                         }
                         className="text-xs"
                       >
@@ -345,10 +341,10 @@ export const ArticlesPage: React.FC = () => {
 
                     {/* Stats */}
                     <div className="flex items-center gap-4 text-sm text-muted-foreground">
-  <span className="flex items-center gap-1">
-    <HeartIcon className="h-4 w-4" />
-    {article.favoritesCount}
-  </span>
+                      <span className="flex items-center gap-1">
+                        <HeartIcon className="h-4 w-4" />
+                        {article.favoritesCount}
+                      </span>
 
                       {/* Actions */}
                       <div className="flex justify-end gap-2 mt-4 w-full">

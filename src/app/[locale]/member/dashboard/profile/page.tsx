@@ -9,7 +9,6 @@ import {
   XMarkIcon,
   PhotoIcon
 } from '@heroicons/react/24/outline';
-import { useAuthContext } from '../providers/AuthProvider';
 import { userApi, ApiError } from '../utils/api';
 
 // shadcn/ui imports
@@ -22,9 +21,13 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Textarea } from '@/components/ui/textarea';
 import { Loader2 } from 'lucide-react';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { updateUserLocal } from '@/store/features/auth/authSlice';
 
 const ProfilePage: React.FC = () => {
-  const { user, updateUser } = useAuthContext();
+  const dispatch = useAppDispatch();
+  const user = useAppSelector((state) => state.auth.user);
+
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -55,7 +58,7 @@ const ProfilePage: React.FC = () => {
 
       await userApi.updateUser(formData);
 
-      updateUser(formData);
+      dispatch(updateUserLocal(formData));
       setSuccess('Profile updated successfully!');
       setIsEditing(false);
     } catch (err) {
@@ -151,8 +154,8 @@ const ProfilePage: React.FC = () => {
             {/* Avatar Section */}
             <div className="flex flex-col items-center lg:items-start space-y-4">
               <Avatar className="w-32 h-32">
-                <AvatarImage 
-                  src={user.image || undefined} 
+                <AvatarImage
+                  src={user.image || undefined}
                   alt={user.username || undefined}
                 />
                 <AvatarFallback className="text-4xl">
@@ -262,11 +265,11 @@ const ProfilePage: React.FC = () => {
                 <div className="space-y-2">
                   <Label className="font-medium">Account Rank</Label>
                   <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
-                    <Badge 
+                    <Badge
                       variant={
                         user.rank === 'ADMIN' ? 'destructive' :
-                        user.rank === 'MODERATOR' ? 'secondary' :
-                        'default'
+                          user.rank === 'MODERATOR' ? 'secondary' :
+                            'default'
                       }
                     >
                       {user.rank || 'No rank'}

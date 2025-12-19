@@ -15,7 +15,7 @@ import {
   AlertTriangle,
   Loader2,
 } from 'lucide-react';
-import { useAuthContext } from '../providers/AuthProvider';
+import { useAppSelector } from '@/store/hooks';
 
 // UI Components
 import { Button } from '@/components/ui/button';
@@ -46,7 +46,7 @@ interface Statistics {
 }
 
 export const ModerationPage: React.FC = () => {
-  const { user, loading: authLoading, error: authError } = useAuthContext();
+  const { user, loading: authLoading, error: authError } = useAppSelector((state) => state.auth);
 
   // Data states
   const [groups, setGroups] = useState<ArticleModerationGroup[]>([]);

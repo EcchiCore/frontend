@@ -7,10 +7,13 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Loader2, ShieldCheck, CircleHelp } from 'lucide-react';
-import { useAuthContext } from '../providers/AuthProvider';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { fetchUser } from '@/store/features/auth/authSlice';
 
 export const WalletPage: React.FC = () => {
-  const { user, refreshUser } = useAuthContext();
+  const dispatch = useAppDispatch();
+  const user = useAppSelector((state) => state.auth.user);
+
   const [voucherCode, setVoucherCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -57,7 +60,7 @@ export const WalletPage: React.FC = () => {
       const successMessage = response?.message || 'Voucher redeemed successfully.';
       setMessage(successMessage);
       setVoucherCode('');
-      await refreshUser();
+      await dispatch(fetchUser());
     } catch (err) {
       const message = err instanceof ApiError ? err.message : 'Voucher redemption failed.';
       setError(message);

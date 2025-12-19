@@ -2,7 +2,6 @@
 
 import React from 'react';
 import { User, FileText, Shield, Settings, CreditCard, Wallet } from 'lucide-react';
-import { useAuthContext } from '../providers/AuthProvider';
 import { NAVIGATION_ITEMS } from '../utils/constants';
 import { NavigationItem, PageType } from '../utils/types';
 import { Button } from '@/components/ui/button';
@@ -26,7 +25,7 @@ interface SidebarProps {
 export const SidebarShadcn: React.FC<SidebarProps> = ({ className = '' }) => {
   const dispatch = useAppDispatch();
   const currentPage = useAppSelector((state) => state.dashboard.currentPage);
-  const { user } = useAuthContext();
+  const user = useAppSelector((state) => state.auth.user);
 
   const hasRequiredRank = (item: NavigationItem): boolean => {
     if (!item.requiredRanks || !user || !user.rank) return true;
