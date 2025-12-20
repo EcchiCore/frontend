@@ -1,8 +1,14 @@
 {
   "compilerOptions": {
     "target": "es2022",
-    "types": ["node"],
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "types": [
+      "node"
+    ],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -12,12 +18,18 @@
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "jsx": "preserve",
+    "jsx": "react-jsx",
     "incremental": true,
-    "plugins": [{ "name": "next" }],
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": [
+        "src/*"
+      ]
     }
   },
   "include": [
@@ -27,7 +39,11 @@
     "next-env.d.ts",
     "build/types/**/*.ts",
     "daisyui.d.ts",
-    "**/*.mdx"
+    "**/*.mdx",
+    ".next/dev/types/**/*.ts"
   ],
-  "exclude": ["node_modules", "scripts/**/*"]
+  "exclude": [
+    "node_modules",
+    "scripts/**/*"
+  ]
 }

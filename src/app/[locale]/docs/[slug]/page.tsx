@@ -74,11 +74,10 @@ export default async function DocsPage({ params }: DocsPageProps) {
                       <Link
                         key={key}
                         href={`/docs/${key}`}
-                        className={`group flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 ${
-                          isActive
+                        className={`group flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 ${isActive
                             ? "bg-gradient-to-r from-blue-600 to-purple-700 text-white shadow-lg transform scale-105"
                             : "text-gray-300 hover:bg-gray-700 hover:text-blue-400 hover:transform hover:scale-105"
-                        }`}
+                          }`}
                       >
                         <Icon className={`w-5 h-5 ${isActive ? "text-white" : "text-gray-400 group-hover:text-blue-400"}`} />
                         <div className="flex-1">
@@ -131,7 +130,7 @@ export default async function DocsPage({ params }: DocsPageProps) {
             {/* Navigation Footer */}
             <div className="mt-8 flex justify-between items-center">
               <div className="text-sm text-gray-400">
-                อัปเดตล่าสุด: {new Date().toLocaleDateString('th-TH')}
+                เอกสารประกอบ
               </div>
               <div className="flex space-x-4">
                 <button className="flex items-center space-x-2 px-4 py-2 bg-gray-800/80 backdrop-blur-sm rounded-xl shadow-md hover:shadow-lg transition-all duration-200 text-gray-300 hover:text-blue-400">

@@ -1,5 +1,5 @@
 // src/app/[locale]/layout.tsx
-import { ReactNode } from 'react';
+import { ReactNode, Suspense } from 'react';
 import { redirect } from 'next/navigation';
 import { routing } from '@/i18n/routing';
 import { NextIntlClientProvider } from 'next-intl';
@@ -8,11 +8,14 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import { siteUrl, defaultMetadataContent, supportedLocales, defaultLocale } from "@/utils/localeUtils";
 import Footer from '@/components/Footer';
-import { getActiveEventTheme } from "@/lib/event-theme";
 import Script from "next/script";
 import { ReduxProvider } from "@/store/ReduxProvider";
 
 const inter = Inter({ subsets: ['latin'] });
+
+export function generateStaticParams() {
+  return routing.locales.map((locale) => ({ locale }));
+}
 
 export function generateViewport() {
   return {
@@ -93,13 +96,13 @@ export default async function LocaleSegmentLayout({
     messages = (await import(`@/messages/${routing.defaultLocale}.json`)).default;
   }
 
-  const activeEventTheme = getActiveEventTheme();
+  // const activeEventTheme = getActiveEventTheme(); // Removed to avoid server-side Date usage
 
   return (
     <html
       lang={validLocale}
       suppressHydrationWarning
-      data-event-theme={activeEventTheme?.id}
+    // data-event-theme={activeEventTheme?.id} // Removed, handled by script
     >
       <head>
         <meta charSet="utf-8" />
@@ -111,7 +114,14 @@ export default async function LocaleSegmentLayout({
             try {
               const theme = localStorage.getItem('chanomhub-theme') || 'light';
               document.documentElement.classList.add(theme);
-              const eventTheme = ${JSON.stringify(activeEventTheme?.id ?? null)};
+              
+              // Client-side event theme detection
+              const month = new Date().getMonth();
+              let eventTheme = null;
+              // 9 = October (Halloween), 11 = December (Christmas)
+              if ([9].includes(month)) eventTheme = 'halloween';
+              if ([11].includes(month)) eventTheme = 'christmas';
+
               if (eventTheme) {
                 document.documentElement.setAttribute('data-event-theme', eventTheme);
               } else {
@@ -165,10 +175,12 @@ export default async function LocaleSegmentLayout({
 
         <ThemeProvider defaultTheme="dark" storageKey="chanomhub-theme">
           <ReduxProvider>
-            <NextIntlClientProvider locale={validLocale} messages={messages}>
-              {children}
-              <Footer />
-            </NextIntlClientProvider>
+            <Suspense fallback={null}>
+              <NextIntlClientProvider locale={validLocale} messages={messages}>
+                {children}
+                <Footer />
+              </NextIntlClientProvider>
+            </Suspense>
           </ReduxProvider>
         </ThemeProvider>
 

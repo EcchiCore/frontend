@@ -9,15 +9,13 @@ export const metadata = {
   description: "ค้นหาและสำรวจเกมที่คุณชื่นชอบ",
 }
 
-export const revalidate = 3600
+
 
 type PageProps = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }
 
 export default async function GamesPage({ searchParams }: PageProps) {
-  const params = await searchParams
-
   return (
     <>
       <Navbar />
@@ -27,7 +25,7 @@ export default async function GamesPage({ searchParams }: PageProps) {
             <SearchControls />
 
             <Suspense fallback={<ResultsSkeleton />}>
-              <Results searchParams={params} />
+              <Results searchParams={searchParams} />
             </Suspense>
           </section>
         </div>

@@ -7,8 +7,9 @@ import { ChevronLeft, ChevronRight } from "lucide-react"
 
 export default async function Results({
   searchParams,
-}: { searchParams: Record<string, string | string[] | undefined> | null | undefined }) {
-  const { items, total, page, pageSize } = await fetchArticles(searchParams)
+}: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
+  const params = await searchParams;
+  const { items, total, page, pageSize } = await fetchArticles(params)
   const pages = Math.max(1, Math.ceil(total / pageSize))
 
   return (
@@ -35,7 +36,7 @@ export default async function Results({
         </div>
       )}
 
-      {items.length > 0 && <Pager page={page} pages={pages} searchParams={searchParams} />}
+      {items.length > 0 && <Pager page={page} pages={pages} searchParams={params} />}
     </div>
   )
 }

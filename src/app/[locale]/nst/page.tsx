@@ -105,20 +105,7 @@ function formatDate(dateString: string): string {
   });
 }
 
-// Format relative time
-function getRelativeTime(dateString: string): string {
-  const date = new Date(dateString);
-  const now = new Date();
-  const diffInMs = now.getTime() - date.getTime();
-  const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
 
-  if (diffInDays === 0) return 'วันนี้';
-  if (diffInDays === 1) return 'เมื่อวาน';
-  if (diffInDays < 7) return `${diffInDays} วันที่แล้ว`;
-  if (diffInDays < 30) return `${Math.floor(diffInDays / 7)} สัปดาห์ที่แล้ว`;
-  if (diffInDays < 365) return `${Math.floor(diffInDays / 30)} เดือนที่แล้ว`;
-  return `${Math.floor(diffInDays / 365)} ปีที่แล้ว`;
-}
 
 async function getAllReleases(): Promise<GitHubRelease[]> {
   try {
@@ -180,7 +167,6 @@ function ReleaseCard({ release, isLatest = false }: { release: GitHubRelease; is
               <span>•</span>
               <Calendar className="h-3 w-3" />
               <span>{formatDate(release.published_at)}</span>
-              <span className="text-xs">({getRelativeTime(release.published_at)})</span>
             </CardDescription>
           </div>
           {totalDownloads > 0 && (

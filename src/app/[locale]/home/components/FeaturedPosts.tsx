@@ -1,5 +1,7 @@
 "use client";
 
+import React from 'react';
+
 import Link from 'next/link';
 
 // Define the structure of an article from the API
@@ -73,9 +75,18 @@ export default function FeaturedPosts({ posts, loading }: FeaturedPostsProps) {
           <tbody>
             {posts.map((post, index) => {
               // Generate mock data for replies and views
-              const replies = Math.floor(Math.random() * 100);
-              const views = Math.floor(Math.random() * 1000) + 100;
-              const relativeTime = getRelativeTime(post.createdAt);
+              // Generate mock data for replies and views (deterministic based on ID to avoid hydration mismatch)
+              const replies = (post.id * 7) % 70 + 12;
+              const views = (post.id * 13) % 900 + 145;
+
+              // Use client-side only relative time to avoid hydration mismatch and new Date() server error
+              const [timeString, setTimeString] = React.useState("");
+
+              React.useEffect(() => {
+                setTimeString(getRelativeTime(post.createdAt));
+              }, [post.createdAt]);
+
+              const relativeTime = timeString || "";
 
               return (
                 <tr

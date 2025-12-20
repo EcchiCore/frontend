@@ -7,9 +7,8 @@ import CategoryGrid from './components/CategoryGrid';
 import { generatePageMetadata } from '@/utils/metadataUtils';
 import { getTranslations } from 'next-intl/server';
 import { locales } from '@/app/[locale]/lib/navigation';
-import { getActiveEventTheme } from '@/lib/event-theme';
+
 import { fetchArticles } from '@/lib/api';
-import { fetchPlatforms, fetchTags } from '@/app/[locale]/lib/searchUtils';
 import NewYearCountdown from './components/NewYearCountdown';
 import DiscordWidget from './components/DiscordWidget';
 
@@ -35,24 +34,20 @@ export async function generateMetadata({ params }: { params: { locale?: string }
 // Server-side data fetching
 async function fetchHomeData() {
   try {
-    const [carouselData, featuredData, latestData, platformsData, tagsData] = await Promise.all([
+    const [carouselData, featuredData, latestData] = await Promise.all([
       fetchArticles({ limit: '3', status: 'PUBLISHED' }),
       fetchArticles({ platform: 'windows', status: 'PUBLISHED', limit: '6' }),
       fetchArticles({ status: 'PUBLISHED', limit: '10' }),
-      fetchPlatforms(),
-      fetchTags(),
     ]);
 
     return {
       carousel: carouselData.items || [],
       featured: featuredData.items || [],
       latest: latestData.items || [],
-      platforms: platformsData || [],
-      tags: tagsData || [],
     };
   } catch (error) {
     console.error('Error fetching home page data:', error);
-    return { carousel: [], featured: [], latest: [], platforms: [], tags: [] };
+    return { carousel: [], featured: [], latest: [] };
   }
 }
 
