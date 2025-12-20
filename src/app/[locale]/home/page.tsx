@@ -11,6 +11,7 @@ import { locales } from '@/app/[locale]/lib/navigation';
 import { fetchArticles } from '@/lib/api';
 import NewYearCountdown from './components/NewYearCountdown';
 import DiscordWidget from './components/DiscordWidget';
+import PromotionsWidget from './components/PromotionsWidget';
 
 
 // Font configuration
@@ -180,6 +181,9 @@ export default async function HomePage({ params }: { params: { locale: string } 
                 ))}
               </div>
             </div> */}
+
+            {/* Promotions Widget */}
+            <PromotionsWidget />
 
             {/* Discord Widget */}
             <DiscordWidget />
