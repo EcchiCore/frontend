@@ -112,7 +112,7 @@ export default function DownloadSection({ releases }: { releases: Release[] }) {
 
                             <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
                                 {recommendedAsset ? (
-                                    <Button size="xl" className="h-20 px-8 text-xl rounded-2xl bg-white text-black hover:bg-cyan-50 hover:text-cyan-900 transition-all shadow-[0_0_30px_-5px_rgba(34,211,238,0.4)] group w-full sm:w-auto flex flex-col items-center justify-center gap-1" asChild>
+                                    <Button className="h-20 px-8 text-xl rounded-2xl bg-white text-black hover:bg-cyan-50 hover:text-cyan-900 transition-all shadow-[0_0_30px_-5px_rgba(34,211,238,0.4)] group w-full sm:w-auto flex flex-col items-center justify-center gap-1" asChild>
                                         <Link href={recommendedAsset.browser_download_url}>
                                             <div className="flex items-center gap-2">
                                                 {getOsIcon(os)}
@@ -124,7 +124,7 @@ export default function DownloadSection({ releases }: { releases: Release[] }) {
                                         </Link>
                                     </Button>
                                 ) : (
-                                    <Button size="xl" className="h-16 px-8 text-lg rounded-2xl bg-white text-black hover:bg-cyan-50 transition-all shadow-lg shadow-white/10 group w-full sm:w-auto" asChild>
+                                    <Button className="h-16 px-8 text-lg rounded-2xl bg-white text-black hover:bg-cyan-50 transition-all shadow-lg shadow-white/10 group w-full sm:w-auto" asChild>
                                         <Link href={latestRelease.html_url} target="_blank">
                                             <Download className="mr-2 h-5 w-5" />
                                             Download Latest
