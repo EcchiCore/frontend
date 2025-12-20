@@ -3,86 +3,72 @@
 import Image from "next/image";
 import React, { useState, useMemo } from "react";
 import Link from "next/link";
-import { Search, Download, Globe, Calendar, Star, Tag, User, Languages, Crown, Menu, Settings, Bell, Gamepad2, X } from "lucide-react";
+import { Search, Download, Globe, Calendar, Star, Tag, User, Languages, Crown, Menu, Settings, Bell, Gamepad2, X, Loader2 } from "lucide-react";
+import { searchArticles } from "@/lib/qdrant";
 
-interface GameResult {
+
+
+export interface GameResult {
   title: string;
   version: string;
   url: string;
   description: string;
   site: string;
   tags: string[] | null;
-  metadata: { platforms?: string; [key: string]: any };
+  metadata: { platforms?: string;[key: string]: any };
   score: number;
   extracted_at: string;
   image_urls: string[] | null;
 }
 
-const dummyResults: GameResult[] = [
-  {
-    title: "Cyberpunk 2077 Thai Edition",
-    version: "2.1.1",
-    url: "https://chanomhub.com/games/cyberpunk-2077-thai",
-    description: "เกม RPG สุดมันส์ในโลกอนาคต พร้อมการแปลภาษาไทยแบบเต็มรูปแบบ ดำดิ่งสู่โลกของไนท์ซิตี้และสัมผัสประสบการณ์ที่ไม่เหมือนใคร",
-    site: "chanomhub.com",
-    tags: ["RPG", "Action", "ไทย", "แปลเต็ม"],
-    metadata: { platforms: "PC, PlayStation, Xbox" },
-    score: 0.95,
-    extracted_at: "2025-09-27T10:00:00Z",
-    image_urls: ["https://images.unsplash.com/photo-1542751371-adc38448a05e?w=400&h=225&fit=crop"],
-  },
-  {
-    title: "The Witcher 3: Wild Hunt - Complete Thai",
-    version: "4.04",
-    url: "https://chanomhub.com/games/witcher-3-thai-complete",
-    description: "การผจญภัยของ Geralt of Rivia ในเวอร์ชันภาษาไทยสมบูรณ์ พร้อมทุก DLC และการแปลเสียงไทย ดื่มด่ำกับเรื่องราวที่ยิ่งใหญ่",
-    site: "chanomhub.com",
-    tags: ["RPG", "Fantasy", "ไทย", "เสียงไทย"],
-    metadata: { platforms: "PC, Nintendo Switch" },
-    score: 0.98,
-    extracted_at: "2025-09-26T15:30:00Z",
-    image_urls: ["https://images.unsplash.com/photo-1511512578047-dfb367046420?w=400&h=225&fit=crop"],
-  },
-  {
-    title: "Stardew Valley Thai Translation Pack",
-    version: "1.8.2",
-    url: "https://chanomhub.com/translations/stardew-valley-thai",
-    description: "แพคแปลไทยสำหรับ Stardew Valley ทำการเกษตร ผจญภัย และสร้างความสัมพันธ์ในหุบเขา Stardew ด้วยภาษาไทยที่อ่านง่าย",
-    site: "chanomhub.com",
-    tags: ["Simulation", "แปลไทย", "เกษตร", "น่ารัก"],
-    metadata: { platforms: "PC, Mobile, Nintendo Switch" },
-    score: 0.92,
-    extracted_at: "2025-09-25T08:15:00Z",
-    image_urls: ["https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=400&h=225&fit=crop"],
-  },
-  {
-    title: "Hollow Knight - Thai Subtitle Mod",
-    version: "1.5.78",
-    url: "https://chanomhub.com/mods/hollow-knight-thai-sub",
-    description: "บินไปกับเหล่าแมลงในโลกใต้ดิน Hallownest พร้อมซับไทยที่แปลอย่างประณีต เพื่อประสบการณ์การเล่นที่ลึกซึ้ง",
-    site: "chanomhub.com",
-    tags: ["Platformer", "Indie", "ซับไทย", "ผจญภัย"],
-    metadata: { platforms: "PC, PlayStation, Xbox, Nintendo Switch" },
-    score: 0.89,
-    extracted_at: "2025-09-24T19:45:00Z",
-    image_urls: ["https://images.unsplash.com/photo-1493711662062-fa541adb3fc8?w=400&h=225&fit=crop"],
-  }
-];
+// Dummy results removed
+
 
 // Placeholder Image
-const PLACEHOLDER_IMAGE = "https://via.placeholder.com/160x90?text=No+Image";
+const PLACEHOLDER_IMAGE = "https://i.ibb.co/NdmJTMMR/images.jpg";
 
-export default function ChanomhubSearch() {
-  const [query, setQuery] = useState("");
-  const [showResults, setShowResults] = useState(false);
+interface ChanomhubSearchProps {
+  initialQuery?: string;
+  initialResults?: GameResult[];
+}
+
+export default function ChanomhubSearch({ initialQuery = "", initialResults = [] }: ChanomhubSearchProps) {
+  const [query, setQuery] = useState(initialQuery);
+  const [showResults, setShowResults] = useState(!!initialQuery);
   const [currentPage, setCurrentPage] = useState(1);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const resultsPerPage = 4;
 
-  const handleSearch = () => {
+  const [results, setResults] = useState<GameResult[]>(initialResults);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSearch = async () => {
     if (query.trim()) {
+      setIsLoading(true);
       setShowResults(true);
       setCurrentPage(1);
+
+      try {
+        const points = await searchArticles(query);
+        const mappedResults: GameResult[] = points.map(point => ({
+          title: point.payload.title || "No Title",
+          version: point.payload.version || "1.0.0",
+          url: point.payload.url || "#",
+          description: point.payload.description || "No description available",
+          site: point.payload.site || "chanomhub.com",
+          tags: point.payload.tags || [],
+          metadata: point.payload.metadata || {},
+          score: point.score || 0,
+          extracted_at: point.payload.extracted_at || new Date().toISOString(),
+          image_urls: point.payload.image_urls || null,
+        }));
+        setResults(mappedResults);
+      } catch (error) {
+        console.error("Search failed:", error);
+        setResults([]);
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -90,6 +76,7 @@ export default function ChanomhubSearch() {
     setQuery("");
     setShowResults(false);
     setCurrentPage(1);
+    setResults([]);
   };
 
   const formatDate = (dateString: string) => {
@@ -114,22 +101,13 @@ export default function ChanomhubSearch() {
     }
   };
 
-  // กรองผลลัพธ์ตาม query
-  const filteredResults = useMemo(() =>
-      dummyResults.filter((result) =>
-        [result.title, result.description, ...(result.tags || [])].some((field) =>
-          field.toLowerCase().includes(query.toLowerCase())
-        )
-      ),
-    [query]
-  );
-
   // Pagination Logic
-  const totalPages = Math.ceil(filteredResults.length / resultsPerPage);
-  const paginatedResults = filteredResults.slice(
+  const totalPages = Math.ceil(results.length / resultsPerPage);
+  const paginatedResults = results.slice(
     (currentPage - 1) * resultsPerPage,
     currentPage * resultsPerPage
   );
+
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white">
@@ -171,7 +149,9 @@ export default function ChanomhubSearch() {
                 onKeyDown={(e) => e.key === "Enter" && handleSearch()}
                 className="flex-1 px-4 py-2.5 text-white bg-transparent outline-none placeholder-gray-400"
                 aria-label="ค้นหา"
+                disabled={isLoading}
               />
+
               {query && (
                 <button
                   onClick={clearSearch}
@@ -188,8 +168,9 @@ export default function ChanomhubSearch() {
                 aria-label="ค้นหา"
                 title="ค้นหา"
               >
-                <Search className="w-4 h-4 text-white" />
+                {isLoading ? <Loader2 className="w-4 h-4 text-white animate-spin" /> : <Search className="w-4 h-4 text-white" />}
               </button>
+
             </div>
           </div>
 
@@ -252,8 +233,9 @@ export default function ChanomhubSearch() {
           <div className="max-w-6xl mx-auto px-4 py-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg text-gray-300">
-                ผลลัพธ์การค้นหา: <span className="text-blue-400">&#34;{query}&#34;</span> ({filteredResults.length} รายการ)
+                ผลลัพธ์การค้นหา: <span className="text-blue-400">&#34;{query}&#34;</span> ({results.length} รายการ)
               </h2>
+
               <button
                 onClick={clearSearch}
                 className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-full text-sm transition-colors"
@@ -359,8 +341,10 @@ export default function ChanomhubSearch() {
             </div>
           </div>
 
+
           {/* Pagination */}
-          {filteredResults.length > 0 && totalPages > 1 && (
+          {results.length > 0 && totalPages > 1 && (
+
             <div className="max-w-6xl mx-auto px-4 pb-8">
               <div className="flex justify-center items-center space-x-2">
                 <button
@@ -377,11 +361,10 @@ export default function ChanomhubSearch() {
                     <button
                       key={page}
                       onClick={() => setCurrentPage(page)}
-                      className={`px-4 py-2 rounded-full transition-colors ${
-                        currentPage === page
-                          ? "text-blue-400 bg-blue-900"
-                          : "text-gray-400 hover:text-blue-400 hover:bg-gray-700"
-                      }`}
+                      className={`px-4 py-2 rounded-full transition-colors ${currentPage === page
+                        ? "text-blue-400 bg-blue-900"
+                        : "text-gray-400 hover:text-blue-400 hover:bg-gray-700"
+                        }`}
                     >
                       {page}
                     </button>
@@ -406,6 +389,11 @@ export default function ChanomhubSearch() {
                   ถัดไป
                 </button>
               </div>
+            </div>
+          )}
+          {isLoading && (
+            <div className="flex justify-center py-12">
+              <Loader2 className="w-12 h-12 text-blue-400 animate-spin" />
             </div>
           )}
         </div>
