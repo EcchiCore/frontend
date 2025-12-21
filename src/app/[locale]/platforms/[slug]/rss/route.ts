@@ -1,22 +1,7 @@
 // app/[[...locale]]/platforms/[slug]/rss/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { getTranslations } from 'next-intl/server';
-import { resolveArticleImageUrl } from '@/lib/articleImageUrl';
-
-// Interface for Article based on GraphQL response
-interface Article {
-  id: number;
-  title: string;
-  slug: string;
-  description: string;
-  createdAt: string;
-  mainImage: string | null;
-  images: { url: string }[];
-  ver: string | null;
-  engine: { name: string } | null;
-  platforms: { name: string }[];
-  sequentialCode: string | null;
-}
+import { createChanomhubClient, type ArticleListItem } from '@/lib/chanomhub-sdk';
 
 // Updated interface to match Next.js expectations
 interface RouteParams {
@@ -27,59 +12,16 @@ interface RouteParams {
 const SUPPORTED_LOCALES = ['en', 'th', 'ja', 'ko'];
 const DEFAULT_LOCALE = 'en';
 
-const API_URL = process.env.API_URL || 'https://api.chanomhub.online';
 const FRONTEND_URL = process.env.frontend || 'https://chanomhub.online';
 
-async function fetchArticles(slug: string): Promise<Article[]> {
-  const query = `query RSSArticles($platform: String!) {
-    articles(filter: { platform: $platform }, status: PUBLISHED, limit: 20) {
-      id
-      title
-      slug
-      description
-      createdAt
-      mainImage
-      images {
-        url
-      }
-      ver
-      engine {
-        name
-      }
-      platforms {
-        name
-      }
-      sequentialCode
-    }
-  }`;
+// Create SDK client
+const sdk = createChanomhubClient();
 
-  const res = await fetch(`${API_URL}/api/graphql`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-    },
-    body: JSON.stringify({
-      query,
-      variables: { platform: slug },
-    }),
-    next: { revalidate: 0 }, // Remove cache
-  });
-
-  if (!res.ok) {
-    const errorText = await res.text();
-    throw new Error(`Failed to fetch articles: ${res.status} ${res.statusText} - ${errorText}`);
-  }
-
-  const json = await res.json();
-  if (json.errors) {
-    throw new Error(`GraphQL Error: ${json.errors.map((e: any) => e.message).join(', ')}`);
-  }
-
-  return json.data.articles || [];
+async function fetchArticles(slug: string): Promise<ArticleListItem[]> {
+  return sdk.articles.getByPlatform(slug, { limit: 20 });
 }
 
-async function generateRSSFeed(articles: Article[], platformName: string, locale: string) {
+async function generateRSSFeed(articles: ArticleListItem[], platformName: string, locale: string) {
   const siteURL = FRONTEND_URL;
   const platformSlug = encodeURIComponent(platformName);
   const feedURL = `${siteURL}/${locale}/platforms/${platformSlug}/rss`;
@@ -109,7 +51,7 @@ async function generateRSSFeed(articles: Article[], platformName: string, locale
 
   articles.forEach((article) => {
     // Check if platform matches (redundant if API filters correctly, but good for safety)
-    const platformList = article.platforms.map(p => p.name);
+    const platformList = article.platforms?.map(p => p.name) || [];
     if (!platformList.map((p) => p.toLowerCase()).includes(platformName.toLowerCase())) {
       // console.warn(`Article ${article.id} skipped: platformList does not include ${platformName}`);
       // return; 
@@ -141,28 +83,24 @@ async function generateRSSFeed(articles: Article[], platformName: string, locale
     <pubDate>${articleDate}</pubDate>
     <description>${escapeXML(article.description || '')}</description>
     <ver>${escapeXML(article.ver || '')}</ver>
-    <engine>${escapeXML(article.engine?.name || '')}</engine>
+    <engine>${escapeXML(typeof article.engine === 'object' ? article.engine?.name || '' : '')}</engine>
     <sequentialCode>${escapeXML(article.sequentialCode || '')}</sequentialCode>
     <platformList>${escapeXML(platformName)}</platformList>
 `;
 
+    // Add mainImage (already transformed by SDK)
     if (article.mainImage) {
-      const resolvedMainImage = resolveArticleImageUrl(article.mainImage);
-      if (resolvedMainImage) {
-        xml += `
-    <media:content url="${escapeXML(resolvedMainImage)}" medium="image" />
+      xml += `
+    <media:content url="${escapeXML(article.mainImage)}" medium="image" />
 `;
-      }
     }
 
+    // Add images (already transformed by SDK)
     if (article.images && article.images.length > 0) {
       article.images.forEach((image) => {
-        const resolvedImageUrl = resolveArticleImageUrl(image.url);
-        if (resolvedImageUrl) {
-          xml += `
-    <media:content url="${escapeXML(resolvedImageUrl)}" medium="image" />
+        xml += `
+    <media:content url="${escapeXML(image.url)}" medium="image" />
 `;
-        }
       });
     }
 

@@ -11,7 +11,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import ErrorCard from '../../components/ErrorCard';
 import { getTranslations } from 'next-intl/server';
 import ImageWithFallback from '@/components/ImageWithFallback';
-import { resolveArticleImageUrl } from '@/lib/articleImageUrl';
+import { createChanomhubClient } from '@/lib/chanomhub-sdk';
 
 // Define types for filter
 type FilterType = 'platforms' | 'tag' | 'category';
@@ -23,121 +23,61 @@ interface DynamicFilterPageProps {
     locale: string;
   }>;
   filterType: FilterType;
-  hasRss?: boolean; // Optional: whether to show RSS link
+  hasRss?: boolean;
 }
 
-// Fetch articles based on filter type using GraphQL
+// Create SDK client
+const sdk = createChanomhubClient();
+
+// Fetch articles using SDK
 async function fetchArticles(slug: string, locale: string, filterType: FilterType): Promise<ArticlesResponse> {
   const decodedSlug = decodeURIComponent(slug);
-  const apiUrl = `${process.env.API_URL || 'https://api.chanomhub.online'}/api/graphql`;
 
-  let filterArg = '';
+  let articlesData;
+
   if (filterType === 'platforms') {
-    filterArg = `platform: "${decodedSlug}"`;
+    articlesData = await sdk.articles.getByPlatform(decodedSlug, { limit: 50 });
   } else if (filterType === 'tag') {
-    filterArg = `tag: "${decodedSlug}"`;
-  } else if (filterType === 'category') {
-    filterArg = `category: "${decodedSlug}"`;
+    articlesData = await sdk.articles.getByTag(decodedSlug, { limit: 50 });
+  } else {
+    articlesData = await sdk.articles.getByCategory(decodedSlug, { limit: 50 });
   }
 
-  const query = `query DynamicFilterArticles {
-    articles(filter: { ${filterArg} }, status: PUBLISHED, limit: 50) {
-      id
-      title
-      slug
-      description
-      createdAt
-      favoritesCount
-      mainImage
-      images {
-        url
-      }
-      ver
-      engine {
-        name
-      }
-      platforms {
-        name
-      }
-      tags {
-        name
-      }
-      categories {
-        name
-      }
-      author {
-        name
-        image
-      }
-      sequentialCode
-    }
-  }`;
-
-  // Note: We are fetching up to 50 items. For full pagination, we would need to implement it properly.
-  // The REST API returned 'articlesCount', but the simple 'articles' query might not return total count directly
-  // unless we use a paginated query structure if available.
-  // For now, we'll use the length of returned articles as a proxy or if the API supports a separate count query.
-  // Given the previous REST API usage, let's stick to fetching the list.
-
-  const res = await fetch(apiUrl, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-    },
-    body: JSON.stringify({ query }),
-    next: { revalidate: 60 },
-  });
-
-  if (!res.ok) {
-    throw new Error(`Failed to fetch articles for ${filterType}`);
-  }
-
-  const json = await res.json();
-  if (json.errors) {
-    console.error('GraphQL Errors:', json.errors);
-    throw new Error(`GraphQL Error: ${json.errors.map((e: any) => e.message).join(', ')}`);
-  }
-
-  const articlesData = json.data.articles || [];
-
-  // Map GraphQL data to Article interface
-  const articles = articlesData.map((item: any) => ({
+  // Map SDK response to ArticleList format
+  const articles = articlesData.map((item) => ({
     id: item.id,
     title: item.title,
     slug: item.slug,
     description: item.description,
     createdAt: item.createdAt,
-    favoritesCount: item.favoritesCount || 0,
-    mainImage: resolveArticleImageUrl(item.mainImage) || '',
-    images: item.images?.map((img: any) => resolveArticleImageUrl(img.url) || '') || [],
-    ver: item.ver,
-    engine: item.engine, // Object or null
-    platformList: item.platforms?.map((p: any) => p.name) || [],
-    tagList: item.tags?.map((t: any) => t.name) || [],
-    categoryList: item.categories?.map((c: any) => c.name) || [],
+    favoritesCount: item.favoritesCount,
+    mainImage: item.mainImage || '',
+    images: item.images?.map(img => img.url) || [],
+    ver: item.ver ?? undefined,
+    engine: item.engine,
+    platformList: item.platforms?.map(p => p.name) || [],
+    tagList: item.tags?.map(t => t.name) || [],
+    categoryList: item.categories?.map(c => c.name) || [],
     author: {
       name: item.author?.name || 'Unknown',
-      image: resolveArticleImageUrl(item.author?.image) || '',
-      // Default values for missing fields
+      image: item.author?.image || '',
       bio: '',
       backgroundImage: '',
       following: false
     },
-    sequentialCode: item.sequentialCode,
-    // Default values for fields not in this specific GraphQL query but in interface
+    sequentialCode: item.sequentialCode ?? undefined,
     excerpt: '',
     publishedAt: item.createdAt,
     body: '',
     version: 0,
-    favorited: false,
-    updatedAt: item.createdAt,
+    favorited: item.favorited ?? false,
+    updatedAt: item.updatedAt,
     status: 'PUBLISHED',
   }));
 
   return {
     articles,
-    articlesCount: articles.length, // Approximate count based on fetched limit
+    articlesCount: articles.length,
   };
 }
 

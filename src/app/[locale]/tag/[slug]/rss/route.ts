@@ -1,24 +1,7 @@
 // app/[[...locale]]/tag/[slug]/rss/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { getTranslations } from 'next-intl/server';
-import { resolveArticleImageUrl } from '@/lib/articleImageUrl';
-
-// Interface for Article based on GraphQL response
-interface Article {
-  id: number;
-  title: string;
-  slug: string;
-  description: string;
-  createdAt: string;
-  mainImage: string | null;
-  images: { url: string }[];
-  ver: string | null;
-  engine: { name: string } | null;
-  sequentialCode: string | null;
-  author: {
-    name: string; // Changed from username to name as per GraphQL schema
-  };
-}
+import { createChanomhubClient, type ArticleListItem } from '@/lib/chanomhub-sdk';
 
 // Updated interface to match Next.js expectations
 interface RouteParams {
@@ -29,59 +12,16 @@ interface RouteParams {
 const SUPPORTED_LOCALES = ['en', 'th', 'ja', 'ko'];
 const DEFAULT_LOCALE = 'en';
 
-const API_URL = process.env.API_URL || 'https://api.chanomhub.online';
 const FRONTEND_URL = process.env.frontend || 'https://chanomhub.online';
 
-async function fetchArticles(slug: string): Promise<Article[]> {
-  const query = `query RSSTagArticles($tag: String!) {
-    articles(filter: { tag: $tag }, status: PUBLISHED, limit: 20) {
-      id
-      title
-      slug
-      description
-      createdAt
-      mainImage
-      images {
-        url
-      }
-      ver
-      engine {
-        name
-      }
-      sequentialCode
-      author {
-        name
-      }
-    }
-  }`;
+// Create SDK client
+const sdk = createChanomhubClient();
 
-  const res = await fetch(`${API_URL}/api/graphql`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-    },
-    body: JSON.stringify({
-      query,
-      variables: { tag: slug },
-    }),
-    next: { revalidate: 0 }, // Remove cache
-  });
-
-  if (!res.ok) {
-    const errorText = await res.text();
-    throw new Error(`Failed to fetch articles: ${res.status} ${res.statusText} - ${errorText}`);
-  }
-
-  const json = await res.json();
-  if (json.errors) {
-    throw new Error(`GraphQL Error: ${json.errors.map((e: any) => e.message).join(', ')}`);
-  }
-
-  return json.data.articles || [];
+async function fetchArticles(slug: string): Promise<ArticleListItem[]> {
+  return sdk.articles.getByTag(slug, { limit: 20 });
 }
 
-async function generateRSSFeed(articles: Article[], tagName: string, locale: string) {
+async function generateRSSFeed(articles: ArticleListItem[], tagName: string, locale: string) {
   const siteURL = FRONTEND_URL;
   const tagSlug = encodeURIComponent(tagName);
   const feedURL = `${siteURL}/${locale}/tag/${tagSlug}/rss`;
@@ -134,29 +74,23 @@ async function generateRSSFeed(articles: Article[], tagName: string, locale: str
     <description>${escapeXML(article.description || '')}</description>
     <author>${escapeXML(article.author?.name || '')}</author>
     <ver>${escapeXML(article.ver || '')}</ver>
-    <engine>${escapeXML(article.engine?.name || '')}</engine>
+    <engine>${escapeXML(typeof article.engine === 'object' ? article.engine?.name || '' : '')}</engine>
     <sequentialCode>${escapeXML(article.sequentialCode || '')}</sequentialCode>
 `;
 
-    // Add mainImage as a media:content element
+    // Add mainImage (already transformed by SDK)
     if (article.mainImage) {
-      const resolvedMainImage = resolveArticleImageUrl(article.mainImage);
-      if (resolvedMainImage) {
-        xml += `
-    <media:content url="${escapeXML(resolvedMainImage)}" medium="image" />
+      xml += `
+    <media:content url="${escapeXML(article.mainImage)}" medium="image" />
 `;
-      }
     }
 
-    // Add additional images as media:content elements
+    // Add images (already transformed by SDK)
     if (article.images && article.images.length > 0) {
       article.images.forEach((image) => {
-        const resolvedImageUrl = resolveArticleImageUrl(image.url);
-        if (resolvedImageUrl) {
-          xml += `
-    <media:content url="${escapeXML(resolvedImageUrl)}" medium="image" />
+        xml += `
+    <media:content url="${escapeXML(image.url)}" medium="image" />
 `;
-        }
       });
     }
 
