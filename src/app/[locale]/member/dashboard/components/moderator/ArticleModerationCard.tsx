@@ -9,6 +9,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Textarea } from '@/components/ui/textarea';
+import { resolveArticleImageUrl } from '@/lib/articleImageUrl';
 
 // Types matching new backend API
 export type RequestStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'NEEDS_REVISION';
@@ -157,7 +158,7 @@ export const ArticleModerationCard: React.FC<ArticleModerationCardProps> = ({
                     <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800 flex-shrink-0">
                         {article.mainImage ? (
                             <img
-                                src={article.mainImage}
+                                src={resolveArticleImageUrl(article.mainImage) || ''}
                                 alt={article.title}
                                 className="w-full h-full object-cover"
                             />
@@ -217,7 +218,7 @@ export const ArticleModerationCard: React.FC<ArticleModerationCardProps> = ({
                                         {article.images.slice(0, 5).map((img, idx) => (
                                             <img
                                                 key={idx}
-                                                src={img.url}
+                                                src={resolveArticleImageUrl(img.url) || ''}
                                                 alt={`Screenshot ${idx + 1}`}
                                                 className="h-20 w-auto rounded-md object-cover flex-shrink-0"
                                             />

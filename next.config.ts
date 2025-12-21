@@ -27,6 +27,7 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: 'via.placeholder.com', pathname: '/**' },
       { protocol: 'https', hostname: 'files.catbox.moe', pathname: '/**' },
       { protocol: 'https', hostname: 'i.ibb.co', pathname: '/**' },
+      { protocol: 'https', hostname: 'cdn.chanomhub.com', pathname: '/**' },
     ],
   },
   compiler: { removeConsole: process.env.NODE_ENV === 'production' },

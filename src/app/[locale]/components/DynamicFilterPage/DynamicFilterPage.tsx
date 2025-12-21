@@ -11,6 +11,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import ErrorCard from '../../components/ErrorCard';
 import { getTranslations } from 'next-intl/server';
 import ImageWithFallback from '@/components/ImageWithFallback';
+import { resolveArticleImageUrl } from '@/lib/articleImageUrl';
 
 // Define types for filter
 type FilterType = 'platforms' | 'tag' | 'category';
@@ -108,8 +109,8 @@ async function fetchArticles(slug: string, locale: string, filterType: FilterTyp
     description: item.description,
     createdAt: item.createdAt,
     favoritesCount: item.favoritesCount || 0,
-    mainImage: item.mainImage || '',
-    images: item.images?.map((img: any) => img.url) || [],
+    mainImage: resolveArticleImageUrl(item.mainImage) || '',
+    images: item.images?.map((img: any) => resolveArticleImageUrl(img.url) || '') || [],
     ver: item.ver,
     engine: item.engine, // Object or null
     platformList: item.platforms?.map((p: any) => p.name) || [],
@@ -117,7 +118,7 @@ async function fetchArticles(slug: string, locale: string, filterType: FilterTyp
     categoryList: item.categories?.map((c: any) => c.name) || [],
     author: {
       name: item.author?.name || 'Unknown',
-      image: item.author?.image || '',
+      image: resolveArticleImageUrl(item.author?.image) || '',
       // Default values for missing fields
       bio: '',
       backgroundImage: '',

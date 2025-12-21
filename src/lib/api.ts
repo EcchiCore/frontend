@@ -4,6 +4,7 @@
 
 
 import { Article } from "@/types/article";
+import { resolveArticleImageUrl, resolveArticleImageObject } from './articleImageUrl';
 
 export type PagedResponse<T> = {
   items: T[];
@@ -11,6 +12,31 @@ export type PagedResponse<T> = {
   page: number;
   pageSize: number;
 };
+
+/**
+ * Transform article image URLs from filename to full CDN URLs
+ * Partial version for list queries that may not include all fields
+ */
+function transformArticleImages(article: Partial<Article>): Partial<Article> {
+  return {
+    ...article,
+    mainImage: resolveArticleImageUrl(article.mainImage ?? null),
+    backgroundImage: resolveArticleImageUrl(article.backgroundImage ?? null),
+    coverImage: resolveArticleImageUrl(article.coverImage ?? null),
+    images: article.images
+      ? article.images
+        .map(img => resolveArticleImageObject(img))
+        .filter((img): img is { url: string } => img !== null)
+      : undefined,
+    author: article.author
+      ? {
+        ...article.author,
+        image: resolveArticleImageUrl(article.author.image ?? null),
+        backgroundImage: resolveArticleImageUrl(article.author.backgroundImage ?? null),
+      }
+      : undefined,
+  };
+}
 
 
 
@@ -164,7 +190,7 @@ export async function fetchArticles(params: Record<string, string | string[] | u
   const hasNextPage = allItems.length > pageSize;
 
   // Only return the requested number of items
-  const items = allItems.slice(0, pageSize);
+  const items = allItems.slice(0, pageSize).map(article => transformArticleImages(article) as Article);
 
   // Estimate total: if we have next page, total is at least current offset + items + 1
   // This allows pagination to work without knowing exact total
@@ -334,5 +360,5 @@ export async function fetchArticle(slug: string): Promise<Article | null> {
     throw new Error("GraphQL query failed");
   }
 
-  return data.article ?? null;
+  return data.article ? transformArticleImages(data.article) as Article : null;
 }

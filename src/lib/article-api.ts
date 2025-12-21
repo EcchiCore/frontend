@@ -1,4 +1,5 @@
 import { Article } from '@/types/article';
+import { resolveArticleImageUrl, resolveArticleImageObject } from './articleImageUrl';
 
 // ฟังก์ชันช่วยสำหรับเรียก GraphQL API
 async function graphqlRequest<T>(
@@ -64,6 +65,26 @@ async function graphqlRequest<T>(
     console.error(`[${operationName}] Request Failed:`, error);
     throw error;
   }
+}
+
+/**
+ * Transform article image URLs from filename to full CDN URLs
+ */
+function transformArticleImages(article: Article): Article {
+  return {
+    ...article,
+    mainImage: resolveArticleImageUrl(article.mainImage),
+    backgroundImage: resolveArticleImageUrl(article.backgroundImage),
+    coverImage: resolveArticleImageUrl(article.coverImage),
+    images: article.images
+      .map(img => resolveArticleImageObject(img))
+      .filter((img): img is { url: string } => img !== null),
+    author: {
+      ...article.author,
+      image: resolveArticleImageUrl(article.author.image),
+      backgroundImage: resolveArticleImageUrl(article.author.backgroundImage),
+    },
+  };
 }
 
 export async function fetchDownloadsByArticleId(
@@ -154,7 +175,7 @@ export async function fetchArticleAndDownloads(
     );
 
     return {
-      article: data.article ?? null,
+      article: data.article ? transformArticleImages(data.article) : null,
       downloads: data.downloads ?? null
     };
   } catch (error) {
@@ -211,7 +232,7 @@ export async function getArticleBySlug(slug: string, language?: string): Promise
     );
     console.log('Article data from API:', data.article);
     console.log('Author following status:', data.article?.author.following);
-    return data.article ?? null;
+    return data.article ? transformArticleImages(data.article) : null;
   } catch (error) {
     console.error(`Failed to fetch article by slug "${slug}":`, error);
     return null;

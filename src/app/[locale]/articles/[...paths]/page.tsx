@@ -43,6 +43,7 @@ export async function generateMetadata(props: ArticlePageProps): Promise<Metadat
   const mainImage = originalArticle.mainImage;
   const backgroundImage = originalArticle.backgroundImage;
 
+  // Use priority order for main image: coverImage > mainImage > backgroundImage
   if (coverImage) {
     mainImageUrl = coverImage;
   } else if (mainImage) {
@@ -51,10 +52,7 @@ export async function generateMetadata(props: ArticlePageProps): Promise<Metadat
     mainImageUrl = backgroundImage;
   }
 
-  // Replace domain if URL exists
-  if (mainImageUrl) {
-    mainImageUrl = mainImageUrl.replace(process.env.IMAGE_SOURCE_DOMAIN!, process.env.IMAGE_TARGET_DOMAIN!);
-  }
+  // URLs are already transformed by the API layer
 
   // Construct content path for hreflang and canonical
   const contentPath = constructContentPath(locale, paths);
@@ -87,11 +85,10 @@ function generateArticleJsonLd(
   locale: Locale,
   slug: string
 ) {
+  // Get main image URL - already transformed by API layer
   let mainImageUrl = article.mainImage || '';
 
-  if (mainImageUrl) {
-    mainImageUrl = mainImageUrl.replace(process.env.IMAGE_SOURCE_DOMAIN!, process.env.IMAGE_TARGET_DOMAIN!);
-  }
+  // URLs are already transformed by the API layer
 
   // Construct the correct article URL with locale
   const articleUrl = `${siteUrl}/${locale}/articles/${slug}`;

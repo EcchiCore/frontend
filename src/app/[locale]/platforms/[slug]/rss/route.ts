@@ -1,6 +1,7 @@
 // app/[[...locale]]/platforms/[slug]/rss/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { getTranslations } from 'next-intl/server';
+import { resolveArticleImageUrl } from '@/lib/articleImageUrl';
 
 // Interface for Article based on GraphQL response
 interface Article {
@@ -146,16 +147,22 @@ async function generateRSSFeed(articles: Article[], platformName: string, locale
 `;
 
     if (article.mainImage) {
-      xml += `
-    <media:content url="${escapeXML(article.mainImage)}" medium="image" />
+      const resolvedMainImage = resolveArticleImageUrl(article.mainImage);
+      if (resolvedMainImage) {
+        xml += `
+    <media:content url="${escapeXML(resolvedMainImage)}" medium="image" />
 `;
+      }
     }
 
     if (article.images && article.images.length > 0) {
       article.images.forEach((image) => {
-        xml += `
-    <media:content url="${escapeXML(image.url)}" medium="image" />
+        const resolvedImageUrl = resolveArticleImageUrl(image.url);
+        if (resolvedImageUrl) {
+          xml += `
+    <media:content url="${escapeXML(resolvedImageUrl)}" medium="image" />
 `;
+        }
       });
     }
 
