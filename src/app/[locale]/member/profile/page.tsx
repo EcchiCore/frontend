@@ -20,7 +20,7 @@ interface UserData {
 
 async function fetchUserData(token: string): Promise<{ userData: UserData | null; error: string | null }> {
   try {
-    const response = await fetch(`${process.env.API_URL || "https://api.chanomhub.online"}/api/user`, {
+    const response = await fetch(`${process.env.API_URL || "https://api.chanomhub.com"}/api/user`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },

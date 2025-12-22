@@ -1,7 +1,7 @@
 import GameUploadForm from './GameUploadForm';
 
 async function fetchTags() {
-  const response = await fetch('https://api.chanomhub.online/api/tags', { next: { revalidate: 3600 } }); // Revalidate every hour
+  const response = await fetch(`${process.env.API_URL || 'https://api.chanomhub.com'}/api/tags`, { next: { revalidate: 3600 } }); // Revalidate every hour
   if (!response.ok) {
     console.error('Failed to fetch tags from backend');
     return [];
@@ -12,7 +12,7 @@ async function fetchTags() {
 }
 
 async function fetchCategories() {
-  const response = await fetch('https://api.chanomhub.online/api/categories', { next: { revalidate: 3600 } }); // Revalidate every hour
+  const response = await fetch(`${process.env.API_URL || 'https://api.chanomhub.com'}/api/categories`, { next: { revalidate: 3600 } }); // Revalidate every hour
   if (!response.ok) {
     console.error('Failed to fetch categories from backend');
     return [];

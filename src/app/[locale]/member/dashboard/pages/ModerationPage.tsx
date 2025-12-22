@@ -34,7 +34,7 @@ import {
 import { BulkActionBar } from '../components/moderator/BulkActionBar';
 
 // API base URL
-const API_BASE_URL = 'https://api.chanomhub.online/api/graphql';
+const API_BASE_URL = `${process.env.NEXT_PUBLIC_API_URL || "https://api.chanomhub.com"}/api/graphql`;
 
 interface Statistics {
   totalGroups: number;

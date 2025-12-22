@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.chanomhub.online/api/graphql';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.chanomhub.com/api/graphql';
 
 interface ModerationRequest {
   id: number;

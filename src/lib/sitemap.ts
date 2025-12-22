@@ -15,7 +15,9 @@ export const chunkArray = <T>(array: T[], size: number): T[][] =>
     array.slice(i * size, i * size + size)
   );
 
-const GRAPHQL_ENDPOINT = `https://api.chanomhub.online/api/graphql`;
+const GRAPHQL_ENDPOINT = process.env.NEXT_PUBLIC_API_URL 
+  ? `${process.env.NEXT_PUBLIC_API_URL}/api/graphql` 
+  : `https://api.chanomhub.com/api/graphql`;
 
 const GET_ARTICLES = `
   query GetArticles($limit: Int!, $offset: Int!) {

@@ -11,7 +11,8 @@ const DiscordWidget = () => {
                 src="https://discord.com/widget?id=1008312874436939857&theme=dark"
                 width="100%"
                 height="500"
-                allowTransparency={true}
+                // @ts-expect-error - Custom attribute for Discord widget
+                allowtransparency="true"
                 frameBorder="0"
                 sandbox="allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-scripts"
                 className="w-full bg-[#313338]"

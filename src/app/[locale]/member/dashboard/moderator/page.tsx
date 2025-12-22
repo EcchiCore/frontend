@@ -51,7 +51,7 @@ interface Statistics {
 }
 
 // API base URL
-const API_BASE_URL = "https://api.chanomhub.online/api/graphql";
+const API_BASE_URL = `${process.env.NEXT_PUBLIC_API_URL || "https://api.chanomhub.com"}/api/graphql`;
 
 // Get auth token from cookies
 const getAuthToken = () => {

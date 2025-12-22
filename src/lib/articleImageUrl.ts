@@ -8,7 +8,7 @@
 
 // CDN Base URL - can be configured via environment variable
 const CDN_BASE_URL = process.env.NEXT_PUBLIC_CDN_URL || 'https://cdn.chanomhub.com';
-const API_URL = process.env.API_URL || 'https://api.chanomhub.online';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.chanomhub.com';
 
 /**
  * Resolves an article image URL.

@@ -80,7 +80,7 @@ export const submitGameUpload = createAsyncThunk(
 
         try {
             // 1. Create Article
-            const gameResponse = await fetch(`https://api.chanomhub.online/api/articles`, {
+            const gameResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://api.chanomhub.com'}/api/articles`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -101,7 +101,7 @@ export const submitGameUpload = createAsyncThunk(
             // 2. Add Downloads (if any)
             if (formData.downloads && formData.downloads.length > 0) {
                 for (const download of formData.downloads) {
-                    await fetch(`https://api.chanomhub.online/api/downloads`, {
+                    await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://api.chanomhub.com'}/api/downloads`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -115,7 +115,7 @@ export const submitGameUpload = createAsyncThunk(
             // 3. Add Purchase Sources (if any)
             if (formData.authorizedPurchaseSources && formData.authorizedPurchaseSources.length > 0) {
                 for (const source of formData.authorizedPurchaseSources) {
-                    await fetch(`https://api.chanomhub.online/api/official-download-sources`, {
+                    await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://api.chanomhub.com'}/api/official-download-sources`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',

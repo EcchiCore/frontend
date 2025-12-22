@@ -25,7 +25,7 @@ async function graphqlRequest<T>(
 
     console.log(`[${operationName}] Headers:`, headers);
 
-    const res = await fetch("https://api.chanomhub.online/api/graphql", {
+    const res = await fetch(`${process.env.API_URL || "https://api.chanomhub.com"}/api/graphql`, {
       method: "POST",
       headers,
       body: JSON.stringify({

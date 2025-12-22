@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ message: 'Missing required fields' }, { status: 400 });
     }
 
-    const backendResponse = await fetch('https://api.chanomhub.online/api/authorized-purchase-sources', {
+    const backendResponse = await fetch(`${process.env.API_URL || "https://api.chanomhub.com"}/api/authorized-purchase-sources`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

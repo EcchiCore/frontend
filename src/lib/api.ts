@@ -126,7 +126,7 @@ export async function fetchArticles(params: Record<string, string | string[] | u
 
   const variables = {}; // No variables are used now
 
-  const res = await fetch("https://api.chanomhub.online/api/graphql", {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "https://api.chanomhub.com"}/api/graphql`, {
     method: "POST",
     headers: {
       "accept": "application/graphql-response+json, application/json, multipart/mixed",
@@ -154,7 +154,7 @@ export async function fetchArticles(params: Record<string, string | string[] | u
   if (!res.ok) {
     const errorBody = await res.text();
     console.error('API error response:', errorBody);
-    throw new Error(`API error ${res.status} for URL: https://api.chanomhub.online/api/graphql`);
+    throw new Error(`API error ${res.status} for URL: ${process.env.NEXT_PUBLIC_API_URL || "https://api.chanomhub.com"}/api/graphql`);
   }
 
   const responseText = await res.text();
@@ -214,7 +214,7 @@ export async function fetchDownloadsByArticleId(articleId: number): Promise<Arti
     articleId,
   };
 
-  const res = await fetch("https://api.chanomhub.online/api/graphql", {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "https://api.chanomhub.com"}/api/graphql`, {
     method: "POST",
     headers: {
       "accept": "application/graphql-response+json, application/json, multipart/mixed",
@@ -242,7 +242,7 @@ export async function fetchDownloadsByArticleId(articleId: number): Promise<Arti
   if (!res.ok) {
     const errorBody = await res.text();
     console.error('API error response:', errorBody);
-    throw new Error(`API error ${res.status} for URL: https://api.chanomhub.online/api/graphql`);
+    throw new Error(`API error ${res.status} for URL: ${process.env.NEXT_PUBLIC_API_URL || "https://api.chanomhub.com"}/api/graphql`);
   }
 
   const { data, errors } = await res.json();
@@ -323,7 +323,7 @@ export async function fetchArticle(slug: string): Promise<Article | null> {
     slug,
   };
 
-  const res = await fetch("https://api.chanomhub.online/api/graphql", {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "https://api.chanomhub.com"}/api/graphql`, {
     method: "POST",
     headers: {
       "accept": "application/graphql-response+json, application/json, multipart/mixed",
@@ -350,7 +350,7 @@ export async function fetchArticle(slug: string): Promise<Article | null> {
   if (!res.ok) {
     const errorBody = await res.text();
     console.error('API error response:', errorBody);
-    throw new Error(`API error ${res.status} for URL: https://api.chanomhub.online/api/graphql`);
+    throw new Error(`API error ${res.status} for URL: ${process.env.NEXT_PUBLIC_API_URL || "https://api.chanomhub.com"}/api/graphql`);
   }
 
   const { data, errors } = await res.json();

@@ -78,7 +78,7 @@ interface Article {
   coverImageId?: string | null;
 }
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.chanomhub.online/api';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.chanomhub.com/api';
 const GRAPHQL_URL = `${API_URL}/api/graphql`;
 
 const getCookie = (name: string): string | null => {
