@@ -30,16 +30,19 @@ export default function Footer() {
 
                         <div className="flex items-center">
                             <a
-                                href="//www.dmca.com/Protection/Status.aspx?ID=eda58e9c-30be-4837-b22e-b013c541bba2"
-                                title="DMCA.com Protection Status"
+                                href="https://www.dmca.com/compliance/chanomhub.com"
+                                title="DMCA Compliance information for chanomhub.com"
+                                target="_blank"
+                                rel="noopener noreferrer"
                                 className="dmca-badge"
                             >
                                 <img
-                                    src="https://images.dmca.com/Badges/dmca-badge-w100-5x1-08.png?ID=eda58e9c-30be-4837-b22e-b013c541bba2"
-                                    alt="DMCA.com Protection Status"
+                                    src="https://www.dmca.com/img/dmca-compliant-grayscale.png"
+                                    alt="DMCA compliant image"
+                                    width={100}
+                                    height={50}
                                 />
                             </a>
-                            <Script src="https://images.dmca.com/Badges/DMCABadgeHelper.min.js" strategy="lazyOnload" />
                         </div>
                     </div>
                 </div>
