@@ -61,6 +61,21 @@ function Pager({
     return `?${usp.toString()}`
   }
 
+  // คำนวณช่วงหน้าที่จะแสดง (แสดง 5 หน้า โดยหน้าปัจจุบันอยู่กลาง)
+  const maxVisible = 5
+  let startPage = Math.max(1, page - Math.floor(maxVisible / 2))
+  let endPage = Math.min(pages, startPage + maxVisible - 1)
+
+  // ปรับ startPage ถ้า endPage ชนขอบ
+  if (endPage - startPage + 1 < maxVisible) {
+    startPage = Math.max(1, endPage - maxVisible + 1)
+  }
+
+  const pageNumbers = Array.from(
+    { length: endPage - startPage + 1 },
+    (_, i) => startPage + i
+  )
+
   return (
     <div className="flex items-center justify-center gap-2 pt-6 text-foreground">
       <Button asChild variant="outline" size="sm" disabled={page === 1}>
@@ -70,8 +85,16 @@ function Pager({
       </Button>
 
       <div className="flex items-center gap-2">
-        {Array.from({ length: Math.min(5, pages) }, (_, i) => {
-          const pageNum = i + 1
+        {startPage > 1 && (
+          <>
+            <Button asChild variant="outline" size="sm" className="min-w-[40px]">
+              <Link href={params(1)}>1</Link>
+            </Button>
+            {startPage > 2 && <span className="text-muted-foreground">...</span>}
+          </>
+        )}
+
+        {pageNumbers.map((pageNum) => {
           const isActive = pageNum === page
           return (
             <Button key={pageNum} asChild variant={isActive ? "default" : "outline"} size="sm" className="min-w-[40px]">
@@ -79,7 +102,15 @@ function Pager({
             </Button>
           )
         })}
-        {pages > 5 && <span className="text-muted-foreground">...</span>}
+
+        {endPage < pages && (
+          <>
+            {endPage < pages - 1 && <span className="text-muted-foreground">...</span>}
+            <Button asChild variant="outline" size="sm" className="min-w-[40px]">
+              <Link href={params(pages)}>{pages}</Link>
+            </Button>
+          </>
+        )}
       </div>
 
       <Button asChild variant="outline" size="sm" disabled={page === pages}>
