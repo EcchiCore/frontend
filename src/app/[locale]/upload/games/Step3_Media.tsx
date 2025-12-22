@@ -8,7 +8,7 @@ export const Step3_Media = () => {
   const dispatch = useAppDispatch();
 
   const getUploadUrl = () => {
-    return 'https://oi.chanomhub.online/upload';
+    return 'https://oi.chanomhub.com/upload';
   };
 
   const uploadFileWithRetry = async (file: File, uploadUrl: string, maxRetries = 3) => {
