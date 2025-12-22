@@ -2,7 +2,7 @@ import type { Article } from "@/types/article"
 import Link from "next/link"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Heart, Eye, Clock, Star } from "lucide-react"
+import { Heart, Clock } from "lucide-react"
 import Image from "next/image"
 
 export default function GameCard({ article }: { article: Article }) {
@@ -136,39 +136,27 @@ export default function GameCard({ article }: { article: Article }) {
                 />
               ) : (
                 <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center">
-          <span className="text-xs font-semibold text-primary">
-            {article.author.name.charAt(0).toUpperCase()}
-          </span>
+                  <span className="text-xs font-semibold text-primary">
+                    {article.author.name.charAt(0).toUpperCase()}
+                  </span>
                 </div>
               )}
               <span className="text-xs text-muted-foreground truncate">
-        {article.author.name}
-      </span>
+                {article.author.name}
+              </span>
             </div>
           )}
 
           {/* Stats */}
           <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground mt-auto pt-2 border-t border-border/40">
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-1 hover:text-primary transition-colors">
-                <Heart className="w-3.5 h-3.5" />
-                <span className="font-medium">{article.favoritesCount}</span>
-              </div>
-              <div className="flex items-center gap-1 hover:text-primary transition-colors">
-                <Eye className="w-3.5 h-3.5" />
-                <span className="font-medium">{Math.floor(Math.random() * 50000) + 1000}</span>
-              </div>
+            <div className="flex items-center gap-1 hover:text-primary transition-colors">
+              <Heart className="w-3.5 h-3.5" />
+              <span className="font-medium">{article.favoritesCount}</span>
             </div>
 
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-1 text-amber-500">
-                <Star className="w-3.5 h-3.5 fill-amber-500" />
-                <span className="font-medium">{(Math.random() * 2 + 3).toFixed(1)}</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <Clock className="w-3.5 h-3.5" />
-                <span>{getTimeAgo(article.createdAt)}</span>
-              </div>
+            <div className="flex items-center gap-1">
+              <Clock className="w-3.5 h-3.5" />
+              <span>{getTimeAgo(article.createdAt)}</span>
             </div>
           </div>
 

@@ -5,7 +5,7 @@ import ResultsSkeleton from "./components/ResultsSkeleton"
 import Navbar from "../components/Navbar"
 
 export const metadata = {
-  title: "เกม | ChanomHub",
+  title: "เกมคลับ",
   description: "ค้นหาและสำรวจเกมที่คุณชื่นชอบ",
 }
 
