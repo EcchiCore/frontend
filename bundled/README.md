@@ -1,1 +1,0 @@
-This folder contains the built output assets for the worker "chanomhub-frontend" generated at 2025-12-24T14:41:36.547Z.
