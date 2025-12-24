@@ -4,7 +4,7 @@
 
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
-import { Suspense } from 'react';
+import { Suspense, cache } from 'react';
 import Navbar from './../../components/Navbar';
 import ArticleContent from './components/ArticleContent';
 import ArticleBodyServer from './components/ArticleBodyServer';
@@ -20,7 +20,12 @@ import { getValidLocale, type Locale } from "@/utils/localeUtils";
 import { Article } from "@/types/article";
 import { getArticleBySlug, fetchArticleAndDownloads } from "@/lib/article-api";
 
-const siteUrl = process.env.FRONTEND || 'https://chanomhub.online';
+const siteUrl = process.env.FRONTEND || 'https://chanomhub.com';
+
+// Cache article fetch to deduplicate between generateMetadata and ArticlePage
+const getCachedArticle = cache(async (slug: string, locale: string) => {
+  return getArticleBySlug(slug, locale);
+});
 
 
 export async function generateMetadata(props: ArticlePageProps): Promise<Metadata> {
@@ -30,7 +35,7 @@ export async function generateMetadata(props: ArticlePageProps): Promise<Metadat
   const paths = params.paths;
   const slug = decodeURIComponent(paths[0]);
 
-  const originalArticle = await getArticleBySlug(slug, locale);
+  const originalArticle = await getCachedArticle(slug, locale);
   if (!originalArticle) {
     return {
       title: 'Article Not Found',
@@ -132,7 +137,7 @@ export default async function ArticlePage(props: ArticlePageProps) {
     originalArticle = result.article;
     downloads = result.downloads;
   } else {
-    originalArticle = await getArticleBySlug(slug, locale);
+    originalArticle = await getCachedArticle(slug, locale);
   }
 
   if (!originalArticle) {

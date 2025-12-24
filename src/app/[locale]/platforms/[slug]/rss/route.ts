@@ -12,7 +12,7 @@ interface RouteParams {
 const SUPPORTED_LOCALES = ['en', 'th', 'ja', 'ko'];
 const DEFAULT_LOCALE = 'en';
 
-const FRONTEND_URL = process.env.frontend || 'https://chanomhub.online';
+const FRONTEND_URL = process.env.frontend || 'https://chanomhub.com';
 
 // Create SDK client
 const sdk = createChanomhubClient();

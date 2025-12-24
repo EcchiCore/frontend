@@ -32,7 +32,7 @@ export const metadata: Metadata = {
   title: 'NST: Game Translator for Linux | Chanomhub',
   description: 'ดาวน์โหลด NST โปรแกรมแปลเกมสำหรับ Linux ที่เขียนด้วย C++ เพื่อประสิทธิภาพสูงสุด แปลเกมที่คุณชื่นชอบได้ง่ายๆ และทลายกำแพงภาษาในโลกของเกม',
   icons: {
-    icon: 'https://cdn.chanomhub.online/icon.png',
+    icon: 'https://cdn.chanomhub.com/icon.png',
   },
 };
 
@@ -329,7 +329,7 @@ export default async function NstPromotionPage() {
         <header className="mb-8 text-center">
           <div className="flex items-center justify-center gap-3 mb-2">
             <Image
-              src="https://cdn.chanomhub.online/icon.png"
+              src="/icon.png"
               alt="NST Icon"
               width={48}
               height={48}
@@ -359,7 +359,7 @@ export default async function NstPromotionPage() {
               </CardHeader>
               <CardContent>
                 <Image
-                  src="https://cdn.chanomhub.online/Screenshot_08-%E0%B8%81.%E0%B8%A2._15-15-36_10718.png"
+                  src="https://cdn.chanomhub.com/Screenshot_08-%E0%B8%81.%E0%B8%A2._15-15-36_10718.png"
                   alt="App screenshot"
                   width={1920}
                   height={1080}
@@ -429,13 +429,13 @@ export default async function NstPromotionPage() {
               </CardHeader>
               <CardContent className="grid grid-cols-2 gap-4">
                 <Button asChild variant="secondary">
-                  <a href="https://nst.chanomhub.online/NST-Linux-Dev-0.3.7z">
+                  <a href="https://nst.chanomhub.com/NST-Linux-Dev-0.3.7z">
                     <Download className="mr-2 h-4 w-4" />
                     Linux (v0.3)
                   </a>
                 </Button>
                 <Button asChild variant="secondary">
-                  <a href="https://nst.chanomhub.online/NST-Windows-Dev-0.3.7z">
+                  <a href="https://nst.chanomhub.com/NST-Windows-Dev-0.3.7z">
                     <Download className="mr-2 h-4 w-4" />
                     Windows (v0.3)
                   </a>

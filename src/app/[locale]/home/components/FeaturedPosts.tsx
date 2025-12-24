@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 import Link from 'next/link';
 
@@ -45,6 +45,70 @@ function getRelativeTime(dateString: string): string {
   return new Date(dateString).toLocaleDateString('th-TH', { day: 'numeric', month: 'short' });
 }
 
+// Separate component for each post row to properly use React hooks
+function PostRow({ post, index }: { post: Article; index: number }) {
+  const [timeString, setTimeString] = useState("");
+
+  useEffect(() => {
+    setTimeString(getRelativeTime(post.createdAt));
+  }, [post.createdAt]);
+
+  // Generate mock data for replies and views (deterministic based on ID to avoid hydration mismatch)
+  const replies = (post.id * 7) % 70 + 12;
+  const views = (post.id * 13) % 900 + 145;
+  const relativeTime = timeString || "";
+
+  return (
+    <tr
+      className={`border-b border-border last:border-b-0 hover:bg-accent/30 transition-colors ${index % 2 === 1 ? 'bg-muted/20' : ''
+        }`}
+    >
+      {/* Title Column */}
+      <td className="px-2 py-1.5 text-foreground  ">
+        <Link
+          href={`/articles/${post.slug}?id=${post.id}`}
+          className="hover:text-primary hover:underline font-medium line-clamp-2 sm:line-clamp-1"
+          title={post.description}
+        >
+          {post.title}
+        </Link>
+        {/* Show author and category on mobile */}
+        <div className="md:hidden text-[10px] text-muted-foreground mt-0.5 space-x-2">
+          <span>โดย {post.author.name}</span>
+          <span>• {relativeTime}</span>
+        </div>
+      </td>
+
+      {/* Author Column - Hidden on mobile */}
+      <td className="px-2 py-1.5 text-muted-foreground hidden md:table-cell truncate">
+        {post.author.name}
+      </td>
+
+      {/* Category Column - Hidden on tablet and below */}
+      <td className="px-2 py-1.5 hidden lg:table-cell">
+        <span className="text-[10px] px-1.5 py-0.5 bg-primary/10 text-primary rounded truncate inline-block max-w-full">
+          {post.categories[0]?.name || 'ทั่วไป'}
+        </span>
+      </td>
+
+      {/* Replies Column - Hidden on laptop and below */}
+      <td className="px-2 py-1.5 text-center text-muted-foreground hidden xl:table-cell">
+        {replies}
+      </td>
+
+      {/* Views Column - Hidden on laptop and below */}
+      <td className="px-2 py-1.5 text-center text-muted-foreground hidden xl:table-cell">
+        {views.toLocaleString()}
+      </td>
+
+      {/* Last Post Column - Hidden on mobile */}
+      <td className="px-2 py-1.5 text-muted-foreground hidden sm:table-cell whitespace-nowrap">
+        {relativeTime}
+      </td>
+    </tr>
+  );
+}
+
 // ลบ title ออกจากการรับค่า function
 export default function FeaturedPosts({ posts, loading }: FeaturedPostsProps) {
   if (loading) {
@@ -73,72 +137,9 @@ export default function FeaturedPosts({ posts, loading }: FeaturedPostsProps) {
             </tr>
           </thead>
           <tbody>
-            {posts.map((post, index) => {
-              // Generate mock data for replies and views
-              // Generate mock data for replies and views (deterministic based on ID to avoid hydration mismatch)
-              const replies = (post.id * 7) % 70 + 12;
-              const views = (post.id * 13) % 900 + 145;
-
-              // Use client-side only relative time to avoid hydration mismatch and new Date() server error
-              const [timeString, setTimeString] = React.useState("");
-
-              React.useEffect(() => {
-                setTimeString(getRelativeTime(post.createdAt));
-              }, [post.createdAt]);
-
-              const relativeTime = timeString || "";
-
-              return (
-                <tr
-                  key={post.id}
-                  className={`border-b border-border last:border-b-0 hover:bg-accent/30 transition-colors ${index % 2 === 1 ? 'bg-muted/20' : ''
-                    }`}
-                >
-                  {/* Title Column */}
-                  <td className="px-2 py-1.5 text-foreground  ">
-                    <Link
-                      href={`/articles/${post.slug}?id=${post.id}`}
-                      className="hover:text-primary hover:underline font-medium line-clamp-2 sm:line-clamp-1"
-                      title={post.description}
-                    >
-                      {post.title}
-                    </Link>
-                    {/* Show author and category on mobile */}
-                    <div className="md:hidden text-[10px] text-muted-foreground mt-0.5 space-x-2">
-                      <span>โดย {post.author.name}</span>
-                      <span>• {relativeTime}</span>
-                    </div>
-                  </td>
-
-                  {/* Author Column - Hidden on mobile */}
-                  <td className="px-2 py-1.5 text-muted-foreground hidden md:table-cell truncate">
-                    {post.author.name}
-                  </td>
-
-                  {/* Category Column - Hidden on tablet and below */}
-                  <td className="px-2 py-1.5 hidden lg:table-cell">
-                    <span className="text-[10px] px-1.5 py-0.5 bg-primary/10 text-primary rounded truncate inline-block max-w-full">
-                      {post.categories[0]?.name || 'ทั่วไป'}
-                    </span>
-                  </td>
-
-                  {/* Replies Column - Hidden on laptop and below */}
-                  <td className="px-2 py-1.5 text-center text-muted-foreground hidden xl:table-cell">
-                    {replies}
-                  </td>
-
-                  {/* Views Column - Hidden on laptop and below */}
-                  <td className="px-2 py-1.5 text-center text-muted-foreground hidden xl:table-cell">
-                    {views.toLocaleString()}
-                  </td>
-
-                  {/* Last Post Column - Hidden on mobile */}
-                  <td className="px-2 py-1.5 text-muted-foreground hidden sm:table-cell whitespace-nowrap">
-                    {relativeTime}
-                  </td>
-                </tr>
-              );
-            })}
+            {posts.map((post, index) => (
+              <PostRow key={post.id} post={post} index={index} />
+            ))}
           </tbody>
         </table>
       </div>

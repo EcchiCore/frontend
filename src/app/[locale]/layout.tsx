@@ -156,7 +156,7 @@ export default async function LocaleSegmentLayout({
           }}
         />
 
-        <link rel="webmention" href="https://webmention.io/chanomhub.online/webmention" />
+        <link rel="webmention" href="https://webmention.io/chanomhub.com/webmention" />
 
         {/* Google Tag Manager */}
         <Script id="google-tag-manager" strategy="lazyOnload">

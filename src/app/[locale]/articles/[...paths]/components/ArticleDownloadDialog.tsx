@@ -28,7 +28,6 @@ const ArticleDownloadDialog: React.FC<ArticleDownloadDialogProps> = ({
   openDownloadDialog,
   setOpenDownloadDialog,
 }) => {
-  console.log("Downloads received in ArticleDownloadDialog:", downloads);
   const t = useTranslations('ArticleContent');
   const {
     searchQuery,

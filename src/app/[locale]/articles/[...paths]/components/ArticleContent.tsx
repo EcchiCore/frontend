@@ -49,7 +49,6 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
   slug,
   downloads,
 }) => {
-  console.log("Downloads prop in ArticleContent:", downloads);
   const t = useTranslations('ArticleContent');
   const {
     isFavorited,

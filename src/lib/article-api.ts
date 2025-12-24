@@ -12,8 +12,7 @@ async function graphqlRequest<T>(
     const cookieStore = await cookies();
     const token = cookieStore.get('token')?.value;
 
-    console.log(`[${operationName}] Token found:`, !!token);
-    console.log(`[${operationName}] Token value:`, token ? `${token.substring(0, 20)}...` : 'none');
+
 
     const headers: Record<string, string> = {
       "content-type": "application/json",
@@ -23,7 +22,7 @@ async function graphqlRequest<T>(
       headers["Authorization"] = `Bearer ${token}`;
     }
 
-    console.log(`[${operationName}] Headers:`, headers);
+
 
     const res = await fetch(`${process.env.API_URL || "https://api.chanomhub.com"}/api/graphql`, {
       method: "POST",
@@ -38,7 +37,7 @@ async function graphqlRequest<T>(
     });
 
     // Log response status สำหรับ debug
-    console.log(`[${operationName}] Status:`, res.status);
+
 
     if (!res.ok) {
       const errorText = await res.text();
@@ -53,7 +52,7 @@ async function graphqlRequest<T>(
     const json = await res.json();
 
     // Log response สำหรับ debug
-    console.log(`[${operationName}] Response:`, json);
+
 
     if (json.errors) {
       console.error(`[${operationName}] GraphQL Errors:`, json.errors);
@@ -230,8 +229,7 @@ export async function getArticleBySlug(slug: string, language?: string): Promise
       { slug, language },
       "ArticleBySlug"
     );
-    console.log('Article data from API:', data.article);
-    console.log('Author following status:', data.article?.author.following);
+
     return data.article ? transformArticleImages(data.article) : null;
   } catch (error) {
     console.error(`Failed to fetch article by slug "${slug}":`, error);

@@ -338,8 +338,8 @@ export default async function PrivacyPolicy() {
                   <Badge variant="secondary" className="text-lg p-2 bg-gray-700 text-gray-200">🌐</Badge>
                   <span className="text-lg font-semibold text-gray-100">{t('contact.website')}</span>
                 </div>
-                <a href="https://chanomhub.online/contact" className="text-lg text-blue-400 hover:underline">
-                  https://chanomhub.online/contact
+                <a href="/contact" className="text-lg text-blue-400 hover:underline">
+                  /contact
                 </a>
                 <p className="mt-4 text-sm text-gray-400">
                   {t('contact.response')}

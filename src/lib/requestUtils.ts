@@ -32,5 +32,5 @@ export const getRequestUrl = async (): Promise<string> => {
   }
 
   // Fallback สุดท้าย
-  return 'https://chanomhub.online';
+  return 'https://chanomhub.com';
 };

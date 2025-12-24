@@ -12,7 +12,6 @@ const withMDXEnhanced = withMDX({
 
 // Next.js configuration
 const nextConfig: NextConfig = {
-  cacheComponents: true,
   images: {
     qualities: [25, 50, 75],
     remotePatterns: [
