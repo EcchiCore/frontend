@@ -1,5 +1,8 @@
 // app/[locale]/articles/[...paths]/page.tsx
 
+// Force dynamic rendering to fix Netlify plugin incompatibility with Next.js 16 PPR
+export const dynamic = 'force-dynamic';
+
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import { Suspense } from 'react';
