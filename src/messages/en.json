@@ -494,5 +494,12 @@
     "countdown": "seconds...",
     "Decrypting": "Decrypting link...",
     "Continue": "Continue to Content"
+  },
+  "CookieConsent": {
+    "title": "We use cookies",
+    "description": "We use cookies to enhance your browsing experience, serve personalized ads or content, and analyze our traffic. By clicking \"Accept\", you consent to our use of cookies.",
+    "accept": "Accept",
+    "decline": "Decline",
+    "settings": "Settings"
   }
 }
