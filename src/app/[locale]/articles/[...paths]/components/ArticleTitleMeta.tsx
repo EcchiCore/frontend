@@ -305,6 +305,7 @@ const ArticleTitleMeta: React.FC<ArticleTitleMetaProps> = ({ article, isDarkMode
                   onError={() => handleImageError(selectedImageIndex)}
                   onLoad={() => setIsLoading(false)}
                   priority={selectedImageIndex === 0}
+                  loading={selectedImageIndex === 0 ? "eager" : "lazy"}
                   loader={myImageLoader}
                 />
               );

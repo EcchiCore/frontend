@@ -14,6 +14,8 @@ const withMDXEnhanced = withMDX({
 const nextConfig: NextConfig = {
   images: {
     qualities: [25, 50, 75],
+    formats: ['image/avif', 'image/webp'],
+    minimumCacheTTL: 31536000, // 1 year
     remotePatterns: [
       { protocol: 'http', hostname: 'res.cloudinary.com', pathname: '/**' },
       { protocol: 'https', hostname: 'res.cloudinary.com', pathname: '/**' },

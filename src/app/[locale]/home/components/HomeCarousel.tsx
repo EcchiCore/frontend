@@ -70,6 +70,8 @@ export default function HomeCarousel({ articles, loading }: HomeCarouselProps) {
                       sizes="(max-width: 768px) 100vw, 33vw"
                       className="object-cover"
                       onError={() => handleImageError(article.id)}
+                      priority={displayArticles.indexOf(article) === 0}
+                      loading={displayArticles.indexOf(article) === 0 ? "eager" : "lazy"}
                     />
                   ) : (
                     <div className="w-full h-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
