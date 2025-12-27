@@ -18,7 +18,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
   let messages;
   try {
     // Use dynamic import with fallback
-    messages = (await import(`../../messages/${locale}.json`)).default;
+    messages = (await import(`../messages/${locale}.json`)).default;
   } catch {
     // Final fallback to empty object to prevent production crash
     messages = {};

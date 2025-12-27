@@ -14,7 +14,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { toggleMobile } from '@/store/features/dashboard/dashboardSlice';
-import { logout } from '@/store/features/auth/authSlice';
+import { logoutUser } from '@/store/features/auth/authSlice';
 
 interface TopBarProps {
   title: string;
@@ -24,9 +24,9 @@ export const TopBarShadcn: React.FC<TopBarProps> = ({ title }) => {
   const dispatch = useAppDispatch();
   const user = useAppSelector((state) => state.auth.user);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     if (window.confirm('Are you sure you want to logout?')) {
-      dispatch(logout());
+      await dispatch(logoutUser());
       window.location.href = '/login';
     }
   };

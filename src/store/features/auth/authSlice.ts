@@ -2,6 +2,7 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { DashboardUser } from '@/app/[locale]/member/dashboard/utils/types';
 import { userApi, ApiError } from '@/app/[locale]/member/dashboard/utils/api';
+import { supabase } from "@/lib/supabaseClient";
 
 interface AuthState {
     user: DashboardUser | null;
@@ -108,6 +109,14 @@ export const loginUser = createAsyncThunk(
     async (token: string, { dispatch }) => {
         document.cookie = `token=${token}; path=/`;
         await dispatch(fetchUser());
+    }
+);
+
+export const logoutUser = createAsyncThunk(
+    'auth/logoutUser',
+    async (_, { dispatch }) => {
+        await supabase.auth.signOut();
+        dispatch(logout());
     }
 );
 

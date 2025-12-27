@@ -6,21 +6,31 @@ import { useRouter } from "next/navigation";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Cookies from 'js-cookie';
+import { supabase } from "@/lib/supabaseClient";
 
 const LogoutPage = () => {
   const router = useRouter();
 
+
+
   useEffect(() => {
-    // Remove the JWT token from cookies
-    Cookies.remove('token');
+    const performLogout = async () => {
+      // Remove the JWT token from cookies
+      Cookies.remove('token');
 
-    // Notify the user
-    toast.success("Logged out successfully! Redirecting to login...");
+      // Sign out from Supabase
+      await supabase.auth.signOut();
 
-    // Delay for 3 seconds before redirecting
-    setTimeout(() => {
-      router.push("/login");
-    }, 3000);
+      // Notify the user
+      toast.success("Logged out successfully! Redirecting to login...");
+
+      // Delay for 3 seconds before redirecting
+      setTimeout(() => {
+        router.push("/login");
+      }, 3000);
+    };
+
+    performLogout();
   }, [router]);
 
   return (

@@ -2,7 +2,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { DashboardUser } from '../utils/types';
 import { userApi, ApiError } from '../utils/api';
-
+import { supabase } from "@/lib/supabaseClient";
 const CACHE_KEY = 'dashboard_user';
 
 /**
@@ -70,7 +70,8 @@ export const useAuth = () => {
     await refreshUser();
   }, [refreshUser]);
 
-  const logout = useCallback(() => {
+  const logout = useCallback(async () => {
+    await supabase.auth.signOut();
     document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT';
     setUser(null);
     setError(null);
