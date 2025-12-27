@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Image from '@tiptap/extension-image';
@@ -64,6 +65,13 @@ const RichTextEditor = ({ content, onUpdate }: { content: string, onUpdate: (htm
     },
     immediatelyRender: false,
   });
+
+  // Sync content updates (e.g. from JSON import) to the editor
+  useEffect(() => {
+    if (editor && content !== editor.getHTML()) {
+      editor.commands.setContent(content);
+    }
+  }, [content, editor]);
 
   if (!editor) {
     return null;

@@ -13,6 +13,8 @@ import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { submitGameUpload, resetUploadState } from '@/store/features/upload/uploadSlice';
 import { toast } from 'sonner';
 
+import { JsonImportDialog } from './JsonImportDialog';
+
 export default function GameUploadForm({ availableTags, availableCategories }: { availableTags: string[]; availableCategories: string[]; }) {
   const dispatch = useAppDispatch();
   const { activeSection, status, ongoingUploads, error } = useAppSelector((state) => state.upload);
@@ -60,8 +62,9 @@ export default function GameUploadForm({ availableTags, availableCategories }: {
 
   return (
     <Card className="max-w-6xl mx-auto my-8">
-      <CardHeader>
-        <CardTitle>Upload a New Game</CardTitle>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-2xl font-bold">Upload a New Game</CardTitle>
+        <JsonImportDialog />
       </CardHeader>
       <CardContent className="grid grid-cols-1 md:grid-cols-4 gap-8">
         <div className="col-span-1">
