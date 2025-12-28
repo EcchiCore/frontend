@@ -2,18 +2,14 @@ import { Article } from '@/types/article';
 import { resolveArticleImageUrl, resolveArticleImageObject } from './articleImageUrl';
 
 // ฟังก์ชันช่วยสำหรับเรียก GraphQL API
+// Note: token parameter is optional - if not provided, request will be cached
 async function graphqlRequest<T>(
   query: string,
   variables: Record<string, any>,
-  operationName: string
+  operationName: string,
+  token?: string | null
 ): Promise<T> {
   try {
-    const { cookies } = await import('next/headers');
-    const cookieStore = await cookies();
-    const token = cookieStore.get('token')?.value;
-
-
-
     const headers: Record<string, string> = {
       "content-type": "application/json",
     };
@@ -21,8 +17,6 @@ async function graphqlRequest<T>(
     if (token) {
       headers["Authorization"] = `Bearer ${token}`;
     }
-
-
 
     const res = await fetch(`${process.env.API_URL || "https://api.chanomhub.com"}/api/graphql`, {
       method: "POST",
@@ -33,11 +27,9 @@ async function graphqlRequest<T>(
         operationName,
       }),
       credentials: "include",
-      ...(token ? { cache: 'no-store' } : { next: { revalidate: 3600 } })
+      // Only disable cache if we have a token (authenticated request)
+      ...(token ? { cache: 'no-store' as const } : { next: { revalidate: 3600 } })
     });
-
-    // Log response status สำหรับ debug
-
 
     if (!res.ok) {
       const errorText = await res.text();
@@ -51,9 +43,6 @@ async function graphqlRequest<T>(
 
     const json = await res.json();
 
-    // Log response สำหรับ debug
-
-
     if (json.errors) {
       console.error(`[${operationName}] GraphQL Errors:`, json.errors);
       throw new Error(`GraphQL Error: ${json.errors.map((e: any) => e.message).join(', ')}`);
@@ -63,6 +52,17 @@ async function graphqlRequest<T>(
   } catch (error) {
     console.error(`[${operationName}] Request Failed:`, error);
     throw error;
+  }
+}
+
+// Helper function to get token from cookies (only call when needed for authenticated requests)
+async function getAuthToken(): Promise<string | null> {
+  try {
+    const { cookies } = await import('next/headers');
+    const cookieStore = await cookies();
+    return cookieStore.get('token')?.value ?? null;
+  } catch {
+    return null;
   }
 }
 
@@ -184,11 +184,12 @@ export async function fetchArticleAndDownloads(
 }
 
 export async function getArticleBySlug(slug: string, language?: string): Promise<Article | null> {
+  // Note: This query intentionally excludes user-specific fields (favorited, following)
+  // to enable caching for anonymous users. User-specific data should be fetched client-side.
   const query = `query ArticleBySlug($slug: String!, $language: String) {
     article(slug: $slug, language: $language) {
       id
       author {
-        following
         id
         image
         name
@@ -204,7 +205,6 @@ export async function getArticleBySlug(slug: string, language?: string): Promise
         name
       }
       description
-      favorited
       favoritesCount
       mainImage
       images {

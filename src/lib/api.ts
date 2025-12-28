@@ -130,17 +130,7 @@ export async function fetchArticles(params: Record<string, string | string[] | u
     method: "POST",
     headers: {
       "accept": "application/graphql-response+json, application/json, multipart/mixed",
-      "accept-language": "en-US,en;q=0.7",
-      "cache-control": "no-cache",
       "content-type": "application/json",
-      "pragma": "no-cache",
-      "sec-ch-ua": "\"Brave\";v=\"141\", \"Not?A_Brand\";v=\"8\", \"Chromium\";v=\"141\"",
-      "sec-ch-ua-mobile": "?0",
-      "sec-ch-ua-platform": "\"Linux\"",
-      "sec-fetch-dest": "empty",
-      "sec-fetch-mode": "cors",
-      "sec-fetch-site": "same-origin",
-      "sec-gpc": "1"
     },
     body: JSON.stringify({
       query,
@@ -148,7 +138,7 @@ export async function fetchArticles(params: Record<string, string | string[] | u
       operationName: "MyQuery",
     }),
     credentials: "include",
-    next: { revalidate: 3600 }
+    next: { revalidate: 3600 }  // Cache for 1 hour, Vercel will revalidate in background
   });
 
   if (!res.ok) {
@@ -218,17 +208,7 @@ export async function fetchDownloadsByArticleId(articleId: number): Promise<Arti
     method: "POST",
     headers: {
       "accept": "application/graphql-response+json, application/json, multipart/mixed",
-      "accept-language": "en-US,en;q=0.7",
-      "cache-control": "no-cache",
       "content-type": "application/json",
-      "pragma": "no-cache",
-      "sec-ch-ua": "\"Brave\";v=\"141\", \"Not?A_Brand\";v=\"8\", \"Chromium\";v=\"141\"",
-      "sec-ch-ua-mobile": "?0",
-      "sec-ch-ua-platform": "\"Linux\"",
-      "sec-fetch-dest": "empty",
-      "sec-fetch-mode": "cors",
-      "sec-fetch-site": "same-origin",
-      "sec-gpc": "1"
     },
     body: JSON.stringify({
       query,
@@ -236,7 +216,7 @@ export async function fetchDownloadsByArticleId(articleId: number): Promise<Arti
       operationName: "DownloadsByArticleId",
     }),
     credentials: "include",
-    next: { revalidate: 3600 }
+    next: { revalidate: 3600 }  // Cache for 1 hour
   });
 
   if (!res.ok) {
@@ -327,16 +307,7 @@ export async function fetchArticle(slug: string): Promise<Article | null> {
     method: "POST",
     headers: {
       "accept": "application/graphql-response+json, application/json, multipart/mixed",
-      "accept-language": "en-US,en;q=0.7",
-      "cache-control": "no-cache",
       "content-type": "application/json",
-      "pragma": "no-cache",
-      "sec-ch-ua": "\"Brave\";v=\"141\", \"Not?A_Brand\";v=\"8\", \"Chromium\";v=\"141\"", "sec-ch-ua-mobile": "?0",
-      "sec-ch-ua-platform": "\"Linux\"",
-      "sec-fetch-dest": "empty",
-      "sec-fetch-mode": "cors",
-      "sec-fetch-site": "same-origin",
-      "sec-gpc": "1"
     },
     body: JSON.stringify({
       query,
@@ -344,7 +315,7 @@ export async function fetchArticle(slug: string): Promise<Article | null> {
       operationName: "MyQuery",
     }),
     credentials: "include",
-    next: { revalidate: 3600 }
+    next: { revalidate: 3600 }  // Cache for 1 hour
   });
 
   if (!res.ok) {
