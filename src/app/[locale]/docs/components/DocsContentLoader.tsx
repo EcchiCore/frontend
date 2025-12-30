@@ -1,30 +1,7 @@
-import React from "react";
-
-// Static imports for MDX content
-import Chanox2Installation from "../contents/chanox2/installation.mdx";
-import Chanox2GettingStarted from "../contents/chanox2/getting-started.mdx";
-import Chanox2Configuration from "../contents/chanox2/configuration.mdx";
-import Chanox2Troubleshooting from "../contents/chanox2/troubleshooting.mdx";
-import GeneralGettingStarted from "../contents/getting-started.mdx";
-import GeneralInstallation from "../contents/installation.mdx";
-import GeneralAdvancedFeatures from "../contents/advanced-features.mdx";
-import GeneralFaq from "../contents/faq.mdx";
-
-// Static content map
-const contentMap: Record<string, Record<string, React.ComponentType<any>>> = {
-    chanox2: {
-        installation: Chanox2Installation,
-        "getting-started": Chanox2GettingStarted,
-        configuration: Chanox2Configuration,
-        troubleshooting: Chanox2Troubleshooting,
-    },
-    general: {
-        "getting-started": GeneralGettingStarted,
-        installation: GeneralInstallation,
-        "advanced-features": GeneralAdvancedFeatures,
-        faq: GeneralFaq,
-    },
-};
+import fs from 'fs';
+import path from 'path';
+import { compileMDX } from 'next-mdx-remote/rsc';
+import { mdxComponents } from '../../components/mdx/MyComponent';
 
 interface DocsContentLoaderProps {
     product: string;
@@ -32,32 +9,37 @@ interface DocsContentLoaderProps {
     locale: string;
 }
 
-function ErrorMessage({ product, slug }: { product: string; slug: string }) {
-    return (
-        <div className="text-center py-12">
-            <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-red-400 text-2xl">⚠️</span>
+export default async function DocsContentLoader({ product, slug, locale }: DocsContentLoaderProps) {
+    // Construct path using process.cwd() for Vercel compatibility
+    // content is located at src/app/[locale]/docs/contents/[product]/[slug].mdx
+    const contentPath = path.join(process.cwd(), 'src/app/[locale]/docs/contents', product, `${slug}.mdx`);
+
+    try {
+        if (!fs.existsSync(contentPath)) {
+            return (
+                <div className="p-4 rounded-lg bg-red-50 text-red-500 border border-red-100 dark:bg-red-900/20 dark:text-red-400 dark:border-red-900/30">
+                    Content not found: {product}/{slug}
+                </div>
+            );
+        }
+
+        const source = fs.readFileSync(contentPath, 'utf8');
+
+        const { content } = await compileMDX({
+            source,
+            components: mdxComponents,
+            options: {
+                parseFrontmatter: true,
+            },
+        });
+
+        return content;
+    } catch (error) {
+        console.error('Error loading MDX:', error);
+        return (
+            <div className="p-4 rounded-lg bg-red-50 text-red-500 border border-red-100 dark:bg-red-900/20 dark:text-red-400 dark:border-red-900/30">
+                Error loading content: {(error as Error).message}
             </div>
-            <h3 className="text-xl font-semibold text-gray-100 mb-2">ไม่พบเนื้อหา</h3>
-            <p className="text-gray-400">
-                ไม่พบเนื้อหาสำหรับ &quot;{product}/{slug}&quot;
-            </p>
-        </div>
-    );
-}
-
-export default function DocsContentLoader({ product, slug, locale }: DocsContentLoaderProps) {
-    const productContent = contentMap[product];
-
-    if (!productContent || !productContent[slug]) {
-        return <ErrorMessage product={product} slug={slug} />;
+        );
     }
-
-    const Content = productContent[slug];
-
-    return (
-        <div className="mdx-content">
-            <Content />
-        </div>
-    );
 }
