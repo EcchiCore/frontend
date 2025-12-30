@@ -1,24 +1,16 @@
-// app/docs/components/DocsContentLoader.tsx
-"use client";
+import React from "react";
+import { MdxProvider } from "../../components/mdx/MdxContext";
+import Chanox2Installation from "../contents/chanox2/installation.mdx";
+import Chanox2GettingStarted from "../contents/chanox2/getting-started.mdx";
+import Chanox2Configuration from "../contents/chanox2/configuration.mdx";
+import Chanox2Troubleshooting from "../contents/chanox2/troubleshooting.mdx";
+import GeneralGettingStarted from "../contents/getting-started.mdx";
+import GeneralInstallation from "../contents/installation.mdx";
+import GeneralAdvancedFeatures from "../contents/advanced-features.mdx";
+import GeneralFaq from "../contents/faq.mdx";
 
-import { MDXProvider } from "@mdx-js/react";
-import { mdxComponents } from "../../components/mdx/MyComponent";
-
-// Lazy imports for code splitting while still being build-time compiled
-import dynamic from "next/dynamic";
-
-// Use dynamic with ssr: false to avoid SSR issues while keeping build-time compilation
-const Chanox2Installation = dynamic(() => import("../contents/chanox2/installation.mdx"), { ssr: false });
-const Chanox2GettingStarted = dynamic(() => import("../contents/chanox2/getting-started.mdx"), { ssr: false });
-const Chanox2Configuration = dynamic(() => import("../contents/chanox2/configuration.mdx"), { ssr: false });
-const Chanox2Troubleshooting = dynamic(() => import("../contents/chanox2/troubleshooting.mdx"), { ssr: false });
-const GeneralGettingStarted = dynamic(() => import("../contents/getting-started.mdx"), { ssr: false });
-const GeneralInstallation = dynamic(() => import("../contents/installation.mdx"), { ssr: false });
-const GeneralAdvancedFeatures = dynamic(() => import("../contents/advanced-features.mdx"), { ssr: false });
-const GeneralFaq = dynamic(() => import("../contents/faq.mdx"), { ssr: false });
-
-// Content map using dynamic components
-const contentMap: Record<string, Record<string, React.ComponentType>> = {
+// Static content map
+const contentMap: Record<string, Record<string, React.ComponentType<any>>> = {
     chanox2: {
         installation: Chanox2Installation,
         "getting-started": Chanox2GettingStarted,
@@ -53,7 +45,7 @@ function ErrorMessage({ product, slug }: { product: string; slug: string }) {
     );
 }
 
-export default function DocsContentLoader({ product, slug }: DocsContentLoaderProps) {
+export default function DocsContentLoader({ product, slug, locale }: DocsContentLoaderProps) {
     const productContent = contentMap[product];
 
     if (!productContent || !productContent[slug]) {
@@ -63,8 +55,10 @@ export default function DocsContentLoader({ product, slug }: DocsContentLoaderPr
     const Content = productContent[slug];
 
     return (
-        <MDXProvider components={mdxComponents}>
-            <Content />
-        </MDXProvider>
+        <MdxProvider locale={locale}>
+            <div className="mdx-content">
+                <Content />
+            </div>
+        </MdxProvider>
     );
 }
