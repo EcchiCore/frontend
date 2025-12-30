@@ -1,5 +1,4 @@
 import React from "react";
-import { MdxProvider } from "../../components/mdx/MdxContext";
 
 // Static imports for MDX content
 import Chanox2Installation from "../contents/chanox2/installation.mdx";
@@ -57,10 +56,8 @@ export default function DocsContentLoader({ product, slug, locale }: DocsContent
     const Content = productContent[slug];
 
     return (
-        <MdxProvider locale={locale}>
-            <div className="mdx-content">
-                <Content />
-            </div>
-        </MdxProvider>
+        <div className="mdx-content">
+            <Content />
+        </div>
     );
 }
