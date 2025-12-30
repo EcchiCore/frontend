@@ -56,6 +56,18 @@ export default async function ChanoX2Page() {
                                 The intelligent identifier and launcher for every game engine.
                                 <span className="text-slate-200 block mt-2">Built for speed. Designed for control.</span>
                             </p>
+                            <div className="flex flex-wrap items-center justify-center gap-4 mt-8">
+                                <Button size="lg" className="h-14 px-8 text-lg rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white border-0" asChild>
+                                    <Link href="#download">
+                                        ดาวน์โหลด
+                                    </Link>
+                                </Button>
+                                <Button size="lg" variant="outline" className="h-14 px-8 text-lg rounded-xl border-slate-600 hover:bg-slate-800 text-slate-200 bg-transparent" asChild>
+                                    <Link href="/docs/chanox2/installation">
+                                        คู่มือการติดตั้ง
+                                    </Link>
+                                </Button>
+                            </div>
                         </div>
 
                         {/* 3D Image Showcase */}

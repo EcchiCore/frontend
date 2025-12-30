@@ -4,14 +4,18 @@ import createNextIntlPlugin from 'next-intl/plugin';
 
 const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
 
-// Configure MDX
+// Configure MDX (without remark/rehype plugins for Turbopack compatibility)
 const withMDXEnhanced = withMDX({
   extension: /\.mdx?$/,
-  options: { remarkPlugins: [], rehypePlugins: [] },
 });
 
 // Next.js configuration
 const nextConfig: NextConfig = {
+  experimental: {
+    mdxRs: {
+      mdxType: 'gfm', // Enable GitHub Flavored Markdown (tables, strikethrough, etc.)
+    },
+  },
   images: {
     qualities: [25, 50, 75],
     formats: ['image/avif', 'image/webp'],

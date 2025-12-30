@@ -77,12 +77,12 @@ export const mdxComponents: MDXComponents = {
       <div className="relative bg-[#0a0a0f] border border-slate-700/50 rounded-lg p-6 overflow-x-auto my-8 shadow-2xl backdrop-blur-sm">
         <div className="absolute top-3 left-3 flex gap-2">
           <div className="w-3 h-3 bg-red-400 rounded-full animate-pulse"></div>
-          <div className="w-3 h-3 bg-yellow-400 rounded-full animate-pulse" style={{animationDelay: '0.2s'}}></div>
-          <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse" style={{animationDelay: '0.4s'}}></div>
+          <div className="w-3 h-3 bg-yellow-400 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
+          <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
         </div>
-        <div className="mt-6">
+        <pre className="mt-6 text-cyan-100 font-mono text-sm leading-relaxed whitespace-pre-wrap">
           {children}
-        </div>
+        </pre>
       </div>
     </div>
   ),
