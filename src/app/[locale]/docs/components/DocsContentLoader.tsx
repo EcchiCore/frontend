@@ -1,26 +1,31 @@
 // app/docs/components/DocsContentLoader.tsx
-"use client";
-
-import dynamic from "next/dynamic";
 import { MDXProvider } from "@mdx-js/react";
 import { mdxComponents } from "../../components/mdx/MyComponent";
-import { MdxProvider } from "../../components/mdx/MdxContext";
-import { Loader2 } from "lucide-react";
 
-// Content map for all products and slugs
-const contentMap: Record<string, Record<string, () => Promise<any>>> = {
+// Direct imports for all MDX content - required for Vercel production compatibility
+// MDX files must be imported at build time, not dynamically at runtime
+import Chanox2Installation from "../contents/chanox2/installation.mdx";
+import Chanox2GettingStarted from "../contents/chanox2/getting-started.mdx";
+import Chanox2Configuration from "../contents/chanox2/configuration.mdx";
+import Chanox2Troubleshooting from "../contents/chanox2/troubleshooting.mdx";
+import GeneralGettingStarted from "../contents/getting-started.mdx";
+import GeneralInstallation from "../contents/installation.mdx";
+import GeneralAdvancedFeatures from "../contents/advanced-features.mdx";
+import GeneralFaq from "../contents/faq.mdx";
+
+// Content map using pre-imported components
+const contentMap: Record<string, Record<string, React.ComponentType>> = {
     chanox2: {
-        installation: () => import("../contents/chanox2/installation.mdx"),
-        "getting-started": () => import("../contents/chanox2/getting-started.mdx"),
-        configuration: () => import("../contents/chanox2/configuration.mdx"),
-        troubleshooting: () => import("../contents/chanox2/troubleshooting.mdx"),
+        installation: Chanox2Installation,
+        "getting-started": Chanox2GettingStarted,
+        configuration: Chanox2Configuration,
+        troubleshooting: Chanox2Troubleshooting,
     },
-    // Legacy flat content for backward compatibility
     general: {
-        "getting-started": () => import("../contents/getting-started.mdx"),
-        installation: () => import("../contents/installation.mdx"),
-        "advanced-features": () => import("../contents/advanced-features.mdx"),
-        faq: () => import("../contents/faq.mdx"),
+        "getting-started": GeneralGettingStarted,
+        installation: GeneralInstallation,
+        "advanced-features": GeneralAdvancedFeatures,
+        faq: GeneralFaq,
     },
 };
 
@@ -28,17 +33,6 @@ interface DocsContentLoaderProps {
     product: string;
     slug: string;
     locale: string;
-}
-
-function LoadingSpinner() {
-    return (
-        <div className="flex items-center justify-center py-12">
-            <div className="flex items-center space-x-3">
-                <Loader2 className="w-6 h-6 animate-spin text-cyan-500" />
-                <span className="text-gray-400 font-medium">กำลังโหลดเนื้อหา...</span>
-            </div>
-        </div>
-    );
 }
 
 function ErrorMessage({ product, slug }: { product: string; slug: string }) {
@@ -55,24 +49,18 @@ function ErrorMessage({ product, slug }: { product: string; slug: string }) {
     );
 }
 
-export default function DocsContentLoader({ product, slug, locale }: DocsContentLoaderProps) {
+export default function DocsContentLoader({ product, slug }: DocsContentLoaderProps) {
     const productContent = contentMap[product];
-    const cleanLocale = locale?.trim() || 'th';
 
     if (!productContent || !productContent[slug]) {
         return <ErrorMessage product={product} slug={slug} />;
     }
 
-    const Content = dynamic(productContent[slug], {
-        ssr: true,
-        loading: LoadingSpinner,
-    });
+    const Content = productContent[slug];
 
     return (
-        <MdxProvider locale={cleanLocale}>
-            <MDXProvider components={mdxComponents}>
-                <Content />
-            </MDXProvider>
-        </MdxProvider>
+        <MDXProvider components={mdxComponents}>
+            <Content />
+        </MDXProvider>
     );
 }
