@@ -45,7 +45,7 @@ export default function DocsSidebar({
                         return (
                             <Link
                                 key={doc.slug}
-                                href={`/ ${locale} /docs/${product}/${doc.slug}`}
+                                href={`/${locale}/docs/${product}/${doc.slug}`}
                                 className={`group flex items-center justify-between px-3 py-2 text-sm rounded-md transition-colors ${isActive
                                     ? "bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400 font-medium"
                                     : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-300"
