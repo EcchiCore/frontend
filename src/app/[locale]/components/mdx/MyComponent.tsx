@@ -1,5 +1,6 @@
 // components/mdx/MyComponent.tsx
 import type { MDXComponents } from 'mdx/types'
+import { MdxLink } from './MdxLink'
 
 export const mdxComponents: MDXComponents = {
   h1: (props) => (
@@ -40,16 +41,8 @@ export const mdxComponents: MDXComponents = {
     );
   },
 
-  a: (props) => (
-    <a
-      className="relative text-cyan-300 hover:text-cyan-100 transition-all duration-300 group inline-block"
-      {...props}
-    >
-      <span className="relative z-10">{props.children}</span>
-      <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-cyan-400 to-purple-400 group-hover:w-full transition-all duration-300 rounded-full"></span>
-      <span className="absolute inset-0 bg-cyan-400/10 scale-0 group-hover:scale-100 rounded transition-transform duration-200 blur-sm"></span>
-    </a>
-  ),
+  // Use MdxLink for automatic locale handling
+  a: MdxLink,
 
   blockquote: ({ children }) => (
     <div className="relative bg-gradient-to-r from-slate-900/50 to-slate-800/50 border-l-4 border-gradient-to-b border-amber-400 p-6 rounded-r-lg my-6 backdrop-blur-sm shadow-2xl group hover:shadow-amber-400/10 transition-all duration-300">

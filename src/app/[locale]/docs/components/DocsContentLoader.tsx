@@ -4,6 +4,7 @@
 import dynamic from "next/dynamic";
 import { MDXProvider } from "@mdx-js/react";
 import { mdxComponents } from "../../components/mdx/MyComponent";
+import { MdxProvider } from "../../components/mdx/MdxContext";
 import { Loader2 } from "lucide-react";
 
 // Content map for all products and slugs
@@ -26,6 +27,7 @@ const contentMap: Record<string, Record<string, () => Promise<any>>> = {
 interface DocsContentLoaderProps {
     product: string;
     slug: string;
+    locale: string;
 }
 
 function LoadingSpinner() {
@@ -53,8 +55,9 @@ function ErrorMessage({ product, slug }: { product: string; slug: string }) {
     );
 }
 
-export default function DocsContentLoader({ product, slug }: DocsContentLoaderProps) {
+export default function DocsContentLoader({ product, slug, locale }: DocsContentLoaderProps) {
     const productContent = contentMap[product];
+    const cleanLocale = locale?.trim() || 'th';
 
     if (!productContent || !productContent[slug]) {
         return <ErrorMessage product={product} slug={slug} />;
@@ -66,8 +69,10 @@ export default function DocsContentLoader({ product, slug }: DocsContentLoaderPr
     });
 
     return (
-        <MDXProvider components={mdxComponents}>
-            <Content />
-        </MDXProvider>
+        <MdxProvider locale={cleanLocale}>
+            <MDXProvider components={mdxComponents}>
+                <Content />
+            </MDXProvider>
+        </MdxProvider>
     );
 }

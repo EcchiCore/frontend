@@ -126,9 +126,9 @@ export default async function DocPage({ params }: DocPageProps) {
                 dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
             />
 
-            <div className="flex flex-col md:flex-row max-w-[1440px] mx-auto">
-                {/* Sidebar - Desktop */}
-                <aside className="hidden md:block w-64 shrink-0 border-r border-gray-200 dark:border-gray-800 h-screen sticky top-0 overflow-y-auto pt-8 pb-8 pl-6">
+            <div className="flex flex-col lg:flex-row max-w-[1600px] mx-auto">
+                {/* Sidebar - Desktop (Left) */}
+                <aside className="hidden lg:block w-64 shrink-0 border-r border-gray-200 dark:border-gray-800 h-screen sticky top-0 overflow-y-auto pt-8 pb-8 pl-6">
                     <DocsSidebar
                         product={product}
                         productName={productData.name}
@@ -139,9 +139,9 @@ export default async function DocPage({ params }: DocPageProps) {
                 </aside>
 
                 {/* Main Content */}
-                <main className="flex-1 min-w-0 px-6 md:px-12 py-8 md:py-12">
+                <main className="flex-1 min-w-0 px-6 lg:px-12 py-8 lg:py-12">
                     {/* Breadcrumbs */}
-                    <nav className="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400 mb-8 overflow-x-auto whitespace-nowrap pb-2 md:pb-0">
+                    <nav className="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400 mb-8 overflow-x-auto whitespace-nowrap pb-2 lg:pb-0">
                         <Link href={`/${locale}/docs`} className="hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                             Docs
                         </Link>
@@ -155,43 +155,77 @@ export default async function DocPage({ params }: DocPageProps) {
                         </span>
                     </nav>
 
-                    {/* Content Wrapper */}
-                    <div className="max-w-3xl">
-                        {/* Article Content */}
-                        <article className="prose prose-slate dark:prose-invert max-w-none prose-headings:scroll-mt-20 prose-a:text-blue-600 dark:prose-a:text-blue-400 prose-img:rounded-lg">
-                            <DocsContentLoader product={product} slug={slugStr} />
-                        </article>
+                    {/* Article Content */}
+                    <article className="prose prose-slate dark:prose-invert max-w-none prose-headings:scroll-mt-20 prose-a:text-blue-600 dark:prose-a:text-blue-400 prose-img:rounded-lg">
+                        <DocsContentLoader product={product} slug={slugStr} locale={locale} />
+                    </article>
 
-                        {/* Page Navigation */}
-                        <div className="mt-16 pt-8 border-t border-gray-200 dark:border-gray-800 grid grid-cols-2 gap-4">
-                            {prevDoc ? (
-                                <Link
-                                    href={`/${locale}/docs/${product}/${prevDoc.slug}`}
-                                    className="group flex flex-col p-4 rounded-lg border border-gray-200 dark:border-gray-800 hover:border-blue-500 dark:hover:border-blue-500 transition-colors text-left"
-                                >
-                                    <span className="text-xs text-gray-500 dark:text-gray-500 mb-1">Previous</span>
-                                    <span className="font-medium text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                                        <ChevronLeft className="inline-block w-4 h-4 mr-1" />
-                                        {prevDoc.title}
-                                    </span>
-                                </Link>
-                            ) : <div />}
+                    {/* Mobile Page Navigation - Only show on mobile/tablet */}
+                    <div className="lg:hidden mt-16 pt-8 border-t border-gray-200 dark:border-gray-800 grid grid-cols-2 gap-4">
+                        {prevDoc ? (
+                            <Link
+                                href={`/${locale}/docs/${product}/${prevDoc.slug}`}
+                                className="group flex flex-col p-4 rounded-lg border border-gray-200 dark:border-gray-800 hover:border-blue-500 dark:hover:border-blue-500 transition-colors text-left"
+                            >
+                                <span className="text-xs text-gray-500 dark:text-gray-500 mb-1">Previous</span>
+                                <span className="font-medium text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                                    <ChevronLeft className="inline-block w-4 h-4 mr-1" />
+                                    {prevDoc.title}
+                                </span>
+                            </Link>
+                        ) : <div />}
 
-                            {nextDoc ? (
-                                <Link
-                                    href={`/${locale}/docs/${product}/${nextDoc.slug}`}
-                                    className="group flex flex-col p-4 rounded-lg border border-gray-200 dark:border-gray-800 hover:border-blue-500 dark:hover:border-blue-500 transition-colors text-right"
-                                >
-                                    <span className="text-xs text-gray-500 dark:text-gray-500 mb-1">Next</span>
-                                    <span className="font-medium text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                                        {nextDoc.title}
-                                        <ChevronRight className="inline-block w-4 h-4 ml-1" />
-                                    </span>
-                                </Link>
-                            ) : <div />}
-                        </div>
+                        {nextDoc ? (
+                            <Link
+                                href={`/${locale}/docs/${product}/${nextDoc.slug}`}
+                                className="group flex flex-col p-4 rounded-lg border border-gray-200 dark:border-gray-800 hover:border-blue-500 dark:hover:border-blue-500 transition-colors text-right"
+                            >
+                                <span className="text-xs text-gray-500 dark:text-gray-500 mb-1">Next</span>
+                                <span className="font-medium text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                                    {nextDoc.title}
+                                    <ChevronRight className="inline-block w-4 h-4 ml-1" />
+                                </span>
+                            </Link>
+                        ) : <div />}
                     </div>
                 </main>
+
+                {/* Right Sidebar - Related Docs (Desktop only) */}
+                <aside className="hidden lg:block w-64 shrink-0 border-l border-gray-200 dark:border-gray-800 h-screen sticky top-0 overflow-y-auto pt-8 pb-8 pr-6">
+                    <div className="pl-6">
+                        <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 mb-4">
+                            ขั้นตอนถัดไป
+                        </h3>
+                        <div className="space-y-2">
+                            {productData.docs
+                                .filter((doc) => doc.slug !== slugStr)
+                                .map((doc) => (
+                                    <Link
+                                        key={doc.slug}
+                                        href={`/${locale}/docs/${product}/${doc.slug}`}
+                                        className="group flex items-start gap-3 p-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800/50 transition-all"
+                                    >
+                                        <span className="text-lg shrink-0">
+                                            {doc.iconName === 'download' && '📥'}
+                                            {doc.iconName === 'rocket' && '🚀'}
+                                            {doc.iconName === 'settings' && '⚙️'}
+                                            {doc.iconName === 'help' && '❓'}
+                                            {doc.iconName === 'book' && '📖'}
+                                            {doc.iconName === 'file' && '📄'}
+                                        </span>
+                                        <div className="flex-1 min-w-0">
+                                            <span className="text-sm font-medium text-gray-900 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors block">
+                                                {doc.title}
+                                            </span>
+                                            <span className="text-xs text-gray-500 dark:text-gray-400 block truncate">
+                                                {doc.description}
+                                            </span>
+                                        </div>
+                                    </Link>
+                                ))}
+                        </div>
+                    </div>
+                </aside>
             </div>
         </div>
     );
