@@ -69,24 +69,22 @@ export async function fetchPublishedArticles(): Promise<Article[]> {
 
 export const getArticleUrl = (
   slug: string,
-  locale: Locale = 'en',
-  id?: string
+  locale: Locale = 'en'
 ): string => {
   const base = locale === 'en' ? `/articles/${slug}` : `/${locale}/articles/${slug}`;
-  const query = id ? `?id=${id}` : '';
-  return `${siteUrl}${base}${query}`;
+  return `${siteUrl}${base}`;
 };
 
 export const buildArticleFields = (articles: Article[], generatedAt: string) => {
   return articles.map(article => ({
-    loc: getArticleUrl(article.slug, 'en', article.id),
+    loc: getArticleUrl(article.slug, 'en'),
     lastmod: article.updatedAt || article.createdAt || generatedAt,
     changefreq: 'weekly' as const,
     priority: 0.7,
     alternates: {
-      en: getArticleUrl(article.slug, 'en', article.id),
-      th: getArticleUrl(article.slug, 'th', article.id),
-      'x-default': getArticleUrl(article.slug, 'en', article.id),
+      en: getArticleUrl(article.slug, 'en'),
+      th: getArticleUrl(article.slug, 'th'),
+      'x-default': getArticleUrl(article.slug, 'en'),
     },
   }));
 };

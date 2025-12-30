@@ -1,7 +1,5 @@
 // app/[locale]/articles/[...paths]/page.tsx
 
-
-
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import { Suspense, cache } from 'react';
@@ -18,13 +16,18 @@ import {
 } from "@/utils/metadataUtils";
 import { getValidLocale, type Locale } from "@/utils/localeUtils";
 import { Article } from "@/types/article";
-import { getArticleBySlug, fetchArticleAndDownloads } from "@/lib/article-api";
+import { getArticleBySlug, getArticleWithDownloads } from "@/lib/article-api";
 
 const siteUrl = process.env.FRONTEND || 'https://chanomhub.com';
 
 // Cache article fetch to deduplicate between generateMetadata and ArticlePage
 const getCachedArticle = cache(async (slug: string, locale: string) => {
   return getArticleBySlug(slug, locale);
+});
+
+// Cache article with downloads
+const getCachedArticleWithDownloads = cache(async (slug: string, locale: string) => {
+  return getArticleWithDownloads(slug, locale);
 });
 
 
@@ -97,8 +100,10 @@ function generateArticleJsonLd(
 
   // URLs are already transformed by the API layer
 
-  // Construct the correct article URL with locale
-  const articleUrl = `${siteUrl}/${locale}/articles/${slug}`;
+  // Construct the correct article URL without locale prefix for default locale
+  const articleUrl = locale === 'en'
+    ? `${siteUrl}/articles/${slug}`
+    : `${siteUrl}/${locale}/articles/${slug}`;
 
   return generateArticleStructuredData({
     title: createSEOTitle(article),
@@ -122,32 +127,16 @@ interface ArticlePageProps {
 
 export default async function ArticlePage(props: ArticlePageProps) {
   const params = await props.params;
-  const searchParams = await props.searchParams;
 
   const locale = getValidLocale(params.locale);
   const paths = params.paths;
   const slug = decodeURIComponent(paths[0]);
-  const articleId = searchParams.id ? Number(searchParams.id) : undefined;
 
-  let originalArticle: Article | null;
-  let downloads: Article['downloads'] | null = null;
-
-  if (articleId) {
-    const result = await fetchArticleAndDownloads(slug, articleId, locale);
-    originalArticle = result.article;
-    downloads = result.downloads;
-  } else {
-    originalArticle = await getCachedArticle(slug, locale);
-  }
+  // Fetch article and downloads together - no ID needed in URL
+  const { article: originalArticle, downloads } = await getCachedArticleWithDownloads(slug, locale);
 
   if (!originalArticle) {
     return notFound();
-  }
-
-  // Redirect to URL with id if not provided
-  if (!articleId && originalArticle.id) {
-    const { redirect } = await import('next/navigation');
-    redirect(`/${locale}/articles/${slug}?id=${originalArticle.id}`);
   }
 
   // Generate structured data JSON-LD for the article (only once, SEO handles language)
@@ -184,7 +173,7 @@ export default async function ArticlePage(props: ArticlePageProps) {
         <ArticleContent
           article={originalArticle}
           slug={slug}
-          articleId={articleId}
+          articleId={originalArticle.id}
           downloads={downloads || []}
         />
       </Suspense>

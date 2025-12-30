@@ -236,3 +236,76 @@ export async function getArticleBySlug(slug: string, language?: string): Promise
     return null;
   }
 }
+
+/**
+ * Fetch article by slug and its downloads.
+ * Uses the article's own ID for the downloads query.
+ * This is the preferred function for article pages - no need for ID in URL.
+ */
+export async function getArticleWithDownloads(
+  slug: string,
+  language?: string
+): Promise<{ article: Article | null; downloads: Article["downloads"] | null }> {
+  // First, fetch the article to get its ID
+  const query = `query ArticleWithDownloads($slug: String!, $language: String) {
+    article(slug: $slug, language: $language) {
+      id
+      author {
+        id
+        image
+        name
+      }
+      backgroundImage
+      body
+      categories {
+        name
+      }
+      coverImage
+      createdAt
+      creators {
+        name
+      }
+      description
+      favoritesCount
+      mainImage
+      images {
+        url
+      }
+      platforms {
+        name
+      }
+      status
+      tags {
+        name
+      }
+      title
+      updatedAt
+      ver
+    }
+  }`;
+
+  try {
+    const articleData = await graphqlRequest<{ article: Article }>(
+      query,
+      { slug, language },
+      "ArticleWithDownloads"
+    );
+
+    if (!articleData.article) {
+      return { article: null, downloads: null };
+    }
+
+    const article = transformArticleImages(articleData.article);
+
+    // Ensure ID is a number for the downloads query
+    const articleId = typeof article.id === 'string' ? parseInt(article.id, 10) : article.id;
+
+    // Now fetch downloads using the article's ID
+    const downloads = await fetchDownloadsByArticleId(articleId);
+
+    return { article, downloads };
+  } catch (error) {
+    console.error(`Failed to fetch article "${slug}" with downloads:`, error);
+    return { article: null, downloads: null };
+  }
+}
