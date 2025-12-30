@@ -3,6 +3,7 @@
 
 import React from "react";
 import Image from "next/image";
+import imageLoader from '@/lib/imageLoader';
 import Link from "next/link";
 import { Article } from "@/types/article";
 import { formatDate } from "@/lib/dateUtils";
@@ -88,6 +89,7 @@ export default function ArticleBodyServer({ article }: ArticleBodyServerProps) {
                 <div className="flex items-center gap-3 mt-4">
                     {article.author.image && (
                         <Image
+                            loader={imageLoader}
                             src={article.author.image}
                             alt={article.author.name || "Author"}
                             width={40}
@@ -113,6 +115,7 @@ export default function ArticleBodyServer({ article }: ArticleBodyServerProps) {
             {mainImageUrl && (
                 <div className="relative w-full h-64 md:h-96 mb-8 rounded-xl overflow-hidden">
                     <Image
+                        loader={imageLoader}
                         src={mainImageUrl}
                         alt={article.title}
                         fill

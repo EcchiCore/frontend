@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
+import imageLoader from '@/lib/imageLoader';
 import { useState } from 'react';
 
 interface Article {
@@ -64,6 +65,7 @@ export default function HomeCarousel({ articles, loading }: HomeCarouselProps) {
                 <div className="relative w-full h-20 bg-muted">
                   {src && !hasError ? (
                     <Image
+                      loader={imageLoader}
                       src={src}
                       alt={article.title}
                       fill

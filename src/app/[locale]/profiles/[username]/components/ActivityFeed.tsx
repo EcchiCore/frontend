@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { resolveArticleImageUrl } from '@/lib/articleImageUrl';
+import { resolveArticleImageUrl, shouldSkipNextImageOptimization } from '@/lib/articleImageUrl';
+import imageLoader from '@/lib/imageLoader';
 
 interface Article {
     slug: string;
@@ -42,6 +43,7 @@ export default function ActivityFeed({ articles, username }: ActivityFeedProps) 
                             <figure className="relative aspect-video bg-base-300/20">
                                 {article.mainImage || article.coverImage ? (
                                     <Image
+                                        loader={imageLoader}
                                         src={resolveArticleImageUrl(article.coverImage || article.mainImage) || ''}
                                         alt={article.title}
                                         fill

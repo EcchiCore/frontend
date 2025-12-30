@@ -7,8 +7,21 @@
  */
 
 // CDN Base URL - can be configured via environment variable
-const CDN_BASE_URL = process.env.NEXT_PUBLIC_CDN_URL || 'https://cdn.chanomhub.com';
+const CDN_BASE_URL = process.env.NEXT_PUBLIC_CDN_URL || 'https://cdn.chanomhub.com/cdn-cgi/image/format=auto';
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://api.chanomhub.com';
+
+/**
+ * Checks if a URL uses Cloudflare Image Transformation and should skip Next.js Image optimization.
+ * Use this to set `unoptimized={true}` on Next.js Image components.
+ * 
+ * @example
+ * <Image src={url} unoptimized={shouldSkipNextImageOptimization(url)} />
+ */
+export function shouldSkipNextImageOptimization(url: string | null | undefined): boolean {
+    if (!url) return false;
+    // URLs with /cdn-cgi/image/ are already optimized by Cloudflare
+    return url.includes('/cdn-cgi/image/');
+}
 
 /**
  * Resolves an article image URL.

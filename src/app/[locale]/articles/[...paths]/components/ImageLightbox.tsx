@@ -5,13 +5,13 @@ import { ImageLightboxProps } from "./Interfaces";
 import myImageLoader from "@/lib/imageLoader";
 
 const ImageLightbox = ({
-                         open,
-                         onClose,
-                         images,
-                         initialIndex = 0,
-                         isDarkMode = false,
-                         swipeHandlers, // NEW: Destructure swipeHandlers
-                       }: ImageLightboxProps) => {
+  open,
+  onClose,
+  images,
+  initialIndex = 0,
+  isDarkMode = false,
+  swipeHandlers, // NEW: Destructure swipeHandlers
+}: ImageLightboxProps) => {
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [isLoading, setIsLoading] = useState(true);
   const [zoomLevel, setZoomLevel] = useState(1);
@@ -240,6 +240,7 @@ const ImageLightbox = ({
                 style={{ transform: `scale(${zoomLevel}) rotate(${rotation}deg)` }}
               >
                 <Image
+                  loader={myImageLoader}
                   src={images[currentIndex]}
                   alt={`Expanded image ${currentIndex + 1}`}
                   fill

@@ -1,6 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import Image from "next/image";
+import imageLoader from '@/lib/imageLoader';
 import Link from "next/link";
 import { ArticleBodyProps } from "./Interfaces";
 import { useTranslations } from "next-intl";
@@ -67,6 +68,7 @@ const ArticleBody: React.FC<ArticleBodyProps> = ({
           <Card className="relative h-64 md:h-80 rounded-xl overflow-hidden bg-base-200 flex justify-center items-center border border-base-content/20 shadow-lg">
             <CardContent className="p-0 relative w-full h-full">
               <Image
+                loader={imageLoader}
                 src={selectedImage}
                 alt="ภาพที่เลือก"
                 fill
@@ -85,14 +87,14 @@ const ArticleBody: React.FC<ArticleBodyProps> = ({
             {article.images.map((image: { url: string }, index: number) => (
               <div
                 key={index}
-                className={`relative w-full h-20 rounded-lg overflow-hidden cursor-pointer transition-all duration-200 hover:scale-105 shadow-md ${
-                  selectedImage === image.url
-                    ? "border-3 border-primary ring-2 ring-primary/50 shadow-lg"
-                    : "border-2 border-base-content/20 hover:border-primary hover:shadow-lg"
-                }`}
+                className={`relative w-full h-20 rounded-lg overflow-hidden cursor-pointer transition-all duration-200 hover:scale-105 shadow-md ${selectedImage === image.url
+                  ? "border-3 border-primary ring-2 ring-primary/50 shadow-lg"
+                  : "border-2 border-base-content/20 hover:border-primary hover:shadow-lg"
+                  }`}
                 onClick={() => setSelectedImage(image.url)}
               >
                 <Image
+                  loader={imageLoader}
                   src={image.url}
                   alt={`Thumbnail ${index + 1}`}
                   fill
@@ -110,9 +112,8 @@ const ArticleBody: React.FC<ArticleBodyProps> = ({
       )}
 
       <div
-        className={`my-6 leading-relaxed ${
-          isDarkBackground ? "text-base-content" : "text-base-content"
-        }`}
+        className={`my-6 leading-relaxed ${isDarkBackground ? "text-base-content" : "text-base-content"
+          }`}
       >
         {content}
       </div>

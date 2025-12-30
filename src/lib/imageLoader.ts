@@ -10,6 +10,11 @@ export default function myImageLoader({
   width: number
   quality?: number
 }) {
+  // URLs with /cdn-cgi/image/ are already optimized by Cloudflare - return as-is
+  if (src.includes('/cdn-cgi/image/')) {
+    return src;
+  }
+
   // ตรวจสอบว่าคือ relative path /image/... หรือ full URL
   const isRelativeImage = src.startsWith('/image/');
   const isRustgramImage = isRelativeImage || src.startsWith('https://rustgram.onrender.com');
