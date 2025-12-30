@@ -15,7 +15,10 @@ export default async function DocsContentLoader({ product, slug, locale }: DocsC
     const contentPath = path.join(process.cwd(), 'src/app/[locale]/docs/contents', product, `${slug}.mdx`);
 
     try {
+        console.log('Attempting to load MDX from:', contentPath);
+
         if (!fs.existsSync(contentPath)) {
+            console.error('File not found:', contentPath);
             return (
                 <div className="p-4 rounded-lg bg-red-50 text-red-500 border border-red-100 dark:bg-red-900/20 dark:text-red-400 dark:border-red-900/30">
                     Content not found: {product}/{slug}
