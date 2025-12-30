@@ -232,5 +232,25 @@ export default async function DocPage({ params }: DocPageProps) {
 }
 
 export async function generateStaticParams() {
-    return [];
+    const { routing } = await import("@/i18n/routing");
+
+    // Create an array of all possible params
+    const params = [];
+
+    // Iterate over all locales
+    for (const locale of routing.locales) {
+        // Iterate over all products
+        for (const [productKey, productData] of Object.entries(products)) {
+            // Iterate over all docs in the product
+            for (const doc of productData.docs) {
+                params.push({
+                    locale,
+                    product: productKey,
+                    slug: [doc.slug], // slug is a catch-all route, so it expects an array
+                });
+            }
+        }
+    }
+
+    return params;
 }
