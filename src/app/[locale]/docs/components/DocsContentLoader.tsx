@@ -1,5 +1,7 @@
 import React from "react";
 import { MdxProvider } from "../../components/mdx/MdxContext";
+
+// Static imports for MDX content
 import Chanox2Installation from "../contents/chanox2/installation.mdx";
 import Chanox2GettingStarted from "../contents/chanox2/getting-started.mdx";
 import Chanox2Configuration from "../contents/chanox2/configuration.mdx";
