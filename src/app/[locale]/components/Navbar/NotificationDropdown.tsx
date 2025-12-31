@@ -113,9 +113,10 @@ export default function NotificationDropdown({ isMobile = false }: NotificationD
           throw new Error(`HTTP ${res.status}`);
         }
 
-        const data: NotificationResponse = await res.json();
-        setNotifications(data.notifications || []);
-        setUnreadCount(data.unreadCount || 0);
+        const response = await res.json() as { data: NotificationResponse };
+        const data = response.data;
+        setNotifications(data?.notifications || []);
+        setUnreadCount(data?.unreadCount || 0);
       } catch (err) {
         console.error("Fetch notifications failed:", err);
         if (showLoading) setError("โหลดแจ้งเตือนล้มเหลว");
