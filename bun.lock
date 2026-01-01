@@ -5,7 +5,7 @@
     "": {
       "name": "chanomhub-2",
       "dependencies": {
-        "@chanomhub/sdk": "^1.0.6",
+        "@chanomhub/sdk": "^1.0.7",
         "@emotion/react": "^11.14.0",
         "@emotion/styled": "^11.14.1",
         "@google-analytics/data": "^5.2.1",
@@ -83,7 +83,7 @@
         "lucide-react": "^0.515.0",
         "nanoid": "^5.1.6",
         "next": "16.1.0",
-        "next-intl": "^4.6.1",
+        "next-intl": "^4.7.0",
         "next-mdx-remote": "^5.0.0",
         "next-sanity": "^11.6.12",
         "next-seo": "^6.8.0",

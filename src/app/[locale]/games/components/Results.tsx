@@ -1,5 +1,5 @@
-import { fetchArticles } from "@/lib/api"
-import type { Article } from "@/types/article"
+import { createServerClient } from "@chanomhub/sdk/next"
+import { ArticleListItem, ArticleListOptions } from "@chanomhub/sdk"
 import GameCard from "./GameCard"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
@@ -9,8 +9,26 @@ export default async function Results({
   searchParams,
 }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const params = await searchParams;
-  const { items, total, page, pageSize } = await fetchArticles(params)
+  const sdk = await createServerClient();
+
+  // Prepare list options
+  const options: ArticleListOptions = {
+    limit: Number(params.pageSize ?? 12),
+    offset: (Number(params.page ?? 1) - 1) * Number(params.pageSize ?? 12),
+    status: 'PUBLISHED',
+    filter: {}
+  };
+
+  // Map params to filter
+  if (params.tag) options.filter!.tag = String(params.tag);
+  if (params.platform) options.filter!.platform = String(params.platform);
+  if (params.category) options.filter!.category = String(params.category);
+  if (params.author) options.filter!.author = String(params.author);
+  if (params.favorited) options.filter!.favorited = params.favorited === 'true';
+
+  const { items, total, page, pageSize } = await sdk.articles.getAllPaginated(options);
   const pages = Math.max(1, Math.ceil(total / pageSize))
+
 
   return (
     <div className="space-y-6">
@@ -22,9 +40,10 @@ export default async function Results({
 
       {items.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {items.map((a: Article) => (
-            <GameCard key={String(a.id)} article={a} />
+          {items.map((a: ArticleListItem) => (
+            <GameCard key={String(a.id)} article={a as any} />
           ))}
+
         </div>
       ) : (
         <div className="flex flex-col items-center justify-center py-24 px-4">
