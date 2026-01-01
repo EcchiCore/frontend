@@ -32,30 +32,36 @@ export async function generateMetadata({ params }: { params: { locale?: string }
   });
 }
 
-// Server-side data fetching using SDK
-async function fetchHomeData() {
-  try {
-    const sdk = createChanomhubClient();
+import { unstable_cache } from 'next/cache';
 
-    const [carouselData, featuredData, latestData] = await Promise.all([
-      sdk.articles.getAll({ limit: 3, status: 'PUBLISHED' }),
-      sdk.articles.getByPlatform('windows', { limit: 25 }),
-      sdk.articles.getAll({ limit: 10, status: 'PUBLISHED' }),
-    ]);
+// Server-side data fetching using SDK with caching
+const getCachedHomeData = unstable_cache(
+  async () => {
+    try {
+      const sdk = createChanomhubClient();
 
-    return {
-      carousel: carouselData || [],
-      featured: featuredData || [],
-      latest: latestData || [],
-    };
-  } catch (error) {
-    console.error('Error fetching home page data:', error);
-    return { carousel: [], featured: [], latest: [] };
-  }
-}
+      const [carouselData, featuredData, latestData] = await Promise.all([
+        sdk.articles.getAll({ limit: 3, status: 'PUBLISHED' }),
+        sdk.articles.getByPlatform('windows', { limit: 25 }),
+        sdk.articles.getAll({ limit: 10, status: 'PUBLISHED' }),
+      ]);
+
+      return {
+        carousel: carouselData || [],
+        featured: featuredData || [],
+        latest: latestData || [],
+      };
+    } catch (error) {
+      console.error('Error fetching home page data:', error);
+      return { carousel: [], featured: [], latest: [] };
+    }
+  },
+  ['home-page-data'],
+  { revalidate: 60 }
+);
 
 export default async function HomePage({ params }: { params: { locale: string } }) {
-  const homeData = await fetchHomeData();
+  const homeData = await getCachedHomeData();
 
 
 
