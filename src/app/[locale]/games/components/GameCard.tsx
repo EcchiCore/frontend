@@ -63,7 +63,7 @@ export default function GameCard({ article }: { article: Article }) {
 
           {/* Top Badges */}
           <div className="absolute top-2 left-2 flex gap-1.5">
-            {article.platforms.slice(0, 2).map((platform) => (
+            {(article.platforms ?? []).slice(0, 2).map((platform) => (
               <Badge
                 key={platform.name}
                 className={`${getPlatformColor(platform.name)} text-white text-xs px-2 py-0.5 font-semibold border-0`}
@@ -80,9 +80,9 @@ export default function GameCard({ article }: { article: Article }) {
           </div>
 
           {/* Categories */}
-          {article.categories.length > 0 && (
+          {(article.categories ?? []).length > 0 && (
             <div className="absolute bottom-2 left-2 flex gap-1 flex-wrap max-w-[calc(100%-1rem)]">
-              {article.categories.slice(0, 2).map((cat, idx) => (
+              {(article.categories ?? []).slice(0, 2).map((cat, idx) => (
                 <Badge
                   key={idx}
                   variant="secondary"
@@ -91,12 +91,12 @@ export default function GameCard({ article }: { article: Article }) {
                   {cat.name}
                 </Badge>
               ))}
-              {article.categories.length > 2 && (
+              {(article.categories ?? []).length > 2 && (
                 <Badge
                   variant="secondary"
                   className="text-xs px-2 py-0.5 bg-black/50 backdrop-blur-sm border-0 text-white/90"
                 >
-                  +{article.categories.length - 2}
+                  +{(article.categories ?? []).length - 2}
                 </Badge>
               )}
             </div>
@@ -162,7 +162,7 @@ export default function GameCard({ article }: { article: Article }) {
           </div>
 
           <div className="flex flex-wrap gap-1">
-            {article.tags.slice(0, 5).map((tag) => (
+            {(article.tags ?? []).slice(0, 5).map((tag) => (
               <Badge
                 key={tag.name}
                 variant="secondary"
