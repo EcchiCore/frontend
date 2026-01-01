@@ -9,6 +9,9 @@ export const metadata = {
   description: "ค้นหาและสำรวจเกมที่คุณชื่นชอบ",
 }
 
+// Next.js ISR: revalidate every 5 minutes
+export const revalidate = 300;
+
 
 
 type PageProps = {
