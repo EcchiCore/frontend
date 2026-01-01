@@ -26,7 +26,7 @@ export interface Article {
   status: string;
   mainImage: string;
   images: string[];
-  engine?: string | { name: string; id?: number };
+  engine?: string | { name: string; id?: string | number };
   ver?: string;
   sequentialCode?: string;
 }

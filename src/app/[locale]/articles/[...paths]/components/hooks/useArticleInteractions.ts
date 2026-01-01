@@ -11,7 +11,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 export function useArticleInteractions(article: Article, slug: string) {
   const [isFavorited, setIsFavorited] = useState(article.favorited);
   const [favoritesCount, setFavoritesCount] = useState(article.favoritesCount);
-  const [isFollowing, setIsFollowing] = useState(article.author.following);
+  const [isFollowing, setIsFollowing] = useState(article.author.following ?? false);
   const [alert, setAlert] = useState<AlertState>({ open: false, message: '', severity: 'success' });
 
   // Get authenticated SDK client
@@ -74,7 +74,7 @@ export function useArticleInteractions(article: Article, slug: string) {
   }, [articleData]);
 
   useEffect(() => {
-    setIsFollowing(article.author.following);
+    setIsFollowing(article.author.following ?? false);
   }, [article.author.following]);
 
   const showAlert = useCallback((message: string, severity: 'success' | 'error') => {
