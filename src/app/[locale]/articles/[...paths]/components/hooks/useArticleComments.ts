@@ -59,7 +59,9 @@ export function useArticleComments(slug: string, showAlert: (message: string, se
     if (commentsData) {
       const commentsArray = Array.isArray(commentsData)
         ? commentsData
-        : commentsData.comments || [];
+        : Array.isArray(commentsData.data)
+          ? commentsData.data
+          : commentsData.comments || [];
       setComments((prev) => {
         if (areCommentsEqual(prev, commentsArray)) return prev;
         return commentsArray;
@@ -100,7 +102,9 @@ export function useArticleComments(slug: string, showAlert: (message: string, se
       );
       if (response.ok) {
         const newCommentData = await response.json();
-        setComments([newCommentData.comment, ...comments]);
+        // The API might return { data: Comment } or just Comment. Check based on structure.
+        const createdComment = newCommentData.data || newCommentData.comment || newCommentData;
+        setComments((prev) => [createdComment, ...prev]);
         setNewComment('');
         showAlert('เพิ่มความคิดเห็นสำเร็จ', 'success');
         mutate(`${API_BASE_URL}/api/articles/${slug}/comments`);

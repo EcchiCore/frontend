@@ -4,6 +4,7 @@ import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import { motion } from "framer-motion";
 import { mutate } from "swr";
+import { useAppSelector } from "@/store/hooks";
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import { Image as TiptapImage } from '@tiptap/extension-image';
@@ -83,8 +84,10 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
     setOpenDownloadDialog,
   } = useDownloadDialog(downloads, showAlert);
   // Essential state
-  const [isCurrentUserAuthor] = useState(false);
-  const [isAuthenticated] = useState(false);
+  // Auth state from Redux
+  const { user } = useAppSelector((state) => state.auth);
+  const isAuthenticated = isClient && !!user;
+  const isCurrentUserAuthor = isClient && !!user && user?.username === article.author?.name;
   const handleDownloadClick = () => {
     setOpenDownloadDialog(true);
   };
