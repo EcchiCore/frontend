@@ -13,61 +13,32 @@ export default async function Results({
 
   const limit = Number(params.pageSize ?? 12);
   const offset = (Number(params.page ?? 1) - 1) * limit;
-  const searchQuery = params.q ? String(params.q) : '';
 
-  // Build common filter options
-  const filterOptions = {
-    tag: params.tag ? String(params.tag) : undefined,
-    platform: params.platform ? String(params.platform) : undefined,
-    category: params.category ? String(params.category) : undefined,
-    author: params.author ? String(params.author) : undefined,
-    engine: params.engine ? String(params.engine) : undefined,
-    sequentialCode: params.sequentialCode ? String(params.sequentialCode) : undefined,
-  };
+  // Use getAllPaginated with unified filter (supports q, engine, sequentialCode in SDK v1.1.1+)
+  const result = await sdk.articles.getAllPaginated({
+    limit,
+    offset,
+    status: 'PUBLISHED',
+    filter: {
+      q: params.q ? String(params.q) : undefined,
+      tag: params.tag ? String(params.tag) : undefined,
+      platform: params.platform ? String(params.platform) : undefined,
+      category: params.category ? String(params.category) : undefined,
+      author: params.author ? String(params.author) : undefined,
+      engine: params.engine ? String(params.engine) : undefined,
+      sequentialCode: params.sequentialCode ? String(params.sequentialCode) : undefined,
+      favorited: params.favorited === 'true' ? true : undefined,
+    },
+    // Only fetch fields that are actually used by GameCard to reduce payload
+    fields: [
+      'id', 'title', 'slug', 'description', 'ver',
+      'mainImage', 'coverImage', 'backgroundImage',
+      'author', 'tags', 'platforms', 'categories',
+      'favoritesCount', 'createdAt'
+    ]
+  });
 
-  let items: ArticleListItem[];
-  let total: number;
-  let page: number;
-  let pageSize: number;
-
-  if (searchQuery) {
-    // Use search repository for full-text search
-    const result = await sdk.search.articles(searchQuery, {
-      limit,
-      offset,
-      ...filterOptions,
-    });
-    items = result.items;
-    total = result.total;
-    page = result.page;
-    pageSize = result.pageSize;
-  } else {
-    // Use articles repository for listing/filtering without search
-    const result = await sdk.articles.getAllPaginated({
-      limit,
-      offset,
-      status: 'PUBLISHED',
-      filter: {
-        tag: filterOptions.tag,
-        platform: filterOptions.platform,
-        category: filterOptions.category,
-        author: filterOptions.author,
-        favorited: params.favorited === 'true' ? true : undefined,
-      },
-      // Only fetch fields that are actually used by GameCard to reduce payload
-      fields: [
-        'id', 'title', 'slug', 'description', 'ver',
-        'mainImage', 'coverImage', 'backgroundImage',
-        'author', 'tags', 'platforms', 'categories',
-        'favoritesCount', 'createdAt'
-      ]
-    });
-    items = result.items;
-    total = result.total;
-    page = result.page;
-    pageSize = result.pageSize;
-  }
-
+  const { items, total, page, pageSize } = result;
   const pages = Math.max(1, Math.ceil(total / pageSize))
 
 

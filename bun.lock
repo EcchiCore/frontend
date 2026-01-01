@@ -5,7 +5,7 @@
     "": {
       "name": "chanomhub-2",
       "dependencies": {
-        "@chanomhub/sdk": "^1.1.0",
+        "@chanomhub/sdk": "^1.1.1",
         "@emotion/react": "^11.14.0",
         "@emotion/styled": "^11.14.1",
         "@google-analytics/data": "^5.2.1",
@@ -399,7 +399,7 @@
 
     "@bundled-es-modules/statuses": ["@bundled-es-modules/statuses@1.0.1", "", { "dependencies": { "statuses": "^2.0.1" } }, "sha512-yn7BklA5acgcBr+7w064fGV+SGIFySjCKpqjcWgBAIfrAkY+4GQTJJHQMeT3V/sgz23VTEVV8TtOmkvJAhFVfg=="],
 
-    "@chanomhub/sdk": ["@chanomhub/sdk@1.1.0", "", { "peerDependencies": { "next": ">=13.0.0" } }, "sha512-THdpKQiiawdrnoZ3C8JZMFndUMCWWTi18C4cqQifmsLDqt4aB3iLMfJCkN6LbFwNnf//vDJtLB2PM+YsR8eKjw=="],
+    "@chanomhub/sdk": ["@chanomhub/sdk@1.1.1", "", { "peerDependencies": { "next": ">=13.0.0" } }, "sha512-Ro3dn2+WYAlDtkqJ/jel82gxONQXqCL5ApxqvQjCh9dEYe05gD8bFOL3zPTc9tuP5/qcPLxKh/Z8ZfEYfTGTOA=="],
 
     "@codemirror/autocomplete": ["@codemirror/autocomplete@6.20.0", "", { "dependencies": { "@codemirror/language": "^6.0.0", "@codemirror/state": "^6.0.0", "@codemirror/view": "^6.17.0", "@lezer/common": "^1.0.0" } }, "sha512-bOwvTOIJcG5FVo5gUUupiwYh8MioPLQ4UcqbcRf7UQ98X90tCa9E1kZ3Z7tqwpZxYyOvh1YTYbmZE9RTfTp5hg=="],
 
