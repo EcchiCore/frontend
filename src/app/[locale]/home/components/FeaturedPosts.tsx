@@ -3,32 +3,14 @@
 import React, { useState, useEffect } from 'react';
 
 import Link from 'next/link';
-
-// Define the structure of an article from the API
-interface Article {
-  id: number;
-  title: string;
-  slug: string;
-  description: string;
-  author: {
-    name: string;
-    image: string | null;
-  };
-  categories: { name: string }[];
-  favoritesCount: number;
-  createdAt: string;
-  mainImage: string | null;
-  backgroundImage: string | null;
-  coverImage: string | null;
-  platforms: { name: string }[];
-  tags: { name: string }[];
-}
+import type { ArticleListItem } from '@chanomhub/sdk';
 
 // ลบ title ออกจาก Interface
 interface FeaturedPostsProps {
-  posts: Article[];
+  posts: ArticleListItem[];
   loading: boolean;
 }
+
 
 // Helper function to get relative time
 function getRelativeTime(dateString: string): string {
@@ -46,7 +28,7 @@ function getRelativeTime(dateString: string): string {
 }
 
 // Separate component for each post row to properly use React hooks
-function PostRow({ post, index }: { post: Article; index: number }) {
+function PostRow({ post, index }: { post: ArticleListItem; index: number }) {
   const [timeString, setTimeString] = useState("");
 
   useEffect(() => {
@@ -87,7 +69,7 @@ function PostRow({ post, index }: { post: Article; index: number }) {
       {/* Category Column - Hidden on tablet and below */}
       <td className="px-2 py-1.5 hidden lg:table-cell">
         <span className="text-[10px] px-1.5 py-0.5 bg-primary/10 text-primary rounded truncate inline-block max-w-full">
-          {post.categories[0]?.name || 'ทั่วไป'}
+          {post.categories?.[0]?.name || 'ทั่วไป'}
         </span>
       </td>
 

@@ -8,7 +8,7 @@ import { generatePageMetadata } from '@/utils/metadataUtils';
 import { getTranslations } from 'next-intl/server';
 import { locales } from '@/app/[locale]/lib/navigation';
 
-import { fetchArticles } from '@/lib/api';
+import { createChanomhubClient } from '@chanomhub/sdk';
 import NewYearCountdown from './components/NewYearCountdown';
 import DiscordWidget from './components/DiscordWidget';
 import PromotionsWidget from './components/PromotionsWidget';
@@ -32,19 +32,21 @@ export async function generateMetadata({ params }: { params: { locale?: string }
   });
 }
 
-// Server-side data fetching
+// Server-side data fetching using SDK
 async function fetchHomeData() {
   try {
+    const sdk = createChanomhubClient();
+
     const [carouselData, featuredData, latestData] = await Promise.all([
-      fetchArticles({ limit: '3', status: 'PUBLISHED' }),
-      fetchArticles({ platform: 'windows', status: 'PUBLISHED', limit: '6' }),
-      fetchArticles({ status: 'PUBLISHED', limit: '10' }),
+      sdk.articles.getAll({ limit: 3, status: 'PUBLISHED' }),
+      sdk.articles.getByPlatform('windows', { limit: 25 }),
+      sdk.articles.getAll({ limit: 10, status: 'PUBLISHED' }),
     ]);
 
     return {
-      carousel: carouselData.items || [],
-      featured: featuredData.items || [],
-      latest: latestData.items || [],
+      carousel: carouselData || [],
+      featured: featuredData || [],
+      latest: latestData || [],
     };
   } catch (error) {
     console.error('Error fetching home page data:', error);

@@ -4,21 +4,13 @@ import Link from 'next/link';
 import Image from 'next/image';
 import imageLoader from '@/lib/imageLoader';
 import { useState } from 'react';
-
-interface Article {
-  id: number;
-  title: string;
-  slug: string;
-  mainImage: string | null;
-  coverImage: string | null;
-  backgroundImage: string | null;
-  description: string;
-}
+import type { ArticleListItem } from '@chanomhub/sdk';
 
 interface HomeCarouselProps {
-  articles: Article[];
+  articles: ArticleListItem[];
   loading: boolean;
 }
+
 
 export default function HomeCarousel({ articles, loading }: HomeCarouselProps) {
   const [imageErrors, setImageErrors] = useState<{ [key: number]: boolean }>({});
@@ -51,7 +43,7 @@ export default function HomeCarousel({ articles, loading }: HomeCarouselProps) {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
         {displayArticles.map((article) => {
-          const src = article.coverImage || article.mainImage || article.backgroundImage || null;
+          const src = article.coverImage || article.mainImage || null;
           const hasError = imageErrors[article.id];
 
           return (
