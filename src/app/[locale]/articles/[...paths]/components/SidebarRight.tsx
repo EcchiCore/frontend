@@ -32,15 +32,15 @@ import { encodeURLComponent } from "@/lib/utils";
 import { formatDate } from "@/lib/dateUtils";
 
 const SidebarRight: React.FC<SidebarRightProps> = ({
-                                                     article,
-                                                     isCurrentUserAuthor,
-                                                     isFollowing,
-                                                     handleFollow,
-                                                     isFavorited,
-                                                     handleFavorite,
-                                                     setOpenDownloadDialog,
-                                                     downloads,
-                                                   }) => {
+  article,
+  isCurrentUserAuthor,
+  isFollowing,
+  handleFollow,
+  isFavorited,
+  handleFavorite,
+  setOpenDownloadDialog,
+  downloads,
+}) => {
   const t = useTranslations("sidebar");
 
   const getStatusText = (status: string) => {
@@ -185,7 +185,7 @@ const SidebarRight: React.FC<SidebarRightProps> = ({
                 <CpuChipIcon className="w-4 h-4 text-muted-foreground" />
                 <span className="text-sm text-muted-foreground">Engine:</span>
               </div>
-              <Badge variant="outline">{article.engine}</Badge>
+              <Badge variant="outline">{article.engine.name}</Badge>
             </div>
           )}
 
