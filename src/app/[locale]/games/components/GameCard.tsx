@@ -48,6 +48,7 @@ export default function GameCard({ article }: { article: Article }) {
               width={600}
               height={375}
               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
+              unoptimized
             />
           ) : (
             <div className="w-full h-full bg-gradient-to-br from-primary/5 via-muted/50 to-background/80 flex items-center justify-center">
