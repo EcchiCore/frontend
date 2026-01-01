@@ -26,7 +26,16 @@ export default async function Results({
   if (params.author) options.filter!.author = String(params.author);
   if (params.favorited) options.filter!.favorited = params.favorited === 'true';
 
-  const { items, total, page, pageSize } = await sdk.articles.getAllPaginated(options);
+  const { items, total, page, pageSize } = await sdk.articles.getAllPaginated({
+    ...options,
+    // Only fetch fields that are actually used by GameCard to reduce payload
+    fields: [
+      'id', 'title', 'slug', 'description', 'ver',
+      'mainImage', 'coverImage', 'backgroundImage',
+      'author', 'tags', 'platforms', 'categories',
+      'favoritesCount', 'createdAt'
+    ]
+  });
   const pages = Math.max(1, Math.ceil(total / pageSize))
 
 
