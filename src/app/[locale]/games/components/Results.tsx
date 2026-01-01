@@ -1,5 +1,5 @@
 import { createServerClient } from "@chanomhub/sdk/next"
-import { ArticleListItem, ArticleListOptions } from "@chanomhub/sdk"
+import { ArticleListItem } from "@chanomhub/sdk"
 import GameCard from "./GameCard"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
@@ -11,31 +11,63 @@ export default async function Results({
   const params = await searchParams;
   const sdk = await createServerClient();
 
-  // Prepare list options
-  const options: ArticleListOptions = {
-    limit: Number(params.pageSize ?? 12),
-    offset: (Number(params.page ?? 1) - 1) * Number(params.pageSize ?? 12),
-    status: 'PUBLISHED',
-    filter: {}
+  const limit = Number(params.pageSize ?? 12);
+  const offset = (Number(params.page ?? 1) - 1) * limit;
+  const searchQuery = params.q ? String(params.q) : '';
+
+  // Build common filter options
+  const filterOptions = {
+    tag: params.tag ? String(params.tag) : undefined,
+    platform: params.platform ? String(params.platform) : undefined,
+    category: params.category ? String(params.category) : undefined,
+    author: params.author ? String(params.author) : undefined,
+    engine: params.engine ? String(params.engine) : undefined,
+    sequentialCode: params.sequentialCode ? String(params.sequentialCode) : undefined,
   };
 
-  // Map params to filter
-  if (params.tag) options.filter!.tag = String(params.tag);
-  if (params.platform) options.filter!.platform = String(params.platform);
-  if (params.category) options.filter!.category = String(params.category);
-  if (params.author) options.filter!.author = String(params.author);
-  if (params.favorited) options.filter!.favorited = params.favorited === 'true';
+  let items: ArticleListItem[];
+  let total: number;
+  let page: number;
+  let pageSize: number;
 
-  const { items, total, page, pageSize } = await sdk.articles.getAllPaginated({
-    ...options,
-    // Only fetch fields that are actually used by GameCard to reduce payload
-    fields: [
-      'id', 'title', 'slug', 'description', 'ver',
-      'mainImage', 'coverImage', 'backgroundImage',
-      'author', 'tags', 'platforms', 'categories',
-      'favoritesCount', 'createdAt'
-    ]
-  });
+  if (searchQuery) {
+    // Use search repository for full-text search
+    const result = await sdk.search.articles(searchQuery, {
+      limit,
+      offset,
+      ...filterOptions,
+    });
+    items = result.items;
+    total = result.total;
+    page = result.page;
+    pageSize = result.pageSize;
+  } else {
+    // Use articles repository for listing/filtering without search
+    const result = await sdk.articles.getAllPaginated({
+      limit,
+      offset,
+      status: 'PUBLISHED',
+      filter: {
+        tag: filterOptions.tag,
+        platform: filterOptions.platform,
+        category: filterOptions.category,
+        author: filterOptions.author,
+        favorited: params.favorited === 'true' ? true : undefined,
+      },
+      // Only fetch fields that are actually used by GameCard to reduce payload
+      fields: [
+        'id', 'title', 'slug', 'description', 'ver',
+        'mainImage', 'coverImage', 'backgroundImage',
+        'author', 'tags', 'platforms', 'categories',
+        'favoritesCount', 'createdAt'
+      ]
+    });
+    items = result.items;
+    total = result.total;
+    page = result.page;
+    pageSize = result.pageSize;
+  }
+
   const pages = Math.max(1, Math.ceil(total / pageSize))
 
 

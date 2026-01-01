@@ -399,7 +399,7 @@
 
     "@bundled-es-modules/statuses": ["@bundled-es-modules/statuses@1.0.1", "", { "dependencies": { "statuses": "^2.0.1" } }, "sha512-yn7BklA5acgcBr+7w064fGV+SGIFySjCKpqjcWgBAIfrAkY+4GQTJJHQMeT3V/sgz23VTEVV8TtOmkvJAhFVfg=="],
 
-    "@chanomhub/sdk": ["@chanomhub/sdk@1.0.7", "", { "peerDependencies": { "next": ">=13.0.0" } }, "sha512-ByiIY/7wWlN21PdE8wHDmrRaE2P++CTUpGmRGZAIbwcdwNscskxaRPiEi3bDlkE1maUWZzLP53+GFbb9MxvWWg=="],
+    "@chanomhub/sdk": ["@chanomhub/sdk@1.0.8", "", { "peerDependencies": { "next": ">=13.0.0" } }, "sha512-hKJsPl98OnQGs+ys/5RotzLTo4XseEzdPovbJLXyVlmHEqM2rodyO8JEf9Fx0B83XuTfO9++05sQsnCuLPHlGw=="],
 
     "@codemirror/autocomplete": ["@codemirror/autocomplete@6.20.0", "", { "dependencies": { "@codemirror/language": "^6.0.0", "@codemirror/state": "^6.0.0", "@codemirror/view": "^6.17.0", "@lezer/common": "^1.0.0" } }, "sha512-bOwvTOIJcG5FVo5gUUupiwYh8MioPLQ4UcqbcRf7UQ98X90tCa9E1kZ3Z7tqwpZxYyOvh1YTYbmZE9RTfTp5hg=="],
 
