@@ -14,20 +14,45 @@ export function useArticleInteractions(article: Article, slug: string) {
   const [alert, setAlert] = useState<AlertState>({ open: false, message: '', severity: 'success' });
 
 
-
-  const fetchedArticleFetcher = (url: string) => {
+  // GraphQL fetcher for user-specific article interaction state
+  const graphqlFetcher = async (key: string) => {
     const token = Cookies.get('token');
-    const headers: HeadersInit = { 'Content-Type': 'application/json' };
-    if (token) headers['Authorization'] = `Bearer ${token}`;
-    return fetch(url, { headers }).then((res) => {
-      if (!res.ok) throw new Error('Failed to fetch article');
-      return res.json();
+    if (!token) return null;
+
+    const query = `
+      query ArticleInteractionState($slug: String!) {
+        article(slug: $slug) {
+          favorited
+          favoritesCount
+          author {
+            following
+          }
+        }
+      }
+    `;
+
+    const response = await fetch(`${API_BASE_URL}/api/graphql`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        query,
+        variables: { slug: key },
+        operationName: 'ArticleInteractionState',
+      }),
     });
+
+    if (!response.ok) throw new Error('Failed to fetch article state');
+    const json = await response.json();
+    if (json.errors) throw new Error(json.errors[0]?.message || 'GraphQL error');
+    return json.data;
   };
 
   const { data: articleData } = useSWR(
-    Cookies.get('token') ? `${API_BASE_URL}/api/articles/${slug}` : null,
-    fetchedArticleFetcher,
+    Cookies.get('token') ? slug : null,
+    graphqlFetcher,
     {
       revalidateOnFocus: false,
     }
@@ -37,7 +62,7 @@ export function useArticleInteractions(article: Article, slug: string) {
     if (articleData?.article) {
       setIsFavorited(articleData.article.favorited);
       setFavoritesCount(articleData.article.favoritesCount);
-      setIsFollowing(articleData.article.author.following);
+      setIsFollowing(articleData.article.author?.following ?? false);
     }
   }, [articleData]);
 
