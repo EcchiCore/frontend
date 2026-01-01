@@ -16,18 +16,21 @@ import {
 } from "@/utils/metadataUtils";
 import { getValidLocale, type Locale } from "@/utils/localeUtils";
 import { Article } from "@/types/article";
-import { getArticleBySlug, getArticleWithDownloads } from "@/lib/article-api";
+import { createChanomhubClient } from '@chanomhub/sdk';
 
 const siteUrl = process.env.FRONTEND || 'https://chanomhub.com';
 
+// SDK client for server-side fetching
+const sdk = createChanomhubClient();
+
 // Cache article fetch to deduplicate between generateMetadata and ArticlePage
 const getCachedArticle = cache(async (slug: string, locale: string) => {
-  return getArticleBySlug(slug, locale);
+  return sdk.articles.getBySlug(slug, locale);
 });
 
 // Cache article with downloads
 const getCachedArticleWithDownloads = cache(async (slug: string, locale: string) => {
-  return getArticleWithDownloads(slug, locale);
+  return sdk.articles.getWithDownloads(slug, locale);
 });
 
 

@@ -2,6 +2,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import useSWR from 'swr';
 import Cookies from 'js-cookie';
+import { createAuthenticatedClient, createChanomhubClient } from '@chanomhub/sdk';
 import { Article } from '@/types/article';
 import { AlertState } from '../Interfaces';
 
@@ -13,6 +14,12 @@ export function useArticleInteractions(article: Article, slug: string) {
   const [isFollowing, setIsFollowing] = useState(article.author.following);
   const [alert, setAlert] = useState<AlertState>({ open: false, message: '', severity: 'success' });
 
+  // Get authenticated SDK client
+  const getAuthenticatedSdk = useCallback(() => {
+    const token = Cookies.get('token');
+    if (!token) return null;
+    return createAuthenticatedClient(token);
+  }, []);
 
   // GraphQL fetcher for user-specific article interaction state
   const graphqlFetcher = async (key: string) => {
@@ -76,50 +83,39 @@ export function useArticleInteractions(article: Article, slug: string) {
   }, []);
 
   const handleFavorite = useCallback(async () => {
-    const token = Cookies.get('token');
-    if (!token) return showAlert('กรุณาเข้าสู่ระบบเพื่อบันทึกบทความนี้', 'error');
+    const sdk = getAuthenticatedSdk();
+    if (!sdk) return showAlert('กรุณาเข้าสู่ระบบเพื่อบันทึกบทความนี้', 'error');
 
     const prevState = { isFavorited, favoritesCount };
     setIsFavorited(!isFavorited);
     setFavoritesCount(isFavorited ? favoritesCount - 1 : favoritesCount + 1);
 
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/api/articles/${slug}/favorite`,
-        {
-          method: isFavorited ? 'DELETE' : 'POST',
-          headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({}),
-        }
-      );
-      if (!response.ok) throw new Error();
+      const result = isFavorited
+        ? await sdk.favorites.remove(slug)
+        : await sdk.favorites.add(slug);
+
+      if (!result) throw new Error('Failed to update favorite');
     } catch {
       setIsFavorited(prevState.isFavorited);
       setFavoritesCount(prevState.favoritesCount);
       showAlert('ไม่สามารถอัปเดตสถานะรายการโปรด', 'error');
     }
-  }, [isFavorited, favoritesCount, slug, showAlert]);
+  }, [isFavorited, favoritesCount, slug, showAlert, getAuthenticatedSdk]);
 
   const handleFollow = useCallback(async () => {
-    const token = Cookies.get('token');
-    if (!token) return showAlert('กรุณาเข้าสู่ระบบเพื่อติดตามผู้เขียน', 'error');
+    const sdk = getAuthenticatedSdk();
+    if (!sdk) return showAlert('กรุณาเข้าสู่ระบบเพื่อติดตามผู้เขียน', 'error');
 
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/api/profiles/${article.author.name}/follow`,
-        {
-          method: isFollowing ? 'DELETE' : 'POST',
-          headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({}),
-        }
-      );
-      if (response.ok) {
-        const data = await response.json();
-        console.log('Follow API Response:', data);
-        console.log('Following status:', data.profile.following);
-        setIsFollowing(data.profile.following);
+      const profile = isFollowing
+        ? await sdk.users.unfollow(article.author.name)
+        : await sdk.users.follow(article.author.name);
+
+      if (profile) {
+        setIsFollowing(profile.following);
         showAlert(
-          data.profile.following ? 'ติดตามผู้เขียนแล้ว' : 'เลิกติดตามผู้เขียน',
+          profile.following ? 'ติดตามผู้เขียนแล้ว' : 'เลิกติดตามผู้เขียน',
           'success'
         );
       } else {
@@ -128,7 +124,7 @@ export function useArticleInteractions(article: Article, slug: string) {
     } catch {
       showAlert('เกิดข้อผิดพลาดในการเชื่อมต่อ', 'error');
     }
-  }, [isFollowing, article.author.name, showAlert]);
+  }, [isFollowing, article.author.name, showAlert, getAuthenticatedSdk]);
 
   const handleShare = useCallback(async () => {
     const shareData = {
@@ -159,3 +155,4 @@ export function useArticleInteractions(article: Article, slug: string) {
     showAlert,
   };
 }
+

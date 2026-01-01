@@ -12,7 +12,7 @@
     "i18n:scan": "i18next-scanner"
   },
   "dependencies": {
-    "@chanomhub/sdk": "^1.0.4",
+    "@chanomhub/sdk": "^1.0.6",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@google-analytics/data": "^5.2.1",

@@ -11,7 +11,7 @@ export type Article = {
   createdAt: string;
   updatedAt: string;
   status: 'DRAFT' | 'PENDING_REVIEW' | 'PUBLISHED' | 'ARCHIVED' | 'NOT_APPROVED' | 'NEEDS_REVISION';
-  engine: 'RENPY' | 'RPGM' | 'UNITY' | 'UNREAL' | 'GODOT' | 'TyranoBuilder' | 'WOLFRPG' | 'KIRIKIRI' | 'FLASH' | 'BakinPlayer';
+  engine: { id: string; name: string };
   mainImage: string | null;
   backgroundImage: string | null;
   coverImage: string | null;
@@ -19,17 +19,17 @@ export type Article = {
   categories: { name: string }[];
   author: {
     name: string;
-    bio: string | null;
+    bio?: string | null;
     image: string | null;
-    backgroundImage: string | null;
-    following: boolean;
-    socialMediaLinks: { platform: string; url: string }[];
+    backgroundImage?: string | null;
+    following?: boolean;
+    socialMediaLinks?: { platform: string; url: string }[];
   };
   favorited: boolean;
   favoritesCount: number;
   sequentialCode: string | null;
-  downloads: { id: number; isActive: boolean; name: string; url: string; vipOnly: boolean }[];
-  mods: { downloadLink: string; description: string; creditTo: string; categories: { name: string }[]; images: { url: string }[]; name: string; status: string; version: string }[];
-  officialDownloadSources: { name: string; url: string; status: string }[];
+  downloads?: { id: number; isActive: boolean; name: string; url: string; vipOnly: boolean }[];
+  mods?: { downloadLink: string; description: string; creditTo: string; categories: { name: string }[]; images: { url: string }[]; name: string; status: string; version: string }[];
+  officialDownloadSources?: { name: string; url: string; status: string }[];
   version?: string;
 };

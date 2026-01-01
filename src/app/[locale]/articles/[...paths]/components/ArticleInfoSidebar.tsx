@@ -190,7 +190,7 @@ const ArticleInfoSidebar: React.FC<ArticleInfoSidebarProps> = ({
                   <CpuChipIcon className="w-4 h-4 text-muted-foreground" />
                   <span className="text-sm text-muted-foreground">Engine:</span>
                 </div>
-                <Badge variant="outline">{article.engine}</Badge>
+                <Badge variant="outline">{article.engine.name}</Badge>
               </div>
             )}
 
@@ -408,7 +408,7 @@ const ArticleInfoSidebar: React.FC<ArticleInfoSidebarProps> = ({
                   <CpuChipIcon className="w-4 h-4 text-muted-foreground" />
                   <span className="text-sm text-muted-foreground">Engine:</span>
                 </div>
-                <Badge variant="outline">{article.engine}</Badge>
+                <Badge variant="outline">{article.engine.name}</Badge>
               </div>
             )}
 
