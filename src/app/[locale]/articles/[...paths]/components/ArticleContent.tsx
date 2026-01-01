@@ -60,7 +60,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
     handleFollow,
     handleShare,
     showAlert,
-  } = useArticleInteractions(article);
+  } = useArticleInteractions(article, slug);
   const {
     comments,
     newComment,

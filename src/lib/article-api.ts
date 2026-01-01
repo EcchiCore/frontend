@@ -120,6 +120,7 @@ export async function fetchArticleAndDownloads(
   const query = `query ArticleAndDownloads($slug: String!, $downloadsArticleId: Int!, $language: String) {
     article(slug: $slug, language: $language) {
       id
+      slug
       author {
         following
         id
@@ -189,6 +190,7 @@ export async function getArticleBySlug(slug: string, language?: string): Promise
   const query = `query ArticleBySlug($slug: String!, $language: String) {
     article(slug: $slug, language: $language) {
       id
+      slug
       author {
         id
         image
@@ -250,6 +252,7 @@ export async function getArticleWithDownloads(
   const query = `query ArticleWithDownloads($slug: String!, $language: String) {
     article(slug: $slug, language: $language) {
       id
+      slug
       author {
         id
         image

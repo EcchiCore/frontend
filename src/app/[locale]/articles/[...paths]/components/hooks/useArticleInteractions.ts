@@ -1,16 +1,45 @@
 // src/app/[locale]/articles/[...paths]/components/hooks/useArticleInteractions.ts
 import { useState, useCallback, useEffect } from 'react';
+import useSWR from 'swr';
 import Cookies from 'js-cookie';
 import { Article } from '@/types/article';
 import { AlertState } from '../Interfaces';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
-export function useArticleInteractions(article: Article) {
+export function useArticleInteractions(article: Article, slug: string) {
   const [isFavorited, setIsFavorited] = useState(article.favorited);
   const [favoritesCount, setFavoritesCount] = useState(article.favoritesCount);
   const [isFollowing, setIsFollowing] = useState(article.author.following);
   const [alert, setAlert] = useState<AlertState>({ open: false, message: '', severity: 'success' });
+
+
+
+  const fetchedArticleFetcher = (url: string) => {
+    const token = Cookies.get('token');
+    const headers: HeadersInit = { 'Content-Type': 'application/json' };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+    return fetch(url, { headers }).then((res) => {
+      if (!res.ok) throw new Error('Failed to fetch article');
+      return res.json();
+    });
+  };
+
+  const { data: articleData } = useSWR(
+    Cookies.get('token') ? `${API_BASE_URL}/api/articles/${slug}` : null,
+    fetchedArticleFetcher,
+    {
+      revalidateOnFocus: false,
+    }
+  );
+
+  useEffect(() => {
+    if (articleData?.article) {
+      setIsFavorited(articleData.article.favorited);
+      setFavoritesCount(articleData.article.favoritesCount);
+      setIsFollowing(articleData.article.author.following);
+    }
+  }, [articleData]);
 
   useEffect(() => {
     setIsFollowing(article.author.following);
@@ -31,7 +60,7 @@ export function useArticleInteractions(article: Article) {
 
     try {
       const response = await fetch(
-        `${API_BASE_URL}/api/articles/${article.slug}/favorite`,
+        `${API_BASE_URL}/api/articles/${slug}/favorite`,
         {
           method: isFavorited ? 'DELETE' : 'POST',
           headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
@@ -44,7 +73,7 @@ export function useArticleInteractions(article: Article) {
       setFavoritesCount(prevState.favoritesCount);
       showAlert('ไม่สามารถอัปเดตสถานะรายการโปรด', 'error');
     }
-  }, [isFavorited, favoritesCount, article.slug, showAlert]);
+  }, [isFavorited, favoritesCount, slug, showAlert]);
 
   const handleFollow = useCallback(async () => {
     const token = Cookies.get('token');
