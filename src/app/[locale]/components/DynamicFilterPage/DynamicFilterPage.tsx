@@ -11,7 +11,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import ErrorCard from '../../components/ErrorCard';
 import { getTranslations } from 'next-intl/server';
 import ImageWithFallback from '@/components/ImageWithFallback';
-import { createChanomhubClient } from '@/lib/chanomhub-sdk';
+import { createChanomhubClient } from '@chanomhub/sdk';
 
 // Define types for filter
 type FilterType = 'platforms' | 'tag' | 'category';

@@ -1,7 +1,7 @@
 // app/[[...locale]]/tag/[slug]/rss/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { getTranslations } from 'next-intl/server';
-import { createChanomhubClient, type ArticleListItem } from '@/lib/chanomhub-sdk';
+import { createChanomhubClient, type ArticleListItem } from '@chanomhub/sdk';
 
 // Updated interface to match Next.js expectations
 interface RouteParams {
