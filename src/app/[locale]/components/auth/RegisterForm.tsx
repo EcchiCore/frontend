@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import { Button } from "@/components/ui/button";
@@ -9,7 +9,7 @@ import { useTranslations } from 'next-intl';
 import axios from "axios";
 import Cookies from 'js-cookie';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { supabase } from "@/lib/supabaseClient";
+import { createChanomhubClient, type LoginResponse } from '@chanomhub/sdk';
 
 interface FormData {
   username: string;
@@ -29,83 +29,68 @@ export function RegisterForm({ onSwitch }: { onSwitch: () => void }) {
   });
   const [loading, setLoading] = useState(false);
 
+  // Create SDK instance with Supabase config for OAuth
+  const sdk = useMemo(() => createChanomhubClient({
+    supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
+    supabaseAnonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+  }), []);
+
   const handleGoogleLogin = async () => {
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: `${window.location.origin}/register`,
-          queryParams: {
-            access_type: 'offline',
-            prompt: 'consent',
-          },
-        },
+      await sdk.auth.signInWithGoogle({
+        redirectTo: `${window.location.origin}/register`,
       });
-      if (error) throw error;
-    } catch (error: any) {
-      toast.error(error.message || t('unexpectedErrorMessage'));
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : t('unexpectedErrorMessage');
+      toast.error(message);
     }
   };
 
-  const exchangeSupabaseToken = async (session: any) => {
-    try {
-      if (!session?.access_token) return;
+  const handleOAuthCallback = async (loginData: LoginResponse) => {
+    const token = loginData.token;
+    const refreshToken = loginData.refreshToken;
 
-      const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/users/login-supabase`,
-        { accessToken: session.access_token }
-      );
+    if (token) {
+      toast.success(t('successMessage'), { autoClose: 2000 });
+      Cookies.set("token", token, {
+        secure: true,
+        sameSite: "strict",
+        expires: 7,
+      });
 
-      if (response.data.user?.token) {
-        toast.success(t('successMessage'), { autoClose: 2000 });
-        Cookies.set("token", response.data.user.token, {
+      if (refreshToken) {
+        Cookies.set("refreshToken", refreshToken, {
           secure: true,
           sameSite: "strict",
           expires: 7,
         });
-        setTimeout(() => router.push("/"), 2000);
       }
-    } catch (error) {
-      console.error("SSO Exchange Error:", error);
-      toast.error(t('invalidResponseMessage'));
+
+      setTimeout(() => router.push("/"), 2000);
     }
   };
 
+  // Check for OAuth callback on mount
   useEffect(() => {
     const handleSession = async () => {
-      // Check if we have a hash with access_token (Implicit Grant)
+      // Check if we have a hash with access_token (OAuth callback)
       if (window.location.hash && window.location.hash.includes('access_token')) {
         try {
-          const { data: { session }, error } = await supabase.auth.getSession();
-          if (session) {
-            exchangeSupabaseToken(session);
+          // Use SDK to handle the callback and exchange token with backend
+          const loginData = await sdk.auth.handleCallback();
+          if (loginData) {
+            handleOAuthCallback(loginData);
             window.history.replaceState(null, '', window.location.pathname);
-            return;
           }
         } catch (e) {
-          console.error("Error processing hash session:", e);
+          console.error("Error processing OAuth callback:", e);
+          toast.error(t('invalidResponseMessage'));
         }
       }
-
-      supabase.auth.getSession().then(({ data: { session } }) => {
-        if (session) {
-          exchangeSupabaseToken(session);
-        }
-      });
     };
 
     handleSession();
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session) {
-        exchangeSupabaseToken(session);
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
+  }, [sdk]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;

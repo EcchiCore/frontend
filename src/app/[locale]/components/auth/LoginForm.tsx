@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import { Button } from "@/components/ui/button";
@@ -10,7 +10,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { useTranslations } from 'next-intl';
 import axios from "axios";
 import Cookies from 'js-cookie';
-import { supabase } from "@/lib/supabaseClient";
+import { createChanomhubClient, type LoginResponse } from '@chanomhub/sdk';
 
 export function LoginForm({ onSwitch }: { onSwitch: () => void }) {
   const t = useTranslations('Login');
@@ -19,106 +19,71 @@ export function LoginForm({ onSwitch }: { onSwitch: () => void }) {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // Create SDK instance with Supabase config for OAuth
+  const sdk = useMemo(() => createChanomhubClient({
+    supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
+    supabaseAnonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+  }), []);
+
   const handleGoogleLogin = async () => {
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: `${window.location.origin}/login`,
-          queryParams: {
-            access_type: 'offline',
-            prompt: 'consent',
-          },
-        },
+      await sdk.auth.signInWithGoogle({
+        redirectTo: `${window.location.origin}/login`,
       });
-      if (error) throw error;
-    } catch (error: any) {
-      toast.error(error.message || t('unexpectedErrorMessage'));
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : t('unexpectedErrorMessage');
+      toast.error(message);
     }
   };
 
-  const exchangeSupabaseToken = async (session: any) => {
-    try {
-      if (!session?.access_token) return;
+  const handleOAuthCallback = async (loginData: LoginResponse) => {
+    const token = loginData.token;
+    const refreshToken = loginData.refreshToken;
 
-      const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/users/login-supabase`,
-        { accessToken: session.access_token }
-      );
+    if (token) {
+      toast.success(t('successMessage'), { autoClose: 2000 });
 
-      // Handle new backend response structure
-      const responseData = response.data?.data || response.data;
-      const user = responseData?.user;
-      const token = user?.token;
-      const refreshToken = responseData?.refreshToken;
+      Cookies.set("token", token, {
+        secure: true,
+        sameSite: "strict",
+        expires: 7,
+      });
 
-      if (token) {
-        toast.success(t('successMessage'), { autoClose: 2000 });
-
-        Cookies.set("token", token, {
+      if (refreshToken) {
+        Cookies.set("refreshToken", refreshToken, {
           secure: true,
           sameSite: "strict",
           expires: 7,
         });
-
-        if (refreshToken) {
-          Cookies.set("refreshToken", refreshToken, {
-            secure: true,
-            sameSite: "strict",
-            expires: 7,
-          });
-        }
-
-        // Force reload to update auth state or redirect
-        setTimeout(() => router.push("/"), 1000);
       }
-    } catch (error) {
-      console.error("SSO Exchange Error:", error);
-      toast.error(t('invalidResponseMessage'));
+
+      // Force reload to update auth state or redirect
+      setTimeout(() => router.push("/"), 1000);
     }
   };
 
-
-  // Check for Supabase session on mount (handling redirect from OAuth)
+  // Check for OAuth callback on mount
   useEffect(() => {
     const handleSession = async () => {
-      // Check if we have a hash with access_token (Implicit Grant)
+      // Check if we have a hash with access_token (OAuth callback)
       if (window.location.hash && window.location.hash.includes('access_token')) {
         try {
-          // Supabase client should automatically parse the hash and set the session
-          // We just need to wait a tick or check getSession again
-          const { data: { session }, error } = await supabase.auth.getSession();
-          if (session) {
-            exchangeSupabaseToken(session);
+          // Use SDK to handle the callback and exchange token with backend
+          const loginData = await sdk.auth.handleCallback();
+          if (loginData) {
+            handleOAuthCallback(loginData);
             // Clear the hash to look cleaner
             window.history.replaceState(null, '', window.location.pathname);
-            return;
           }
         } catch (e) {
-          console.error("Error processing hash session:", e);
+          console.error("Error processing OAuth callback:", e);
+          toast.error(t('invalidResponseMessage'));
         }
       }
-
-      // Normal session check
-      supabase.auth.getSession().then(({ data: { session } }) => {
-        if (session) {
-          exchangeSupabaseToken(session);
-        }
-      });
     };
 
     handleSession();
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session) {
-        exchangeSupabaseToken(session);
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
+  }, [sdk]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
