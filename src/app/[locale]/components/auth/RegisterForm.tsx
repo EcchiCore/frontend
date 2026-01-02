@@ -47,8 +47,18 @@ export function RegisterForm({ onSwitch }: { onSwitch: () => void }) {
   };
 
   const handleOAuthCallback = async (loginData: LoginResponse) => {
-    const token = loginData.token;
-    const refreshToken = loginData.refreshToken;
+    // Flexible handling of response structure
+    // The SDK/Backend might return { token: ... } or { data: { user: { token: ... } } } or { user: { token: ... } }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const data = loginData as any;
+
+    // Check various paths for the user/token
+    const user = data?.data?.user || data?.user || data;
+    const token = user?.token || data?.token;
+
+    // Refresh token might be at top level or inside data
+    const refreshToken = data?.data?.refreshToken || data?.refreshToken || user?.refreshToken;
 
     if (token) {
       toast.success(t('successMessage'), { autoClose: 2000 });
