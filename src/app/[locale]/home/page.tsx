@@ -9,7 +9,6 @@ import { getTranslations } from 'next-intl/server';
 import { locales } from '@/app/[locale]/lib/navigation';
 
 import { createChanomhubClient } from '@chanomhub/sdk';
-import NewYearCountdown from './components/NewYearCountdown';
 import DiscordWidget from './components/DiscordWidget';
 import PromotionsWidget from './components/PromotionsWidget';
 
@@ -70,13 +69,8 @@ export default async function HomePage({ params }: { params: { locale: string } 
       <Navbar />
 
       <main className="bg-background">
-        <section className="border-b border-border py-2 px-2">
-          <div className="container mx-auto">
-            <div className="flex items-center justify-center">
-              <NewYearCountdown />
-            </div>
-          </div>
-        </section>
+        <h1 className="sr-only">ChanomHub - Adult Gaming Hub</h1>
+
 
         <HomeCarousel articles={homeData.carousel} loading={false} />
 
