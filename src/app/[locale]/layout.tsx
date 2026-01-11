@@ -10,6 +10,7 @@ import { siteUrl, defaultMetadataContent, supportedLocales, defaultLocale } from
 import Footer from '@/components/Footer';
 import Script from "next/script";
 import { ReduxProvider } from "@/store/ReduxProvider";
+import { Analytics } from '@vercel/analytics/next';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -193,6 +194,8 @@ export default async function LocaleSegmentLayout({
             style={{ display: 'none', visibility: 'hidden' }}
           />
         </noscript>
+
+        <Analytics />
       </body>
     </html>
   );
