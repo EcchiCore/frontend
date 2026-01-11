@@ -10,6 +10,7 @@ import { siteUrl, defaultMetadataContent, supportedLocales, defaultLocale } from
 import Footer from '@/components/Footer';
 import Script from "next/script";
 import { ReduxProvider } from "@/store/ReduxProvider";
+import { SpeedInsights } from '@vercel/speed-insights/next';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -183,6 +184,9 @@ export default async function LocaleSegmentLayout({
             </Suspense>
           </ReduxProvider>
         </ThemeProvider>
+
+        {/* Vercel Speed Insights */}
+        <SpeedInsights />
 
         {/* Google Tag Manager (noscript) */}
         <noscript>
