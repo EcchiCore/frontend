@@ -13,7 +13,12 @@ import { ReduxProvider } from "@/store/ReduxProvider";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
-const inter = Inter({ subsets: ['latin'] });
+const inter = Inter({
+  subsets: ['latin'],
+  display: 'swap',  // Prevent FOIT (Flash of Invisible Text)
+  preload: true,
+  fallback: ['system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+});
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -107,7 +112,7 @@ export default async function LocaleSegmentLayout({
     // data-event-theme={activeEventTheme?.id} // Removed, handled by script
     >
       <head>
-        <meta charSet="utf-8" />
+
 
         {/* Prevent flash of unstyled content */}
         <script

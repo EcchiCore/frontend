@@ -1,9 +1,7 @@
 "use client";
 import Link from "next/link";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import Cookies from "js-cookie";
-import NavbarLinks from "./Navbar/NavbarLinks";
-import NotificationDropdown from "./Navbar/NotificationDropdown";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
@@ -11,6 +9,17 @@ import { Input } from "@/components/ui/input";
 import { Search, X } from "lucide-react";
 import dynamic from "next/dynamic";
 import { cn } from "@/lib/utils";
+
+// Lazy load heavy client-only components
+const NavbarLinks = dynamic(() => import("./Navbar/NavbarLinks"), {
+  ssr: false,
+  loading: () => <div className="flex items-center gap-4 min-w-[200px]" />,
+});
+
+const NotificationDropdown = dynamic(() => import("./Navbar/NotificationDropdown"), {
+  ssr: false,
+  loading: () => <div className="w-9 h-9" />,
+});
 
 // Simple logo component for the navbar
 const Logo = (props: React.SVGAttributes<SVGElement>) => {
@@ -238,7 +247,7 @@ const Navbar = () => {
           {/* Right Navigation Links (Desktop Only) */}
           <div className="hidden md:flex items-center gap-4">
             <NavbarLinks section="right" onCloseMenu={closeMenu} />
-            
+
             {hasToken && isDesktop && <NotificationDropdown />}
 
             {!hasToken && (
@@ -262,7 +271,7 @@ const Navbar = () => {
                   className={cn(
                     'group h-9 w-9 rounded-full data-[state=open]:bg-zinc-100 dark:data-[state=open]:bg-zinc-800',
                     isMenuOpen &&
-                      'data-[state=open]:[&>svg>path:first-child]:-translate-y-0 data-[state=open]:[&>svg>path:first-child]:rotate-45 data-[state=open]:[&>svg>path:last-child]:-translate-y-0 data-[state=open]:[&>svg>path:last-child]:-rotate-45 data-[state=open]:[&>svg>path:nth-child(2)]:opacity-0'
+                    'data-[state=open]:[&>svg>path:first-child]:-translate-y-0 data-[state=open]:[&>svg>path:first-child]:rotate-45 data-[state=open]:[&>svg>path:last-child]:-translate-y-0 data-[state=open]:[&>svg>path:last-child]:-rotate-45 data-[state=open]:[&>svg>path:nth-child(2)]:opacity-0'
                   )}
                   aria-label="Toggle Menu"
                 >
@@ -277,7 +286,7 @@ const Navbar = () => {
                       เมนู
                     </SheetTitle>
                   </SheetHeader>
-                  
+
                   <div className="flex-1 overflow-y-auto">
                     <div className="p-4 space-y-6">
                       {/* Left Section Links */}
@@ -365,4 +374,4 @@ const Navbar = () => {
   );
 };
 
-export default dynamic(() => Promise.resolve(Navbar), { ssr: false });
+export default Navbar;

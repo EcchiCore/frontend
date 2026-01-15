@@ -1,4 +1,3 @@
-import { Inter } from 'next/font/google';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import Navbar from '../components/Navbar';
 import FeaturedPosts from './components/FeaturedPosts';
@@ -11,10 +10,6 @@ import { locales } from '@/app/[locale]/lib/navigation';
 import { createChanomhubClient } from '@chanomhub/sdk';
 import DiscordWidget from './components/DiscordWidget';
 import PromotionsWidget from './components/PromotionsWidget';
-
-
-// Font configuration
-const inter = Inter({ subsets: ['latin'] });
 
 
 
@@ -65,7 +60,7 @@ export default async function HomePage({ params }: { params: { locale: string } 
 
 
   return (
-    <div className={`min-h-screen bg-background ${inter.className}`}>
+    <div className="min-h-screen bg-background">
       <Navbar />
 
       <main className="bg-background">

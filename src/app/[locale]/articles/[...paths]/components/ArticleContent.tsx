@@ -1,23 +1,9 @@
 "use client";
-import React, { useState } from "react";
-import Skeleton from "react-loading-skeleton";
-import "react-loading-skeleton/dist/skeleton.css";
-import { motion } from "framer-motion";
+import React from "react";
+import dynamic from "next/dynamic";
 import { mutate } from "swr";
 import { useAppSelector } from "@/store/hooks";
-import { useEditor, EditorContent } from '@tiptap/react';
-import StarterKit from '@tiptap/starter-kit';
-import { Image as TiptapImage } from '@tiptap/extension-image';
-import { Link as TiptapLink } from '@tiptap/extension-link';
-import Typography from '@tiptap/extension-typography';
-import { TextStyle } from '@tiptap/extension-text-style';
-import { Color } from '@tiptap/extension-color';
-import Underline from '@tiptap/extension-underline';
-import { TextAlign } from '@tiptap/extension-text-align';
-import { Table } from '@tiptap/extension-table';
-import { TableRow } from '@tiptap/extension-table-row';
-import { TableCell } from '@tiptap/extension-table-cell';
-import { TableHeader } from '@tiptap/extension-table-header';
+import DOMPurify from "dompurify";
 
 import CustomArticleAlert from "./Alert";
 import { Alert } from "@/components/ui/alert";
@@ -35,6 +21,12 @@ import { useDownloadDialog } from "./hooks/useDownloadDialog";
 import ArticleDownloadDialog from "./ArticleDownloadDialog";
 import { Button, Card, CardContent } from "@/components/ui";
 import { useTranslations } from 'next-intl';
+
+// Lazy load Framer Motion for animations (optional enhancement)
+const MotionDiv = dynamic(
+  () => import('framer-motion').then(mod => mod.motion.div),
+  { ssr: false, loading: () => <div /> }
+);
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -91,84 +83,24 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
   const handleDownloadClick = () => {
     setOpenDownloadDialog(true);
   };
-  const editor = useEditor({
-    extensions: [
-      StarterKit.configure({
-        paragraph: {
-          HTMLAttributes: {
-            class: 'mb-4',
-          },
-        },
-        heading: {
-          levels: [1, 2, 3, 4, 5, 6],
-          HTMLAttributes: {
-            class: 'mb-4 font-bold',
-          },
-        },
-        link: false,
-        underline: false,
-      }),
-      TextAlign.configure({
-        types: ['heading', 'paragraph'],
-        alignments: ['left', 'center', 'right', 'justify'],
-        defaultAlignment: 'left',
-      }),
-      TextStyle,
-      Color,
-      Underline,
-      TiptapImage.configure({
-        HTMLAttributes: {
-          class: 'max-w-full h-auto rounded-lg my-4',
-        },
-        allowBase64: true,
-        inline: false,
-      }),
-      TiptapLink.configure({
-        openOnClick: false,
-        HTMLAttributes: {
-          class: 'text-primary hover:text-primary-focus underline',
-          target: '_blank',
-          rel: 'nofollow noopener',
-        },
-        protocols: ['http', 'https', 'mailto'],
-        validate: href => /^https?:\/\//.test(href),
-      }),
-      Typography,
-      Table.configure({
-        resizable: true,
-        HTMLAttributes: {
-          class: 'border-collapse table-auto w-full my-4',
-        },
-      }),
-      TableRow.configure({
-        HTMLAttributes: {
-          class: 'border-b border-border',
-        },
-      }),
-      TableHeader.configure({
-        HTMLAttributes: {
-          class: 'border border-border px-4 py-2 text-left font-bold bg-muted',
-        },
-      }),
-      TableCell.configure({
-        HTMLAttributes: {
-          class: 'border border-border px-4 py-2',
-        },
-      }),
-    ],
-    content: article.body,
-    editable: false,
-    editorProps: {
-      attributes: {
-        class: `prose prose-lg max-w-none ${isDarkMode ? "prose-invert" : ""} prose-primary`,
-        style: `font-size: ${fontSize}px`,
-      },
-    },
-    parseOptions: {
-      preserveWhitespace: 'full',
-    },
-    immediatelyRender: false,
-  });
+  // Sanitize HTML content for security (DOMPurify is already a project dependency)
+  const sanitizedBody = typeof window !== 'undefined'
+    ? DOMPurify.sanitize(article.body, {
+      ALLOWED_TAGS: [
+        'p', 'br', 'strong', 'b', 'em', 'i', 'u', 'strike', 's', 'del',
+        'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+        'ul', 'ol', 'li', 'blockquote', 'pre', 'code',
+        'a', 'img', 'figure', 'figcaption',
+        'table', 'thead', 'tbody', 'tr', 'th', 'td',
+        'div', 'span', 'hr'
+      ],
+      ALLOWED_ATTR: [
+        'href', 'src', 'alt', 'title', 'target', 'rel', 'class', 'style',
+        'width', 'height', 'colspan', 'rowspan'
+      ],
+      ALLOW_DATA_ATTR: false,
+    })
+    : article.body; // SSR: render as-is, client will sanitize on hydration
   const wordCount = article.body.split(/\s+/).length;
   const readingTime = Math.ceil(wordCount / 200);
 
@@ -223,7 +155,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
           />
 
           <main className="min-w-0">
-            <motion.div
+            <MotionDiv
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
@@ -235,9 +167,19 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
                     isDarkMode={isDarkMode}
                   />
 
-                  <div className="mb-6">
-                    <EditorContent editor={editor} />
-                  </div>
+                  {/* Lightweight HTML renderer - replaces heavy Tiptap editor */}
+                  <div
+                    className={`prose prose-lg max-w-none mb-6 ${isDarkMode ? "prose-invert" : ""} prose-primary
+                      prose-headings:mb-4 prose-headings:font-bold
+                      prose-p:mb-4
+                      prose-a:text-primary prose-a:underline hover:prose-a:text-primary/80
+                      prose-img:max-w-full prose-img:h-auto prose-img:rounded-lg prose-img:my-4
+                      prose-table:border-collapse prose-table:w-full prose-table:my-4
+                      prose-th:border prose-th:border-border prose-th:px-4 prose-th:py-2 prose-th:text-left prose-th:font-bold prose-th:bg-muted
+                      prose-td:border prose-td:border-border prose-td:px-4 prose-td:py-2`}
+                    style={{ fontSize: `${fontSize}px` }}
+                    dangerouslySetInnerHTML={{ __html: sanitizedBody }}
+                  />
 
                   <InteractionBar
                     isCurrentUserAuthor={isCurrentUserAuthor}
@@ -277,7 +219,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
                   />
                 </CardContent>
               </Card>
-            </motion.div>
+            </MotionDiv>
           </main>
 
           <ArticleInfoSidebar
