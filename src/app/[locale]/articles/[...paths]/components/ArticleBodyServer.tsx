@@ -111,9 +111,12 @@ export default function ArticleBodyServer({ article }: ArticleBodyServerProps) {
                 </div>
             </header>
 
-            {/* Main Image - SSR for SEO */}
+            {/* Main Image - SSR for SEO with proper CLS prevention */}
             {mainImageUrl && (
-                <div className="relative w-full h-64 md:h-96 mb-8 rounded-xl overflow-hidden">
+                <div
+                    className="relative w-full mb-8 rounded-xl overflow-hidden bg-muted"
+                    style={{ aspectRatio: '16/9' }}  // Reserve space to prevent CLS
+                >
                     <Image
                         loader={imageLoader}
                         src={mainImageUrl}
@@ -122,6 +125,7 @@ export default function ArticleBodyServer({ article }: ArticleBodyServerProps) {
                         className="object-cover"
                         sizes="(max-width: 768px) 100vw, 80vw"
                         priority
+                        fetchPriority="high"
                     />
                 </div>
             )}

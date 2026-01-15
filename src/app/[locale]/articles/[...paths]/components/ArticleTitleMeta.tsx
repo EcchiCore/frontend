@@ -292,7 +292,8 @@ const ArticleTitleMeta: React.FC<ArticleTitleMetaProps> = ({ article, isDarkMode
             </div>
           )}
 
-          <div className="relative w-full h-64 sm:h-80 md:h-96 lg:h-[32rem] xl:h-[36rem]">
+          {/* Main image container with aspect-ratio to prevent CLS */}
+          <div className="relative w-full bg-muted/50" style={{ aspectRatio: '16/10' }}>
             {(() => {
               const mainImageSrc = getImageSrc(article.images[selectedImageIndex]);
               return mainImageSrc && (
@@ -306,6 +307,7 @@ const ArticleTitleMeta: React.FC<ArticleTitleMetaProps> = ({ article, isDarkMode
                   onLoad={() => setIsLoading(false)}
                   priority={selectedImageIndex === 0}
                   loading={selectedImageIndex === 0 ? "eager" : "lazy"}
+                  fetchPriority={selectedImageIndex === 0 ? "high" : undefined}
                   loader={myImageLoader}
                 />
               );

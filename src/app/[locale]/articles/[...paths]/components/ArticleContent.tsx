@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useEffect } from "react";
 import dynamic from "next/dynamic";
 import { mutate } from "swr";
 import { useAppSelector } from "@/store/hooks";
@@ -103,6 +103,15 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
     : article.body; // SSR: render as-is, client will sanitize on hydration
   const wordCount = article.body.split(/\s+/).length;
   const readingTime = Math.ceil(wordCount / 200);
+
+  // Hide SSR content when client is ready to prevent CLS
+  useEffect(() => {
+    // Set data attribute to hide SSR content via CSS
+    document.documentElement.setAttribute('data-ssr-hidden', 'true');
+    return () => {
+      document.documentElement.removeAttribute('data-ssr-hidden');
+    };
+  }, []);
 
   // No longer returning skeleton - SSR content is rendered by ArticleBodyServer
   // This component hydrates on client side
