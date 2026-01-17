@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useRef, useEffect, useState, useCallback } from "react";
+import React, { useRef, useEffect, useState, useCallback, useMemo } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Card } from "@/components/ui/card";
 import { ArticleListItem } from "@chanomhub/sdk";
 import { useTranslations } from "next-intl";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useViewHistory } from "./hooks/useViewHistory";
 
 interface RelatedArticlesProps {
     articles: ArticleListItem[];
@@ -22,10 +23,32 @@ export default function RelatedArticles({
     const [isPaused, setIsPaused] = useState(false);
     const resumeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-    // Filter out current article and limit to 10
-    const filteredArticles = articles
-        .filter((a) => a.id !== currentArticleId)
-        .slice(0, 10);
+    // Get user's preferred tags from view history
+    const { tagScores } = useViewHistory();
+
+    // Filter and sort articles by user preference
+    const filteredArticles = useMemo(() => {
+        const filtered = articles.filter((a) => a.id !== currentArticleId);
+
+        // Score each article based on how many tags match user's viewing history
+        const scored = filtered.map(article => {
+            const articleTags = article.tags?.map(t => t.name.toLowerCase()) || [];
+            let score = 0;
+
+            // Add score based on user's tag view history
+            for (const tag of articleTags) {
+                score += tagScores[tag] || 0;
+            }
+
+            return { article, score };
+        });
+
+        // Sort by preference score (higher first), then slice
+        return scored
+            .sort((a, b) => b.score - a.score)
+            .slice(0, 10)
+            .map(item => item.article);
+    }, [articles, currentArticleId, tagScores]);
 
     // Handle user scroll - pause and set timeout to resume
     const handleUserScroll = useCallback(() => {

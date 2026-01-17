@@ -18,6 +18,7 @@ import { useArticleInteractions } from "./hooks/useArticleInteractions";
 import { useArticleComments } from "./hooks/useArticleComments";
 import { useArticleSettings } from "./hooks/useArticleSettings";
 import { useDownloadDialog } from "./hooks/useDownloadDialog";
+import { useViewHistory } from "./hooks/useViewHistory";
 import ArticleDownloadDialog from "./ArticleDownloadDialog";
 import RelatedArticles from "./RelatedArticles";
 import { Button, Card, CardContent } from "@/components/ui";
@@ -116,6 +117,17 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
       document.documentElement.removeAttribute('data-ssr-hidden');
     };
   }, []);
+
+  // Track viewed tags for personalized recommendations
+  const { recordView, getPreferredTags } = useViewHistory();
+
+  useEffect(() => {
+    // Record this article's tags to user's view history
+    const tagNames = article.tags?.map(t => t.name) || [];
+    if (tagNames.length > 0) {
+      recordView(tagNames);
+    }
+  }, [article.id, article.tags, recordView]);
 
   // No longer returning skeleton - SSR content is rendered by ArticleBodyServer
   // This component hydrates on client side

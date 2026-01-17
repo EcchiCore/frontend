@@ -33,26 +33,8 @@ const getCachedArticleWithDownloads = cache(async (slug: string, locale: string)
   return sdk.articles.getWithDownloads(slug, locale);
 });
 
-// Cache related articles based on tags
-const getCachedRelatedArticles = cache(async (tags: string[], excludeId: number) => {
-  if (tags.length === 0) return [];
-
-  // Fetch articles that share the first tag
-  const result = await sdk.articles.getAllPaginated({
-    limit: 7, // Fetch 7 to have buffer after excluding current
-    status: 'PUBLISHED',
-    filter: {
-      tag: tags[0], // Use first tag for relevance
-    },
-    fields: [
-      'id', 'title', 'slug', 'description',
-      'mainImage', 'coverImage', 'backgroundImage',
-      'author'
-    ]
-  });
-
-  return result.items.filter(a => a.id !== excludeId);
-});
+// Import shared cache functions - no extra API calls needed
+import { getCachedRecommendationPool, getRelatedFromPool } from '@/lib/articlesCache';
 
 
 export async function generateMetadata(props: ArticlePageProps): Promise<Metadata> {
@@ -165,7 +147,8 @@ export default async function ArticlePage(props: ArticlePageProps) {
 
   // Fetch related articles based on tags (server-side, no extra client request)
   const tagNames = originalArticle.tags?.map(t => t.name) || [];
-  const relatedArticles = await getCachedRelatedArticles(tagNames, originalArticle.id);
+  const articlePool = await getCachedRecommendationPool();
+  const relatedArticles = getRelatedFromPool(articlePool, tagNames, originalArticle.id);
 
   // Generate structured data JSON-LD for the article (only once, SEO handles language)
   const articleJsonLd = generateArticleJsonLd(
