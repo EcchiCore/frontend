@@ -378,6 +378,25 @@
       "firstResultId": "ID ผลลัพธ์แรก"
     }
   },
+  "gameCodeDetection": {
+    "title": "ตรวจพบรหัสเกม!",
+    "description": "\"{code}\" ดูเหมือนเป็นรหัสเกม (Sequential Code) ต้องการค้นหาด้วยรหัสเกมใช่ไหม?",
+    "searchByCode": "ค้นหาด้วยรหัสเกม",
+    "searchByText": "ค้นหาเป็นข้อความปกติ",
+    "cancel": "ยกเลิก"
+  },
+  "searchControls": {
+    "searchPlaceholder": "ค้นหาชื่อเกม, คำอธิบาย...",
+    "search": "ค้นหา",
+    "advancedFilters": "ตัวกรองขั้นสูง",
+    "category": "หมวดหมู่",
+    "platform": "แพลตฟอร์ม",
+    "author": "ผู้เขียน (username)",
+    "tag": "แท็ก",
+    "engine": "เอนจิ้น",
+    "gameCode": "รหัสเกม",
+    "clearFilters": "ล้างตัวกรองทั้งหมด"
+  },
   "ArticleBody": {
     "copySuccess": "คัดลอกโค้ดสำเร็จ",
     "copyButtonTitle": "คลิกเพื่อคัดลอก",

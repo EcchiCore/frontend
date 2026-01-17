@@ -4,11 +4,17 @@ import type React from "react"
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation"
 import { useCallback, useEffect, useState } from "react"
+import { useTranslations } from "next-intl"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Search, X, ChevronDown, ChevronUp } from "lucide-react"
+import { Search, X, ChevronDown, ChevronUp, Hash } from "lucide-react"
+
+// Pattern สำหรับตรวจจับรหัสเกม เช่น HJ294, Hj103, hj999
+const GAME_CODE_PATTERN = /^[Hh][Jj]\d+$/
 
 export default function SearchControls() {
+  const t = useTranslations("gameCodeDetection")
+  const tSearch = useTranslations("searchControls")
   const router = useRouter()
   const pathname = usePathname()
   const sp = useSearchParams()
@@ -21,6 +27,8 @@ export default function SearchControls() {
   const [engine, setEngine] = useState("")
   const [sequentialCode, setSequentialCode] = useState("")
   const [showAdvanced, setShowAdvanced] = useState(false)
+  const [showCodeConfirm, setShowCodeConfirm] = useState(false)
+  const [detectedCode, setDetectedCode] = useState("")
 
   // อ่านค่าจาก URL params
   useEffect(() => {
@@ -68,6 +76,45 @@ export default function SearchControls() {
   )
 
   const handleSearch = useCallback(() => {
+    const trimmedSearch = searchText.trim()
+
+    // ตรวจสอบว่าเป็น pattern รหัสเกม (HJ294, Hj103, hj999 etc.)
+    if (GAME_CODE_PATTERN.test(trimmedSearch)) {
+      setDetectedCode(trimmedSearch.toUpperCase())
+      setShowCodeConfirm(true)
+      return
+    }
+
+    updateParams({
+      q: searchText || null,
+      category: category || null,
+      platform: platform || null,
+      author: author || null,
+      tag: tag || null,
+      engine: engine || null,
+      sequentialCode: sequentialCode || null,
+    })
+  }, [searchText, category, platform, author, tag, engine, sequentialCode, updateParams])
+
+  // ค้นหาด้วยรหัสเกม
+  const searchByCode = useCallback(() => {
+    setSequentialCode(detectedCode)
+    setSearchText("")
+    setShowCodeConfirm(false)
+    updateParams({
+      q: null,
+      category: category || null,
+      platform: platform || null,
+      author: author || null,
+      tag: tag || null,
+      engine: engine || null,
+      sequentialCode: detectedCode,
+    })
+  }, [detectedCode, category, platform, author, tag, engine, updateParams])
+
+  // ค้นหาด้วยข้อความปกติ
+  const searchByText = useCallback(() => {
+    setShowCodeConfirm(false)
     updateParams({
       q: searchText || null,
       category: category || null,
@@ -108,7 +155,7 @@ export default function SearchControls() {
 
   return (
     <div className="bg-card border border-border/50 rounded-lg p-4 space-y-3">
-      {/* ช่องค้นหาหลัก */}
+      {/* Main Search */}
       <div className="flex gap-2">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
@@ -116,7 +163,7 @@ export default function SearchControls() {
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder="ค้นหาชื่อเกม, คำอธิบาย..."
+            placeholder={tSearch("searchPlaceholder")}
             className="pl-10 bg-background border-border/50 focus:border-primary text-foreground"
           />
           {searchText && (
@@ -132,17 +179,56 @@ export default function SearchControls() {
 
         <Button onClick={handleSearch} className="bg-primary hover:bg-primary/90">
           <Search className="w-4 h-4 mr-2" />
-          ค้นหา
+          {tSearch("search")}
         </Button>
       </div>
 
-      {/* ปุ่มแสดง/ซ่อน Advanced Filters */}
+      {/* Game Code Detection Confirmation */}
+      {showCodeConfirm && (
+        <div className="bg-primary/10 border border-primary/30 rounded-lg p-4 space-y-3 animate-in fade-in slide-in-from-top-2 duration-200 ">
+          <div className="flex items-center gap-2 text-foreground">
+            <Hash className="w-5 h-5" />
+            <span className="font-medium">{t("title")}</span>
+          </div>
+          <p className="text-sm text-foreground">
+            {t("description", { code: detectedCode })}
+          </p>
+          <div className="flex gap-2 ">
+            <Button
+              onClick={searchByCode}
+              size="sm"
+              className="bg-primary hover:bg-primary/90 "
+            >
+              <Hash className="w-4 h-4 mr-1 " />
+              {t("searchByCode")}
+            </Button>
+            <Button
+              onClick={searchByText}
+              variant="outline"
+              size="sm"
+              className="text-foreground"
+            >
+              {t("searchByText")}
+            </Button>
+            <Button
+              onClick={() => setShowCodeConfirm(false)}
+              variant="ghost"
+              size="sm"
+              className="text-foreground"
+            >
+              {t("cancel")}
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Advanced Filters Toggle */}
       <button
         onClick={() => setShowAdvanced(!showAdvanced)}
         className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
       >
         {showAdvanced ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-        ตัวกรองขั้นสูง
+        {tSearch("advancedFilters")}
       </button>
 
       {/* Advanced Filters */}
@@ -152,48 +238,48 @@ export default function SearchControls() {
             value={category}
             onChange={(e) => setCategory(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder="หมวดหมู่"
+            placeholder={tSearch("category")}
             className="bg-background border-border/50 text-sm text-foreground"
           />
           <Input
             value={platform}
             onChange={(e) => setPlatform(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder="แพลตฟอร์ม"
+            placeholder={tSearch("platform")}
             className="bg-background border-border/50 text-sm text-foreground"
           />
           <Input
             value={author}
             onChange={(e) => setAuthor(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder="ผู้เขียน (username)"
+            placeholder={tSearch("author")}
             className="bg-background border-border/50 text-sm text-foreground"
           />
           <Input
             value={tag}
             onChange={(e) => setTag(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder="แท็ก"
+            placeholder={tSearch("tag")}
             className="bg-background border-border/50 text-sm text-foreground"
           />
           <Input
             value={engine}
             onChange={(e) => setEngine(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder="เอนจิ้น"
+            placeholder={tSearch("engine")}
             className="bg-background border-border/50 text-sm text-foreground"
           />
           <Input
             value={sequentialCode}
             onChange={(e) => setSequentialCode(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder="รหัสเกม"
+            placeholder={tSearch("gameCode")}
             className="bg-background border-border/50 text-sm text-foreground"
           />
         </div>
       )}
 
-      {/* ปุ่มล้างตัวกรอง */}
+      {/* Clear Filters Button */}
       {hasActiveFilters && (
         <Button
           onClick={clearFilters}
@@ -202,7 +288,7 @@ export default function SearchControls() {
           className="text-xs text-muted-foreground hover:text-foreground w-full"
         >
           <X className="w-3 h-3 mr-1" />
-          ล้างตัวกรองทั้งหมด
+          {tSearch("clearFilters")}
         </Button>
       )}
     </div>

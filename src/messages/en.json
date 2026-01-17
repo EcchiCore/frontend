@@ -378,6 +378,25 @@
       "firstResultId": "First Result ID"
     }
   },
+  "gameCodeDetection": {
+    "title": "Game Code Detected!",
+    "description": "\"{code}\" looks like a game code (Sequential Code). Would you like to search by game code?",
+    "searchByCode": "Search by Game Code",
+    "searchByText": "Search as Text",
+    "cancel": "Cancel"
+  },
+  "searchControls": {
+    "searchPlaceholder": "Search game name, description...",
+    "search": "Search",
+    "advancedFilters": "Advanced Filters",
+    "category": "Category",
+    "platform": "Platform",
+    "author": "Author (username)",
+    "tag": "Tag",
+    "engine": "Engine",
+    "gameCode": "Game Code",
+    "clearFilters": "Clear All Filters"
+  },
   "ArticleBody": {
     "copySuccess": "Code copied successfully",
     "copyButtonTitle": "Click to copy",
