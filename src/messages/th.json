@@ -410,6 +410,9 @@
     "next": "ถัดไป",
     "previous": "ก่อนหน้า"
   },
+  "RelatedArticles": {
+    "title": "บทความที่คุณอาจสนใจ"
+  },
   "Register": {
     "title": "สมัครสมาชิก",
     "username": "ชื่อผู้ใช้",

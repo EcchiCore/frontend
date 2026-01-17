@@ -19,8 +19,10 @@ import { useArticleComments } from "./hooks/useArticleComments";
 import { useArticleSettings } from "./hooks/useArticleSettings";
 import { useDownloadDialog } from "./hooks/useDownloadDialog";
 import ArticleDownloadDialog from "./ArticleDownloadDialog";
+import RelatedArticles from "./RelatedArticles";
 import { Button, Card, CardContent } from "@/components/ui";
 import { useTranslations } from 'next-intl';
+import type { ArticleListItem } from '@chanomhub/sdk';
 
 // Lazy load Framer Motion for animations (optional enhancement)
 const MotionDiv = dynamic(
@@ -35,12 +37,14 @@ interface ArticleContentProps {
   slug: string;
   articleId?: number;
   downloads: DownloadFile[];
+  relatedArticles?: ArticleListItem[];
 }
 
 const ArticleContent: React.FC<ArticleContentProps> = ({
   article,
   slug,
   downloads,
+  relatedArticles = [],
 }) => {
   const t = useTranslations('ArticleContent');
   const {
@@ -244,6 +248,12 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
             translationFiles={[]} // Temporarily pass an empty array to resolve type error
           />
         </div>
+
+        {/* Related Articles - Outside main content grid */}
+        <RelatedArticles
+          articles={relatedArticles}
+          currentArticleId={article.id}
+        />
       </div>
 
       <ArticleDownloadDialog

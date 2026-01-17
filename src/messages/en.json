@@ -410,6 +410,9 @@
     "next": "Next",
     "previous": "Previous"
   },
+  "RelatedArticles": {
+    "title": "You may also like"
+  },
   "Register": {
     "title": "Register",
     "username": "Username",
