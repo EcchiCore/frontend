@@ -1,6 +1,5 @@
 // src/lib/sitemap.ts
 import { siteUrl, Locale } from '@/utils/localeUtils';
-import { products } from '@/config/docs';
 
 export const SITEMAP_ARTICLE_PAGE_SIZE = 10000;
 
@@ -94,25 +93,13 @@ export const buildArticleFields = (articles: Article[], generatedAt: string) => 
 export const buildStaticFields = (generatedAt: string) => {
   const routes = ['', 'articles', 'games', 'search', 'about', 'contact'];
 
-  // Add product doc routes
-  Object.keys(products).forEach(productKey => {
-    // Product landing e.g. /docs/chanox2
-    routes.push(`docs/${productKey}`);
-
-    // Product pages e.g. /docs/chanox2/installation
-    const product = products[productKey];
-    product.docs.forEach(doc => {
-      routes.push(`docs/${productKey}/${doc.slug}`);
-    });
-  });
-
   return routes.map(route => {
     const path = route ? `/${route}` : '';
     return {
       loc: `${siteUrl}${path}`,
       lastmod: generatedAt,
-      changefreq: 'weekly', // Docs change less frequently
-      priority: route.startsWith('docs') ? 0.9 : (route ? 0.8 : 1.0),
+      changefreq: 'weekly',
+      priority: route ? 0.8 : 1.0,
       alternates: {
         en: `${siteUrl}${path}`,
         th: `${siteUrl}/th${path || ''}`,
