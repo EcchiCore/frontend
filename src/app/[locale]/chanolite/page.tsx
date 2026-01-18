@@ -1,10 +1,10 @@
 
 import Image from 'next/image'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Check, Zap, Shield, Globe, Star, Cpu, Layout, Github, MessageCircle, Feather, Gauge, Layers } from 'lucide-react'
+import { Feather, Gauge } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import DownloadSection from './DownloadSection'
+import { getTranslations } from 'next-intl/server'
 
 async function getReleases() {
     try {
@@ -21,6 +21,7 @@ async function getReleases() {
 
 export default async function ChanoLitePage() {
     const releases = await getReleases()
+    const t = await getTranslations('ChanoLite')
 
     return (
         <div className="min-h-screen bg-[#020617] text-white selection:bg-emerald-500/30 overflow-x-hidden">
@@ -41,20 +42,20 @@ export default async function ChanoLitePage() {
                                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                                 <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                             </span>
-                            ChanoLite Edition
+                            {t('badge')}
                         </div>
 
                         {/* Heading */}
                         <div className="space-y-6 max-w-4xl animate-in slide-in-from-bottom-8 duration-1000 delay-100 fade-in fill-mode-both">
                             <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight leading-[1.1]">
-                                <span className="text-white">Essential</span><br />
+                                <span className="text-white">{t('heroTitle')}</span><br />
                                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-500 to-cyan-500 animate-gradient-xy">
-                                    Game Management
+                                    {t('heroSubtitle')}
                                 </span>
                             </h1>
                             <p className="text-xl md:text-2xl text-slate-400 max-w-2xl mx-auto font-light leading-relaxed">
-                                The lightweight, distraction-free version of ChanoX2.
-                                <span className="text-emerald-500/80 block mt-2 font-mono text-lg">Pure Performance. Zero Bloat.</span>
+                                {t('heroDesc')}
+                                <span className="text-emerald-500/80 block mt-2 font-mono text-lg">{t('heroTagline')}</span>
                             </p>
                         </div>
 
@@ -88,10 +89,10 @@ export default async function ChanoLitePage() {
                 <div className="container mx-auto px-6">
                     <div className="text-center mb-16 space-y-4">
                         <h2 className="text-3xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-white to-slate-500">
-                            Why Choose Lite?
+                            {t('whyChoose')}
                         </h2>
                         <p className="text-slate-400 text-lg max-w-2xl mx-auto">
-                            For users who prefer simplicity and speed over extensive features.
+                            {t('whyChooseDesc')}
                         </p>
                     </div>
 
@@ -112,10 +113,10 @@ export default async function ChanoLitePage() {
                                     <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-400">
                                         <Feather className="w-6 h-6" />
                                     </div>
-                                    <h3 className="text-2xl font-bold text-white">Streamlined Interface</h3>
+                                    <h3 className="text-2xl font-bold text-white">{t('featureStreamlined')}</h3>
                                 </div>
                                 <p className="text-slate-400 leading-relaxed">
-                                    A clean, no-nonsense interface that gets out of your way. Focus on your games, not the launcher.
+                                    {t('featureStreamlinedDesc')}
                                 </p>
                             </div>
                         </div>
@@ -136,10 +137,10 @@ export default async function ChanoLitePage() {
                                     <div className="p-2 rounded-lg bg-teal-500/10 text-teal-400">
                                         <Gauge className="w-6 h-6" />
                                     </div>
-                                    <h3 className="text-2xl font-bold text-white">Maximum Efficiency</h3>
+                                    <h3 className="text-2xl font-bold text-white">{t('featureEfficiency')}</h3>
                                 </div>
                                 <p className="text-slate-400 leading-relaxed">
-                                    Optimized for lower-end hardware or minimalists. Uses significantly less RAM and CPU in the background.
+                                    {t('featureEfficiencyDesc')}
                                 </p>
                             </div>
                         </div>
@@ -154,12 +155,12 @@ export default async function ChanoLitePage() {
                     {/* Panel Header */}
                     <div className="max-w-5xl mx-auto mb-10 flex flex-col md:flex-row items-center justify-between gap-6 border-b border-slate-800 pb-8">
                         <div>
-                            <h2 className="text-3xl font-bold text-white mb-2">Get ChanoLite</h2>
-                            <p className="text-slate-400">Lightweight builds directly from GitHub</p>
+                            <h2 className="text-3xl font-bold text-white mb-2">{t('getChanoLite')}</h2>
+                            <p className="text-slate-400">{t('downloadDesc')}</p>
                         </div>
                         <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-mono">
                             <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                            Stable Release
+                            {t('stableRelease')}
                         </div>
                     </div>
 
@@ -171,10 +172,10 @@ export default async function ChanoLitePage() {
             {/* --- Footer --- */}
             <section className="py-16 border-t border-slate-900 bg-[#0B1121] text-center">
                 <div className="container mx-auto px-6">
-                    <p className="text-slate-500 mb-8">Looking for the full experience?</p>
+                    <p className="text-slate-500 mb-8">{t('lookingForFull')}</p>
                     <Button variant="outline" className="border-slate-700 text-white hover:bg-slate-800" asChild>
                         <Link href="/chanox2">
-                            Go to ChanoX2 Pro
+                            {t('goToChanoX2')}
                         </Link>
                     </Button>
                 </div>

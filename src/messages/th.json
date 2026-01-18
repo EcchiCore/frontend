@@ -552,5 +552,23 @@
     "openSource": "โอเพ่นซอร์ส MIT",
     "crossPlatform": "รองรับหลายแพลตฟอร์ม",
     "securePrivate": "ปลอดภัยและเป็นส่วนตัว"
+  },
+  "ChanoLite": {
+    "badge": "ChanoLite Edition",
+    "heroTitle": "ChanoLite",
+    "heroSubtitle": "แหล่งรวมที่โหลดเกม H มือถือ",
+    "heroDesc": "เวอร์ชันเบา ๆ ที่ไม่รกตาของ ChanoX2",
+    "heroTagline": "ประสิทธิภาพสูงสุด ไม่มีของเกินจำเป็น",
+    "whyChoose": "ทำไมต้องเลือก Lite?",
+    "whyChooseDesc": "สำหรับผู้ใช้ที่ต้องการความเรียบง่ายและความเร็วมากกว่าฟีเจอร์มากมาย",
+    "featureStreamlined": "อินเทอร์เฟซที่กระชับ",
+    "featureStreamlinedDesc": "อินเทอร์เฟซสะอาดตา ไม่วุ่นวาย ให้คุณโฟกัสที่เกม ไม่ใช่ตัว Launcher",
+    "featureEfficiency": "ประสิทธิภาพสูงสุด",
+    "featureEfficiencyDesc": "ปรับแต่งสำหรับฮาร์ดแวร์ระดับต่ำหรือผู้ที่ชอบความเรียบง่าย ใช้ RAM และ CPU น้อยมากในพื้นหลัง",
+    "getChanoLite": "ดาวน์โหลด ChanoLite",
+    "downloadDesc": "เวอร์ชันเบาจาก GitHub โดยตรง",
+    "stableRelease": "เวอร์ชันเสถียร",
+    "lookingForFull": "ต้องการประสบการณ์เต็มรูปแบบ?",
+    "goToChanoX2": "ไปที่ ChanoX2 Pro"
   }
 }

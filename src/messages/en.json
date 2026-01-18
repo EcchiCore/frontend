@@ -552,5 +552,23 @@
     "openSource": "Open Source MIT",
     "crossPlatform": "Cross Platform",
     "securePrivate": "Secure & Private"
+  },
+  "ChanoLite": {
+    "badge": "ChanoLite Edition",
+    "heroTitle": "ChanoLite",
+    "heroSubtitle": "Mobile H-Game Download Hub",
+    "heroDesc": "The lightweight, distraction-free version of ChanoX2.",
+    "heroTagline": "Pure Performance. Zero Bloat.",
+    "whyChoose": "Why Choose Lite?",
+    "whyChooseDesc": "For users who prefer simplicity and speed over extensive features.",
+    "featureStreamlined": "Streamlined Interface",
+    "featureStreamlinedDesc": "A clean, no-nonsense interface that gets out of your way. Focus on your games, not the launcher.",
+    "featureEfficiency": "Maximum Efficiency",
+    "featureEfficiencyDesc": "Optimized for lower-end hardware or minimalists. Uses significantly less RAM and CPU in the background.",
+    "getChanoLite": "Get ChanoLite",
+    "downloadDesc": "Lightweight builds directly from GitHub",
+    "stableRelease": "Stable Release",
+    "lookingForFull": "Looking for the full experience?",
+    "goToChanoX2": "Go to ChanoX2 Pro"
   }
 }
