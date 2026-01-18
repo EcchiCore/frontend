@@ -1,10 +1,10 @@
 
 import Image from 'next/image'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Check, Zap, Shield, Globe, Star, Cpu, Layout, Github, MessageCircle } from 'lucide-react'
+import { Zap, Shield, Globe, Cpu, Layout, Github, MessageCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import DownloadSection from './DownloadSection'
+import { getTranslations } from 'next-intl/server'
 
 async function getReleases() {
     try {
@@ -21,6 +21,7 @@ async function getReleases() {
 
 export default async function ChanoX2Page() {
     const releases = await getReleases()
+    const t = await getTranslations('ChanoX2')
 
     return (
         <div className="min-h-screen bg-[#020617] text-white selection:bg-cyan-500/30 overflow-x-hidden">
@@ -41,30 +42,30 @@ export default async function ChanoX2Page() {
                                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
                                 <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-500"></span>
                             </span>
-                            Legacy Reforged
+                            {t('badge')}
                         </div>
 
                         {/* Heading */}
                         <div className="space-y-6 max-w-4xl animate-in slide-in-from-bottom-8 duration-1000 delay-100 fade-in fill-mode-both">
                             <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight leading-[1.1]">
-                                <span className="text-white">Master Your</span><br />
+                                <span className="text-white"></span>{t('heroTitle')}<br />
                                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500 animate-gradient-xy">
-                                    Game Library
+                                    {t('heroTitleFeatures')}
                                 </span>
                             </h1>
                             <p className="text-xl md:text-2xl text-slate-400 max-w-2xl mx-auto font-light leading-relaxed">
-                                The intelligent identifier and launcher for every game engine.
-                                <span className="text-slate-200 block mt-2">Built for speed. Designed for control.</span>
+                                {t('heroDesc1')}
+                                <span className="text-slate-200 block mt-2">{t('heroDesc2')}</span>
                             </p>
                             <div className="flex flex-wrap items-center justify-center gap-4 mt-8">
                                 <Button size="lg" className="h-14 px-8 text-lg rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white border-0" asChild>
                                     <Link href="#download">
-                                        ดาวน์โหลด
+                                        {t('download')}
                                     </Link>
                                 </Button>
                                 <Button size="lg" variant="outline" className="h-14 px-8 text-lg rounded-xl border-slate-600 hover:bg-slate-800 text-slate-200 bg-transparent" asChild>
                                     <Link href="/docs/chanox2/installation">
-                                        คู่มือการติดตั้ง
+                                        {t('installGuide')}
                                     </Link>
                                 </Button>
                             </div>
@@ -84,7 +85,7 @@ export default async function ChanoX2Page() {
                                             <div className="w-3 h-3 rounded-full bg-yellow-500/20 border border-yellow-500/50" />
                                             <div className="w-3 h-3 rounded-full bg-green-500/20 border border-green-500/50" />
                                         </div>
-                                        <div className="mx-auto text-xs text-slate-500 font-mono">ChanoX2 - Main Window</div>
+                                        <div className="mx-auto text-xs text-slate-500 font-mono">{t('windowTitle')}</div>
                                     </div>
                                     <Image
                                         src="/chanox2/20251220_100948.png"
@@ -123,29 +124,28 @@ export default async function ChanoX2Page() {
                         {/* Feature List */}
                         <div className="flex-1 space-y-8 lg:order-1 text-left">
                             <h2 className="text-4xl md:text-5xl font-bold text-white">
-                                Organize without <br />
-                                <span className="text-cyan-400">Complexity</span>
+                                {t('manageTitle')}<br />
+                                <span className="text-cyan-400">{t('manageSubtitle')}</span>
                             </h2>
                             <p className="text-lg text-slate-400 leading-relaxed">
-                                Identify game engines automatically. Sort your collection by technology, size, or playtime.
-                                ChanoX2 gives you the granular control you've been missing.
+                                {t('manageDesc')}
                             </p>
 
                             <div className="space-y-6">
                                 <FeatureItem
                                     icon={<Cpu className="w-6 h-6 text-purple-400" />}
-                                    title="Engine Detection"
-                                    desc="Instantly identifies Unity, Unreal, Godot, Ren'Py and more."
+                                    title={t('featureAutoDetect')}
+                                    desc={t('featureAutoDetectDesc')}
                                 />
                                 <FeatureItem
                                     icon={<Layout className="w-6 h-6 text-blue-400" />}
-                                    title="Smart Library"
-                                    desc="Auto-import your games and keep them organized with tags."
+                                    title={t('featureSmartLibrary')}
+                                    desc={t('featureSmartLibraryDesc')}
                                 />
                                 <FeatureItem
                                     icon={<Zap className="w-6 h-6 text-yellow-400" />}
-                                    title="Performance Mode"
-                                    desc="Zero-overhead launcher that closes itself when game starts."
+                                    title={t('featurePerformance')}
+                                    desc={t('featurePerformanceDesc')}
                                 />
                             </div>
                         </div>
@@ -161,12 +161,12 @@ export default async function ChanoX2Page() {
                     {/* Panel Header */}
                     <div className="max-w-5xl mx-auto mb-10 flex flex-col md:flex-row items-center justify-between gap-6 border-b border-slate-800 pb-8">
                         <div>
-                            <h2 className="text-3xl font-bold text-white mb-2">Release Channels</h2>
-                            <p className="text-slate-400">Stable builds and assets from GitHub</p>
+                            <h2 className="text-3xl font-bold text-white mb-2">{t('releaseChannels')}</h2>
+                            <p className="text-slate-400">{t('releaseDesc')}</p>
                         </div>
                         <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-500/10 border border-green-500/20 text-green-400 text-xs font-mono">
                             <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                            System Operational
+                            {t('systemStatus')}
                         </div>
                     </div>
 
@@ -180,9 +180,9 @@ export default async function ChanoX2Page() {
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[300px] bg-cyan-900/10 blur-[100px] pointer-events-none" />
 
                 <div className="container mx-auto px-6 relative z-10">
-                    <h2 className="text-3xl font-bold text-white mb-6">Join the Community</h2>
+                    <h2 className="text-3xl font-bold text-white mb-6">{t('communityTitle')}</h2>
                     <p className="text-slate-400 max-w-xl mx-auto mb-10 text-lg">
-                        ChanoX2 is open source and community-driven. Report bugs, feature requests, or just come say hi.
+                        {t('communityDesc')}
                     </p>
 
                     <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mb-16">
@@ -191,27 +191,27 @@ export default async function ChanoX2Page() {
                             <Button size="lg" className="relative h-14 px-8 text-lg rounded-xl bg-[#5865F2] hover:bg-[#4752C4] text-white border-0" asChild>
                                 <Link href="https://discord.gg/chanomhub" target="_blank">
                                     <MessageCircle className="mr-2 w-5 h-5 fill-current" />
-                                    Join Discord
+                                    {t('joinDiscord')}
                                 </Link>
                             </Button>
                         </div>
                         <Button size="lg" variant="outline" className="h-14 px-8 text-lg rounded-xl border-slate-700 hover:bg-white hover:text-black transition-all bg-transparent" asChild>
                             <Link href="https://github.com/Chanomhub/ChanoX2" target="_blank">
                                 <Github className="mr-2 w-5 h-5" />
-                                Star on GitHub
+                                {t('starGithub')}
                             </Link>
                         </Button>
                     </div>
 
                     <div className="flex flex-wrap items-center justify-center gap-8 md:gap-16 text-slate-500 text-sm font-medium">
                         <div className="flex items-center gap-2">
-                            <Globe className="w-4 h-4" /> Open Source MIT
+                            <Globe className="w-4 h-4" /> {t('openSource')}
                         </div>
                         <div className="flex items-center gap-2">
-                            <Layout className="w-4 h-4" /> Cross Platform
+                            <Layout className="w-4 h-4" /> {t('crossPlatform')}
                         </div>
                         <div className="flex items-center gap-2">
-                            <Shield className="w-4 h-4" /> Secure & Private
+                            <Shield className="w-4 h-4" /> {t('securePrivate')}
                         </div>
                     </div>
                 </div>
