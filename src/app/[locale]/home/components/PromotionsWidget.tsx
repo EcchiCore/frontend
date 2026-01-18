@@ -8,7 +8,7 @@ export default function PromotionsWidget() {
         <div className="space-y-4">
 
             {/* Title */}
-            <div className="text-xs font-semibold px-1 flex items-center space-x-2">
+            <div className="text-xs font-semibold px-1 flex items-center space-x-2 text-foreground">
                 <div className="w-0.5 h-4 bg-primary"></div>
                 <span>แนะนำจากทีมงาน</span>
             </div>
@@ -22,14 +22,14 @@ export default function PromotionsWidget() {
                             <Layers className="w-4 h-4" />
                         </div>
                         <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-full">
-                            Premium
+                            Desktop
                         </span>
                     </div>
                     <h3 className="text-sm font-bold text-white mb-1 group-hover:text-cyan-300 transition-colors">
                         ChanoX2
                     </h3>
                     <p className="text-xs text-slate-400 mb-3 line-clamp-2">
-                        The ultimate game library manager. Organize, launch, and conquer.
+                        โปรแกรมจัดการเกม H บน ChanoHub รองรับ Linux, MacOS, Windows
                     </p>
                     <div className="flex items-center text-xs text-indigo-300 font-medium group-hover:translate-x-1 transition-transform">
                         Learn more <ArrowRight className="w-3 h-3 ml-1" />
@@ -46,14 +46,14 @@ export default function PromotionsWidget() {
                             <Zap className="w-4 h-4" />
                         </div>
                         <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full">
-                            Lite
+                            Mobile
                         </span>
                     </div>
                     <h3 className="text-sm font-bold text-white mb-1 group-hover:text-emerald-300 transition-colors">
                         ChanoLite
                     </h3>
                     <p className="text-xs text-slate-400 mb-3 line-clamp-2">
-                        Lightweight and fast. Essentials only for maximum performance.
+                        โปรแกรมจัดการเกม H บน ChanoHub รองรับ IOS, Android
                     </p>
                     <div className="flex items-center text-xs text-emerald-300 font-medium group-hover:translate-x-1 transition-transform">
                         Get it free <ArrowRight className="w-3 h-3 ml-1" />
@@ -70,14 +70,14 @@ export default function PromotionsWidget() {
                             <Ghost className="w-4 h-4" />
                         </div>
                         <span className="text-[10px] font-bold uppercase tracking-wider text-orange-400 bg-orange-500/10 px-2 py-0.5 rounded-full">
-                            Tool
+                            Translate
                         </span>
                     </div>
                     <h3 className="text-sm font-bold text-white mb-1 group-hover:text-orange-300 transition-colors">
-                        NST-Ghost
+                        NST Ghost
                     </h3>
                     <p className="text-xs text-slate-400 mb-3 line-clamp-2">
-                        Real-time game translator for Linux. C++ optimized.
+                        โปรแกรมแปลเกมแบบครบวงจรพัฒนาโดย Chanomhub Community
                     </p>
                     <div className="flex items-center text-xs text-orange-300 font-medium group-hover:translate-x-1 transition-transform">
                         Download <ArrowRight className="w-3 h-3 ml-1" />
