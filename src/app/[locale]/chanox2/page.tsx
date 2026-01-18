@@ -64,7 +64,7 @@ export default async function ChanoX2Page() {
                                     </Link>
                                 </Button>
                                 <Button size="lg" variant="outline" className="h-14 px-8 text-lg rounded-xl border-slate-600 hover:bg-slate-800 text-slate-200 bg-transparent" asChild>
-                                    <Link href="/docs/chanox2/installation">
+                                    <Link href="https://docs.chanomhub.com/chanox2/installation/">
                                         {t('installGuide')}
                                     </Link>
                                 </Button>
