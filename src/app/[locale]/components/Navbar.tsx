@@ -152,8 +152,8 @@ const Navbar = () => {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      // Navigate to search page with query
-      window.location.href = `/search?q=${encodeURIComponent(searchQuery.trim())}`;
+      // Navigate to games page with search query
+      window.location.href = `/games?q=${encodeURIComponent(searchQuery.trim())}`;
     }
   };
 
@@ -215,7 +215,7 @@ const Navbar = () => {
                 placeholder="ค้นหากระทู้..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 pr-10 h-9 bg-background/50 border-border/50 focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all duration-200"
+                className="pl-10 pr-10 h-9 bg-background/50 border-border/50 focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all duration-200 text-foreground"
               />
               {searchQuery && (
                 <Button
@@ -339,7 +339,7 @@ const Navbar = () => {
                     placeholder="ค้นหากระทู้..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10 pr-10 h-11 bg-background/50 border-border/50 focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all duration-200"
+                    className="pl-10 pr-10 h-11 bg-background/50 border-border/50 focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all duration-200 text-foreground"
                     autoFocus
                   />
                   {searchQuery && (
