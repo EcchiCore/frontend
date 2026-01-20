@@ -10,6 +10,9 @@ import { Search, X } from "lucide-react";
 import dynamic from "next/dynamic";
 import { cn } from "@/lib/utils";
 
+// Pattern สำหรับตรวจจับรหัสเกม เช่น HJ294, Hj103, hj999
+const GAME_CODE_PATTERN = /^[Hh][Jj]\d+$/;
+
 // Lazy load heavy client-only components
 const NavbarLinks = dynamic(() => import("./Navbar/NavbarLinks"), {
   ssr: false,
@@ -151,9 +154,16 @@ const Navbar = () => {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    if (searchQuery.trim()) {
-      // Navigate to games page with search query
-      window.location.href = `/games?q=${encodeURIComponent(searchQuery.trim())}`;
+    const trimmedQuery = searchQuery.trim();
+    if (trimmedQuery) {
+      // ตรวจจับรหัสเกม (HJ294, Hj103, hj999 etc.)
+      if (GAME_CODE_PATTERN.test(trimmedQuery)) {
+        // Navigate to games page with sequential code
+        window.location.href = `/games?sequentialCode=${encodeURIComponent(trimmedQuery.toUpperCase())}`;
+      } else {
+        // Navigate to games page with search query
+        window.location.href = `/games?q=${encodeURIComponent(trimmedQuery)}`;
+      }
     }
   };
 
