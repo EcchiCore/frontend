@@ -185,7 +185,7 @@ export default function SearchControls() {
 
       {/* Game Code Detection Confirmation */}
       {showCodeConfirm && (
-        <div className="bg-primary/10 border border-primary/30 rounded-lg p-4 space-y-3 animate-in fade-in slide-in-from-top-2 duration-200 ">
+        <div className="bg-primary/10 border border-primary/30 rounded-lg p-4 space-y-3 md:animate-in md:fade-in md:slide-in-from-top-2 md:duration-200 ">
           <div className="flex items-center gap-2 text-foreground">
             <Hash className="w-5 h-5" />
             <span className="font-medium">{t("title")}</span>
@@ -193,7 +193,7 @@ export default function SearchControls() {
           <p className="text-sm text-foreground">
             {t("description", { code: detectedCode })}
           </p>
-          <div className="flex gap-2 ">
+          <div className="flex gap-2 flex-wrap">
             <Button
               onClick={searchByCode}
               size="sm"

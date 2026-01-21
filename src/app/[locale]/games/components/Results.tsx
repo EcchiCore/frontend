@@ -11,7 +11,8 @@ export default async function Results({
   const params = await searchParams;
   const sdk = await createServerClient();
 
-  const limit = Number(params.pageSize ?? 12);
+  // Default limit: smaller for better mobile performance
+  const limit = Number(params.pageSize ?? 9);
   const offset = (Number(params.page ?? 1) - 1) * limit;
 
   // Use getAllPaginated with unified filter (supports q, engine, sequentialCode in SDK v1.1.1+)

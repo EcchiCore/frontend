@@ -38,7 +38,8 @@ export default function GameCard({ article }: { article: Article }) {
 
   return (
     <Link href={`/articles/${article.slug}?id=${article.id}`} className="group block h-full">
-      <Card className="overflow-hidden bg-card/50 backdrop-blur-sm border-border/40 hover:border-primary/40 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 h-full flex flex-col">
+      {/* Mobile: ลด effects เพื่อ performance, Desktop: เต็ม effects */}
+      <Card className="overflow-hidden bg-card/50 md:backdrop-blur-sm border-border/40 md:hover:border-primary/40 md:hover:shadow-xl md:hover:shadow-primary/5 transition-all duration-300 h-full flex flex-col">
         {/* Image Container */}
         <div className="relative aspect-[16/10] overflow-hidden bg-gradient-to-br from-muted/50 to-background/50">
           {imageSrc ? (
@@ -47,7 +48,7 @@ export default function GameCard({ article }: { article: Article }) {
               alt={article.title || "Game image"}
               width={600}
               height={375}
-              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
+              className="w-full h-full object-cover md:group-hover:scale-110 md:transition-transform md:duration-700 md:ease-out"
               unoptimized
             />
           ) : (
@@ -58,8 +59,8 @@ export default function GameCard({ article }: { article: Article }) {
             </div>
           )}
 
-          {/* Gradient Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          {/* Gradient Overlay - Desktop only */}
+          <div className="hidden md:block absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
           {/* Top Badges */}
           <div className="absolute top-2 left-2 flex gap-1.5">
@@ -74,7 +75,8 @@ export default function GameCard({ article }: { article: Article }) {
           </div>
 
           <div className="absolute top-2 right-2">
-            <Badge className="bg-black/70 text-white text-xs px-2 py-0.5 font-medium border-0 backdrop-blur-sm">
+            {/* Mobile: ไม่มี blur, Desktop: มี blur */}
+            <Badge className="bg-black/70 text-white text-xs px-2 py-0.5 font-medium border-0 md:backdrop-blur-sm">
               {article.ver}
             </Badge>
           </div>
@@ -86,7 +88,7 @@ export default function GameCard({ article }: { article: Article }) {
                 <Badge
                   key={idx}
                   variant="secondary"
-                  className="text-xs px-2 py-0.5 bg-black/50 backdrop-blur-sm border-0 text-white/90 hover:bg-black/70 transition-colors"
+                  className="text-xs px-2 py-0.5 bg-black/50 md:backdrop-blur-sm border-0 text-white/90 md:hover:bg-black/70 transition-colors"
                 >
                   {cat.name}
                 </Badge>
@@ -94,7 +96,7 @@ export default function GameCard({ article }: { article: Article }) {
               {(article.categories ?? []).length > 2 && (
                 <Badge
                   variant="secondary"
-                  className="text-xs px-2 py-0.5 bg-black/50 backdrop-blur-sm border-0 text-white/90"
+                  className="text-xs px-2 py-0.5 bg-black/50 md:backdrop-blur-sm border-0 text-white/90"
                 >
                   +{(article.categories ?? []).length - 2}
                 </Badge>
@@ -103,23 +105,26 @@ export default function GameCard({ article }: { article: Article }) {
           )}
         </div>
 
-        {/* Content */}
+
         {/* Content */}
         <div className="p-4 space-y-3 flex-1 flex flex-col">
           {/* Title */}
-          <h3 className="font-bold text-base line-clamp-2 text-foreground group-hover:text-primary transition-colors leading-tight min-h-[2.5rem]">
+          <h3 className="font-bold text-base line-clamp-2 text-foreground md:group-hover:text-primary transition-colors leading-tight min-h-[2.5rem]">
             {article.title}
           </h3>
 
-          {/* Description with glass effect and expand on hover */}
+          {/* Description - Mobile: simple, Desktop: glass effect + expand on hover */}
           {article.description && (
             <div className="relative overflow-hidden rounded-lg">
-              <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/40 to-background/60 backdrop-blur-sm border border-border/30"></div>
-              <div className="relative p-3 max-h-16 group-hover:max-h-32 transition-all duration-300 overflow-hidden">
-                <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3 group-hover:line-clamp-6">
+              {/* Desktop only: glass effect background */}
+              <div className="hidden md:block absolute inset-0 bg-gradient-to-b from-background/60 via-background/40 to-background/60 backdrop-blur-sm border border-border/30"></div>
+              {/* Mobile: simple background */}
+              <div className="md:hidden absolute inset-0 bg-muted/30 border border-border/30 rounded-lg"></div>
+              <div className="relative p-3 max-h-16 md:group-hover:max-h-32 md:transition-all md:duration-300 overflow-hidden">
+                <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3 md:group-hover:line-clamp-6">
                   {article.description}
                 </p>
-                <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-background/80 to-transparent group-hover:opacity-0 transition-opacity"></div>
+                <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-background/80 to-transparent md:group-hover:opacity-0 md:transition-opacity"></div>
               </div>
             </div>
           )}
@@ -166,7 +171,7 @@ export default function GameCard({ article }: { article: Article }) {
               <Badge
                 key={tag.name}
                 variant="secondary"
-                className="text-[10px] px-1.5 py-0 h-5 bg-secondary/80 hover:bg-primary hover:text-primary-foreground transition-colors border-0"
+                className="text-[10px] px-1.5 py-0 h-5 bg-secondary/80 md:hover:bg-primary md:hover:text-primary-foreground transition-colors border-0"
               >
                 {tag.name}
               </Badge>
