@@ -70,6 +70,28 @@ const SidebarLeft: React.FC<SidebarLeftProps> = ({
               </div>
             )}
 
+            {/* Video Preview Section - Demo */}
+            <div className="relative w-full rounded-lg overflow-hidden mb-6 group">
+              <h3 className="text-sm font-semibold text-muted-foreground mb-2 flex items-center gap-2">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Video Preview
+              </h3>
+              <video
+                controls
+                className="w-full rounded-lg bg-black shadow-md"
+                preload="metadata"
+              >
+                <source
+                  src="https://vidoes.chanomhub.com/file/Chanomhub-Vidoes/20-1-26_2.webm?Authorization=4_0051e50adc6bddd0000000001_01c1e6d3_f3aa13_acct_M803cRTXDpM8g_fqY8ZYrBjl__c="
+                  type="video/webm"
+                />
+                Your browser does not support the video tag.
+              </video>
+            </div>
+
             {/* Article Description */}
             <div className="relative mb-6">
               <div className="absolute -left-3 top-0 w-1 h-full bg-gradient-to-b from-primary/60 to-secondary/60 rounded-full" />
