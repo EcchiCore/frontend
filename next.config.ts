@@ -31,6 +31,12 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: 'cdn.chanomhub.com', pathname: '/**' },
     ],
   },
+
+  // As per docs: experimental.dynamicIO -> cacheComponents (root)
+  // But TS types for NextConfig might not have it yet if @types/next is old.
+  // Package.json says next: 16.1.0. 
+  // Let's stick to the doc suggestion: cacheComponents: true at root.
+  cacheComponents: true,
   compiler: { removeConsole: process.env.NODE_ENV === 'production' },
   poweredByHeader: false,
   reactStrictMode: true,

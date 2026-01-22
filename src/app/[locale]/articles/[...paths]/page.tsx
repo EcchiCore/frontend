@@ -2,7 +2,7 @@
 
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
-import { Suspense, cache } from 'react';
+import { Suspense } from 'react';
 import Navbar from './../../components/Navbar';
 import ArticleContent from './components/ArticleContent';
 import ArticleBodyServer from './components/ArticleBodyServer';
@@ -16,22 +16,10 @@ import {
 } from "@/utils/metadataUtils";
 import { getValidLocale, type Locale } from "@/utils/localeUtils";
 import { Article } from "@/types/article";
-import { createChanomhubClient } from '@chanomhub/sdk';
-
 const siteUrl = process.env.FRONTEND || 'https://chanomhub.com';
 
-// SDK client for server-side fetching
-const sdk = createChanomhubClient();
-
-// Cache article fetch to deduplicate between generateMetadata and ArticlePage
-const getCachedArticle = cache(async (slug: string, locale: string) => {
-  return sdk.articles.getBySlug(slug, locale);
-});
-
-// Cache article with downloads
-const getCachedArticleWithDownloads = cache(async (slug: string, locale: string) => {
-  return sdk.articles.getWithDownloads(slug, locale);
-});
+// SDK client removed in favor of cached functions in lib
+import { getCachedArticle, getCachedArticleWithDownloads } from '@/lib/articlePageCache';
 
 // Import shared cache functions - no extra API calls needed
 import { getCachedRecommendationPool, getRelatedFromPool } from '@/lib/articlesCache';
