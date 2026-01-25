@@ -723,7 +723,7 @@ export const ArticleEditorForm: React.FC<ArticleEditorFormProps> = ({ slug = '',
                     title={formData.title}
                     mode={mode}
                     lastUpdated={formData.updatedAt}
-                    onSave={e => handleSubmit(e as any)}
+                    onSave={() => handleSubmit({ preventDefault: () => { } } as React.FormEvent)}
                     saving={saving}
                     onBack={() => router.back()}
                 />
