@@ -917,19 +917,31 @@ export const ArticleEditorForm: React.FC<ArticleEditorFormProps> = ({ slug = '',
                                             <SelectValue placeholder="Select..." />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            {availableEngines.length > 0 ? (
-                                                availableEngines.map((eng) => (
-                                                    <SelectItem key={eng.id} value={eng.name}>{eng.name}</SelectItem>
-                                                ))
-                                            ) : (
+                                            {/* 1. Dynamic Options from API */}
+                                            {availableEngines.map((eng) => (
+                                                <SelectItem key={eng.id} value={eng.name}>{eng.name}</SelectItem>
+                                            ))}
+
+                                            {/* 2. Hardcoded Common Options (if not in API list) */}
+                                            {availableEngines.length === 0 && (
                                                 <>
-                                                    <SelectItem value="RENPY">Ren&#39;Py</SelectItem>
-                                                    <SelectItem value="RPGM">RPG Maker</SelectItem>
-                                                    <SelectItem value="UNITY">Unity</SelectItem>
-                                                    <SelectItem value="UNREAL">Unreal Engine</SelectItem>
-                                                    <SelectItem value="GODOT">Godot</SelectItem>
+                                                    <SelectItem value="Ren'Py">Ren&#39;Py</SelectItem>
+                                                    <SelectItem value="RPG Maker">RPG Maker</SelectItem>
+                                                    <SelectItem value="Unity">Unity</SelectItem>
+                                                    <SelectItem value="Unreal Engine">Unreal Engine</SelectItem>
+                                                    <SelectItem value="Godot">Godot</SelectItem>
+                                                    {/* Legacy uppercase codes fallback */}
+                                                    <SelectItem value="RENPY">Ren&#39;Py (Legacy)</SelectItem>
+                                                    <SelectItem value="RPGM">RPG Maker (Legacy)</SelectItem>
                                                 </>
                                             )}
+
+                                            {/* 3. Ensure current value is shown even if missing from list */}
+                                            {formData.engine &&
+                                                !availableEngines.some(e => e.name === formData.engine) &&
+                                                !['Ren\'Py', 'RPG Maker', 'Unity', 'Unreal Engine', 'Godot', 'RENPY', 'RPGM'].includes(formData.engine) && (
+                                                    <SelectItem value={formData.engine}>{formData.engine}</SelectItem>
+                                                )}
                                         </SelectContent>
                                     </Select>
                                 </div>
