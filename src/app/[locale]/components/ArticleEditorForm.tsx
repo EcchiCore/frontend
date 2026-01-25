@@ -17,6 +17,7 @@ import { X, Upload, Image as ImageIcon, LayoutIcon, BookOpenIcon, Save, ArrowLef
 import Image from 'next/image';
 import { getSdk } from '@/lib/sdk';
 import { NewArticleDTO, UpdateArticleDTO } from '@chanomhub/sdk';
+import RichTextEditor from '@/components/ui/RichTextEditor';
 
 interface ImageItem {
     id: string;
@@ -799,15 +800,10 @@ export const ArticleEditorForm: React.FC<ArticleEditorFormProps> = ({ slug = '',
                                 <FileText className="h-5 w-5 text-muted-foreground" />
                                 <h3 className="font-semibold text-foreground">Content Body</h3>
                             </div>
-                            <CardContent className="p-0">
-                                <Textarea
-                                    id="body"
-                                    name="body"
-                                    value={formData.body || ''}
-                                    onChange={handleInputChange}
-                                    placeholder="Write your article here..."
-                                    className="min-h-[500px] border-none p-6 font-mono text-sm leading-relaxed focus:ring-0 resize-y"
-                                    required
+                            <CardContent className="p-0 min-h-[500px]">
+                                <RichTextEditor
+                                    content={formData.body || ''}
+                                    onUpdate={(html) => setFormData((prev: any) => ({ ...prev, body: html }))}
                                 />
                             </CardContent>
                         </Card>
