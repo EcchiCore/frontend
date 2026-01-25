@@ -12,7 +12,7 @@ const EditArticlePage: React.FC = () => {
   if (!slug) return <div>Invalid slug</div>;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <ArticleEditorForm mode="edit" slug={slug} locale={locale} />
     </div>
   );

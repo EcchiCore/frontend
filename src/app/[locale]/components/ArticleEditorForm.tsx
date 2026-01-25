@@ -13,7 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { X, Upload, Image as ImageIcon, LayoutIcon, BookOpenIcon, Save, ArrowLeft, Plus, Trash2 } from 'lucide-react';
+import { X, Upload, Image as ImageIcon, LayoutIcon, BookOpenIcon, Save, ArrowLeft, Plus, Trash2, Eye, FileText, Settings, Download, Monitor, Gamepad, FolderOpen } from 'lucide-react';
 import Image from 'next/image';
 import { getSdk } from '@/lib/sdk';
 import { NewArticleDTO, UpdateArticleDTO } from '@chanomhub/sdk';
@@ -52,66 +52,108 @@ export interface ArticleEditorFormProps {
 
 /* ---------------------- Inner Components ---------------------- */
 
+const EditorHeader: React.FC<{
+    title: string;
+    mode: 'create' | 'edit';
+    lastUpdated?: string | Date;
+    onSave: () => void;
+    saving: boolean;
+    onBack: () => void;
+}> = ({ title, mode, lastUpdated, onSave, saving, onBack }) => (
+    <div className="flex items-center justify-between mb-8 pb-4 border-b border-border">
+        <div className="flex items-center gap-4">
+            <Button variant="ghost" size="icon" onClick={onBack}>
+                <ArrowLeft className="h-5 w-5" />
+            </Button>
+            <div>
+                <h1 className="text-2xl font-bold tracking-tight text-foreground">{mode === 'create' ? 'Create New Article' : 'Edit Article'}</h1>
+                {lastUpdated && (
+                    <p className="text-sm text-muted-foreground">Last saved: {new Date(lastUpdated).toLocaleString()}</p>
+                )}
+            </div>
+        </div>
+        <div className="flex items-center gap-3">
+            {/* Preview functionality could be added here */}
+            <Button variant="outline" size="sm">
+                <Eye className="h-4 w-4 mr-2" /> Preview
+            </Button>
+            <Button onClick={onSave} disabled={saving} className="bg-primary hover:bg-primary/90">
+                {saving ? 'Saving...' : (
+                    <>
+                        <Save className="h-4 w-4 mr-2" /> {mode === 'create' ? 'Publish Article' : 'Save Changes'}
+                    </>
+                )}
+            </Button>
+        </div>
+    </div>
+);
+
 const TagsInput: React.FC<{
     items?: string[];
     onAdd: (v: string) => void;
     onRemove: (v: string) => void;
     placeholder?: string;
     suggestions?: string[];
-}> = ({ items = [], onAdd, onRemove, placeholder, suggestions = [] }) => {
+    label?: string;
+}> = ({ items = [], onAdd, onRemove, placeholder, suggestions = [], label }) => {
     const [input, setInput] = useState('');
     const [showSuggestions, setShowSuggestions] = useState(false);
 
     const filteredSuggestions = suggestions.filter(s => s.toLowerCase().includes(input.toLowerCase()) && !items.includes(s));
 
     return (
-        <div className="relative">
-            <div className="mt-2 flex flex-wrap gap-2">
-                {items.map((it) => (
-                    <Badge key={it} variant="secondary" className="group relative">
+        <div className="space-y-2">
+            {label && <Label className="text-xs uppercase text-muted-foreground font-semibold tracking-wider">{label}</Label>}
+            <div className="flex flex-wrap gap-2 mb-2 min-h-[24px]">
+                {items.length > 0 ? items.map((it) => (
+                    <Badge key={it} variant="secondary" className="px-2 py-1 text-sm bg-muted text-muted-foreground border-border">
                         {it}
-                        <X className="ml-1 h-3 w-3 cursor-pointer opacity-50 group-hover:opacity-100" onClick={() => onRemove(it)} />
+                        <X className="ml-1.5 h-3 w-3 cursor-pointer opacity-50 hover:text-destructive hover:opacity-100 transition-colors" onClick={() => onRemove(it)} />
                     </Badge>
-                ))}
+                )) : (
+                    <span className="text-sm text-muted-foreground italic">No items selected</span>
+                )}
             </div>
-            <Input
-                placeholder={placeholder}
-                value={input}
-                onChange={(e) => {
-                    setInput(e.target.value);
-                    setShowSuggestions(true);
-                }}
-                onFocus={() => setShowSuggestions(true)}
-                onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-                onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                        e.preventDefault();
-                        const v = input.trim();
-                        if (v) {
-                            onAdd(v);
-                            setInput('');
-                        }
-                    }
-                }}
-                className="mt-2"
-            />
-            {showSuggestions && input && filteredSuggestions.length > 0 && (
-                <div className="absolute z-10 w-full bg-white border rounded-md shadow-lg mt-1 max-h-40 overflow-y-auto">
-                    {filteredSuggestions.map((s) => (
-                        <div
-                            key={s}
-                            className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm"
-                            onClick={() => {
-                                onAdd(s);
+            <div className="relative">
+                <Input
+                    placeholder={placeholder}
+                    value={input}
+                    onChange={(e) => {
+                        setInput(e.target.value);
+                        setShowSuggestions(true);
+                    }}
+                    onFocus={() => setShowSuggestions(true)}
+                    onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                    onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                            e.preventDefault();
+                            const v = input.trim();
+                            if (v) {
+                                onAdd(v);
                                 setInput('');
-                                setShowSuggestions(false);
-                            }}
-                        >
-                            {s}
-                        </div>
-                    ))}
-                </div>
-            )}
+                            }
+                        }
+                    }}
+                    className="h-9"
+                />
+                {showSuggestions && input && filteredSuggestions.length > 0 && (
+                    <div className="absolute z-50 w-full bg-popover border border-border rounded-md shadow-lg mt-1 max-h-48 overflow-y-auto">
+                        {filteredSuggestions.map((s) => (
+                            <div
+                                key={s}
+                                className="px-4 py-2 hover:bg-muted cursor-pointer text-sm text-popover-foreground"
+                                onClick={() => {
+                                    onAdd(s);
+                                    setInput('');
+                                    setShowSuggestions(false);
+                                }}
+                            >
+                                {s}
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
         </div>
     );
 };
@@ -142,10 +184,10 @@ const ImageManager: React.FC<{
     };
 
     return (
-        <div>
-            <div className="mt-1 flex gap-2">
+        <div className="space-y-4">
+            <div className="flex gap-2">
                 <Input
-                    placeholder="Enter image URL"
+                    placeholder="Paste image URL..."
                     value={imageUrlInput}
                     onChange={(e) => setImageUrlInput(e.target.value)}
                     onKeyDown={(e) => {
@@ -154,71 +196,84 @@ const ImageManager: React.FC<{
                             addImage();
                         }
                     }}
+                    className="h-9"
                 />
-                <Button type="button" onClick={addImage} variant="outline" className="shrink-0">
-                    <Upload className="h-4 w-4 mr-2" /> Add
+                <Button type="button" onClick={addImage} variant="secondary" size="sm" className="shrink-0">
+                    <Plus className="h-4 w-4" />
                 </Button>
             </div>
 
             {imageItems.length > 0 && (
-                <ScrollArea className="h-[300px] mt-4 pr-4">
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                <ScrollArea className="h-[240px] pr-3">
+                    <div className="grid grid-cols-2 gap-3">
                         {imageItems.map((image) => (
-                            <div key={image.id} className="relative group">
-                                <div className="relative h-32 w-full rounded-lg overflow-hidden">
-                                    <Image
-                                        src={image.url}
-                                        alt={image.url}
-                                        fill
-                                        className="object-cover"
-                                    />
-                                </div>
-                                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
+                            <div key={image.id} className="relative group rounded-md overflow-hidden border border-border bg-muted/50 aspect-video">
+                                <Image
+                                    src={image.url}
+                                    alt="preview"
+                                    fill
+                                    className="object-cover"
+                                />
+                                {/* Overlay Controls */}
+                                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center p-2 gap-1">
+                                    <div className="flex gap-1">
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="icon"
+                                            className={`h-7 w-7 rounded-full ${mainId === image.id ? 'bg-primary text-white hover:bg-primary/90' : 'bg-white/20 text-white hover:bg-white/40'}`}
+                                            onClick={() => setSpecialImageId('main', image.id)}
+                                            title="Set as Main"
+                                        >
+                                            <ImageIcon className="h-3.5 w-3.5" />
+                                        </Button>
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="icon"
+                                            className={`h-7 w-7 rounded-full ${backgroundId === image.id ? 'bg-primary text-white hover:bg-primary/90' : 'bg-white/20 text-white hover:bg-white/40'}`}
+                                            onClick={() => setSpecialImageId('background', image.id)}
+                                            title="Set as Background"
+                                        >
+                                            <LayoutIcon className="h-3.5 w-3.5" />
+                                        </Button>
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="icon"
+                                            className={`h-7 w-7 rounded-full ${coverId === image.id ? 'bg-primary text-white hover:bg-primary/90' : 'bg-white/20 text-white hover:bg-white/40'}`}
+                                            onClick={() => setSpecialImageId('cover', image.id)}
+                                            title="Set as Cover"
+                                        >
+                                            <BookOpenIcon className="h-3.5 w-3.5" />
+                                        </Button>
+                                    </div>
                                     <Button
                                         type="button"
-                                        variant="ghost"
-                                        size="icon"
-                                        className={`text-white ${mainId === image.id ? 'ring-2 ring-white' : ''}`}
-                                        onClick={() => setSpecialImageId('main', image.id)}
-                                        title="Set as main"
-                                    >
-                                        <ImageIcon className="h-4 w-4" />
-                                    </Button>
-                                    <Button
-                                        type="button"
-                                        variant="ghost"
-                                        size="icon"
-                                        className={`text-white ${backgroundId === image.id ? 'ring-2 ring-white' : ''}`}
-                                        onClick={() => setSpecialImageId('background', image.id)}
-                                        title="Set as background"
-                                    >
-                                        <LayoutIcon className="h-4 w-4" />
-                                    </Button>
-                                    <Button
-                                        type="button"
-                                        variant="ghost"
-                                        size="icon"
-                                        className={`text-white ${coverId === image.id ? 'ring-2 ring-white' : ''}`}
-                                        onClick={() => setSpecialImageId('cover', image.id)}
-                                        title="Set as cover"
-                                    >
-                                        <BookOpenIcon className="h-4 w-4" />
-                                    </Button>
-                                    <Button
-                                        type="button"
-                                        variant="ghost"
-                                        size="icon"
-                                        className="text-white"
+                                        variant="destructive"
+                                        size="sm"
+                                        className="h-7 px-2 text-xs w-full mt-1 bg-red-500/80 hover:bg-red-600"
                                         onClick={() => removeImage(image.id)}
-                                        title="Remove"
                                     >
-                                        <X className="h-4 w-4" />
+                                        Remove
                                     </Button>
+                                </div>
+                                {/* Badges */}
+                                <div className="absolute bottom-1 right-1 flex flex-col gap-0.5 pointer-events-none">
+                                    {mainId === image.id && <Badge variant="default" className="text-[10px] px-1 py-0 h-4">Main</Badge>}
+                                    {backgroundId === image.id && <Badge variant="secondary" className="text-[10px] px-1 py-0 h-4 bg-blue-100 text-blue-700">BG</Badge>}
+                                    {coverId === image.id && <Badge variant="secondary" className="text-[10px] px-1 py-0 h-4 bg-purple-100 text-purple-700">Cover</Badge>}
                                 </div>
                             </div>
                         ))}
                     </div>
                 </ScrollArea>
+            )}
+
+            {imageItems.length === 0 && (
+                <div className="h-24 border-2 border-dashed rounded-md flex items-center justify-center text-gray-400 text-sm">
+                    No images added
+                </div>
             )}
         </div>
     );
@@ -257,11 +312,11 @@ const DownloadManager: React.FC<{
                 </Button>
             </div>
 
-            {items.length === 0 && <p className="text-sm text-gray-500 italic">No downloads added yet.</p>}
+            {items.length === 0 && <p className="text-sm text-muted-foreground italic">No downloads added yet.</p>}
 
             <div className="space-y-4">
                 {items.map((item, idx) => (
-                    <Card key={item.tempId}>
+                    <Card key={item.tempId} className="border-none shadow-sm ring-1 ring-gray-100">
                         <CardContent className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <Label>Name</Label>
@@ -332,11 +387,11 @@ const ModsManager: React.FC<{
                 </Button>
             </div>
 
-            {items.length === 0 && <p className="text-sm text-gray-500 italic">No mods added yet.</p>}
+            {items.length === 0 && <p className="text-sm text-muted-foreground italic">No mods added yet.</p>}
 
             <div className="space-y-4">
                 {items.map((item, idx) => (
-                    <Card key={idx}>
+                    <Card key={idx} className="border-none shadow-sm ring-1 ring-gray-100">
                         <CardContent className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <Label>Mod Name</Label>
@@ -648,217 +703,298 @@ export const ArticleEditorForm: React.FC<ArticleEditorFormProps> = ({ slug = '',
         }
     };
 
-    if (loading) return <div className="p-8 text-center">Loading...</div>;
+    /* ---------------------- Main Component Render ---------------------- */
+
+    if (loading) return (
+        <div className="min-h-screen flex items-center justify-center">
+            <div className="flex flex-col items-center gap-4">
+                <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+                <p className="text-muted-foreground font-medium">Loading Editor...</p>
+            </div>
+        </div>
+    );
 
     return (
-        <div className="container mx-auto max-w-5xl px-4 py-8">
-            <div className="flex items-center justify-between mb-6">
-                <h1 className="text-3xl font-bold text-gray-900">{mode === 'create' ? 'Create Article' : 'Edit Article'}</h1>
-                {formData.updatedAt && (
-                    <p className="text-sm text-gray-500">Last updated: {new Date(formData.updatedAt).toLocaleString()}</p>
-                )}
+        <div className="min-h-screen bg-background text-foreground pb-20">
+            {/* Header */}
+            <div className="bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border sticky top-0 z-40 px-6 pt-6 pb-2 shadow-sm">
+                <EditorHeader
+                    title={formData.title}
+                    mode={mode}
+                    lastUpdated={formData.updatedAt}
+                    onSave={e => handleSubmit(e as any)}
+                    saving={saving}
+                    onBack={() => router.back()}
+                />
             </div>
 
-            {successMessage && (
-                <Alert variant="default" className="mb-6 bg-green-50 border-green-200">
-                    <AlertTitle>Success</AlertTitle>
-                    <AlertDescription>{successMessage}</AlertDescription>
-                </Alert>
-            )}
+            <main className="container mx-auto max-w-[1600px] px-6 py-8">
+                {successMessage && (
+                    <Alert variant="default" className="mb-6 bg-green-50 text-green-800 border-green-200">
+                        <AlertTitle>Success</AlertTitle>
+                        <AlertDescription>{successMessage}</AlertDescription>
+                    </Alert>
+                )}
 
-            {error && (
-                <Alert variant="destructive" className="mb-6">
-                    <AlertTitle>Error</AlertTitle>
-                    <AlertDescription>{error}</AlertDescription>
-                </Alert>
-            )}
+                {error && (
+                    <Alert variant="destructive" className="mb-6">
+                        <AlertTitle>Error</AlertTitle>
+                        <AlertDescription>{error}</AlertDescription>
+                    </Alert>
+                )}
 
-            <Card className="shadow-lg">
-                <CardContent className="p-0">
-                    <form onSubmit={handleSubmit}>
-                        <Tabs defaultValue="basic" className="relative">
-                            <div className="sticky top-0 z-10 bg-white border-b overflow-x-auto">
-                                <TabsList className="w-full justify-start px-6 min-w-max">
-                                    <TabsTrigger value="basic">Basic Info</TabsTrigger>
-                                    <TabsTrigger value="content">Content</TabsTrigger>
-                                    <TabsTrigger value="media">Media & Metadata</TabsTrigger>
-                                    <TabsTrigger value="downloads">Downloads</TabsTrigger>
-                                    <TabsTrigger value="mods">Mods</TabsTrigger>
-                                </TabsList>
+                <form onSubmit={handleSubmit} className="grid grid-cols-12 gap-8">
+
+                    {/* LEFT COLUMN - MAIN CONTENT (70%) */}
+                    <div className="col-span-12 lg:col-span-8 flex flex-col gap-8">
+
+                        {/* 1. Main Info */}
+                        <Card className="border border-border shadow-sm">
+                            <CardContent className="p-8 space-y-6">
+                                <div className="space-y-2">
+                                    <Label htmlFor="title" className="text-xs uppercase text-muted-foreground font-bold tracking-wider">Article Title</Label>
+                                    <Input
+                                        id="title"
+                                        name="title"
+                                        value={formData.title || ''}
+                                        onChange={handleInputChange}
+                                        placeholder="Enter a descriptive title"
+                                        className="text-lg font-semibold h-12 px-4 border-gray-200 focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all"
+                                        required
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="slug" className="text-xs uppercase text-muted-foreground font-bold tracking-wider">Slug (URL)</Label>
+                                    <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/50 px-3 py-2 rounded-md border border-input">
+                                        <span className="shrink-0">/articles/</span>
+                                        <input
+                                            id="slug"
+                                            name="slug"
+                                            value={formData.slug || ''}
+                                            onChange={handleInputChange}
+                                            disabled={mode === 'create'}
+                                            className="bg-transparent border-none w-full focus:ring-0 p-0 text-foreground font-mono"
+                                        />
+                                    </div>
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="description" className="text-xs uppercase text-muted-foreground font-bold tracking-wider">Short Description</Label>
+                                    <Textarea
+                                        id="description"
+                                        name="description"
+                                        value={formData.description || ''}
+                                        onChange={handleInputChange}
+                                        placeholder="Brief overview of the game or content..."
+                                        rows={3}
+                                        className="resize-none border-gray-200 focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all"
+                                        required
+                                    />
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        {/* 2. Body Content */}
+                        <Card className="border border-border shadow-sm h-full">
+                            <div className="border-b border-border px-6 py-4 flex items-center gap-2 bg-muted/20">
+                                <FileText className="h-5 w-5 text-muted-foreground" />
+                                <h3 className="font-semibold text-foreground">Content Body</h3>
                             </div>
+                            <CardContent className="p-0">
+                                <Textarea
+                                    id="body"
+                                    name="body"
+                                    value={formData.body || ''}
+                                    onChange={handleInputChange}
+                                    placeholder="Write your article here..."
+                                    className="min-h-[500px] border-none p-6 font-mono text-sm leading-relaxed focus:ring-0 resize-y"
+                                    required
+                                />
+                            </CardContent>
+                        </Card>
 
-                            <div className="p-6">
-                                <TabsContent value="basic">
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        <div className="space-y-4">
-                                            <div>
-                                                <Label htmlFor="title" className="text-sm font-medium">Title <span className="text-red-500">*</span></Label>
-                                                <Input id="title" name="title" value={formData.title || ''} onChange={handleInputChange} placeholder="Enter article title" className="mt-1" required />
-                                            </div>
-
-                                            <div>
-                                                <Label htmlFor="creator" className="text-sm font-medium">Creator / Studio <span className="text-red-500">*</span></Label>
-                                                <Input id="creator" name="creator" value={formData.creator || ''} onChange={handleInputChange} placeholder="Enter creator or studio" className="mt-1" required />
-                                            </div>
-
-                                            <div>
-                                                <Label htmlFor="slug" className="text-sm font-medium">Slug</Label>
-                                                <Input id="slug" name="slug" value={formData.slug || ''} onChange={handleInputChange} placeholder="article-url-slug" className="mt-1" disabled={mode === 'create'} />
-                                            </div>
-
-                                            <div>
-                                                <Label htmlFor="status" className="text-sm font-medium">Status</Label>
-                                                <Select value={formData.status} onValueChange={handleStatusChange}>
-                                                    <SelectTrigger className="mt-1">
-                                                        <SelectValue />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        <SelectItem value="DRAFT">Draft</SelectItem>
-                                                        <SelectItem value="PENDING_REVIEW">Pending Review</SelectItem>
-                                                        <SelectItem value="PUBLISHED">Published</SelectItem>
-                                                        <SelectItem value="ARCHIVED">Archived</SelectItem>
-                                                        <SelectItem value="NOT_APPROVED">Not Approved</SelectItem>
-                                                        <SelectItem value="NEEDS_REVISION">Needs Revision</SelectItem>
-                                                    </SelectContent>
-                                                </Select>
-                                            </div>
-
-                                            <div className="flex items-center space-x-3">
-                                                <Switch id="favorited" checked={formData.favorited || false} onCheckedChange={handleFavoritedChange} />
-                                                <Label htmlFor="favorited" className="font-medium">Mark as favorited ({formData.favoritesCount || 0} favorites)</Label>
-                                            </div>
-                                        </div>
-
-                                        <div className="space-y-4">
-                                            <div>
-                                                <Label htmlFor="description" className="text-sm font-medium">Description <span className="text-red-500">*</span></Label>
-                                                <Textarea id="description" name="description" value={formData.description || ''} onChange={handleInputChange} placeholder="Brief overview" rows={4} className="mt-1" required />
-                                            </div>
-
-                                            <div>
-                                                <Label htmlFor="ver" className="text-sm font-medium">Version Name</Label>
-                                                <Input id="ver" name="ver" value={formData.ver || ''} onChange={handleInputChange} placeholder="e.g., v1.0" className="mt-1" />
-                                            </div>
-
-                                            <div>
-                                                <Label htmlFor="version" className="text-sm font-medium">Version Number</Label>
-                                                <Input id="version" name="version" type="number" min={1} value={formData.version || 1} onChange={handleInputChange} className="mt-1" />
-                                            </div>
-
-                                            <div>
-                                                <Label htmlFor="sequentialCode" className="text-sm font-medium">Sequential Code</Label>
-                                                <Input id="sequentialCode" name="sequentialCode" value={formData.sequentialCode || ''} onChange={handleInputChange} placeholder="e.g., HJ103" className="mt-1" />
-                                            </div>
-                                        </div>
+                        {/* 3. Downloads & Mods */}
+                        <div className="grid grid-cols-1 gap-8">
+                            <Card className="border border-border shadow-sm">
+                                <div className="border-b border-border px-6 py-4 flex items-center justify-between bg-muted/40">
+                                    <div className="flex items-center gap-2">
+                                        <Download className="h-5 w-5 text-blue-500" />
+                                        <h3 className="font-semibold text-foreground">Downloads</h3>
                                     </div>
-                                </TabsContent>
-
-                                <TabsContent value="content">
-                                    <div>
-                                        <Label htmlFor="body" className="text-sm font-medium">Article Content <span className="text-red-500">*</span></Label>
-                                        <Textarea id="body" name="body" value={formData.body || ''} onChange={handleInputChange} placeholder="Write your article here (Markdown supported)" rows={20} className="mt-1 font-mono text-sm resize-none" required />
-                                        <p className="mt-2 text-xs text-gray-500">Markdown formatting is supported for rich text.</p>
-                                    </div>
-                                </TabsContent>
-
-                                <TabsContent value="media">
-                                    <div className="space-y-8">
-                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                            <div>
-                                                <Label className="text-sm font-medium">Tags</Label>
-                                                <TagsInput items={formData.tags || []} onAdd={(v) => addItem('tags', v)} onRemove={(v) => removeItem('tags', v)} placeholder="Add tag" suggestions={availableTags} />
-                                            </div>
-
-                                            <div>
-                                                <Label className="text-sm font-medium">Categories</Label>
-                                                <TagsInput items={formData.categories || []} onAdd={(v) => addItem('categories', v)} onRemove={(v) => removeItem('categories', v)} placeholder="Add category" suggestions={availableCategories} />
-                                            </div>
-
-                                            <div>
-                                                <Label className="text-sm font-medium">Platforms</Label>
-                                                <TagsInput items={formData.platforms || []} onAdd={(v) => addItem('platforms', v)} onRemove={(v) => removeItem('platforms', v)} placeholder="Add platform" suggestions={availablePlatforms} />
-                                            </div>
-                                        </div>
-
-                                        <div>
-                                            <Label htmlFor="engine" className="text-sm font-medium">Game Engine</Label>
-                                            <Select value={formData.engine || ''} onValueChange={handleEngineChange}>
-                                                <SelectTrigger className="mt-1">
-                                                    <SelectValue placeholder="Select engine" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    {availableEngines.length > 0 ? (
-                                                        availableEngines.map((eng) => (
-                                                            <SelectItem key={eng.id} value={eng.name}>{eng.name}</SelectItem>
-                                                        ))
-                                                    ) : (
-                                                        <>
-                                                            <SelectItem value="RENPY">Ren&#39;Py</SelectItem>
-                                                            <SelectItem value="RPGM">RPG Maker</SelectItem>
-                                                            <SelectItem value="UNITY">Unity</SelectItem>
-                                                            <SelectItem value="UNREAL">Unreal Engine</SelectItem>
-                                                            <SelectItem value="GODOT">Godot</SelectItem>
-                                                        </>
-                                                    )}
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-
-                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                            <div>
-                                                <Label className="text-sm font-medium">Main Image (preview)</Label>
-                                                <Input id="mainImage" name="mainImage" value={
-                                                    (formData.mainImageId ? imageItems.find(i => i.id === formData.mainImageId)?.url : (typeof formData.mainImage === 'string' ? formData.mainImage : formData.mainImage?.url)) || ''
-                                                } readOnly placeholder="Select from images below" className="mt-1 bg-gray-50" />
-                                            </div>
-                                            <div>
-                                                <Label className="text-sm font-medium">Background Image (preview)</Label>
-                                                <Input id="backgroundImage" name="backgroundImage" value={
-                                                    (formData.backgroundImageId ? imageItems.find(i => i.id === formData.backgroundImageId)?.url : (typeof formData.backgroundImage === 'string' ? formData.backgroundImage : formData.backgroundImage?.url)) || ''
-                                                } readOnly placeholder="Select from images below" className="mt-1 bg-gray-50" />
-                                            </div>
-                                            <div>
-                                                <Label className="text-sm font-medium">Cover Image (preview)</Label>
-                                                <Input id="coverImage" name="coverImage" value={
-                                                    (formData.coverImageId ? imageItems.find(i => i.id === formData.coverImageId)?.url : (typeof formData.coverImage === 'string' ? formData.coverImage : formData.coverImage?.url)) || ''
-                                                } readOnly placeholder="Select from images below" className="mt-1 bg-gray-50" />
-                                            </div>
-                                        </div>
-
-
-                                        <div>
-                                            <Label className="text-sm font-medium">Article Images</Label>
-                                            <ImageManager imageItems={imageItems} setImageItems={setImageItems} setSpecialImageId={setSpecialImageId} mainId={formData.mainImageId} backgroundId={formData.backgroundImageId} coverId={formData.coverImageId} />
-                                        </div>
-                                    </div>
-                                </TabsContent>
-
-                                <TabsContent value="downloads">
+                                    <Badge variant="outline" className="bg-background border-border">{downloadItems.length} items</Badge>
+                                </div>
+                                <CardContent className="p-6">
                                     <DownloadManager items={downloadItems} setItems={setDownloadItems} />
-                                </TabsContent>
+                                </CardContent>
+                            </Card>
 
-                                <TabsContent value="mods">
+                            <Card className="border border-border shadow-sm">
+                                <div className="border-b border-border px-6 py-4 flex items-center justify-between bg-muted/40">
+                                    <div className="flex items-center gap-2">
+                                        <Settings className="h-5 w-5 text-purple-500" />
+                                        <h3 className="font-semibold text-foreground">Mods / Add-ons</h3>
+                                    </div>
+                                    <Badge variant="outline" className="bg-background border-border">{modItems.length} items</Badge>
+                                </div>
+                                <CardContent className="p-6">
                                     <ModsManager items={modItems} setItems={setModItems} />
-                                </TabsContent>
-                            </div>
-                        </Tabs>
-
-                        <div className="flex justify-end space-x-3 p-6 border-t bg-white sticky bottom-0 z-10">
-                            <Button type="button" variant="outline" onClick={() => router.back()} disabled={saving} className="gap-2">
-                                <ArrowLeft className="h-4 w-4" /> Cancel
-                            </Button>
-                            <Button type="submit" disabled={saving} className="gap-2">
-                                {saving ? (
-                                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                                ) : (
-                                    <Save className="h-4 w-4" />
-                                )}
-                                {saving ? 'Saving...' : (mode === 'create' ? 'Create Article' : 'Update Article')}
-                            </Button>
+                                </CardContent>
+                            </Card>
                         </div>
-                    </form>
-                </CardContent>
-            </Card>
+
+                    </div>
+
+                    {/* RIGHT COLUMN - SIDEBAR (30%) */}
+                    <div className="col-span-12 lg:col-span-4 flex flex-col gap-6">
+
+                        {/* A. Status & Publish */}
+                        <Card className="border border-border shadow-sm">
+                            <div className="border-b border-border px-4 py-3 bg-muted/40">
+                                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Publishing</h3>
+                            </div>
+                            <CardContent className="p-4 space-y-4">
+                                <div>
+                                    <Label className="text-xs text-muted-foreground font-semibold mb-1.5 block">Status</Label>
+                                    <Select value={formData.status} onValueChange={handleStatusChange}>
+                                        <SelectTrigger className="w-full">
+                                            <div className="flex items-center gap-2">
+                                                <div className={`h-2.5 w-2.5 rounded-full ${formData.status === 'PUBLISHED' ? 'bg-green-500' :
+                                                    formData.status === 'DRAFT' ? 'bg-gray-400' : 'bg-orange-400'
+                                                    }`} />
+                                                <SelectValue />
+                                            </div>
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="DRAFT">Draft</SelectItem>
+                                            <SelectItem value="PENDING_REVIEW">Pending Review</SelectItem>
+                                            <SelectItem value="PUBLISHED">Published</SelectItem>
+                                            <SelectItem value="ARCHIVED">Archived</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div className="flex items-center justify-between border-t pt-4">
+                                    <Label htmlFor="favorited" className="text-sm text-gray-600">Featured / Favorite</Label>
+                                    <Switch id="favorited" checked={formData.favorited || false} onCheckedChange={handleFavoritedChange} />
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        {/* B. Game Info - Critical Metadata */}
+                        <Card className="border border-border shadow-sm">
+                            <div className="border-b border-border px-4 py-3 bg-muted/40 flex items-center gap-2">
+                                <Gamepad className="h-4 w-4 text-muted-foreground" />
+                                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Game Info</h3>
+                            </div>
+                            <CardContent className="p-4 space-y-4">
+                                <div>
+                                    <Label className="text-xs text-muted-foreground font-semibold mb-1.5 block">Creator / Studio</Label>
+                                    <Input
+                                        value={formData.creator || ''}
+                                        onChange={handleInputChange}
+                                        name="creator"
+                                        placeholder="Developer Name"
+                                    />
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <Label className="text-xs text-muted-foreground font-semibold mb-1.5 block">Version</Label>
+                                        <Input
+                                            value={formData.ver || ''}
+                                            onChange={handleInputChange}
+                                            name="ver"
+                                            placeholder="v1.0"
+                                        />
+                                    </div>
+                                    <div>
+                                        <Label className="text-xs text-muted-foreground font-semibold mb-1.5 block">Seq. Code</Label>
+                                        <Input
+                                            value={formData.sequentialCode || ''}
+                                            onChange={handleInputChange}
+                                            name="sequentialCode"
+                                            placeholder="HJ-001"
+                                        />
+                                    </div>
+                                </div>
+                                <div className="pt-2">
+                                    <Label className="text-xs text-muted-foreground font-semibold mb-1.5 block">Game Engine</Label>
+                                    <Select value={formData.engine || ''} onValueChange={handleEngineChange}>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select..." />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {availableEngines.length > 0 ? (
+                                                availableEngines.map((eng) => (
+                                                    <SelectItem key={eng.id} value={eng.name}>{eng.name}</SelectItem>
+                                                ))
+                                            ) : (
+                                                <>
+                                                    <SelectItem value="RENPY">Ren&#39;Py</SelectItem>
+                                                    <SelectItem value="RPGM">RPG Maker</SelectItem>
+                                                    <SelectItem value="UNITY">Unity</SelectItem>
+                                                    <SelectItem value="UNREAL">Unreal Engine</SelectItem>
+                                                    <SelectItem value="GODOT">Godot</SelectItem>
+                                                </>
+                                            )}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        {/* C. Media Manager */}
+                        <Card className="border border-border shadow-sm">
+                            <div className="border-b border-border px-4 py-3 bg-muted/40 flex items-center gap-2">
+                                <ImageIcon className="h-4 w-4 text-muted-foreground" />
+                                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Media Gallery</h3>
+                            </div>
+                            <CardContent className="p-4">
+                                <ImageManager
+                                    imageItems={imageItems}
+                                    setImageItems={setImageItems}
+                                    setSpecialImageId={setSpecialImageId}
+                                    mainId={formData.mainImageId}
+                                    backgroundId={formData.backgroundImageId}
+                                    coverId={formData.coverImageId}
+                                />
+                            </CardContent>
+                        </Card>
+
+                        {/* D. Classification - Tags & Cats */}
+                        <Card className="border border-border shadow-sm">
+                            <div className="border-b border-border px-4 py-3 bg-muted/40 flex items-center gap-2">
+                                <FolderOpen className="h-4 w-4 text-muted-foreground" />
+                                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Classification</h3>
+                            </div>
+                            <CardContent className="p-4 space-y-6">
+                                <TagsInput
+                                    label="Tags"
+                                    items={formData.tags || []}
+                                    onAdd={(v) => addItem('tags', v)}
+                                    onRemove={(v) => removeItem('tags', v)}
+                                    placeholder="+ Tag"
+                                    suggestions={availableTags}
+                                />
+                                <TagsInput
+                                    label="Categories"
+                                    items={formData.categories || []}
+                                    onAdd={(v) => addItem('categories', v)}
+                                    onRemove={(v) => removeItem('categories', v)}
+                                    placeholder="+ Category"
+                                    suggestions={availableCategories}
+                                />
+                                <TagsInput
+                                    label="Platforms"
+                                    items={formData.platforms || []}
+                                    onAdd={(v) => addItem('platforms', v)}
+                                    onRemove={(v) => removeItem('platforms', v)}
+                                    placeholder="+ Platform"
+                                    suggestions={availablePlatforms}
+                                />
+                            </CardContent>
+                        </Card>
+
+                    </div>
+                </form>
+            </main>
         </div>
     );
 };
