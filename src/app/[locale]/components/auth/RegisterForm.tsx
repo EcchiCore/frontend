@@ -135,8 +135,12 @@ export function RegisterForm({ onSwitch }: { onSwitch: () => void }) {
         }
       );
 
-      if (response.data.user?.token) {
-        Cookies.set('token', response.data.user.token, {
+      // Check for token in data.user (SDK/standard) or data.data.user (Actual response)
+      const user = response.data?.data?.user || response.data?.user;
+      const token = user?.token;
+
+      if (token) {
+        Cookies.set('token', token, {
           expires: 7,
           secure: true,
           sameSite: 'strict'
@@ -152,10 +156,19 @@ export function RegisterForm({ onSwitch }: { onSwitch: () => void }) {
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
         console.error("Registration error:", error);
-        const errorMessage = error.response?.data?.errors?.body?.[0] ||
-          error.response?.data?.message ||
-          error.response?.data?.error ||
+
+        // Handle various error structures
+        // 1. { error: { message: "This username is already taken", ... } }
+        // 2. { errors: { body: ["error message"] } }
+        // 3. { message: "error message" }
+        const data = error.response?.data;
+        const errorMessage =
+          data?.error?.message ||
+          data?.errors?.body?.[0] ||
+          data?.message ||
+          data?.error || // Fallback string error
           t('registrationFailedMessage');
+
         toast.error(errorMessage);
       } else {
         console.error("Unexpected error:", error);
