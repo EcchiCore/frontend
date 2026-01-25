@@ -47,6 +47,7 @@ export interface ArticleEditorFormProps {
     slug?: string;
     initialData?: NewArticleDTO | UpdateArticleDTO;
     mode: 'create' | 'edit';
+    locale?: string;
 }
 
 /* ---------------------- Inner Components ---------------------- */
@@ -373,7 +374,7 @@ const ModsManager: React.FC<{
 
 /* ---------------------- Main Component ---------------------- */
 
-export const ArticleEditorForm: React.FC<ArticleEditorFormProps> = ({ slug = '', initialData, mode }) => {
+export const ArticleEditorForm: React.FC<ArticleEditorFormProps> = ({ slug = '', initialData, mode, locale = 'en' }) => {
     const router = useRouter();
 
     // Use a local state that mostly matches UpdateArticleDTO/NewArticleDTO but handles form-specific needs
@@ -426,50 +427,53 @@ export const ArticleEditorForm: React.FC<ArticleEditorFormProps> = ({ slug = '',
                 setLoading(true);
                 const sdk = await getSdk();
 
-                // 1. Load options by harvesting from recent articles (fallback since no direct endpoint)
-                const recentArticles = await sdk.articles.getAll({ limit: 50 });
+                // 1. Load options via GraphQL directly
+                // Note: Based on error messages, tags/categories/platforms return [String!]!, not objects.
+                // Engines query seems unavailable on root, so we rely on fallback.
+                const query = `
+          query GetDirectOptions {
+            tags
+            categories
+            platforms
+          }
+        `;
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const optionsData: any = await sdk.graphql(query);
 
-                const tags = new Set<string>();
-                const cats = new Set<string>();
-                const plats = new Set<string>();
-                const engs = new Map<string, string>(); // name -> name (or id -> name)
+                if (optionsData?.tags) setAvailableTags(optionsData.tags);
+                if (optionsData?.categories) setAvailableCategories(optionsData.categories);
+                if (optionsData?.platforms) setAvailablePlatforms(optionsData.platforms);
 
-                recentArticles.forEach(a => {
-                    a.tags?.forEach((t: any) => tags.add(t.name || t));
-                    a.categories?.forEach((c: any) => cats.add(c.name || c));
-                    a.platforms?.forEach((p: any) => plats.add(p.name || p));
-                    if (a.engine) {
-                        const eName = typeof a.engine === 'string' ? a.engine : a.engine.name;
-                        engs.set(eName, eName);
-                    }
-                });
-
-                setAvailableTags(Array.from(tags));
-                setAvailableCategories(Array.from(cats));
-                setAvailablePlatforms(Array.from(plats));
-                setAvailableEngines(Array.from(engs.values()).map((name, i) => ({ id: i, name })));
+                // Engines fallback since it's not queryable directly
+                // if (optionsData?.engines) setAvailableEngines(optionsData.engines.map((e: any) => ({ id: e.id, name: e.name })));
 
                 // 2. If 'edit' mode, ensure we have full data
                 if (mode === 'edit' && slug) {
-                    // Use getWithDownloads if possible, or getBySlug
-                    // Ideally getWithDownloads is better if we want existing downloads
-                    // But check if it returns updateable structure
-                    const article = await sdk.articles.getBySlug(slug);
+                    let articleData = null;
+                    let downloadsData: any[] = [];
+                    let modsData: any[] = [];
 
-                    // Separate fetch for downloads if not included, or assume we might need to fetch them
-                    // For now, let's see if we can get downloads from a separate call or if they are in article object
-                    // The SDK getBySlug returns 'Article', which doesn't seem to have downloads in type definition
-                    // But let's try to see if they are there in runtime or fetch them separately
-
-                    let downloads: any[] = [];
                     try {
-                        const withDl = await sdk.articles.getWithDownloads(slug);
-                        if (withDl.downloads) downloads = withDl.downloads;
-                    } catch {
-                        console.log("Could not fetch downloads separately");
+                        // Prefer getWithDownloads as it seems to return full relational data (tags, creators, etc.)
+                        // which getBySlug might miss depending on backend implementation.
+                        // Pass locale to ensure strict localized data is returned
+                        const withDl = await sdk.articles.getWithDownloads(slug, locale);
+                        if (withDl.article) {
+                            articleData = withDl.article;
+                        }
+                        if (withDl.downloads) {
+                            downloadsData = withDl.downloads;
+                        }
+                    } catch (err) {
+                        console.warn("getWithDownloads failed, falling back to getBySlug", err);
+                        // Fallback
+                        const res = await sdk.articles.getBySlug(slug);
+                        if (res) articleData = res;
                     }
 
-                    if (article) {
+                    if (articleData) {
+                        const article = articleData;
+
                         // Prepare images
                         const rawImages = article.images || [];
                         const imageUrls = rawImages.map((img: any) => typeof img === 'string' ? img : img.url);
@@ -489,7 +493,7 @@ export const ArticleEditorForm: React.FC<ArticleEditorFormProps> = ({ slug = '',
                         }
 
                         // Prepare downloads
-                        const dls = downloads.map((d: any) => ({
+                        const dls = downloadsData.map((d: any) => ({
                             id: d.id,
                             tempId: `dl-${d.id}`,
                             name: d.name,
@@ -501,7 +505,7 @@ export const ArticleEditorForm: React.FC<ArticleEditorFormProps> = ({ slug = '',
                         }));
                         setDownloadItems(dls);
 
-                        // Prepare mods (if any - article.mods might verify later)
+                        // Prepare mods
                         if (article.mods) {
                             setModItems(article.mods);
                         }
@@ -523,7 +527,6 @@ export const ArticleEditorForm: React.FC<ArticleEditorFormProps> = ({ slug = '',
                         });
                     }
                 }
-
             } catch (err) {
                 console.error("Init Error", err);
                 setError("Failed to load data");
