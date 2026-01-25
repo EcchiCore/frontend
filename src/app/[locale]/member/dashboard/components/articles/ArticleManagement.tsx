@@ -2,115 +2,70 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import ArticleItem from './ArticleItem';
 import { PlusIcon } from '@heroicons/react/24/outline';
+import ArticleItem from './ArticleItem';
+import { getSdk } from '@/lib/sdk';
+import { ArticleListItem, ArticleListOptions, ArticleStatus } from '@chanomhub/sdk';
 
-interface Author {
-  username: string;
-  bio: string | null;
-  image: string | null;
-  following: boolean;
-}
-
-interface Article {
-  tagList: string[];
-  categoryList: string[];
-  title: string;
-  slug: string;
-  description: string;
-  body: string;
-  author: Author;
-  favorited: boolean;
-  favoritesCount: number;
-  createdAt: string;
-  updatedAt: string;
-  status: string;
-  mainImage: string | null;
-  images: string[];
-}
-
-interface ArticlesResponse {
-  articles: Article[];
-  articlesCount: number;
-}
+// Use ArticleListItem from SDK, but we might need to cast or adapt if ArticleItem expects more.
+// For now, let's treat the state as holding SDK items.
+type AnyArticle = any;
 
 const ArticleManagement: React.FC = () => {
-  const [articles, setArticles] = useState<Article[]>([]);
+  const [articles, setArticles] = useState<AnyArticle[]>([]);
   const [articlesCount, setArticlesCount] = useState<number>(0);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [statusFilter, setStatusFilter] = useState<string>(''); // New state for status filter
-  const [tagFilter, setTagFilter] = useState<string>(''); // New state for tag filter
+  const [statusFilter, setStatusFilter] = useState<string>('');
+  const [tagFilter, setTagFilter] = useState<string>('');
   const [page, setPage] = useState<number>(1);
   const [itemsPerPage, setItemsPerPage] = useState<number>(10);
   const router = useRouter();
 
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:3000/api';
-
-  const getCookie = (name: string): string | null => {
-    if (typeof document === 'undefined') return null;
-    const cookieValue = document.cookie
-      .split('; ')
-      .find(row => row.startsWith(`${name}=`))
-      ?.split('=')[1];
-    return cookieValue ? decodeURIComponent(cookieValue) : null;
-  };
-
   const fetchArticles = useCallback(async () => {
-    console.log('fetchArticles: Starting fetch...');
     try {
       setLoading(true);
-      const token = getCookie('token');
-      console.log('fetchArticles: Token:', token ? 'present' : 'missing');
-      if (!token) {
-        throw new Error('Authorization token not found. Please log in.');
-      }
-
-      const offset = (page - 1) * itemsPerPage;
-      const queryParams = new URLSearchParams({
-        limit: itemsPerPage.toString(),
-        offset: offset.toString(),
-        ...(statusFilter && { status: statusFilter }),
-        ...(tagFilter && { tag: tagFilter })
-      });
-
-      const endpoint = `${API_URL}/api/articles/me?${queryParams}`;
-      console.log('fetchArticles: Fetching from:', endpoint);
-
-      const response = await fetch(endpoint, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      console.log('fetchArticles: Response status:', response.status);
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error('fetchArticles: API error data:', errorData);
-        throw new Error(`API error: ${response.statusText} - ${errorData.message || 'Unknown error'}`);
-      }
-
-      const data: ArticlesResponse = await response.json();
-      console.log('fetchArticles: Fetched articles data:', data);
-      setArticles(data.articles);
-      setArticlesCount(data.articlesCount);
       setError(null);
+
+      const sdk = await getSdk();
+      const offset = (page - 1) * itemsPerPage;
+
+      const options: ArticleListOptions = {
+        limit: itemsPerPage,
+        offset: offset,
+        filter: {}
+      };
+
+      // Set filters
+      if (tagFilter && options.filter) options.filter.tag = tagFilter;
+
+      // Cast string to ArticleStatus (top-level option, not in filter)
+      if (statusFilter) options.status = statusFilter as ArticleStatus;
+
+      // Try to get "my" articles via author filter - assuming SDK supports 'me' alias or backend handles it
+      if (options.filter) options.filter.author = 'me';
+
+      // Use getAllPaginated
+      const res = await sdk.articles.getAllPaginated(options);
+
+      const list = res.items;
+      const count = res.total;
+
+      setArticles(list);
+      setArticlesCount(count);
+
     } catch (err) {
       console.error('fetchArticles: Error during fetch:', err);
       setError(err instanceof Error ? err.message : 'Failed to fetch articles');
     } finally {
       setLoading(false);
-      console.log('fetchArticles: Fetch finished. Loading:', false, 'Error:', error);
     }
-  }, [statusFilter, tagFilter, page, itemsPerPage, API_URL, error]);
+  }, [statusFilter, tagFilter, page, itemsPerPage]);
 
   useEffect(() => {
-    console.log('ArticleManagement: useEffect triggered. Calling fetchArticles...');
     fetchArticles();
   }, [fetchArticles]);
 
-  
 
   const handlePageChange = (value: number) => {
     setPage(value);
@@ -123,33 +78,23 @@ const ArticleManagement: React.FC = () => {
 
   const handleStatusFilterChange = (newStatus: string) => {
     setStatusFilter(newStatus);
-    setPage(1); // Reset to first page when filter changes
+    setPage(1);
   };
 
   const handleTagFilterChange = (newTag: string) => {
     setTagFilter(newTag);
-    setPage(1); // Reset to first page when filter changes
+    setPage(1);
   };
 
   const handleFavoriteChange = (slug: string, favorited: boolean, favoritesCount: number) => {
+    // Optimistic update
     setArticles(articles.map(article =>
       article.slug === slug ? { ...article, favorited, favoritesCount } : article
     ));
   };
 
-  const handleViewArticle = async (slug: string) => {
-    try {
-      const token = getCookie('token');
-      if (!token) throw new Error('Authorization required');
-
-      const response = await fetch(`${API_URL}/api/articles/${slug}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (!response.ok) throw new Error('Failed to fetch article');
-      window.open(`/articles/${slug}`, '_blank');
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to view article');
-    }
+  const handleViewArticle = (slug: string) => {
+    window.open(`/articles/${slug}`, '_blank');
   };
 
   const handleEditArticle = (slug: string) => {
@@ -160,17 +105,9 @@ const ArticleManagement: React.FC = () => {
     if (!window.confirm('Are you sure you want to delete this article?')) return;
 
     try {
-      const token = getCookie('token');
-      if (!token) throw new Error('Authorization required');
+      const sdk = await getSdk();
+      await sdk.articles.delete(slug);
 
-      const response = await fetch(`${API_URL}/api/articles/${slug}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        }
-      });
-
-      if (!response.ok) throw new Error('Failed to delete article');
       setArticles(articles.filter(article => article.slug !== slug));
       setArticlesCount(prev => prev - 1);
     } catch (err) {
@@ -182,8 +119,18 @@ const ArticleManagement: React.FC = () => {
     if (!window.confirm('Are you sure you want to request publication for this article?')) return;
 
     try {
+      // Fallback to manual fetch for custom endpoint not in SDK yet
+      const getCookie = (name: string): string | null => {
+        if (typeof document === 'undefined') return null;
+        const cookieValue = document.cookie
+          .split('; ')
+          .find(row => row.startsWith(`${name}=`))
+          ?.split('=')[1];
+        return cookieValue ? decodeURIComponent(cookieValue) : null;
+      };
       const token = getCookie('token');
-      if (!token) throw new Error('Authorization required');
+      const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
 
       const response = await fetch(`${API_URL}/api/articles/${slug}/publish-request`, {
         method: 'POST',
@@ -191,7 +138,7 @@ const ArticleManagement: React.FC = () => {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({}), // Empty body as per API docs example
+        body: JSON.stringify({}),
       });
 
       if (!response.ok) {
@@ -199,7 +146,6 @@ const ArticleManagement: React.FC = () => {
         throw new Error(errorData.message || 'Failed to request publication');
       }
 
-      // Optionally, update the article status in the local state to PENDING_REVIEW
       setArticles(prevArticles =>
         prevArticles.map(article =>
           article.slug === slug ? { ...article, status: 'PENDING_REVIEW' } : article
@@ -215,7 +161,6 @@ const ArticleManagement: React.FC = () => {
     router.push('/editor');
   };
 
-  console.log('ArticleManagement: Rendering. Loading:', loading, 'Error:', error, 'Articles count:', articles.length);
   return (
     <div className="container mx-auto p-4">
       <div className="flex justify-between items-center mb-6">
@@ -277,15 +222,16 @@ const ArticleManagement: React.FC = () => {
               description={article.description}
               favoritesCount={article.favoritesCount}
               favorited={article.favorited}
-              tagList={article.tagList}
+              // Map SDK named entities (or string) to string[]
+              tagList={article.tags ? article.tags.map((t: any) => t.name || t) : (article.tagList || [])}
               author={article.author}
               createdAt={article.createdAt}
               status={article.status}
-              onView={handleViewArticle}
+              onView={() => handleViewArticle(article.slug)}
               onEdit={handleEditArticle}
               onDelete={handleDeleteArticle}
               onFavoriteChange={handleFavoriteChange}
-              onPublishRequest={handlePublishRequest} // New prop
+              onPublishRequest={handlePublishRequest}
             />
           ))}
           <div className="flex flex-col sm:flex-row justify-between items-center mt-6 gap-4">
