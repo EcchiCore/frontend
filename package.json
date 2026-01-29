@@ -91,7 +91,7 @@
     "jwt-decode": "^4.0.0",
     "lucide-react": "^0.515.0",
     "nanoid": "^5.1.6",
-    "next": "16.1.0",
+    "next": "16.1.5",
     "next-intl": "^4.7.0",
     "next-mdx-remote": "^5.0.0",
     "next-sanity": "^11.6.12",
