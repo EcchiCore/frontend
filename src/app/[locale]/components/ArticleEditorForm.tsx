@@ -13,8 +13,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { X, Upload, Image as ImageIcon, LayoutIcon, BookOpenIcon, Save, ArrowLeft, Plus, Trash2, Eye, FileText, Settings, Download, Monitor, Gamepad, FolderOpen } from 'lucide-react';
-import Image from 'next/image';
+import { X, Upload, Image as ImageIcon, LayoutIcon, BookOpenIcon, Save, ArrowLeft, Plus, Trash2, Eye, FileText, Settings, Download, Monitor, Gamepad, FolderOpen, Loader2, Check } from 'lucide-react';
+import { toast } from 'sonner'; import Image from 'next/image';
 import { getSdk } from '@/lib/sdk';
 import { NewArticleDTO, UpdateArticleDTO } from '@chanomhub/sdk';
 import RichTextEditor from '@/components/ui/RichTextEditor';
@@ -32,7 +32,9 @@ interface DownloadItem {
     iframe: string;
     isActive: boolean;
     vipOnly: boolean;
+    forVersion?: string;
     fileSize?: string;
+    syncStatus: 'synced' | 'saving' | 'error' | 'new';
 }
 
 interface ModItem {
@@ -52,6 +54,27 @@ export interface ArticleEditorFormProps {
 }
 
 /* ---------------------- Inner Components ---------------------- */
+
+
+const PLATFORMS_SHORT = ["Win", "Android", "Mac", "Linux", "iOS"];
+
+// Common providers for autocomplete only (not full name replacement)
+const COMMON_PROVIDERS = [
+    "Google Drive", "Mega", "MediaFire", "Pixeldrain", "Workupload", "Gofile", "Steam", "itch.io", "Patreon"
+];
+
+const DOMAIN_MAPPINGS: Record<string, string> = {
+    'drive.google.com': 'Google Drive',
+    'mega.nz': 'Mega',
+    'mediafire.com': 'MediaFire',
+    'pixeldrain.com': 'Pixeldrain',
+    'workupload.com': 'Workupload',
+    'gofile.io': 'Gofile',
+    'steamcommunity.com': 'Steam',
+    'store.steampowered.com': 'Steam',
+    'itch.io': 'itch.io',
+    'patreon.com': 'Patreon'
+};
 
 const EditorHeader: React.FC<{
     title: string;
@@ -281,47 +304,258 @@ const ImageManager: React.FC<{
 };
 
 const DownloadManager: React.FC<{
+    articleId: number | undefined;
     items: DownloadItem[];
-    setItems: (val: DownloadItem[]) => void;
-}> = ({ items, setItems }) => {
+    setItems: React.Dispatch<React.SetStateAction<DownloadItem[]>>;
+}> = ({ articleId, items, setItems }) => {
+    // Use ref to access latest items inside timeouts
+    const itemsRef = React.useRef(items);
+    useEffect(() => {
+        itemsRef.current = items;
+    }, [items]);
+
+    // Add debounced save logic
+    useEffect(() => {
+        const timeoutIds: Record<string, NodeJS.Timeout> = {};
+
+        // Find items that need saving (status 'saving')
+        items.forEach(item => {
+            if (item.syncStatus === 'saving') {
+                // Clear existing timeout for this item
+                if (timeoutIds[item.tempId]) clearTimeout(timeoutIds[item.tempId]);
+
+                // Set new timeout for debounce
+                timeoutIds[item.tempId] = setTimeout(async () => {
+                    if (!articleId) return;
+
+                    // Get fresh item from ref to avoid stale closure (e.g. missing ID from previous async save)
+                    const currentItem = itemsRef.current.find(i => i.tempId === item.tempId);
+                    if (!currentItem) return;
+
+                    try {
+                        const sdk = await getSdk();
+
+                        // Lazy Creation: If no ID, create it first
+                        if (!currentItem.id) {
+                            // Here we assume if status is 'saving', user touched it.
+                            const created = await sdk.downloads.create({
+                                articleId,
+                                name: currentItem.name,
+                                url: currentItem.url || 'https://example.com',
+                                vipOnly: currentItem.vipOnly,
+                                forVersion: currentItem.forVersion
+                            });
+
+                            if (created) {
+                                setItems((currentItems: DownloadItem[]) =>
+                                    currentItems.map(i => i.tempId === currentItem.tempId ? {
+                                        ...i,
+                                        id: created.id,
+                                        syncStatus: 'synced' as const
+                                    } : i)
+                                );
+                                toast.success("Download created");
+                            } else {
+                                console.error('SDK returned null for created download', currentItem);
+                                setItems((currentItems: DownloadItem[]) =>
+                                    currentItems.map(i => i.tempId === currentItem.tempId ? { ...i, syncStatus: 'error' as const } : i)
+                                );
+                                toast.error("Saved but server returned no ID. Please refresh.");
+                            }
+                        } else {
+                            // Update existing
+                            await sdk.downloads.update(currentItem.id, {
+                                name: currentItem.name,
+                                url: currentItem.url,
+                                isActive: currentItem.isActive,
+                                vipOnly: currentItem.vipOnly,
+                                forVersion: currentItem.forVersion
+                            });
+
+                            // Update status to synced
+                            setItems((currentItems: DownloadItem[]) =>
+                                currentItems.map(i => i.tempId === currentItem.tempId ? { ...i, syncStatus: 'synced' as const } : i)
+                            );
+                        }
+                    } catch (error) {
+                        console.error('Failed to save download:', error);
+                        setItems((currentItems: DownloadItem[]) =>
+                            currentItems.map(i => i.tempId === currentItem.tempId ? { ...i, syncStatus: 'error' as const } : i)
+                        );
+                        toast.error('Failed to save download changes');
+                    }
+                }, 1500); // 1.5s debounce
+            }
+        });
+
+        return () => {
+            Object.values(timeoutIds).forEach(clearTimeout);
+        };
+    }, [items, articleId, setItems]);
+
     const addDownload = () => {
+        if (!articleId) {
+            toast.error("Please save the article first to add downloads");
+            return;
+        }
+
+        const tempId = typeof crypto !== 'undefined' && (crypto as any).randomUUID ? (crypto as any).randomUUID() : `dl-${Date.now()}`;
         const newItem: DownloadItem = {
-            tempId: typeof crypto !== 'undefined' && (crypto as any).randomUUID ? (crypto as any).randomUUID() : `dl-${Date.now()}`,
-            name: 'New Download',
+            tempId,
+            name: '', // Start empty
             url: '',
             iframe: '',
             isActive: true,
-            vipOnly: false
+            vipOnly: false,
+            syncStatus: 'new' // Start as new (unsaved)
         };
+
         setItems([...items, newItem]);
     };
 
-    const removeDownload = (tempId: string) => {
-        setItems(items.filter(i => i.tempId !== tempId));
+    const removeDownload = async (item: DownloadItem) => {
+        if (!item.id) {
+            // If it's a local-only item (failed to create), just remove from state
+            setItems(items.filter(i => i.tempId !== item.tempId));
+            return;
+        }
+
+        // Optimistically remove
+        const previousItems = [...items];
+        setItems(items.filter(i => i.tempId !== item.tempId));
+
+        try {
+            const sdk = await getSdk();
+            await sdk.downloads.delete(item.id);
+            toast.success("Download removed");
+        } catch (error) {
+            console.error('Failed to delete download:', error);
+            setItems(previousItems); // Revert
+            toast.error("Failed to delete download");
+        }
     };
 
     const updateDownload = (tempId: string, field: keyof DownloadItem, value: any) => {
-        setItems(items.map(i => i.tempId === tempId ? { ...i, [field]: value } : i));
+        setItems(items.map(i => {
+            if (i.tempId !== tempId) return i;
+
+            const updates: Partial<DownloadItem> = { [field]: value, syncStatus: 'saving' };
+
+            // Auto-detect name from URL
+            if (field === 'url') {
+                const isNameEmptyOrPrefixOnly = !i.name || i.name === 'New Download' || /^[\[].*?[\]]\s*$/.test(i.name);
+
+                if (isNameEmptyOrPrefixOnly) {
+                    try {
+                        const urlObj = new URL(value);
+                        const domain = urlObj.hostname.replace('www.', '');
+
+                        // Direct match or partial
+                        let detectedProvider = DOMAIN_MAPPINGS[domain];
+                        if (!detectedProvider) {
+                            for (const key in DOMAIN_MAPPINGS) {
+                                if (domain.includes(key)) {
+                                    detectedProvider = DOMAIN_MAPPINGS[key];
+                                    break;
+                                }
+                            }
+                        }
+
+                        // Fallback: Use capitalized domain name
+                        if (!detectedProvider) {
+                            const parts = domain.split('.');
+                            if (parts.length > 0) {
+                                const name = parts[0];
+                                detectedProvider = name.charAt(0).toUpperCase() + name.slice(1);
+                            }
+                        }
+
+                        if (detectedProvider) {
+                            // Check for existing platform prefix [Platform]
+                            const match = i.name.match(/^\[(.*?)\]/);
+                            const prefix = match ? match[0] : '';
+                            updates.name = `${prefix ? prefix + ' ' : ''}${detectedProvider}`;
+                        }
+                    } catch (e) {
+                        // Invalid URL
+                    }
+                }
+            }
+
+            return { ...i, ...updates };
+        }));
+    };
+
+    const togglePlatformPrefix = (tempId: string, platform: string) => {
+        setItems(items.map(i => {
+            if (i.tempId !== tempId) return i;
+
+            let newName = i.name;
+            const prefix = `[${platform}]`;
+
+            if (newName.startsWith(prefix)) {
+                // Toggle OFF if matches exact prefix.
+                // If it was just "[Win]", it becomes empty.
+                newName = newName.replace(prefix, '').trim();
+            } else if (newName.match(/^\[(.*?)\]/)) {
+                // Switch prefix
+                newName = newName.replace(/^\[(.*?)\]/, prefix);
+            } else {
+                // Add prefix. If name was empty, just prefix.
+                newName = `${prefix} ${newName}`.trim();
+            }
+
+            return { ...i, name: newName, syncStatus: 'saving' };
+        }));
     };
 
     return (
         <div className="space-y-4">
+            <datalist id="download-names">
+                {COMMON_PROVIDERS.map(name => (
+                    <option key={name} value={name} />
+                ))}
+            </datalist>
+
             <div className="flex justify-between items-center">
                 <h3 className="text-lg font-medium">Downloads</h3>
-                <Button type="button" onClick={addDownload} size="sm" variant="outline">
+                <Button type="button" onClick={addDownload} size="sm" variant="outline" disabled={!articleId}>
                     <Plus className="h-4 w-4 mr-2" /> Add Download
                 </Button>
             </div>
+
+            {!articleId && <p className="text-sm text-amber-500 bg-amber-50 p-2 rounded border border-amber-200">Please save the article first to manage downloads.</p>}
 
             {items.length === 0 && <p className="text-sm text-muted-foreground italic">No downloads added yet.</p>}
 
             <div className="space-y-4">
                 {items.map((item, idx) => (
-                    <Card key={item.tempId} className="border-none shadow-sm ring-1 ring-gray-100">
-                        <CardContent className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Card key={item.tempId} className={`border-none shadow-sm ring-1 transition-all ${item.syncStatus === 'error' ? 'ring-destructive/50 bg-destructive/10' : 'ring-border bg-card'}`}>
+                        <CardContent className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4 relative">
+                            {item.syncStatus === 'saving' && <div className="absolute top-2 right-2"><Loader2 className="h-4 w-4 animate-spin text-muted-foreground" /></div>}
+                            {item.syncStatus === 'synced' && <div className="absolute top-2 right-2"><Check className="h-4 w-4 text-green-500" /></div>}
+
                             <div>
-                                <Label>Name</Label>
-                                <Input value={item.name} onChange={(e) => updateDownload(item.tempId, 'name', e.target.value)} className="mt-1" />
+                                <Label>Name & Platform</Label>
+                                <div className="flex flex-wrap gap-1 mb-2 mt-1">
+                                    {PLATFORMS_SHORT.map(p => (
+                                        <Badge
+                                            key={p}
+                                            variant="outline"
+                                            className={`cursor-pointer select-none ${item.name.startsWith(`[${p}]`) ? 'bg-primary text-primary-foreground hover:bg-primary/90' : 'hover:bg-muted'}`}
+                                            onClick={() => togglePlatformPrefix(item.tempId, p)}
+                                        >
+                                            {p}
+                                        </Badge>
+                                    ))}
+                                </div>
+                                <Input
+                                    value={item.name}
+                                    onChange={(e) => updateDownload(item.tempId, 'name', e.target.value)}
+                                    className="mt-1"
+                                    list="download-names"
+                                    placeholder="e.g. [Win] Google Drive"
+                                />
                             </div>
                             <div>
                                 <Label>URL</Label>
@@ -329,7 +563,7 @@ const DownloadManager: React.FC<{
                             </div>
                             <div className="md:col-span-2">
                                 <Label>Embed / Iframe Code</Label>
-                                <Input value={item.iframe} onChange={(e) => updateDownload(item.tempId, 'iframe', e.target.value)} placeholder="<iframe ...>" className="mt-1" />
+                                <Input disabled value={item.iframe} placeholder="Iframe not editable directly" className="mt-1 bg-muted/50" />
                             </div>
                             <div className="flex items-center gap-4">
                                 <div className="flex items-center space-x-2">
@@ -342,7 +576,7 @@ const DownloadManager: React.FC<{
                                 </div>
                             </div>
                             <div className="flex justify-end md:col-span-2">
-                                <Button type="button" variant="destructive" size="sm" onClick={() => removeDownload(item.tempId)}>
+                                <Button type="button" variant="destructive" size="sm" onClick={() => removeDownload(item)}>
                                     <Trash2 className="h-4 w-4 mr-2" /> Remove
                                 </Button>
                             </div>
@@ -436,6 +670,7 @@ export const ArticleEditorForm: React.FC<ArticleEditorFormProps> = ({ slug = '',
     // Use a local state that mostly matches UpdateArticleDTO/NewArticleDTO but handles form-specific needs
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [formData, setFormData] = useState<any>({
+        id: (initialData as any)?.id || null,
         title: initialData?.title || '',
         slug: mode === 'edit' ? slug : '',
         description: initialData?.description || '',
@@ -557,7 +792,8 @@ export const ArticleEditorForm: React.FC<ArticleEditorFormProps> = ({ slug = '',
                             iframe: d.iframe || '',
                             isActive: d.isActive,
                             vipOnly: d.vipOnly,
-                            fileSize: d.fileSize
+                            fileSize: d.fileSize,
+                            syncStatus: 'synced' as const // Initially synced
                         }));
                         setDownloadItems(dls);
 
@@ -568,6 +804,7 @@ export const ArticleEditorForm: React.FC<ArticleEditorFormProps> = ({ slug = '',
 
                         setFormData({
                             ...article,
+                            id: Number(article.id), // Ensure ID is a number
                             // Map NamedEntity[] to string[] for the form
                             tags: article.tags?.map((t: any) => t.name || t) || [],
                             categories: article.categories?.map((c: any) => c.name || c) || [],
@@ -674,15 +911,8 @@ export const ArticleEditorForm: React.FC<ArticleEditorFormProps> = ({ slug = '',
                 coverImage: formData.coverImageId ? imageItems.find(i => i.id === formData.coverImageId)?.url : (formData.coverImage?.url || formData.coverImage),
                 otherImages: imageItems.map(i => i.url),
 
-                // Add downloads and mods to payload - SDK types might ignore this but backend may accept it if adjusted
-                downloads: downloadItems.map(d => ({
-                    id: d.id, // Include ID if updating
-                    name: d.name,
-                    url: d.url,
-                    iframe: d.iframe,
-                    isActive: d.isActive,
-                    vipOnly: d.vipOnly
-                })),
+                // Downloads are now managed separately via optimistic UI
+                // We don't send them in the article update payload anymore to prevent overwriting/re-moderation triggers
                 mods: modItems
             };
 
@@ -818,7 +1048,7 @@ export const ArticleEditorForm: React.FC<ArticleEditorFormProps> = ({ slug = '',
                                     <Badge variant="outline" className="bg-background border-border">{downloadItems.length} items</Badge>
                                 </div>
                                 <CardContent className="p-6">
-                                    <DownloadManager items={downloadItems} setItems={setDownloadItems} />
+                                    <DownloadManager articleId={formData.id ? Number(formData.id) : undefined} items={downloadItems} setItems={setDownloadItems} />
                                 </CardContent>
                             </Card>
 
