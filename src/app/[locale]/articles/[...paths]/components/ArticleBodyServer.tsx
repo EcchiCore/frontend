@@ -8,6 +8,7 @@ import Link from "next/link";
 import { Article } from "@/types/article";
 import { formatDate } from "@/lib/dateUtils";
 import { encodeURLComponent } from "@/lib/utils";
+import { getImageUrl } from "@/lib/imageUrl";
 
 interface ArticleBodyServerProps {
     article: Article;
@@ -63,7 +64,11 @@ function sanitizeHtml(html: string): string {
 const PLACEHOLDER_IMAGE = '/placeholder-image.png';
 
 export default function ArticleBodyServer({ article }: ArticleBodyServerProps) {
-    const mainImageUrl = article.coverImage || article.mainImage || article.backgroundImage;
+    // Use imgproxy for optimized main image with 'hero' preset
+    const mainImageUrl = getImageUrl(
+        article.coverImage || article.mainImage || article.backgroundImage,
+        'hero'
+    );
 
     return (
         <article className="article-ssr-content" data-ssr="true">

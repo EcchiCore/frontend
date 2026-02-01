@@ -2,7 +2,7 @@ import { useEffect, useCallback, useState } from "react";
 import Image from "next/image";
 import { ImageLightboxProps } from "./Interfaces";
 
-import myImageLoader from "@/lib/imageLoader";
+import { getImageUrl } from "@/lib/imageUrl";
 
 const ImageLightbox = ({
   open,
@@ -42,21 +42,20 @@ const ImageLightbox = ({
     return 828;
   }, []);
 
-  // Preload next one or two images
+  // Preload next one or two images using imgproxy
   const preloadImages = useCallback(() => {
-    const width = getPreloadWidth();
-    const imagesToPreload = [];
+    const imagesToPreload: { src: string; url: string }[] = [];
 
     const nextIndex = (currentIndex + 1) % images.length;
-    const nextImageUrl = myImageLoader({ src: images[nextIndex], width, quality: 90 });
-    if (!preloadedImages.has(nextImageUrl)) {
+    const nextImageUrl = getImageUrl(images[nextIndex], 'gallery');
+    if (nextImageUrl && !preloadedImages.has(nextImageUrl)) {
       imagesToPreload.push({ src: images[nextIndex], url: nextImageUrl });
     }
 
     const nextNextIndex = (currentIndex + 2) % images.length;
     if (images.length > 2) {
-      const nextNextImageUrl = myImageLoader({ src: images[nextNextIndex], width, quality: 90 });
-      if (!preloadedImages.has(nextNextImageUrl)) {
+      const nextNextImageUrl = getImageUrl(images[nextNextIndex], 'gallery');
+      if (nextNextImageUrl && !preloadedImages.has(nextNextImageUrl)) {
         imagesToPreload.push({ src: images[nextNextIndex], url: nextNextImageUrl });
       }
     }
@@ -71,7 +70,7 @@ const ImageLightbox = ({
         console.error(`Failed to preload image: ${src}`);
       };
     });
-  }, [currentIndex, images, preloadedImages, getPreloadWidth]);
+  }, [currentIndex, images, preloadedImages]);
 
   // Memoize navigation functions
   const navigateToNext = useCallback(() => {
@@ -240,15 +239,14 @@ const ImageLightbox = ({
                 style={{ transform: `scale(${zoomLevel}) rotate(${rotation}deg)` }}
               >
                 <Image
-                  loader={myImageLoader}
-                  src={images[currentIndex]}
+                  src={getImageUrl(images[currentIndex], 'gallery') || images[currentIndex]}
                   alt={`Expanded image ${currentIndex + 1}`}
                   fill
                   style={{ objectFit: "contain" }}
                   sizes="100vw"
                   priority
                   onLoad={handleImageLoad}
-                  quality={90}
+                  unoptimized
                 />
               </div>
 
@@ -307,13 +305,13 @@ const ImageLightbox = ({
                       `}
                     >
                       <Image
-                        loader={myImageLoader}
-                        src={image}
+                        src={getImageUrl(image, 'cardThumbnail') || image}
                         alt={`Thumbnail ${index + 1}`}
                         fill
                         sizes="80px"
                         style={{ objectFit: "cover" }}
                         loading="lazy"
+                        unoptimized
                       />
                     </div>
                   ))}

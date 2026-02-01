@@ -1,7 +1,6 @@
 "use client";
 import React, { useState } from "react";
 import Image from "next/image";
-import imageLoader from '@/lib/imageLoader';
 import Link from "next/link";
 import { ArticleBodyProps } from "./Interfaces";
 import { useTranslations } from "next-intl";
@@ -9,6 +8,7 @@ import { Alert, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { getImageUrl } from "@/lib/imageUrl";
 
 const PLACEHOLDER_IMAGE = '/placeholder-image.png';
 
@@ -68,8 +68,7 @@ const ArticleBody: React.FC<ArticleBodyProps> = ({
           <Card className="relative h-64 md:h-80 rounded-xl overflow-hidden bg-base-200 flex justify-center items-center border border-base-content/20 shadow-lg">
             <CardContent className="p-0 relative w-full h-full">
               <Image
-                loader={imageLoader}
-                src={selectedImage}
+                src={getImageUrl(selectedImage, 'gallery') || selectedImage}
                 alt="ภาพที่เลือก"
                 fill
                 className="object-contain rounded-xl cursor-pointer transition-transform duration-300 hover:scale-105"
@@ -79,6 +78,7 @@ const ArticleBody: React.FC<ArticleBodyProps> = ({
                     article.images?.findIndex((img: { url: string }) => img.url === selectedImage) || 0
                   )}
                 onError={(e) => (e.currentTarget.src = PLACEHOLDER_IMAGE)}
+                unoptimized
               />
             </CardContent>
           </Card>
@@ -94,15 +94,13 @@ const ArticleBody: React.FC<ArticleBodyProps> = ({
                 onClick={() => setSelectedImage(image.url)}
               >
                 <Image
-                  loader={imageLoader}
-                  src={image.url}
+                  src={getImageUrl(image.url, 'cardThumbnail') || image.url}
                   alt={`Thumbnail ${index + 1}`}
                   fill
                   className="object-cover"
                   sizes="100px"
-                  quality={80}
                   loading="lazy"
-
+                  unoptimized
                 />
 
               </div>

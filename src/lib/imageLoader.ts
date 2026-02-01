@@ -1,6 +1,13 @@
 'use client'
 
-// src/app/lib/[locale]/imageLoader.ts
+import { getImageUrl, type ImgproxyOptions } from '@/lib/imageUrl';
+
+/**
+ * Next.js Image Loader using imgproxy
+ * 
+ * Maps width breakpoints to appropriate imgproxy options for optimal performance.
+ * This loader integrates with the SDK's imgproxy transformation functions.
+ */
 export default function myImageLoader({
   src,
   width,
@@ -15,45 +22,37 @@ export default function myImageLoader({
     return src;
   }
 
-  // ตรวจสอบว่าคือ relative path /image/... หรือ full URL
-  const isRelativeImage = src.startsWith('/image/');
-  const isRustgramImage = isRelativeImage || src.startsWith('https://rustgram.onrender.com');
-
-  // หากเป็น Rustgram image
-  if (isRustgramImage) {
-    // สร้าง absolute URL
-    const baseUrl = 'https://rustgram.onrender.com';
-    const finalSrc = isRelativeImage ? `${baseUrl}${src}` : src;
-    return finalSrc;
+  // URLs already processed by imgproxy - return as-is
+  if (src.includes('/insecure/') || src.includes('imgproxy.chanomhub.com')) {
+    return src;
   }
 
-  // ภาพจาก URL อื่น ใช้ตรง ๆ ไม่ optimize
-  return src;
+  // If it's already a full URL, return as-is
+  if (src.startsWith('http://') || src.startsWith('https://')) {
+    return src;
+  }
+
+  // Build imgproxy options based on requested width and quality
+  const options: ImgproxyOptions = {
+    width: width,
+    height: 0, // Auto height
+    resizeType: 'fit',
+    quality: quality || 80,
+    format: 'webp',
+  };
+
+  // Use SDK's getImageUrl for imgproxy transformation
+  return getImageUrl(src, options) || src;
 }
 
-// Alternative version with optimization (ถ้า Rustgram รองรับ)
-export function myImageLoaderWithOptimization({
-  src,
-  width,
-  quality,
-}: {
-  src: string
-  width: number
-  quality?: number
-}) {
-  const isRelativeImage = src.startsWith('/image/');
-  const isRustgramImage = isRelativeImage || src.startsWith('https://rustgram.onrender.com');
-
-  if (isRustgramImage) {
-    const baseUrl = 'https://rustgram.onrender.com';
-    const finalSrc = isRelativeImage ? `${baseUrl}${src}` : src;
-    const finalQuality = quality ?? getUserPreferredQuality() ?? 80;
-
-    // ใช้ format ที่ Rustgram รองรับ (ต้องเช็ค API docs)
-    return `${finalSrc}?w=${width}&q=${finalQuality}`;
-  }
-
-  return src;
+/**
+ * Get imgproxy URL with specific preset
+ */
+export function getLoaderUrl(
+  src: string,
+  preset: 'card' | 'cardThumbnail' | 'hero' | 'gallery' | 'avatar' | 'placeholder' = 'card'
+) {
+  return getImageUrl(src, preset) || src;
 }
 
 function getUserPreferredQuality(): number | null {

@@ -96,8 +96,24 @@ export function getImageUrl(
     imageUrl: string | null | undefined,
     preset: keyof typeof IMAGE_PRESETS | ImgproxyOptions = 'card'
 ): string | null {
+    if (!imageUrl) return null;
+
+    let processedUrl = imageUrl;
+
+    // Robustly strip Cloudflare/Storage prefixes
+    // Matches:
+    // 1. Optional storage domain (https://cdn.chanomhub.com)
+    // 2. Optional /cdn-cgi/image/... part (any options)
+    // 3. Optional leading slash
+    const prefixRegex = /^(?:https?:\/\/[^/]+)?(?:\/cdn-cgi\/image\/[^/]+\/)?\/?/;
+
+    // If we match the storage url domain specifically, or just relative cdn-cgi paths
+    if (processedUrl.includes('cdn-cgi/image/') || processedUrl.startsWith(STORAGE_URL)) {
+        processedUrl = processedUrl.replace(prefixRegex, '');
+    }
+
     const options = typeof preset === 'string' ? IMAGE_PRESETS[preset] : preset;
-    return resolveImageUrl(imageUrl, IMGPROXY_URL, STORAGE_URL, options);
+    return resolveImageUrl(processedUrl, IMGPROXY_URL, STORAGE_URL, options);
 }
 
 /**

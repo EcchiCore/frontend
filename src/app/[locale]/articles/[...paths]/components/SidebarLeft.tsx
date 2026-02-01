@@ -7,14 +7,18 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { MessageCircle, Trophy, Medal, Award } from "lucide-react";
 import { SidebarLeftProps } from "./Interfaces";
+import { getImageUrl } from "@/lib/imageUrl";
 
 const SidebarLeft: React.FC<SidebarLeftProps> = ({
   article,
   topCommenters,
 }) => {
 
-  const imageUrl = article.coverImage || article.mainImage || article.backgroundImage || null;
-  const mainImageUrl = imageUrl;
+  // Get optimized image URL via imgproxy
+  const mainImageUrl = getImageUrl(
+    article.coverImage || article.mainImage || article.backgroundImage || null,
+    'card'
+  );
 
   const getRankingIcon = (index: number) => {
     switch (index) {
@@ -61,6 +65,7 @@ const SidebarLeft: React.FC<SidebarLeftProps> = ({
                   className="object-cover transition-transform duration-500 group-hover:scale-105"
                   sizes="(max-width: 768px) 100vw, 300px"
                   loading="eager"
+                  unoptimized
                 />
 
                 {/* Decorative corner accent */}
