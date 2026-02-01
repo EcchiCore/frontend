@@ -4,19 +4,24 @@ import { useState, useEffect } from "react"
 import Image from "next/image"
 import { Badge } from "@/components/ui/badge"
 import type { Article } from "@/types/article"
+import { getImageUrl, getImageFallbackUrl } from "@/lib/imageUrl"
 
 export default function GameCardImage({ article }: { article: Article }) {
     const [currentImageIndex, setCurrentImageIndex] = useState(0)
     const [isHovered, setIsHovered] = useState(false)
+    const [failedImages, setFailedImages] = useState<Set<string>>(new Set())
 
-    const primaryImage =
-        article.coverImage || article.mainImage || article.backgroundImage || null
+    // Get primary image and apply imgproxy optimization
+    const primaryImage = getImageUrl(
+        article.coverImage || article.mainImage || article.backgroundImage || null,
+        'card'
+    )
 
-    // Collect all valid images: Primary + Gallery
+    // Collect all valid images: Primary + Gallery (with imgproxy optimization)
     const images = [
         primaryImage,
-        ...(article.images || []).map((img) => img.url),
-    ].filter((img): img is string => !!img)
+        ...(article.images || []).map((img) => getImageUrl(img.url, 'gallery')),
+    ].filter((img): img is string => !!img && !failedImages.has(img))
 
     // Cycler effect
     useEffect(() => {
@@ -65,6 +70,14 @@ export default function GameCardImage({ article }: { article: Article }) {
                         } ${isHovered && currentImageIndex > 0 ? "opacity-90" : "opacity-100"
                         }`}
                     unoptimized
+                    onError={() => {
+                        // On imgproxy failure, try fallback to original URL
+                        const fallbackUrl = getImageFallbackUrl(currentImageSrc)
+                        if (fallbackUrl && fallbackUrl !== currentImageSrc) {
+                            // Add to failed images and let React re-render
+                            setFailedImages((prev) => new Set([...prev, currentImageSrc]))
+                        }
+                    }}
                 />
             ) : (
                 <div className="w-full h-full bg-gradient-to-br from-primary/5 via-muted/50 to-background/80 flex items-center justify-center">
