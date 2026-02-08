@@ -23,6 +23,56 @@ export function JsonImportDialog() {
     const [jsonInput, setJsonInput] = useState('');
     const [error, setError] = useState<string | null>(null);
 
+    const repairMalformedHtml = (html: string): string => {
+        if (!html) return html;
+        let repaired = html;
+
+        // 1. Decode generic HTML entities using DOMParser
+        // This handles &lt;, &gt;, &quot;, &amp;, etc. correctly even if they are mixed.
+        try {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(repaired, 'text/html');
+            repaired = doc.body.textContent || repaired;
+        } catch (e) {
+            console.error("DOMParser error", e);
+            // Fallback
+            repaired = repaired
+                .replace(/&lt;/g, '<')
+                .replace(/&gt;/g, '>')
+                .replace(/&quot;/g, '"')
+                .replace(/&#39;/g, "'");
+        }
+
+        // 2. Fix the specific double-nested link pattern:
+        // Pattern A: <a href="<a href='URL'>...</a>">TEXT</a> (cleanly nested)
+        // Pattern B: <a href="<a href='URL'>Title" class="...">Content</a> (broken middle quote)
+
+        // This regex matches:
+        // <a ... href=  ---> Start
+        // ["']          ---> Open quote of href
+        // <a\s+href=["']([^"']+)["']   ---> Inner open tag with URL (Group 1)
+        // [^>]*>        ---> End of inner open tag
+        // (.*?)         ---> Inner Title/Text (Group 2)
+        // ["']          ---> Closing quote of outer href (or intermediate quote)
+        // [^>]*>        ---> Rest of outer opening tag
+        // (.*?)         ---> Outer content (Group 3)
+        // <\/a>         ---> Closing tag (stops at the first one)
+
+        const messyLinkRegex = /<a\s+[^>]*href=["']<a\s+href=["']([^"']+)["'][^>]*>(.*?)["'][^>]*>(.*?)<\/a>/gi;
+
+        repaired = repaired.replace(messyLinkRegex, (match, url, innerTitle, outerContent) => {
+            return `<a href="${url}" target="_blank" rel="noopener noreferrer">${innerTitle || outerContent || url}</a>`;
+        });
+
+        // 3. Simple nested fallback (for the cleanly nested case or variations)
+        const nestedLinkRegex = /<a\s+[^>]*href=["']\s*<a\s+href=['"]([^'"]+)['"][^>]*>.*?<\/a>\s*["'][^>]*>(.*?)<\/a>/gi;
+        repaired = repaired.replace(nestedLinkRegex, (match, url, text) => {
+            return `<a href="${url}" target="_blank" rel="noopener noreferrer">${text}</a>`;
+        });
+
+        return repaired;
+    };
+
     const handleImport = () => {
         try {
             setError(null);
@@ -33,9 +83,14 @@ export function JsonImportDialog() {
 
             const parsedData = JSON.parse(jsonInput);
 
-            // Basic validation: Check if it's an object
+            // Basic validation: Check if 'object'
             if (typeof parsedData !== 'object' || parsedData === null || Array.isArray(parsedData)) {
                 throw new Error('Input must be a valid JSON object.');
+            }
+
+            // Sanitization step for body
+            if (parsedData.body && typeof parsedData.body === 'string') {
+                parsedData.body = repairMalformedHtml(parsedData.body);
             }
 
             // Dispatch update
@@ -99,9 +154,30 @@ export function JsonImportDialog() {
                     </DialogDescription>
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
-                    <div className="bg-muted/50 p-3 rounded-md text-sm text-muted-foreground border">
-                        <p className="font-semibold mb-1">💡 For "body" (Full Description):</p>
-                        <p>Please use <strong>HTML format</strong>. Supported tags: headers, paragraphs, lists, bold, italic. Avoid complex styles or inline CSS.</p>
+                    <div className="bg-muted/50 p-3 rounded-md text-sm text-muted-foreground border space-y-2">
+                        <div>
+                            <p className="font-semibold mb-1">💡 For "body" (Full Description):</p>
+                            <p>Please use <strong>HTML format</strong>. Supported tags: headers, paragraphs, lists, bold, italic, <strong>images</strong>. Avoid complex styles or inline CSS.</p>
+                        </div>
+                        <div className="pt-2 border-t border-border mt-2">
+                            <p className="font-semibold mb-1">🤖 Using AI? Copy this rule:</p>
+                            <div className="flex gap-2 items-center bg-background p-2 rounded border">
+                                <code className="flex-1 text-xs whitespace-pre-wrap">
+                                    Generate 'body' as valid unescaped HTML. Use &lt;p&gt;, &lt;a&gt;, &lt;img&gt;. Do NOT use entities for tags. Ensure links and images use valid href/src attributes.
+                                </code>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => {
+                                        navigator.clipboard.writeText("Generate the 'body' content as valid, unescaped HTML. Supported tags include <p>, <a>, <b>, <i>, <ul>, <li>, <img>. Do NOT HTML-encode the tags (use <p> NOT &lt;p&gt;). Ensure <a> href and <img> src attributes contain ONLY the valid URL string, without nested tags.");
+                                        toast.success("AI Prompt copied!");
+                                    }}
+                                    title="Copy Prompt"
+                                >
+                                    <Clipboard className="h-4 w-4" />
+                                </Button>
+                            </div>
+                        </div>
                     </div>
                     <div className="flex justify-end">
                         <Button variant="ghost" size="sm" onClick={handlePasteFromClipboard} className="text-xs h-8 gap-1">
