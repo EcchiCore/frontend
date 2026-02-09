@@ -88,7 +88,7 @@ export default function GameCard({ article }: { article: Article }) {
 
               <div className="flex items-center gap-1">
                 <Clock className="w-3.5 h-3.5" />
-                <span>{getTimeAgo(article.createdAt)}</span>
+                <span>{getTimeAgo(article.updatedAt)}</span>
               </div>
             </div>
 
