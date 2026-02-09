@@ -1,4 +1,4 @@
-import { createServerClient } from "@chanomhub/sdk/next"
+import { createChanomhubClient } from "@chanomhub/sdk"
 import { ArticleListItem } from "@chanomhub/sdk"
 import GameCard from "./GameCard"
 import { Button } from "@/components/ui/button"
@@ -9,7 +9,7 @@ export default async function Results({
   searchParams,
 }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const params = await searchParams;
-  const sdk = await createServerClient();
+  const sdk = createChanomhubClient();
 
   // Default limit: smaller for better mobile performance
   const limit = Number(params.pageSize ?? 30);
