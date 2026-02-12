@@ -19,6 +19,7 @@ const SettingsPage = React.lazy(() => import('../settings/page'));
 const ModerationPage = React.lazy(() => import('../pages/ModerationPage').then(module => ({ default: module.ModerationPage })));
 const SubscriptionsPage = React.lazy(() => import('../pages/SubscriptionsPage').then(module => ({ default: module.SubscriptionsPage })));
 const WalletPage = React.lazy(() => import('../pages/WalletPage').then(module => ({ default: module.WalletPage })));
+const AdminDashboard = React.lazy(() => import('../admin/page'));
 
 interface DashboardLayoutProps {
   title: string;
@@ -30,7 +31,7 @@ const getPageFromHash = (): PageType => {
     return 'profile';
   }
   const hash = window.location.hash.replace('#', '') as PageType;
-  const validPages: PageType[] = ['profile', 'articles', 'subscriptions', 'wallet', 'moderation', 'settings'];
+  const validPages: PageType[] = ['profile', 'articles', 'subscriptions', 'wallet', 'moderation', 'settings', 'admin'];
   if (validPages.includes(hash)) {
     return hash;
   }
@@ -115,6 +116,8 @@ export const DashboardLayoutShadcn: React.FC<DashboardLayoutProps> = ({ title })
         return <SettingsPage />;
       case 'moderation':
         return <ModerationPage />;
+      case 'admin':
+        return <AdminDashboard />;
       default:
         return <ProfilePage />;
     }

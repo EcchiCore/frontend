@@ -22,6 +22,8 @@ import { useViewHistory } from "./hooks/useViewHistory";
 import ArticleDownloadDialog from "./ArticleDownloadDialog";
 import RelatedArticles from "./RelatedArticles";
 import { Button, Card, CardContent } from "@/components/ui";
+// import ArticleModsSection from "./ArticleModsSection"; // Removed
+import ArticleCommunityTabs from "./ArticleCommunityTabs";
 import { useTranslations } from 'next-intl';
 import type { ArticleListItem } from '@chanomhub/sdk';
 
@@ -144,29 +146,30 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
         />
       </div>
 
-      <div className="container mx-auto px-4 py-8">
-        {alert.open && (
-          <CustomArticleAlert
-            title={alert.severity === "success" ? t("success") : t("error")}
-            message={alert.message}
-            variant={alert.severity === "success" ? "default" : "destructive"}
-          />
-        )}
+      <div className="container mx-auto px-4 py-6 md:py-8">
 
-        <div className="flex justify-between items-center mb-4">
-          <span className="text-sm text-muted-foreground">
-            {t("readingTime", { time: readingTime })}
-          </span>
-          <div className="flex items-center space-x-4">
-            <label className="flex items-center gap-2">
-              {t("fontSize")}:
+        {/* Utility Bar: Tabs + Reading Time & Font Size */}
+        <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-6 text-sm text-muted-foreground bg-card/50 p-2 rounded-lg border sticky top-[60px] z-40 backdrop-blur supports-[backdrop-filter]:bg-card/50">
+          <ArticleCommunityTabs
+            slug={slug}
+            commentCount={comments?.length}
+            variant="inline"
+            className="w-full md:w-auto overflow-x-auto pb-2 md:pb-0"
+          />
+
+          <div className="flex items-center gap-4 bg-muted/50 p-1.5 rounded-md self-end md:self-auto">
+            <span className="text-xs whitespace-nowrap px-2">{t("readingTime", { time: readingTime })}</span>
+            <div className="w-px h-4 bg-border"></div>
+            <label className="flex items-center gap-2 text-xs pr-2">
+              <span className="hidden sm:inline">{t("fontSize")}:</span>
+              <span className="sm:hidden">AA:</span>
               <input
                 type="range"
                 min="14"
                 max="20"
                 value={fontSize}
                 onChange={(e) => debouncedSetFontSize(Number(e.target.value))}
-                className="w-24"
+                className="w-20 accent-primary"
               />
             </label>
           </div>
@@ -192,16 +195,16 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
                     isDarkMode={isDarkMode}
                   />
 
-                  {/* Lightweight HTML renderer - replaces heavy Tiptap editor */}
+                  {/* Lightweight HTML renderer */}
                   <div
                     className={`prose prose-lg max-w-none mb-6 ${isDarkMode ? "prose-invert" : ""} prose-primary
-                      prose-headings:mb-4 prose-headings:font-bold
-                      prose-p:mb-4
-                      prose-a:text-primary prose-a:underline hover:prose-a:text-primary/80
-                      prose-img:max-w-full prose-img:h-auto prose-img:rounded-lg prose-img:my-4
-                      prose-table:border-collapse prose-table:w-full prose-table:my-4
-                      prose-th:border prose-th:border-border prose-th:px-4 prose-th:py-2 prose-th:text-left prose-th:font-bold prose-th:bg-muted
-                      prose-td:border prose-td:border-border prose-td:px-4 prose-td:py-2`}
+                            prose-headings:mb-4 prose-headings:font-bold
+                            prose-p:mb-4
+                            prose-a:text-primary prose-a:underline hover:prose-a:text-primary/80
+                            prose-img:max-w-full prose-img:h-auto prose-img:rounded-lg prose-img:my-4
+                            prose-table:border-collapse prose-table:w-full prose-table:my-4
+                            prose-th:border prose-th:border-border prose-th:px-4 prose-th:py-2 prose-th:text-left prose-th:font-bold prose-th:bg-muted
+                            prose-td:border prose-td:border-border prose-td:px-4 prose-td:py-2`}
                     style={{ fontSize: `${fontSize}px` }}
                     dangerouslySetInnerHTML={{ __html: sanitizedBody }}
                   />
@@ -216,6 +219,8 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
                     handleShare={handleShare}
                     isDarkBackground={isDarkMode}
                   />
+
+                  {/* Mods Section Removed (Moved to Workshop Page) */}
 
                   {commentsError && (
                     <Alert variant="destructive">
@@ -257,11 +262,11 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
             setOpenDownloadDialog={handleDownloadClick}
             isDarkBackground={isDarkMode}
             downloads={downloads}
-            translationFiles={[]} // Temporarily pass an empty array to resolve type error
+            translationFiles={[]}
           />
         </div>
 
-        {/* Related Articles - Outside main content grid */}
+        {/* Related Articles */}
         <RelatedArticles
           articles={relatedArticles}
           currentArticleId={article.id}
@@ -277,6 +282,13 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
         isMobile={isMobile}
         isDarkMode={isDarkMode}
       />
+      {alert.open && (
+        <CustomArticleAlert
+          title={alert.severity === "success" ? t("success") : t("error")}
+          message={alert.message}
+          variant={alert.severity === "success" ? "default" : "destructive"}
+        />
+      )}
     </div>
   );
 };

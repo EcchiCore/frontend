@@ -35,6 +35,13 @@ export const NAVIGATION_ITEMS: NavigationItem[] = [
     path: '#moderation'
   },
   {
+    id: 'admin',
+    label: 'Admin',
+    icon: 'Settings', // You might want to pick a different icon if available
+    requiredRanks: ['ADMIN'],
+    path: '#admin'
+  },
+  {
     id: 'settings',
     label: 'Settings',
     icon: 'Settings',

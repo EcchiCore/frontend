@@ -8,6 +8,8 @@ import ArticleContent from './components/ArticleContent';
 import ArticleBodyServer from './components/ArticleBodyServer';
 import GTMArticleTracker from './components/GTMArticleTracker';
 import Script from 'next/script';
+import ArticleModsPage from './components/ArticleModsPage';
+import ArticleDiscussionsPage from './components/ArticleDiscussionsPage';
 import {
   generatePageMetadata,
   generateArticleStructuredData,
@@ -23,6 +25,7 @@ import { getCachedArticle, getCachedArticleWithDownloads } from '@/lib/articlePa
 
 // Import shared cache functions - no extra API calls needed
 import { getCachedRecommendationPool, getRelatedFromPool } from '@/lib/articlesCache';
+
 
 
 export async function generateMetadata(props: ArticlePageProps): Promise<Metadata> {
@@ -145,6 +148,7 @@ export default async function ArticlePage(props: ArticlePageProps) {
     slug
   );
 
+  // Client Content: Hydrates after JS loads - replaces SSR content
   return (
     <>
       <Navbar />
@@ -162,21 +166,37 @@ export default async function ArticlePage(props: ArticlePageProps) {
         authorUsername={originalArticle.author.name}
       />
 
-      {/* SSR Content: Rendered on server for SEO - Google will index this */}
-      <div className="ssr-article-content">
-        <ArticleBodyServer article={originalArticle} />
-      </div>
-
-      {/* Client Content: Hydrates after JS loads - replaces SSR content */}
-      <Suspense fallback={null}>
-        <ArticleContent
+      {/* Workshop Page Routing */}
+      {paths[1] === 'mods' ? (
+        <ArticleModsPage
           article={originalArticle}
-          slug={slug}
-          articleId={originalArticle.id}
-          downloads={downloads || []}
-          relatedArticles={relatedArticles}
+          mods={originalArticle.mods || []}
+          isAuthenticated={false} // You might want to pass real auth state here if possible, or handle it in client comp
         />
-      </Suspense>
+      ) : paths[1] === 'discussions' ? (
+        <ArticleDiscussionsPage
+          article={originalArticle}
+          isAuthenticated={false}
+        />
+      ) : (
+        <>
+          {/* SSR Content: Rendered on server for SEO - Google will index this */}
+          <div className="ssr-article-content">
+            <ArticleBodyServer article={originalArticle} />
+          </div>
+
+          {/* Client Content: Hydrates after JS loads - replaces SSR content */}
+          <Suspense fallback={null}>
+            <ArticleContent
+              article={originalArticle}
+              slug={slug}
+              articleId={originalArticle.id}
+              downloads={downloads || []}
+              relatedArticles={relatedArticles}
+            />
+          </Suspense>
+        </>
+      )}
     </>
   );
 }

@@ -30,6 +30,7 @@ const nextConfig: NextConfig = {
       // Note: cdn.chanomhub.com/cdn-cgi/** URLs use Cloudflare Image Transformation and should use unoptimized prop
       { protocol: 'https', hostname: 'cdn.chanomhub.com', pathname: '/**' },
       { protocol: 'https', hostname: 'imgproxy.chanomhub.com', pathname: '/**' },
+      { protocol: 'https', hostname: 'placehold.co', pathname: '/**' },
     ],
   },
 
