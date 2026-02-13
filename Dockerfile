@@ -45,7 +45,7 @@ RUN addgroup --system --gid 1001 bunjs && \
     adduser --system --uid 1001 nextjs
 
 # คัดลอกไฟล์ที่จำเป็น
-COPY --from=builder /app/next.config.js ./
+COPY --from=builder /app/next.config.ts ./
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/package.json ./package.json
 
