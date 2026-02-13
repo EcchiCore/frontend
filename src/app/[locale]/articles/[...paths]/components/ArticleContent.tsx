@@ -27,11 +27,7 @@ import ArticleCommunityTabs from "./ArticleCommunityTabs";
 import { useTranslations } from 'next-intl';
 import type { ArticleListItem } from '@chanomhub/sdk';
 
-// Lazy load Framer Motion for animations (optional enhancement)
-const MotionDiv = dynamic(
-  () => import('framer-motion').then(mod => mod.motion.div),
-  { ssr: false, loading: () => <div /> }
-);
+
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -183,21 +179,16 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
           />
 
           <main className="min-w-0">
-            <MotionDiv
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-            >
-              <Card>
-                <CardContent>
-                  <ArticleTitleMeta
-                    article={article}
-                    isDarkMode={isDarkMode}
-                  />
+            <Card>
+              <CardContent>
+                <ArticleTitleMeta
+                  article={article}
+                  isDarkMode={isDarkMode}
+                />
 
-                  {/* Lightweight HTML renderer */}
-                  <div
-                    className={`prose prose-lg max-w-none mb-6 ${isDarkMode ? "prose-invert" : ""} prose-primary
+                {/* Lightweight HTML renderer */}
+                <div
+                  className={`prose prose-lg max-w-none mb-6 ${isDarkMode ? "prose-invert" : ""} prose-primary
                             prose-headings:mb-4 prose-headings:font-bold
                             prose-p:mb-4
                             prose-a:text-primary prose-a:underline hover:prose-a:text-primary/80
@@ -205,51 +196,50 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
                             prose-table:border-collapse prose-table:w-full prose-table:my-4
                             prose-th:border prose-th:border-border prose-th:px-4 prose-th:py-2 prose-th:text-left prose-th:font-bold prose-th:bg-muted
                             prose-td:border prose-td:border-border prose-td:px-4 prose-td:py-2`}
-                    style={{ fontSize: `${fontSize}px` }}
-                    dangerouslySetInnerHTML={{ __html: sanitizedBody }}
-                  />
+                  style={{ fontSize: `${fontSize}px` }}
+                  dangerouslySetInnerHTML={{ __html: sanitizedBody }}
+                />
 
-                  <InteractionBar
-                    isCurrentUserAuthor={isCurrentUserAuthor}
-                    isFollowing={isFollowing}
-                    handleFollow={handleFollow}
-                    isFavorited={isFavorited}
-                    favoritesCount={favoritesCount}
-                    handleFavorite={handleFavorite}
-                    handleShare={handleShare}
-                    isDarkBackground={isDarkMode}
-                  />
+                <InteractionBar
+                  isCurrentUserAuthor={isCurrentUserAuthor}
+                  isFollowing={isFollowing}
+                  handleFollow={handleFollow}
+                  isFavorited={isFavorited}
+                  favoritesCount={favoritesCount}
+                  handleFavorite={handleFavorite}
+                  handleShare={handleShare}
+                  isDarkBackground={isDarkMode}
+                />
 
-                  {/* Mods Section Removed (Moved to Workshop Page) */}
+                {/* Mods Section Removed (Moved to Workshop Page) */}
 
-                  {commentsError && (
-                    <Alert variant="destructive">
-                      {t("commentsLoadError")}{" "}
-                      <Button
-                        onClick={() =>
-                          mutate(`${API_BASE_URL}/api/articles/${slug}/comments`)
-                        }
-                        variant="link"
-                      >
-                        {t("tryAgain")}
-                      </Button>
-                    </Alert>
-                  )}
+                {commentsError && (
+                  <Alert variant="destructive">
+                    {t("commentsLoadError")}{" "}
+                    <Button
+                      onClick={() =>
+                        mutate(`${API_BASE_URL}/api/articles/${slug}/comments`)
+                      }
+                      variant="link"
+                    >
+                      {t("tryAgain")}
+                    </Button>
+                  </Alert>
+                )}
 
-                  <CommentsSection
-                    isAuthenticated={isAuthenticated}
-                    isDarkBackground={isDarkMode}
-                    comments={comments}
-                    newComment={newComment}
-                    setNewComment={setNewComment}
-                    handleAddComment={handleAddComment}
-                    isCurrentUserAuthor={isCurrentUserAuthor}
-                    handleDeleteComment={handleDeleteComment}
-                    isLoading={isLoading && comments.length === 0}
-                  />
-                </CardContent>
-              </Card>
-            </MotionDiv>
+                <CommentsSection
+                  isAuthenticated={isAuthenticated}
+                  isDarkBackground={isDarkMode}
+                  comments={comments}
+                  newComment={newComment}
+                  setNewComment={setNewComment}
+                  handleAddComment={handleAddComment}
+                  isCurrentUserAuthor={isCurrentUserAuthor}
+                  handleDeleteComment={handleDeleteComment}
+                  isLoading={isLoading && comments.length === 0}
+                />
+              </CardContent>
+            </Card>
           </main>
 
           <ArticleInfoSidebar
