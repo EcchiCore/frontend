@@ -38,61 +38,7 @@ const ArticleModsPage: React.FC<ArticleModsPageProps> = ({
     const isAuthenticated = propIsAuthenticated || !!user;
     const [searchTerm, setSearchTerm] = useState("");
 
-    // MOCK DATA for demonstration
-    const mockMods = [
-        {
-            name: "Community Patch v1.2",
-            version: "1.2.0",
-            creditTo: "ModderX",
-            description: "Fixes various bugs and improves performance. A must-have for all players.",
-            status: "APPROVED",
-            categories: [{ name: "Patch" }, { name: "Fix" }],
-            downloadLink: "#",
-            images: [] as any[]
-        },
-        {
-            name: "HD Texture Pack",
-            version: "1.0",
-            creditTo: "ArtMaster",
-            description: "Replaces all textures with high-resolution 4k alternatives.",
-            status: "APPROVED",
-            categories: [{ name: "Graphics" }],
-            downloadLink: "#",
-            images: [{ url: "https://placehold.co/600x400/png" }]
-        },
-        {
-            name: "Cheat Menu",
-            version: "0.5",
-            creditTo: "HackerOne",
-            description: "Adds a cheat menu to the game.",
-            status: "APPROVED",
-            categories: [{ name: "Cheat" }, { name: "Utility" }],
-            downloadLink: "#",
-            images: [] as any[]
-        },
-        {
-            name: "Thai Language Pack",
-            version: "1.0",
-            creditTo: "TranslatorTH",
-            description: "แปลภาษาไทยทั้งเกม",
-            status: "APPROVED",
-            categories: [{ name: "Translation" }],
-            downloadLink: "#",
-            images: [] as any[]
-        },
-        {
-            name: "Unlimited Money",
-            version: "1.0",
-            creditTo: "RichKid",
-            description: "Start the game with unlimited currency.",
-            status: "APPROVED",
-            categories: [{ name: "Cheat" }],
-            downloadLink: "#",
-            images: [] as any[]
-        }
-    ];
-
-    const displayMods = (initialMods && initialMods.length > 0) ? initialMods : mockMods;
+    const displayMods = initialMods;
 
     const filteredMods = displayMods.filter(mod =>
         mod.name.toLowerCase().includes(searchTerm.toLowerCase()) ||

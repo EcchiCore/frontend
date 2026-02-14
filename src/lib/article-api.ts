@@ -184,6 +184,20 @@ export async function fetchArticleAndDownloads(
   }
 }
 
+import { getSdk } from '@/lib/sdk';
+
+export async function getArticleMods(articleId: number): Promise<any[]> {
+  try {
+    const sdk = await getSdk();
+    return await sdk.articles.getMods(articleId, {
+      fields: ['id', 'name', 'version', 'description', 'status', 'downloadLink', 'images', 'creditTo', 'categories']
+    });
+  } catch (error) {
+    console.error(`Failed to fetch mods for article ${articleId}:`, error);
+    return [];
+  }
+}
+
 export async function getArticleBySlug(slug: string, language?: string): Promise<Article | null> {
   // Note: This query intentionally excludes user-specific fields (favorited, following)
   // to enable caching for anonymous users. User-specific data should be fetched client-side.

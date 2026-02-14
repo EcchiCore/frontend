@@ -132,6 +132,13 @@ export default async function ArticlePage(props: ArticlePageProps) {
   // Fetch article and downloads together - no ID needed in URL
   const { article: originalArticle, downloads } = await getCachedArticleWithDownloads(slug, locale);
 
+  let mods: any[] = [];
+  if (originalArticle && paths[1] === 'mods') {
+    const { getArticleMods } = await import('@/lib/article-api');
+    const articleId = typeof originalArticle.id === 'string' ? parseInt(originalArticle.id as unknown as string, 10) : originalArticle.id;
+    mods = await getArticleMods(articleId);
+  }
+
   if (!originalArticle) {
     return notFound();
   }
@@ -170,7 +177,7 @@ export default async function ArticlePage(props: ArticlePageProps) {
       {paths[1] === 'mods' ? (
         <ArticleModsPage
           article={originalArticle}
-          mods={originalArticle.mods || []}
+          mods={mods.length > 0 ? mods : (originalArticle.mods || [])}
           isAuthenticated={false} // You might want to pass real auth state here if possible, or handle it in client comp
         />
       ) : paths[1] === 'discussions' ? (
