@@ -69,7 +69,7 @@ export async function generateMetadata(props: ArticlePageProps): Promise<Metadat
   return generatePageMetadata({
     title: seoTitle,
     description: originalArticle.description,
-    keywords: originalArticle.tags.map(tag => tag.name) || [],
+    keywords: originalArticle.tags.map((tag: { name: string }) => tag.name) || [],
     locale,
     contentPath,
     type: 'article',
@@ -137,7 +137,7 @@ export default async function ArticlePage(props: ArticlePageProps) {
   }
 
   // Fetch related articles based on tags (server-side, no extra client request)
-  const tagNames = originalArticle.tags?.map(t => t.name) || [];
+  const tagNames = originalArticle.tags?.map((t: { name: string }) => t.name) || [];
   const articlePool = await getCachedRecommendationPool();
   const relatedArticles = getRelatedFromPool(articlePool, tagNames, originalArticle.id);
 
@@ -162,7 +162,7 @@ export default async function ArticlePage(props: ArticlePageProps) {
       <GTMArticleTracker
         title={originalArticle.title}
         slug={originalArticle.slug}
-        categoryList={originalArticle.categories.map(c => c.name)}
+        categoryList={originalArticle.categories.map((c: { name: string }) => c.name)}
         authorUsername={originalArticle.author.name}
       />
 
