@@ -7,7 +7,7 @@ const sdk = createChanomhubClient();
 // Revalidates every 1 hour (3600 seconds)
 export const getCachedArticle = unstable_cache(
     async (slug: string, locale: string) => {
-        return sdk.articles.getBySlug(slug, locale);
+        return (sdk.articles as any).getBySlug(slug, { language: locale });
     },
     ['article-by-slug'],
     { revalidate: 3600 }
@@ -17,7 +17,7 @@ export const getCachedArticle = unstable_cache(
 // Revalidates every 1 hour (3600 seconds)
 export const getCachedArticleWithDownloads = unstable_cache(
     async (slug: string, locale: string) => {
-        return sdk.articles.getWithDownloads(slug, locale);
+        return (sdk.articles as any).getWithDownloads(slug, { language: locale });
     },
     ['article-with-downloads'],
     { revalidate: 3600 }

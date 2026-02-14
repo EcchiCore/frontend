@@ -19,18 +19,23 @@ import {
 import { Article } from "@/types/article";
 
 import ArticleCommunityTabs from "./ArticleCommunityTabs";
+import { AddModDialog } from "./AddModDialog";
+
+import { useAppSelector } from "@/store/hooks";
 
 interface ArticleModsPageProps {
     article: Article;
     mods: NonNullable<Article["mods"]>;
-    isAuthenticated?: boolean;
+    isAuthenticated?: boolean; // Kept for backward compatibility if needed, but we'll prefer Redux
 }
 
 const ArticleModsPage: React.FC<ArticleModsPageProps> = ({
     article,
     mods: initialMods,
-    isAuthenticated = false,
+    isAuthenticated: propIsAuthenticated = false,
 }) => {
+    const { user } = useAppSelector((state) => state.auth);
+    const isAuthenticated = propIsAuthenticated || !!user;
     const [searchTerm, setSearchTerm] = useState("");
 
     // MOCK DATA for demonstration
@@ -114,7 +119,6 @@ const ArticleModsPage: React.FC<ArticleModsPageProps> = ({
                 <ArticleCommunityTabs slug={article.slug} />
             </div>
 
-
             <div className="container mx-auto px-4 py-8">
                 {/* Steam-like Toolbar */}
                 <div className="bg-[#2a475e] p-1 flex flex-col md:flex-row gap-2 mb-6 rounded-sm">
@@ -127,10 +131,14 @@ const ArticleModsPage: React.FC<ArticleModsPageProps> = ({
                         />
                         <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#67c1f5]" />
                     </div>
-                    <div className="flex gap-1">
+                    <div className="flex gap-2">
                         <Button variant="ghost" className="h-9 text-[#67c1f5] hover:text-white hover:bg-white/10 text-xs font-bold bg-[#1b2838]">
                             <Search className="w-4 h-4 mr-2" />
                         </Button>
+                        {/* Add Mod Button */}
+                        {isAuthenticated && (
+                            <AddModDialog slug={article.slug} articleId={article.id} />
+                        )}
                     </div>
                 </div>
 

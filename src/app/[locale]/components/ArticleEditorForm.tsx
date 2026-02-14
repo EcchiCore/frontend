@@ -748,7 +748,7 @@ export const ArticleEditorForm: React.FC<ArticleEditorFormProps> = ({ slug = '',
                         // Prefer getWithDownloads as it seems to return full relational data (tags, creators, etc.)
                         // which getBySlug might miss depending on backend implementation.
                         // Pass locale to ensure strict localized data is returned
-                        const withDl = await sdk.articles.getWithDownloads(slug, locale);
+                        const withDl = await (sdk.articles as any).getWithDownloads(slug, { language: locale });
                         if (withDl.article) {
                             articleData = withDl.article;
                         }

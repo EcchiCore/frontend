@@ -5,7 +5,7 @@
     "": {
       "name": "chanomhub-2",
       "dependencies": {
-        "@chanomhub/sdk": "1.2.5",
+        "@chanomhub/sdk": "1.2.7",
         "@emotion/react": "^11.14.0",
         "@emotion/styled": "^11.14.1",
         "@google-analytics/data": "^5.2.1",
@@ -41,9 +41,9 @@
         "@reduxjs/toolkit": "^2.11.2",
         "@sanity/client": "^7.14.1",
         "@sanity/image-url": "^1.2.0",
-        "@sanity/vision": "^5.8.1",
+        "@sanity/vision": "^5.9.0",
         "@supabase/supabase-js": "^2.95.3",
-        "@tanstack/react-query": "^5.90.20",
+        "@tanstack/react-query": "^5.90.21",
         "@tiptap/extension-color": "^3.19.0",
         "@tiptap/extension-heading": "^3.19.0",
         "@tiptap/extension-highlight": "^3.19.0",
@@ -91,8 +91,9 @@
         "next-seo": "^6.8.0",
         "next-themes": "^0.4.6",
         "nookies": "^2.5.2",
+        "patch-package": "^8.0.1",
         "pixi-live2d-display": "^0.4.0",
-        "qs": "^6.14.1",
+        "qs": "^6.14.2",
         "react": "19.2.3",
         "react-content-loader": "^7.1.2",
         "react-cookie": "^8.0.1",
@@ -122,7 +123,7 @@
         "@eslint/eslintrc": "^3.3.3",
         "@marsidev/react-turnstile": "^1.4.2",
         "@next/eslint-plugin-next": "16.1.0",
-        "@opennextjs/cloudflare": "^1.16.3",
+        "@opennextjs/cloudflare": "^1.16.4",
         "@stripe/stripe-js": "^5.10.0",
         "@tailwindcss/postcss": "^4.1.18",
         "@types/babel__traverse": "^7.28.0",
@@ -145,14 +146,13 @@
         "formidable": "^3.5.4",
         "next-logger": "^5.0.2",
         "next-pwa": "^5.6.0",
-        "patch-package": "^8.0.1",
         "postcss": "^8.5.6",
         "postinstall-postinstall": "^2.1.0",
         "shadcn": "^2.10.0",
         "tailwindcss": "^4.1.18",
         "tw-animate-css": "^1.4.0",
         "typescript": "^5.9.3",
-        "wrangler": "^4.64.0",
+        "wrangler": "^4.65.0",
       },
     },
   },
@@ -521,7 +521,7 @@
 
     "@bundled-es-modules/statuses": ["@bundled-es-modules/statuses@1.0.1", "", { "dependencies": { "statuses": "^2.0.1" } }, "sha512-yn7BklA5acgcBr+7w064fGV+SGIFySjCKpqjcWgBAIfrAkY+4GQTJJHQMeT3V/sgz23VTEVV8TtOmkvJAhFVfg=="],
 
-    "@chanomhub/sdk": ["@chanomhub/sdk@1.2.5", "", { "peerDependencies": { "@supabase/supabase-js": ">=2.0.0", "next": ">=13.0.0", "react-native-app-auth": ">=7.0.0" }, "optionalPeers": ["@supabase/supabase-js", "next", "react-native-app-auth"] }, "sha512-9T9W97yNF0m8E5tcBkMegf6feKGrdGxaNxMKLMFfBZO4qDrhM8YVjYcJ+mqNozK7vx5pqYZ+2ddQywuHbGT2qg=="],
+    "@chanomhub/sdk": ["@chanomhub/sdk@1.2.7", "", { "peerDependencies": { "@supabase/supabase-js": ">=2.0.0", "next": ">=13.0.0", "react-native-app-auth": ">=7.0.0" }, "optionalPeers": ["@supabase/supabase-js", "next", "react-native-app-auth"] }, "sha512-I7i47xXEvJ3Eh0eSR+pLq3PI12u7v79diyBcsVQ6hogtRI/tdVmceV0qlXNs3IEtZtQ+UTleihDYqiWbvrKenw=="],
 
     "@cloudflare/kv-asset-handler": ["@cloudflare/kv-asset-handler@0.4.2", "", {}, "sha512-SIOD2DxrRRwQ+jgzlXCqoEFiKOFqaPjhnNTGKXSRLvp1HiOvapLaFG2kEr9dYQTYe8rKrd9uvDUzmAITeNyaHQ=="],
 
@@ -2657,7 +2657,7 @@
 
     "fs-constants": ["fs-constants@1.0.0", "", {}, "sha512-y6OAwoSIf7FyjMIv94u+b5rdheZEjzR63GTyZJm5qh4Bi+2YgwLCcI/fPFZkL5PSixOt6ZNKm+w+Hfp/Bciwow=="],
 
-    "fs-extra": ["fs-extra@10.1.0", "", { "dependencies": { "graceful-fs": "^4.2.0", "jsonfile": "^6.0.1", "universalify": "^2.0.0" } }, "sha512-oRXApq54ETRj4eMiFzGnHWGy+zo5raudjuxN0b8H7s/RU2oW0Wvsx9O0ACRN/kRq9E8Vu/ReskGB5o3ji+FzHQ=="],
+    "fs-extra": ["fs-extra@11.3.2", "", { "dependencies": { "graceful-fs": "^4.2.0", "jsonfile": "^6.0.1", "universalify": "^2.0.0" } }, "sha512-Xr9F6z6up6Ws+NjzMCZc6WXg2YFRlrLP9NQDO3VQrWrfiojdhS56TzueT88ze0uBdCTwEIhQ3ptnmKeWGFAe0A=="],
 
     "fs-minipass": ["fs-minipass@2.1.0", "", { "dependencies": { "minipass": "^3.0.0" } }, "sha512-V/JgOLFCS+R6Vcq0slCuaeWEdNC3ouDlJMNIsacH2VtALiu9mV4LPrHc5cDl8k5aw6J8jwgWWpiTo5RYhmIzvg=="],
 
@@ -5195,6 +5195,8 @@
 
     "patch-package/chalk": ["chalk@4.1.2", "", { "dependencies": { "ansi-styles": "^4.1.0", "supports-color": "^7.1.0" } }, "sha512-oKnbhFyRIXpUuez8iBMmyEa4nbj4IOQyuhc/wy9kY7/WVPcwIO9VA668Pu8RkO7+0G76SLROeyw9CpQ061i4mA=="],
 
+    "patch-package/fs-extra": ["fs-extra@10.1.0", "", { "dependencies": { "graceful-fs": "^4.2.0", "jsonfile": "^6.0.1", "universalify": "^2.0.0" } }, "sha512-oRXApq54ETRj4eMiFzGnHWGy+zo5raudjuxN0b8H7s/RU2oW0Wvsx9O0ACRN/kRq9E8Vu/ReskGB5o3ji+FzHQ=="],
+
     "patch-package/semver": ["semver@7.7.2", "", { "bin": "bin/semver.js" }, "sha512-RF0Fw+rO5AMf9MAyaRXI4AV0Ulj5lMHqVxxdSgiVbixSCXoEmmX/jk0CuJw4+3SqroYO9VoUh+HcuJivvtJemA=="],
 
     "path-match/http-errors": ["http-errors@1.4.0", "", { "dependencies": { "inherits": "2.0.1", "statuses": ">= 1.2.1 < 2" } }, "sha512-oLjPqve1tuOl5aRhv8GK5eHpqP1C9fb+Ol+XTLjKfLltE44zdDbEdjPSbU7Ch5rSNsVFqZn97SrMmZLdu1/YMw=="],
@@ -5282,8 +5284,6 @@
     "shadcn/commander": ["commander@10.0.1", "", {}, "sha512-y4Mg2tXshplEbSGzx7amzPwKKOCGuoSRP/CjEdwwk0FOGlUbq6lKuoyDZTNZkmxHdJtp54hdfY/JUrdL7Xfdug=="],
 
     "shadcn/fast-glob": ["fast-glob@3.3.3", "", { "dependencies": { "@nodelib/fs.stat": "^2.0.2", "@nodelib/fs.walk": "^1.2.3", "glob-parent": "^5.1.2", "merge2": "^1.3.0", "micromatch": "^4.0.8" } }, "sha512-7MptL8U0cqcFdzIzwOTHoilX9x5BrNqye7Z/LuC7kCMRio1EMSyqRK3BEAUD7sXRq4iT4AzTVuZdhgQ2TCvYLg=="],
-
-    "shadcn/fs-extra": ["fs-extra@11.3.2", "", { "dependencies": { "graceful-fs": "^4.2.0", "jsonfile": "^6.0.1", "universalify": "^2.0.0" } }, "sha512-Xr9F6z6up6Ws+NjzMCZc6WXg2YFRlrLP9NQDO3VQrWrfiojdhS56TzueT88ze0uBdCTwEIhQ3ptnmKeWGFAe0A=="],
 
     "slate-dom/tiny-invariant": ["tiny-invariant@1.3.1", "", {}, "sha512-AD5ih2NlSssTCwsMznbvwMZpJ1cbhkGd2uueNxzv2jDlEeZdU04JQfRnggJQ8DrcVBGjAsCKwFBbDlVNtEMlzw=="],
 
