@@ -9,15 +9,22 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { X, Upload, Image as ImageIcon, LayoutIcon, BookOpenIcon, Save, ArrowLeft, Plus, Trash2, Eye, FileText, Settings, Download, Monitor, Gamepad, FolderOpen, Loader2, Check } from 'lucide-react';
-import { toast } from 'sonner'; import Image from 'next/image';
+import { X, Image as ImageIcon, LayoutIcon, BookOpenIcon, Save, ArrowLeft, Plus, Trash2, Eye, FileText, Download, Gamepad, FolderOpen, Loader2, Check } from 'lucide-react';
+import { toast } from 'sonner';
+import Image from 'next/image';
 import { getSdk } from '@/lib/sdk';
 import { NewArticleDTO, UpdateArticleDTO } from '@chanomhub/sdk';
 import RichTextEditor from '@/components/ui/RichTextEditor';
+
+interface ArticleEditorFormProps {
+    slug?: string;
+    initialData?: any;
+    mode: 'create' | 'edit';
+    locale?: string;
+}
 
 interface ImageItem {
     id: string;
@@ -37,28 +44,8 @@ interface DownloadItem {
     syncStatus: 'synced' | 'saving' | 'error' | 'new';
 }
 
-interface ModItem {
-    name: string;
-    description: string;
-    downloadLink: string;
-    version: string;
-    status: string;
-    creditTo: string;
-}
-
-export interface ArticleEditorFormProps {
-    slug?: string;
-    initialData?: NewArticleDTO | UpdateArticleDTO;
-    mode: 'create' | 'edit';
-    locale?: string;
-}
-
-/* ---------------------- Inner Components ---------------------- */
-
-
 const PLATFORMS_SHORT = ["Win", "Android", "Mac", "Linux", "iOS"];
 
-// Common providers for autocomplete only (not full name replacement)
 const COMMON_PROVIDERS = [
     "Google Drive", "Mega", "MediaFire", "Pixeldrain", "Workupload", "Gofile", "Steam", "itch.io", "Patreon"
 ];
@@ -97,7 +84,6 @@ const EditorHeader: React.FC<{
             </div>
         </div>
         <div className="flex items-center gap-3">
-            {/* Preview functionality could be added here */}
             <Button variant="outline" size="sm">
                 <Eye className="h-4 w-4 mr-2" /> Preview
             </Button>
@@ -238,7 +224,6 @@ const ImageManager: React.FC<{
                                     fill
                                     className="object-cover"
                                 />
-                                {/* Overlay Controls */}
                                 <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center p-2 gap-1">
                                     <div className="flex gap-1">
                                         <Button
@@ -282,7 +267,6 @@ const ImageManager: React.FC<{
                                         Remove
                                     </Button>
                                 </div>
-                                {/* Badges */}
                                 <div className="absolute bottom-1 right-1 flex flex-col gap-0.5 pointer-events-none">
                                     {mainId === image.id && <Badge variant="default" className="text-[10px] px-1 py-0 h-4">Main</Badge>}
                                     {backgroundId === image.id && <Badge variant="secondary" className="text-[10px] px-1 py-0 h-4 bg-blue-100 text-blue-700">BG</Badge>}
@@ -308,36 +292,28 @@ const DownloadManager: React.FC<{
     items: DownloadItem[];
     setItems: React.Dispatch<React.SetStateAction<DownloadItem[]>>;
 }> = ({ articleId, items, setItems }) => {
-    // Use ref to access latest items inside timeouts
     const itemsRef = React.useRef(items);
     useEffect(() => {
         itemsRef.current = items;
     }, [items]);
 
-    // Add debounced save logic
     useEffect(() => {
         const timeoutIds: Record<string, NodeJS.Timeout> = {};
 
-        // Find items that need saving (status 'saving')
         items.forEach(item => {
             if (item.syncStatus === 'saving') {
-                // Clear existing timeout for this item
                 if (timeoutIds[item.tempId]) clearTimeout(timeoutIds[item.tempId]);
 
-                // Set new timeout for debounce
                 timeoutIds[item.tempId] = setTimeout(async () => {
                     if (!articleId) return;
 
-                    // Get fresh item from ref to avoid stale closure (e.g. missing ID from previous async save)
                     const currentItem = itemsRef.current.find(i => i.tempId === item.tempId);
                     if (!currentItem) return;
 
                     try {
                         const sdk = await getSdk();
 
-                        // Lazy Creation: If no ID, create it first
                         if (!currentItem.id) {
-                            // Here we assume if status is 'saving', user touched it.
                             const created = await sdk.downloads.create({
                                 articleId,
                                 name: currentItem.name,
@@ -363,7 +339,6 @@ const DownloadManager: React.FC<{
                                 toast.error("Saved but server returned no ID. Please refresh.");
                             }
                         } else {
-                            // Update existing
                             await sdk.downloads.update(currentItem.id, {
                                 name: currentItem.name,
                                 url: currentItem.url,
@@ -372,7 +347,6 @@ const DownloadManager: React.FC<{
                                 forVersion: currentItem.forVersion
                             });
 
-                            // Update status to synced
                             setItems((currentItems: DownloadItem[]) =>
                                 currentItems.map(i => i.tempId === currentItem.tempId ? { ...i, syncStatus: 'synced' as const } : i)
                             );
@@ -384,7 +358,7 @@ const DownloadManager: React.FC<{
                         );
                         toast.error('Failed to save download changes');
                     }
-                }, 1500); // 1.5s debounce
+                }, 1500);
             }
         });
 
@@ -402,12 +376,12 @@ const DownloadManager: React.FC<{
         const tempId = typeof crypto !== 'undefined' && (crypto as any).randomUUID ? (crypto as any).randomUUID() : `dl-${Date.now()}`;
         const newItem: DownloadItem = {
             tempId,
-            name: '', // Start empty
+            name: '',
             url: '',
             iframe: '',
             isActive: true,
             vipOnly: false,
-            syncStatus: 'new' // Start as new (unsaved)
+            syncStatus: 'new'
         };
 
         setItems([...items, newItem]);
@@ -415,12 +389,10 @@ const DownloadManager: React.FC<{
 
     const removeDownload = async (item: DownloadItem) => {
         if (!item.id) {
-            // If it's a local-only item (failed to create), just remove from state
             setItems(items.filter(i => i.tempId !== item.tempId));
             return;
         }
 
-        // Optimistically remove
         const previousItems = [...items];
         setItems(items.filter(i => i.tempId !== item.tempId));
 
@@ -430,7 +402,7 @@ const DownloadManager: React.FC<{
             toast.success("Download removed");
         } catch (error) {
             console.error('Failed to delete download:', error);
-            setItems(previousItems); // Revert
+            setItems(previousItems);
             toast.error("Failed to delete download");
         }
     };
@@ -441,7 +413,6 @@ const DownloadManager: React.FC<{
 
             const updates: Partial<DownloadItem> = { [field]: value, syncStatus: 'saving' };
 
-            // Auto-detect name from URL
             if (field === 'url') {
                 const isNameEmptyOrPrefixOnly = !i.name || i.name === 'New Download' || /^[\[].*?[\]]\s*$/.test(i.name);
 
@@ -450,7 +421,6 @@ const DownloadManager: React.FC<{
                         const urlObj = new URL(value);
                         const domain = urlObj.hostname.replace('www.', '');
 
-                        // Direct match or partial
                         let detectedProvider = DOMAIN_MAPPINGS[domain];
                         if (!detectedProvider) {
                             for (const key in DOMAIN_MAPPINGS) {
@@ -461,7 +431,6 @@ const DownloadManager: React.FC<{
                             }
                         }
 
-                        // Fallback: Use capitalized domain name
                         if (!detectedProvider) {
                             const parts = domain.split('.');
                             if (parts.length > 0) {
@@ -471,7 +440,6 @@ const DownloadManager: React.FC<{
                         }
 
                         if (detectedProvider) {
-                            // Check for existing platform prefix [Platform]
                             const match = i.name.match(/^\[(.*?)\]/);
                             const prefix = match ? match[0] : '';
                             updates.name = `${prefix ? prefix + ' ' : ''}${detectedProvider}`;
@@ -494,14 +462,10 @@ const DownloadManager: React.FC<{
             const prefix = `[${platform}]`;
 
             if (newName.startsWith(prefix)) {
-                // Toggle OFF if matches exact prefix.
-                // If it was just "[Win]", it becomes empty.
                 newName = newName.replace(prefix, '').trim();
             } else if (newName.match(/^\[(.*?)\]/)) {
-                // Switch prefix
                 newName = newName.replace(/^\[(.*?)\]/, prefix);
             } else {
-                // Add prefix. If name was empty, just prefix.
                 newName = `${prefix} ${newName}`.trim();
             }
 
@@ -588,87 +552,9 @@ const DownloadManager: React.FC<{
     );
 };
 
-const ModsManager: React.FC<{
-    items: ModItem[];
-    setItems: (val: ModItem[]) => void;
-}> = ({ items, setItems }) => {
-    const addMod = () => {
-        // Assuming simple structure for now
-        const newMod: ModItem = {
-            name: '',
-            description: '',
-            downloadLink: '',
-            version: '',
-            status: 'active',
-            creditTo: ''
-        };
-        setItems([...items, newMod]);
-    };
-
-    const removeMod = (index: number) => {
-        setItems(items.filter((_, i) => i !== index));
-    };
-
-    const updateMod = (index: number, field: keyof ModItem, value: any) => {
-        setItems(items.map((item, i) => i === index ? { ...item, [field]: value } : item));
-    };
-
-    return (
-        <div className="space-y-4">
-            <div className="flex justify-between items-center">
-                <h3 className="text-lg font-medium">Mods</h3>
-                <Button type="button" onClick={addMod} size="sm" variant="outline">
-                    <Plus className="h-4 w-4 mr-2" /> Add Mod
-                </Button>
-            </div>
-
-            {items.length === 0 && <p className="text-sm text-muted-foreground italic">No mods added yet.</p>}
-
-            <div className="space-y-4">
-                {items.map((item, idx) => (
-                    <Card key={idx} className="border-none shadow-sm ring-1 ring-gray-100">
-                        <CardContent className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <Label>Mod Name</Label>
-                                <Input value={item.name} onChange={(e) => updateMod(idx, 'name', e.target.value)} className="mt-1" />
-                            </div>
-                            <div>
-                                <Label>Version</Label>
-                                <Input value={item.version} onChange={(e) => updateMod(idx, 'version', e.target.value)} className="mt-1" />
-                            </div>
-                            <div>
-                                <Label>Credit To</Label>
-                                <Input value={item.creditTo} onChange={(e) => updateMod(idx, 'creditTo', e.target.value)} className="mt-1" />
-                            </div>
-                            <div>
-                                <Label>Download Link</Label>
-                                <Input value={item.downloadLink} onChange={(e) => updateMod(idx, 'downloadLink', e.target.value)} className="mt-1" />
-                            </div>
-                            <div className="md:col-span-2">
-                                <Label>Description</Label>
-                                <Textarea value={item.description} onChange={(e) => updateMod(idx, 'description', e.target.value)} rows={2} className="mt-1" />
-                            </div>
-                            <div className="flex justify-end md:col-span-2">
-                                <Button type="button" variant="destructive" size="sm" onClick={() => removeMod(idx)}>
-                                    <Trash2 className="h-4 w-4 mr-2" /> Remove
-                                </Button>
-                            </div>
-                        </CardContent>
-                    </Card>
-                ))}
-            </div>
-        </div>
-    );
-};
-
-
-/* ---------------------- Main Component ---------------------- */
-
-export const ArticleEditorForm: React.FC<ArticleEditorFormProps> = ({ slug = '', initialData, mode, locale = 'en' }) => {
+export const ArticleEditorForm = ({ slug = '', initialData, mode, locale = 'en' }: ArticleEditorFormProps) => {
     const router = useRouter();
 
-    // Use a local state that mostly matches UpdateArticleDTO/NewArticleDTO but handles form-specific needs
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [formData, setFormData] = useState<any>({
         id: (initialData as any)?.id || null,
         title: initialData?.title || '',
@@ -690,7 +576,6 @@ export const ArticleEditorForm: React.FC<ArticleEditorFormProps> = ({ slug = '',
         categories: initialData?.categories || [],
         platforms: initialData?.platforms || [],
 
-        // Internal state for selected IDs
         mainImageId: null,
         backgroundImageId: null,
         coverImageId: null
@@ -702,10 +587,7 @@ export const ArticleEditorForm: React.FC<ArticleEditorFormProps> = ({ slug = '',
     const [availableEngines, setAvailableEngines] = useState<{ id: number; name: string }[]>([]);
 
     const [imageItems, setImageItems] = useState<ImageItem[]>([]);
-
-    // New State for Downloads and Mods
     const [downloadItems, setDownloadItems] = useState<DownloadItem[]>([]);
-    const [modItems, setModItems] = useState<ModItem[]>([]);
 
     const [loading, setLoading] = useState<boolean>(true);
     const [saving, setSaving] = useState<boolean>(false);
@@ -718,56 +600,39 @@ export const ArticleEditorForm: React.FC<ArticleEditorFormProps> = ({ slug = '',
                 setLoading(true);
                 const sdk = await getSdk();
 
-                // 1. Load options via GraphQL directly
-                // Note: Based on error messages, tags/categories/platforms return [String!]!, not objects.
-                // Engines query seems unavailable on root, so we rely on fallback.
-                const query = `
-          query GetDirectOptions {
-            tags
-            categories
-            platforms
-          }
-        `;
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                const optionsData: any = await sdk.graphql(query);
+                const [tags, categories, platforms] = await Promise.all([
+                    sdk.articles.getTags(),
+                    sdk.articles.getCategories(),
+                    sdk.articles.getPlatforms()
+                ]);
 
-                if (optionsData?.tags) setAvailableTags(optionsData.tags);
-                if (optionsData?.categories) setAvailableCategories(optionsData.categories);
-                if (optionsData?.platforms) setAvailablePlatforms(optionsData.platforms);
+                if (tags) setAvailableTags(tags);
+                if (categories) setAvailableCategories(categories);
+                if (platforms) setAvailablePlatforms(platforms);
 
-                // Engines fallback since it's not queryable directly
-                // if (optionsData?.engines) setAvailableEngines(optionsData.engines.map((e: any) => ({ id: e.id, name: e.name })));
-
-                // 2. If 'edit' mode, ensure we have full data
                 if (mode === 'edit' && slug) {
                     let articleData = null;
                     let downloadsData: any[] = [];
-                    let modsData: any[] = [];
 
-                    try {
-                        // Prefer getWithDownloads as it seems to return full relational data (tags, creators, etc.)
-                        // which getBySlug might miss depending on backend implementation.
-                        // Pass locale to ensure strict localized data is returned
-                        const withDl = await (sdk.articles as any).getWithDownloads(slug, { language: locale });
-                        if (withDl.article) {
-                            articleData = withDl.article;
+                    const article = await sdk.articles.getBySlug(slug);
+
+                    if (article) {
+                        articleData = article;
+
+                        try {
+                            const downloads = await sdk.downloads.getByArticle(Number(article.id));
+                            if (Array.isArray(downloads)) {
+                                downloadsData = downloads;
+                            }
+                        } catch (e) {
+                            console.warn("Failed to load downloads", e);
+                            downloadsData = [];
                         }
-                        if (withDl.downloads) {
-                            downloadsData = withDl.downloads;
-                        }
-                    } catch (err) {
-                        console.warn("getWithDownloads failed, falling back to getBySlug", err);
-                        // Fallback
-                        const res = await sdk.articles.getBySlug(slug);
-                        if (res) articleData = res;
-                    }
 
-                    if (articleData) {
-                        const article = articleData;
-
-                        // Prepare images
                         const rawImages = article.images || [];
-                        const imageUrls = rawImages.map((img: any) => typeof img === 'string' ? img : img.url);
+                        const imageUrls = Array.isArray(rawImages)
+                            ? rawImages.map((img: any) => typeof img === 'string' ? img : img.url)
+                            : [];
 
                         const items: ImageItem[] = imageUrls.map((url: string) => ({
                             id: typeof crypto !== 'undefined' && (crypto as any).randomUUID ? (crypto as any).randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
@@ -775,7 +640,6 @@ export const ArticleEditorForm: React.FC<ArticleEditorFormProps> = ({ slug = '',
                         }));
                         setImageItems(items);
 
-                        // Extract engine name
                         let engineName = null;
                         if (article.engine && typeof article.engine === 'object') {
                             engineName = article.engine.name;
@@ -783,37 +647,28 @@ export const ArticleEditorForm: React.FC<ArticleEditorFormProps> = ({ slug = '',
                             engineName = article.engine;
                         }
 
-                        // Prepare downloads
                         const dls = downloadsData.map((d: any) => ({
                             id: d.id,
                             tempId: `dl-${d.id}`,
                             name: d.name,
                             url: d.url,
                             iframe: d.iframe || '',
-                            isActive: d.isActive,
-                            vipOnly: d.vipOnly,
+                            isActive: d.isActive ?? true,
+                            vipOnly: d.vipOnly ?? false,
                             fileSize: d.fileSize,
-                            syncStatus: 'synced' as const // Initially synced
+                            syncStatus: 'synced' as const
                         }));
                         setDownloadItems(dls);
 
-                        // Prepare mods
-                        if (article.mods) {
-                            setModItems(article.mods);
-                        }
-
                         setFormData({
                             ...article,
-                            id: Number(article.id), // Ensure ID is a number
-                            // Map NamedEntity[] to string[] for the form
+                            id: Number(article.id),
                             tags: article.tags?.map((t: any) => t.name || t) || [],
                             categories: article.categories?.map((c: any) => c.name || c) || [],
                             platforms: article.platforms?.map((p: any) => p.name || p) || [],
-                            // Map creators array to single creator string (assuming first one)
                             creator: article.creators && article.creators.length > 0 ? article.creators[0].name : '',
                             engine: engineName,
 
-                            // Resolve Special Images
                             mainImageId: article.mainImage ? items.find(i => i.url === article.mainImage)?.id : null,
                             backgroundImageId: article.backgroundImage ? items.find(i => i.url === article.backgroundImage)?.id : null,
                             coverImageId: article.coverImage ? items.find(i => i.url === article.coverImage)?.id : null
@@ -910,10 +765,6 @@ export const ArticleEditorForm: React.FC<ArticleEditorFormProps> = ({ slug = '',
                 backgroundImage: formData.backgroundImageId ? imageItems.find(i => i.id === formData.backgroundImageId)?.url : (formData.backgroundImage?.url || formData.backgroundImage),
                 coverImage: formData.coverImageId ? imageItems.find(i => i.id === formData.coverImageId)?.url : (formData.coverImage?.url || formData.coverImage),
                 otherImages: imageItems.map(i => i.url),
-
-                // Downloads are now managed separately via optimistic UI
-                // We don't send them in the article update payload anymore to prevent overwriting/re-moderation triggers
-                mods: modItems
             };
 
             if (mode === 'create') {
@@ -933,8 +784,6 @@ export const ArticleEditorForm: React.FC<ArticleEditorFormProps> = ({ slug = '',
         }
     };
 
-    /* ---------------------- Main Component Render ---------------------- */
-
     if (loading) return (
         <div className="min-h-screen flex items-center justify-center">
             <div className="flex flex-col items-center gap-4">
@@ -946,7 +795,6 @@ export const ArticleEditorForm: React.FC<ArticleEditorFormProps> = ({ slug = '',
 
     return (
         <div className="min-h-screen bg-background text-foreground pb-20">
-            {/* Header */}
             <div className="bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border sticky top-0 z-40 px-6 pt-6 pb-2 shadow-sm">
                 <EditorHeader
                     title={formData.title}
@@ -975,10 +823,8 @@ export const ArticleEditorForm: React.FC<ArticleEditorFormProps> = ({ slug = '',
 
                 <form onSubmit={handleSubmit} className="grid grid-cols-12 gap-8">
 
-                    {/* LEFT COLUMN - MAIN CONTENT (70%) */}
                     <div className="col-span-12 lg:col-span-8 flex flex-col gap-8">
 
-                        {/* 1. Main Info */}
                         <Card className="border border-border shadow-sm">
                             <CardContent className="p-8 space-y-6">
                                 <div className="space-y-2">
@@ -1023,7 +869,6 @@ export const ArticleEditorForm: React.FC<ArticleEditorFormProps> = ({ slug = '',
                             </CardContent>
                         </Card>
 
-                        {/* 2. Body Content */}
                         <Card className="border border-border shadow-sm h-full">
                             <div className="border-b border-border px-6 py-4 flex items-center gap-2 bg-muted/20">
                                 <FileText className="h-5 w-5 text-muted-foreground" />
@@ -1037,41 +882,23 @@ export const ArticleEditorForm: React.FC<ArticleEditorFormProps> = ({ slug = '',
                             </CardContent>
                         </Card>
 
-                        {/* 3. Downloads & Mods */}
-                        <div className="grid grid-cols-1 gap-8">
-                            <Card className="border border-border shadow-sm">
-                                <div className="border-b border-border px-6 py-4 flex items-center justify-between bg-muted/40">
-                                    <div className="flex items-center gap-2">
-                                        <Download className="h-5 w-5 text-blue-500" />
-                                        <h3 className="font-semibold text-foreground">Downloads</h3>
-                                    </div>
-                                    <Badge variant="outline" className="bg-background border-border">{downloadItems.length} items</Badge>
+                        <Card className="border border-border shadow-sm">
+                            <div className="border-b border-border px-6 py-4 flex items-center justify-between bg-muted/40">
+                                <div className="flex items-center gap-2">
+                                    <Download className="h-5 w-5 text-blue-500" />
+                                    <h3 className="font-semibold text-foreground">Downloads</h3>
                                 </div>
-                                <CardContent className="p-6">
-                                    <DownloadManager articleId={formData.id ? Number(formData.id) : undefined} items={downloadItems} setItems={setDownloadItems} />
-                                </CardContent>
-                            </Card>
-
-                            <Card className="border border-border shadow-sm">
-                                <div className="border-b border-border px-6 py-4 flex items-center justify-between bg-muted/40">
-                                    <div className="flex items-center gap-2">
-                                        <Settings className="h-5 w-5 text-purple-500" />
-                                        <h3 className="font-semibold text-foreground">Mods / Add-ons</h3>
-                                    </div>
-                                    <Badge variant="outline" className="bg-background border-border">{modItems.length} items</Badge>
-                                </div>
-                                <CardContent className="p-6">
-                                    <ModsManager items={modItems} setItems={setModItems} />
-                                </CardContent>
-                            </Card>
-                        </div>
+                                <Badge variant="outline" className="bg-background border-border">{downloadItems.length} items</Badge>
+                            </div>
+                            <CardContent className="p-6">
+                                <DownloadManager articleId={formData.id ? Number(formData.id) : undefined} items={downloadItems} setItems={setDownloadItems} />
+                            </CardContent>
+                        </Card>
 
                     </div>
 
-                    {/* RIGHT COLUMN - SIDEBAR (30%) */}
                     <div className="col-span-12 lg:col-span-4 flex flex-col gap-6">
 
-                        {/* A. Status & Publish */}
                         <Card className="border border-border shadow-sm">
                             <div className="border-b border-border px-4 py-3 bg-muted/40">
                                 <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Publishing</h3>
@@ -1103,7 +930,6 @@ export const ArticleEditorForm: React.FC<ArticleEditorFormProps> = ({ slug = '',
                             </CardContent>
                         </Card>
 
-                        {/* B. Game Info - Critical Metadata */}
                         <Card className="border border-border shadow-sm">
                             <div className="border-b border-border px-4 py-3 bg-muted/40 flex items-center gap-2">
                                 <Gamepad className="h-4 w-4 text-muted-foreground" />
@@ -1146,12 +972,10 @@ export const ArticleEditorForm: React.FC<ArticleEditorFormProps> = ({ slug = '',
                                             <SelectValue placeholder="Select..." />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            {/* 1. Dynamic Options from API */}
                                             {availableEngines.map((eng) => (
                                                 <SelectItem key={eng.id} value={eng.name}>{eng.name}</SelectItem>
                                             ))}
 
-                                            {/* 2. Hardcoded Common Options (if not in API list) */}
                                             {availableEngines.length === 0 && (
                                                 <>
                                                     <SelectItem value="Ren'Py">Ren&#39;Py</SelectItem>
@@ -1159,13 +983,11 @@ export const ArticleEditorForm: React.FC<ArticleEditorFormProps> = ({ slug = '',
                                                     <SelectItem value="Unity">Unity</SelectItem>
                                                     <SelectItem value="Unreal Engine">Unreal Engine</SelectItem>
                                                     <SelectItem value="Godot">Godot</SelectItem>
-                                                    {/* Legacy uppercase codes fallback */}
                                                     <SelectItem value="RENPY">Ren&#39;Py (Legacy)</SelectItem>
                                                     <SelectItem value="RPGM">RPG Maker (Legacy)</SelectItem>
                                                 </>
                                             )}
 
-                                            {/* 3. Ensure current value is shown even if missing from list */}
                                             {formData.engine &&
                                                 !availableEngines.some(e => e.name === formData.engine) &&
                                                 !['Ren\'Py', 'RPG Maker', 'Unity', 'Unreal Engine', 'Godot', 'RENPY', 'RPGM'].includes(formData.engine) && (
@@ -1177,7 +999,6 @@ export const ArticleEditorForm: React.FC<ArticleEditorFormProps> = ({ slug = '',
                             </CardContent>
                         </Card>
 
-                        {/* C. Media Manager */}
                         <Card className="border border-border shadow-sm">
                             <div className="border-b border-border px-4 py-3 bg-muted/40 flex items-center gap-2">
                                 <ImageIcon className="h-4 w-4 text-muted-foreground" />
@@ -1195,7 +1016,6 @@ export const ArticleEditorForm: React.FC<ArticleEditorFormProps> = ({ slug = '',
                             </CardContent>
                         </Card>
 
-                        {/* D. Classification - Tags & Cats */}
                         <Card className="border border-border shadow-sm">
                             <div className="border-b border-border px-4 py-3 bg-muted/40 flex items-center gap-2">
                                 <FolderOpen className="h-4 w-4 text-muted-foreground" />

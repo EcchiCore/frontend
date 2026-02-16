@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Image from '@tiptap/extension-image';
-import Link from '@tiptap/extension-link';
+// Link is included in StarterKit
 import { Table } from '@tiptap/extension-table';
 import { TableRow } from '@tiptap/extension-table-row';
 import { TableCell } from '@tiptap/extension-table-cell';
@@ -29,15 +29,15 @@ const RichTextEditor = ({ content, onUpdate }: { content: string, onUpdate: (htm
         heading: {
           levels: [2, 3],
         },
+        link: {
+          openOnClick: false,
+          HTMLAttributes: {
+            class: 'text-primary underline cursor-pointer',
+          },
+        },
       }),
       Image.configure({
         inline: true,
-      }),
-      Link.configure({
-        openOnClick: false,
-        HTMLAttributes: {
-          class: 'text-primary underline cursor-pointer',
-        },
       }),
       Table.configure({
         resizable: true,
