@@ -35,43 +35,30 @@ ENV NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY=${NEXT_PUBLIC_CLOUDFLARE_TURNSTILE
 # Build application
 RUN bun run build
 
-# Stage 3: Production stage
-FROM oven/bun:1-alpine AS runner
+# Stage 3: Production stage (standalone - ลดขนาด image จาก ~1GB → ~200MB)
+FROM node:22-alpine AS runner
 
 WORKDIR /app
 
+ENV NODE_ENV=production
+ENV PORT=3000
+ENV HOSTNAME=0.0.0.0
+
 # สร้างผู้ใช้ที่ไม่ใช่ root
-RUN addgroup --system --gid 1001 bunjs && \
+RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nextjs
 
-# คัดลอกไฟล์ที่จำเป็น
-COPY --from=builder /app/next.config.ts ./
+# คัดลอก public assets
 COPY --from=builder /app/public ./public
-COPY --from=builder /app/package.json ./package.json
 
-# Copy cache handler for production runtime
-COPY --from=builder /app/src/lib/cache/dragonfly-handler.ts ./src/lib/cache/dragonfly-handler.ts
-
-# คัดลอก .next folder
-COPY --from=builder --chown=nextjs:bunjs /app/.next ./.next
-
-# ติดตั้ง production dependencies เท่านั้น
-COPY package.json bun.lockb* ./
-RUN bun install --frozen-lockfile --production
-
-# คัดลอก environment file (ถ้ามี)
-COPY --from=builder /app/.env* ./
-
-# ตั้งค่าการเป็นเจ้าของไฟล์
-RUN chown -R nextjs:bunjs /app
+# คัดลอก standalone server (includes minimal node_modules)
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+# คัดลอก static files (ไม่รวมใน standalone โดย default)
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
 USER nextjs
 
 EXPOSE 3000
 
-ENV PORT=3000
-ENV HOSTNAME=0.0.0.0
-ENV NODE_ENV=production
-
-# เรียกใช้ Next.js ผ่าน bun
-CMD ["bun", "run", "start"]
+# standalone output uses server.js directly
+CMD ["node", "server.js"]

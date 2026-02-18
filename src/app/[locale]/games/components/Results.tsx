@@ -4,40 +4,50 @@ import GameCard from "./GameCard"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { ChevronLeft, ChevronRight } from "lucide-react"
+import { unstable_cache } from "next/cache"
+
+// Cached game results fetcher — shared across all concurrent users
+const getCachedGameResults = unstable_cache(
+  async (limit: number, offset: number, filter: Record<string, string | boolean | undefined>) => {
+    const sdk = createChanomhubClient();
+    return sdk.articles.getAllPaginated({
+      limit,
+      offset,
+      status: 'PUBLISHED',
+      filter,
+      fields: [
+        'id', 'title', 'slug', 'description', 'ver',
+        'mainImage', 'coverImage', 'backgroundImage',
+        'author', 'tags', 'platforms', 'categories',
+        'favoritesCount', 'createdAt', 'updatedAt'
+      ]
+    });
+  },
+  ['game-results'],
+  { revalidate: 60 } // 1 minute
+);
 
 export default async function Results({
   searchParams,
 }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const params = await searchParams;
-  const sdk = createChanomhubClient();
 
   // Default limit: smaller for better mobile performance
   const limit = Number(params.pageSize ?? 30);
   const offset = (Number(params.page ?? 1) - 1) * limit;
 
-  // Use getAllPaginated with unified filter (supports q, engine, sequentialCode in SDK v1.1.1+)
-  const result = await sdk.articles.getAllPaginated({
-    limit,
-    offset,
-    status: 'PUBLISHED',
-    filter: {
-      q: params.q ? String(params.q) : undefined,
-      tag: params.tag ? String(params.tag) : undefined,
-      platform: params.platform ? String(params.platform) : undefined,
-      category: params.category ? String(params.category) : undefined,
-      author: params.author ? String(params.author) : undefined,
-      engine: params.engine ? String(params.engine) : undefined,
-      sequentialCode: params.sequentialCode ? String(params.sequentialCode) : undefined,
-      favorited: params.favorited === 'true' ? true : undefined,
-    },
-    // Only fetch fields that are actually used by GameCard to reduce payload
-    fields: [
-      'id', 'title', 'slug', 'description', 'ver',
-      'mainImage', 'coverImage', 'backgroundImage',
-      'author', 'tags', 'platforms', 'categories',
-      'favoritesCount', 'createdAt', 'updatedAt'
-    ]
-  });
+  const filter = {
+    q: params.q ? String(params.q) : undefined,
+    tag: params.tag ? String(params.tag) : undefined,
+    platform: params.platform ? String(params.platform) : undefined,
+    category: params.category ? String(params.category) : undefined,
+    author: params.author ? String(params.author) : undefined,
+    engine: params.engine ? String(params.engine) : undefined,
+    sequentialCode: params.sequentialCode ? String(params.sequentialCode) : undefined,
+    favorited: params.favorited === 'true' ? true : undefined,
+  };
+
+  const result = await getCachedGameResults(limit, offset, filter);
 
   const { items, total, page, pageSize } = result;
   const pages = Math.max(1, Math.ceil(total / pageSize))

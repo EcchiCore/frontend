@@ -1,4 +1,4 @@
-"use client";
+// Server Component — no client interactivity needed
 import { Sparkles, Heart, Star, Zap } from 'lucide-react';
 
 export default function Footer() {
@@ -185,22 +185,17 @@ export default function Footer() {
             {/* Animated gradient line at bottom */}
             <div className="absolute bottom-0 left-0 w-full h-[2px] bg-gradient-to-r from-primary via-accent to-primary animate-gradient bg-[length:200%_auto] opacity-30"></div>
 
-            <style jsx>{`
+            <style dangerouslySetInnerHTML={{
+                __html: `
                 @keyframes gradient {
-                    0% {
-                        background-position: 0% 50%;
-                    }
-                    50% {
-                        background-position: 100% 50%;
-                    }
-                    100% {
-                        background-position: 0% 50%;
-                    }
+                    0% { background-position: 0% 50%; }
+                    50% { background-position: 100% 50%; }
+                    100% { background-position: 0% 50%; }
                 }
                 .animate-gradient {
                     animation: gradient 8s linear infinite;
                 }
-            `}</style>
+            `}} />
         </footer>
     );
 }

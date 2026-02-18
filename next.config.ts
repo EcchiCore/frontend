@@ -11,6 +11,7 @@ const withMDXEnhanced = withMDX({
 
 // Next.js configuration
 const nextConfig: NextConfig = {
+  output: 'standalone',
   images: {
     qualities: [25, 50, 75],
     formats: ['image/avif', 'image/webp'],
@@ -60,6 +61,25 @@ const nextConfig: NextConfig = {
   pageExtensions: ['js', 'jsx', 'ts', 'tsx', 'md', 'mdx'],
   async headers() {
     return [
+      // Cache headers for high-traffic pages (CDN + browser caching)
+      {
+        source: '/:locale/home',
+        headers: [
+          { key: 'Cache-Control', value: 'public, s-maxage=60, stale-while-revalidate=300' },
+        ],
+      },
+      {
+        source: '/:locale/games',
+        headers: [
+          { key: 'Cache-Control', value: 'public, s-maxage=60, stale-while-revalidate=300' },
+        ],
+      },
+      {
+        source: '/:locale/articles/:path*',
+        headers: [
+          { key: 'Cache-Control', value: 'public, s-maxage=3600, stale-while-revalidate=600' },
+        ],
+      },
       {
         source: '/:path*',
         headers: [

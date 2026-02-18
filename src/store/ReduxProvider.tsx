@@ -16,8 +16,11 @@ function AuthInitializer({ children }: { children: React.ReactNode }) {
             initialized.current = true;
             // Load from local storage first for optimistic UI (optional, but good for UX)
             dispatch(initializeAuth());
-            // Then fetch fresh data from server
-            dispatch(fetchUser());
+            // Only fetch from server if user has a token (skip for anonymous users)
+            const hasToken = document.cookie.split(';').some(c => c.trim().startsWith('token='));
+            if (hasToken) {
+                dispatch(fetchUser());
+            }
         }
     }, [dispatch]);
 
