@@ -157,7 +157,7 @@ export default function RelatedArticles({
                     }}
                 >
                     {/* Duplicate items for infinite loop effect */}
-                    {[...filteredArticles, ...filteredArticles].map((article, index) => {
+                    {filteredArticles.map((article, index) => {
                         const imageSrc =
                             article.coverImage ||
                             article.mainImage ||
@@ -179,7 +179,7 @@ export default function RelatedArticles({
                                                 width={260}
                                                 height={146}
                                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                                                unoptimized
+                                                sizes="260px"
                                             />
                                         ) : (
                                             <div className="w-full h-full bg-gradient-to-br from-primary/5 to-muted/50 flex items-center justify-center">

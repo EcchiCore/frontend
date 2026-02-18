@@ -1,41 +1,19 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import Image from "next/image"
 import { Badge } from "@/components/ui/badge"
 import type { Article } from "@/types/article"
-import { getImageUrl, getImageFallbackUrl } from "@/lib/imageUrl"
+import { getImageUrl } from "@/lib/imageUrl"
 
 export default function GameCardImage({ article }: { article: Article }) {
-    const [currentImageIndex, setCurrentImageIndex] = useState(0)
-    const [isHovered, setIsHovered] = useState(false)
-    const [failedImages, setFailedImages] = useState<Set<string>>(new Set())
+    const [hasError, setHasError] = useState(false)
 
-    // Get primary image and apply imgproxy optimization
+    // Get primary image only — no gallery cycling to save memory
     const primaryImage = getImageUrl(
         article.coverImage || article.mainImage || article.backgroundImage || null,
         'card'
     )
-
-    // Collect all valid images: Primary + Gallery (with imgproxy optimization)
-    const images = [
-        primaryImage,
-        ...(article.images || []).map((img) => getImageUrl(img.url, 'gallery')),
-    ].filter((img): img is string => !!img && !failedImages.has(img))
-
-    // Cycler effect
-    useEffect(() => {
-        if (!isHovered || images.length <= 1) {
-            setCurrentImageIndex(0)
-            return
-        }
-
-        const interval = setInterval(() => {
-            setCurrentImageIndex((prev) => (prev + 1) % images.length)
-        }, 1500)
-
-        return () => clearInterval(interval)
-    }, [isHovered, images.length])
 
     const getPlatformColor = (platform: string) => {
         const colors: Record<string, string> = {
@@ -51,33 +29,19 @@ export default function GameCardImage({ article }: { article: Article }) {
         return colors[platform] || "bg-gray-600"
     }
 
-    const currentImageSrc = images[currentImageIndex] || null
-
     return (
         <div
             className="relative aspect-[16/10] overflow-hidden bg-gradient-to-br from-muted/50 to-background/50"
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
         >
-            {currentImageSrc ? (
+            {primaryImage && !hasError ? (
                 <Image
-                    key={currentImageSrc}
-                    src={currentImageSrc}
+                    src={primaryImage}
                     alt={article.title || "Game image"}
                     width={600}
                     height={375}
-                    className={`w-full h-full object-cover transition-all duration-700 ease-in-out ${isHovered ? "scale-110" : "scale-100"
-                        } ${isHovered && currentImageIndex > 0 ? "opacity-90" : "opacity-100"
-                        }`}
-                    unoptimized
-                    onError={() => {
-                        // On imgproxy failure, try fallback to original URL
-                        const fallbackUrl = getImageFallbackUrl(currentImageSrc)
-                        if (fallbackUrl && fallbackUrl !== currentImageSrc) {
-                            // Add to failed images and let React re-render
-                            setFailedImages((prev) => new Set([...prev, currentImageSrc]))
-                        }
-                    }}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                    onError={() => setHasError(true)}
                 />
             ) : (
                 <div className="w-full h-full bg-gradient-to-br from-primary/5 via-muted/50 to-background/80 flex items-center justify-center">
@@ -105,7 +69,6 @@ export default function GameCardImage({ article }: { article: Article }) {
             </div>
 
             <div className="absolute top-2 right-2">
-                {/* Mobile: ไม่มี blur, Desktop: มี blur */}
                 <Badge className="bg-black/70 text-white text-xs px-2 py-0.5 font-medium border-0 md:backdrop-blur-sm">
                     {article.ver}
                 </Badge>
@@ -131,19 +94,6 @@ export default function GameCardImage({ article }: { article: Article }) {
                             +{(article.categories ?? []).length - 2}
                         </Badge>
                     )}
-                </div>
-            )}
-
-            {/* Image Indicator Dots */}
-            {isHovered && images.length > 1 && (
-                <div className="absolute bottom-2 right-2 flex gap-1 justify-end">
-                    {images.slice(0, 5).map((_, idx) => (
-                        <div
-                            key={idx}
-                            className={`h-1.5 rounded-full transition-all duration-300 ${idx === currentImageIndex ? "w-4 bg-primary" : "w-1.5 bg-white/50"
-                                }`}
-                        />
-                    ))}
                 </div>
             )}
         </div>

@@ -36,7 +36,7 @@ const getCachedHomeData = unstable_cache(
 
       const [carouselData, featuredData, latestData] = await Promise.all([
         sdk.articles.getAll({ limit: 3, status: 'PUBLISHED' }),
-        sdk.articles.getByPlatform('windows', { limit: 25 }),
+        sdk.articles.getByPlatform('windows', { limit: 12 }),
         sdk.articles.getAll({ limit: 10, status: 'PUBLISHED' }),
       ]);
 

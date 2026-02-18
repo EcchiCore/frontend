@@ -3,7 +3,7 @@ import React, { useEffect } from "react";
 import dynamic from "next/dynamic";
 import { mutate } from "swr";
 import { useAppSelector } from "@/store/hooks";
-import DOMPurify from "dompurify";
+// DOMPurify is lazy-loaded below to reduce initial bundle size (~60KB)
 
 import CustomArticleAlert from "./Alert";
 import { Alert } from "@/components/ui/alert";
@@ -86,24 +86,27 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
   const handleDownloadClick = () => {
     setOpenDownloadDialog(true);
   };
-  // Sanitize HTML content for security (DOMPurify is already a project dependency)
-  const sanitizedBody = typeof window !== 'undefined'
-    ? DOMPurify.sanitize(article.body, {
-      ALLOWED_TAGS: [
-        'p', 'br', 'strong', 'b', 'em', 'i', 'u', 'strike', 's', 'del',
-        'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
-        'ul', 'ol', 'li', 'blockquote', 'pre', 'code',
-        'a', 'img', 'figure', 'figcaption',
-        'table', 'thead', 'tbody', 'tr', 'th', 'td',
-        'div', 'span', 'hr'
-      ],
-      ALLOWED_ATTR: [
-        'href', 'src', 'alt', 'title', 'target', 'rel', 'class', 'style',
-        'width', 'height', 'colspan', 'rowspan'
-      ],
-      ALLOW_DATA_ATTR: false,
-    })
-    : article.body; // SSR: render as-is, client will sanitize on hydration
+  // Lazy-load DOMPurify to reduce initial bundle size
+  const [sanitizedBody, setSanitizedBody] = React.useState(article.body);
+  useEffect(() => {
+    import('dompurify').then(({ default: DOMPurify }) => {
+      setSanitizedBody(DOMPurify.sanitize(article.body, {
+        ALLOWED_TAGS: [
+          'p', 'br', 'strong', 'b', 'em', 'i', 'u', 'strike', 's', 'del',
+          'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+          'ul', 'ol', 'li', 'blockquote', 'pre', 'code',
+          'a', 'img', 'figure', 'figcaption',
+          'table', 'thead', 'tbody', 'tr', 'th', 'td',
+          'div', 'span', 'hr'
+        ],
+        ALLOWED_ATTR: [
+          'href', 'src', 'alt', 'title', 'target', 'rel', 'class', 'style',
+          'width', 'height', 'colspan', 'rowspan'
+        ],
+        ALLOW_DATA_ATTR: false,
+      }));
+    });
+  }, [article.body]);
   const wordCount = article.body.split(/\s+/).length;
   const readingTime = Math.ceil(wordCount / 200);
 

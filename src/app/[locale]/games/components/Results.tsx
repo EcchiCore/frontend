@@ -35,7 +35,7 @@ export default async function Results({
       'id', 'title', 'slug', 'description', 'ver',
       'mainImage', 'coverImage', 'backgroundImage',
       'author', 'tags', 'platforms', 'categories',
-      'favoritesCount', 'createdAt', 'updatedAt', 'images'
+      'favoritesCount', 'createdAt', 'updatedAt'
     ]
   });
 
