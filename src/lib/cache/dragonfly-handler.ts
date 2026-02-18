@@ -8,7 +8,11 @@ const globalForRedis = global as unknown as { redis: Redis };
 
 const redis =
     globalForRedis.redis ||
-    new Redis(process.env.DRAGONFLY_URL || 'redis://localhost:6379');
+    new Redis(process.env.DRAGONFLY_URL || 'redis://localhost:6379', {
+        maxRetriesPerRequest: 0, // Fail fast instead of queuing and retrying 20 times
+        connectTimeout: 1000,    // 1 second connection timeout
+        enableOfflineQueue: false // Don't queue commands when connection is down
+    });
 
 // Prevent unhandled error events from crashing the process
 redis.on('error', (err) => {
@@ -24,16 +28,13 @@ export default class DragonflyCacheHandler implements CacheHandler {
     private prefix = 'next-cache:';
 
     async get(key: string, softTags: string[]): Promise<any> {
+        if (redis.status !== 'ready') return undefined;
         try {
             const data = await redis.get(this.prefix + key);
             if (!data) return undefined;
 
             // Data is stored as JSON string
             const entry = JSON.parse(data);
-
-            // Check for expiration? Next.js says "The implementation check logic is up to the handler"
-            // But typically we return the entry and let Next.js decide or we verify here.
-            // The interface says return undefined if not found or if soft tags are stale.
 
             // Convert buffer back to ReadableStream
             const buffer = Buffer.from(entry.value, 'base64');
@@ -49,12 +50,17 @@ export default class DragonflyCacheHandler implements CacheHandler {
                 value: stream,
             };
         } catch (error) {
+            // Silently fail if redis is offline to avoid log spam during build
+            if ((error as Error).message.includes('enableOfflineQueue')) {
+                return undefined;
+            }
             console.error('Cache get error:', error);
             return undefined;
         }
     }
 
     async set(key: string, pendingEntry: Promise<any>): Promise<void> {
+        if (redis.status !== 'ready') return;
         try {
             const data = await pendingEntry;
 
@@ -101,6 +107,9 @@ export default class DragonflyCacheHandler implements CacheHandler {
 
             await pipeline.exec();
         } catch (error) {
+            if ((error as Error).message.includes('enableOfflineQueue')) {
+                return;
+            }
             console.error('Cache set error:', error);
         }
     }
@@ -121,6 +130,7 @@ export default class DragonflyCacheHandler implements CacheHandler {
     }
 
     async updateTags(tags: string[], durations?: { expire?: number }): Promise<void> {
+        if (redis.status !== 'ready') return;
         try {
             for (const tag of tags) {
                 const keys = await redis.smembers(`tags:${tag}`);
@@ -130,6 +140,9 @@ export default class DragonflyCacheHandler implements CacheHandler {
                 }
             }
         } catch (error) {
+            if ((error as Error).message.includes('enableOfflineQueue')) {
+                return;
+            }
             console.error('Cache updateTags error:', error);
         }
     }
