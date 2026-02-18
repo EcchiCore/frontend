@@ -36,7 +36,7 @@ ENV NEXT_PUBLIC_CLOUDFLARE_TURNSTILE_SITE_KEY=${NEXT_PUBLIC_CLOUDFLARE_TURNSTILE
 RUN bun run build
 
 # Stage 3: Production stage (standalone - ลดขนาด image จาก ~1GB → ~200MB)
-FROM node:22-alpine AS runner
+FROM oven/bun:1-alpine AS runner
 
 WORKDIR /app
 
