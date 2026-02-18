@@ -40,7 +40,7 @@ export default function GameCardImage({ article }: { article: Article }) {
                     width={600}
                     height={375}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                    unoptimized
                     onError={() => setHasError(true)}
                 />
             ) : (

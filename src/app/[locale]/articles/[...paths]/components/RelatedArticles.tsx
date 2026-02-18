@@ -179,7 +179,7 @@ export default function RelatedArticles({
                                                 width={260}
                                                 height={146}
                                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                                                sizes="260px"
+                                                unoptimized
                                             />
                                         ) : (
                                             <div className="w-full h-full bg-gradient-to-br from-primary/5 to-muted/50 flex items-center justify-center">
