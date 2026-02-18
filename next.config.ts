@@ -39,6 +39,8 @@ const nextConfig: NextConfig = {
   // Package.json says next: 16.1.0. 
   // Let's stick to the doc suggestion: cacheComponents: true at root.
   cacheComponents: true,
+  // Use custom cache handler if DRAGONFLY_URL is set
+  cacheHandler: process.env.DRAGONFLY_URL ? require.resolve('./src/lib/cache/dragonfly-handler.ts') : undefined,
   compiler: { removeConsole: process.env.NODE_ENV === 'production' },
   poweredByHeader: false,
   reactStrictMode: true,

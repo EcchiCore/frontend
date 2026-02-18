@@ -24,6 +24,18 @@ services:
         limits:
           memory: 1G
  
+  dragonfly:
+    image: 'docker.dragonflydb.io/dragonflydb/dragonfly'
+    ulimits:
+      memlock: -1
+    ports:
+      - '6379:6379'
+    container_name: dragonfly
+    restart: unless-stopped
+    networks:
+      - frontend
+    volumes:
+      - dragonfly_data:/data 
   proxy:
     image: 'jc21/nginx-proxy-manager:latest'
     restart: unless-stopped
@@ -49,6 +61,8 @@ volumes:
     driver: local
   npm_letsencrypt:
     driver: local
+  dragonfly_data:
+    driver: local
 
 networks:
   frontend:
@@ -60,4 +74,4 @@ networks:
     internal: true
   backend:
     name: chanom_backend
-    external: true  # สำคัญ! เพื่อใช้ network ที่สร้างจาก backend compose
+    external: true 
