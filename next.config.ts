@@ -39,8 +39,16 @@ const nextConfig: NextConfig = {
   // Package.json says next: 16.1.0. 
   // Let's stick to the doc suggestion: cacheComponents: true at root.
   cacheComponents: true,
-  // Use custom cache handler if DRAGONFLY_URL is set
-  cacheHandler: process.env.DRAGONFLY_URL ? require.resolve('./src/lib/cache/dragonfly-handler.ts') : undefined,
+  // Use custom cache handler if DRAGONFLY_URL is set and the file exists
+  cacheHandler: (() => {
+    if (!process.env.DRAGONFLY_URL) return undefined;
+    try {
+      return require.resolve('./src/lib/cache/dragonfly-handler.ts');
+    } catch (e) {
+      console.warn('Dragonfly cache handler not found, falling back to default cache.');
+      return undefined;
+    }
+  })(),
   staticPageGenerationTimeout: 300, // Increase timeout to 5 minutes to handle slow APIs
   experimental: {
     cpus: 1, // Limit CPUs to reduce concurrent requests to the API during build

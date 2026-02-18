@@ -49,6 +49,9 @@ COPY --from=builder /app/next.config.ts ./
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/package.json ./package.json
 
+# Copy cache handler for production runtime
+COPY --from=builder /app/src/lib/cache/dragonfly-handler.ts ./src/lib/cache/dragonfly-handler.ts
+
 # คัดลอก .next folder
 COPY --from=builder --chown=nextjs:bunjs /app/.next ./.next
 
