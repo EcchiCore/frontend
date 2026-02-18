@@ -41,6 +41,10 @@ const nextConfig: NextConfig = {
   cacheComponents: true,
   // Use custom cache handler if DRAGONFLY_URL is set
   cacheHandler: process.env.DRAGONFLY_URL ? require.resolve('./src/lib/cache/dragonfly-handler.ts') : undefined,
+  staticPageGenerationTimeout: 300, // Increase timeout to 5 minutes to handle slow APIs
+  experimental: {
+    cpus: 1, // Limit CPUs to reduce concurrent requests to the API during build
+  },
   compiler: { removeConsole: process.env.NODE_ENV === 'production' },
   poweredByHeader: false,
   reactStrictMode: true,
