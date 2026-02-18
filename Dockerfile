@@ -61,4 +61,4 @@ USER nextjs
 EXPOSE 3000
 
 # standalone output uses server.js directly
-CMD ["node", "server.js"]
+CMD ["bun", "server.js"]
