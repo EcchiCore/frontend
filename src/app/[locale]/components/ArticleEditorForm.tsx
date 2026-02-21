@@ -614,20 +614,33 @@ export const ArticleEditorForm = ({ slug = '', initialData, mode, locale = 'en' 
                     let articleData = null;
                     let downloadsData: any[] = [];
 
-                    const article = await sdk.articles.getBySlug(slug);
+                    // Fetch complete article + downloads in one GraphQL request bypassing SDK preset bugs
+                    const query = `
+                      query GetCompleteArticleForEditor($slug: String!) {
+                        public {
+                          article(slug: $slug) {
+                            id title slug description body ver mainImage coverImage backgroundImage
+                            createdAt updatedAt status sequentialCode favoritesCount favorited
+                            engine { id name }
+                            author { id name image }
+                            creators { id name }
+                            tags { id name }
+                            platforms { id name }
+                            categories { id name }
+                            images { id url }
+                            downloads { id name url isActive vipOnly }
+                          }
+                        }
+                      }
+                    `;
+                    const res = await sdk.graphql<{ public: { article: any } }>(query, { slug }, { operationName: 'GetCompleteArticleForEditor' });
+                    const article = res.data?.public?.article || null;
 
                     if (article) {
                         articleData = article;
 
-                        try {
-                            const downloads = await sdk.downloads.getByArticle(Number(article.id));
-                            if (Array.isArray(downloads)) {
-                                downloadsData = downloads;
-                            }
-                        } catch (e) {
-                            console.warn("Failed to load downloads", e);
-                            downloadsData = [];
-                        }
+                        // Extract downloads directly from the complete article payload
+                        downloadsData = article.downloads || [];
 
                         const rawImages = article.images || [];
                         const imageUrls = Array.isArray(rawImages)
