@@ -77,15 +77,15 @@ const HamburgerIcon = ({
   >
     <path
       d="M4 12L20 12"
-      className="origin-center -translate-y-[7px] transition-all duration-300 ease-[cubic-bezier(.5,.85,.25,1.75)]"
+      className="origin-center -translate-y-[7px] transition-all duration-200 ease-in-out"
     />
     <path
       d="M4 12L20 12"
-      className="origin-center transition-all duration-300 ease-[cubic-bezier(.5,.85,.25,1.75)]"
+      className="origin-center transition-all duration-200 ease-in-out"
     />
     <path
       d="M4 12L20 12"
-      className="origin-center translate-y-[7px] transition-all duration-300 ease-[cubic-bezier(.5,.85,.25,1.75)]"
+      className="origin-center translate-y-[7px] transition-all duration-200 ease-in-out"
     />
   </svg>
 );
