@@ -1,6 +1,6 @@
 // NavbarLinks.tsx
 "use client";
-import { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import Link from "next/link";
 import { ChevronDown, User } from "lucide-react";
 import Cookies from "js-cookie";
@@ -24,9 +24,7 @@ interface NavbarLinksProps {
   isMobile?: boolean;
 }
 
-export default function NavbarLinks({ section, onCloseMenu = () => {}, isMobile = false }: NavbarLinksProps) {
-  const [leftNavLinks, setLeftNavLinks] = useState<NavLink[]>([]);
-  const [rightNavLinks, setRightNavLinks] = useState<NavLink[]>([]);
+const NavbarLinks = ({ section, onCloseMenu = () => { }, isMobile = false }: NavbarLinksProps) => {
   const [isClient, setIsClient] = useState(false);
   const params = useParams();
   const pathname = usePathname();
@@ -70,34 +68,34 @@ export default function NavbarLinks({ section, onCloseMenu = () => {}, isMobile 
     onCloseMenu();
   }, [pathname, locale, getLocalizedHref, router, onCloseMenu]);
 
-  useEffect(() => {
-    if (!isClient) return;
+  // Use useMemo for links instead of useEffect + state to avoid double render on mount
+  const { leftNavLinks, rightNavLinks } = useMemo(() => {
+    if (!isClient) return { leftNavLinks: [], rightNavLinks: [] };
 
     const token = Cookies.get("token");
 
-    // Left navigation links (Search, Extensions)
     const leftLinks: NavLink[] = [
-      { 
-        id: "games", 
+      {
+        id: "games",
         name: "Games",
-        transKey: "games", 
-        link: getLocalizedHref("games") 
+        transKey: "games",
+        link: getLocalizedHref("games")
       },
-      { 
-        id: "search", 
-        name: t("search"), 
-        transKey: "search", 
-        link: getLocalizedHref("search") 
+      {
+        id: "search",
+        name: t("search"),
+        transKey: "search",
+        link: getLocalizedHref("search")
       },
       {
         id: "extensions",
         name: t("extensions"),
         transKey: "extensions",
         subLinks: [
-          { 
-            id: "extensions-app", 
-            name: t("loadApp"), 
-            transKey: "loadApp", 
+          {
+            id: "extensions-app",
+            name: t("loadApp"),
+            transKey: "loadApp",
             link: getLocalizedHref("tools")
           },
           {
@@ -110,24 +108,23 @@ export default function NavbarLinks({ section, onCloseMenu = () => {}, isMobile 
       },
     ];
 
-    // Right navigation links (Language, Member if authenticated)
     const rightLinks: NavLink[] = [
       {
         id: "language",
         name: t("language"),
         transKey: "language",
         subLinks: [
-          { 
-            id: "lang-en", 
-            name: t("english"), 
-            transKey: "english", 
-            link: "#" 
+          {
+            id: "lang-en",
+            name: t("english"),
+            transKey: "english",
+            link: "#"
           },
-          { 
-            id: "lang-th", 
-            name: t("thai"), 
-            transKey: "thai", 
-            link: "#" 
+          {
+            id: "lang-th",
+            name: t("thai"),
+            transKey: "thai",
+            link: "#"
           },
         ],
       },
@@ -139,43 +136,42 @@ export default function NavbarLinks({ section, onCloseMenu = () => {}, isMobile 
         name: t("member"),
         transKey: "member",
         subLinks: [
-          { 
-            id: "member-dashboard", 
-            name: t("dashboard"), 
-            transKey: "dashboard", 
-            link: getLocalizedHref("/member/dashboard") 
+          {
+            id: "member-dashboard",
+            name: t("dashboard"),
+            transKey: "dashboard",
+            link: getLocalizedHref("/member/dashboard")
           },
-          { 
-            id: "member-profile", 
-            name: t("profile"), 
-            transKey: "profile", 
-            link: getLocalizedHref("/member/profile") 
+          {
+            id: "member-profile",
+            name: t("profile"),
+            transKey: "profile",
+            link: getLocalizedHref("/member/profile")
           },
-          { 
-            id: "member-settings", 
-            name: t("settings"), 
-            transKey: "settings", 
+          {
+            id: "member-settings",
+            name: t("settings"),
+            transKey: "settings",
             link: getLocalizedHref("/member/dashboard#settings")
           },
-          { 
-            id: "member-contact", 
-            name: t("contact"), 
-            transKey: "contact", 
-            link: getLocalizedHref("/contact") 
+          {
+            id: "member-contact",
+            name: t("contact"),
+            transKey: "contact",
+            link: getLocalizedHref("/contact")
           },
-          { 
-            id: "member-logout", 
-            name: t("logout"), 
-            transKey: "logout", 
-            link: getLocalizedHref("/logout") 
+          {
+            id: "member-logout",
+            name: t("logout"),
+            transKey: "logout",
+            link: getLocalizedHref("/logout")
           },
         ],
       });
     }
 
-    setLeftNavLinks(leftLinks);
-    setRightNavLinks(rightLinks);
-  }, [isClient, locale, pathname, t, getLocalizedHref]);
+    return { leftNavLinks: leftLinks, rightNavLinks: rightLinks };
+  }, [isClient, locale, t, getLocalizedHref]);
 
   if (!isClient) {
     return <div className={isMobile ? "space-y-2" : "flex items-center gap-4"} />;
@@ -195,8 +191,8 @@ export default function NavbarLinks({ section, onCloseMenu = () => {}, isMobile 
                   className={cn(
                     "group inline-flex h-9 w-max items-center justify-center rounded-lg bg-transparent px-4 py-2 text-sm font-medium transition-all duration-200 hover:bg-accent/50 focus:bg-accent/50 focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/30 hover:scale-105",
                     isMobile
-                      ? "justify-between w-full h-11 px-4 hover:bg-primary/5 hover:border-primary/20 border border-transparent hover:border-border/50" // Enhanced mobile styles
-                      : "justify-start w-auto px-3 py-2" // Keep desktop specific styles
+                      ? "justify-between w-full h-11 px-4 hover:bg-primary/5 hover:border-primary/20 border border-transparent hover:border-border/50"
+                      : "justify-start w-auto px-3 py-2"
                   )}
                 >
                   <span className="flex items-center gap-2">
@@ -206,7 +202,7 @@ export default function NavbarLinks({ section, onCloseMenu = () => {}, isMobile 
                   <ChevronDown size={16} />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent 
+              <DropdownMenuContent
                 className={`w-full ${isMobile ? "min-w-[200px]" : "md:w-56"} border-border/50 shadow-xl`}
                 align={isMobile ? "start" : section === 'right' ? "end" : "start"}
               >
@@ -225,7 +221,7 @@ export default function NavbarLinks({ section, onCloseMenu = () => {}, isMobile 
                         href={sub.link || "#"}
                         className={cn(
                           'w-full rounded-lg px-4 py-2 text-left text-sm font-medium transition-all duration-200',
-                          'hover:bg-accent/50 hover:text-primary' // Enhanced hover style
+                          'hover:bg-accent/50 hover:text-primary'
                         )}
                         onClick={onCloseMenu}
                         target={sub.link?.startsWith("http") ? "_blank" : undefined}
@@ -244,8 +240,8 @@ export default function NavbarLinks({ section, onCloseMenu = () => {}, isMobile 
               className={cn(
                 "group inline-flex h-9 w-max items-center justify-center rounded-lg bg-transparent px-4 py-2 text-sm font-medium transition-all duration-200 hover:bg-accent/50 focus:bg-accent/50 focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/30 hover:scale-105 hover:text-primary",
                 isMobile
-                  ? "w-full px-4 py-2 h-11 hover:bg-primary/5 hover:border-primary/20 border border-transparent hover:border-border/50" // Enhanced mobile styles
-                  : "" // No extra styles for desktop, as the main class covers it
+                  ? "w-full px-4 py-2 h-11 hover:bg-primary/5 hover:border-primary/20 border border-transparent hover:border-border/50"
+                  : ""
               )}
               onClick={onCloseMenu}
             >
@@ -256,4 +252,6 @@ export default function NavbarLinks({ section, onCloseMenu = () => {}, isMobile 
       ))}
     </div>
   );
-}
+};
+
+export default React.memo(NavbarLinks);

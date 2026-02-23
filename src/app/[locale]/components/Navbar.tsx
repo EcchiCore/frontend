@@ -110,41 +110,33 @@ const Navbar = () => {
 
   // Handle resize for mobile menu with proper cleanup
   useEffect(() => {
+    if (!isClient) return;
+
     let timeoutId: NodeJS.Timeout | null = null;
 
     const updateViewport = () => {
       const desktop = window.innerWidth >= 768;
-      setIsDesktop(desktop);
-      if (desktop) {
-        setIsMenuOpen(false);
-      }
-    };
-
-    const debounceResize = () => {
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
-      timeoutId = setTimeout(() => {
-        updateViewport();
-      }, 100);
+      // Only update state if value has changed
+      setIsDesktop((prev) => {
+        if (prev !== desktop) {
+          if (desktop) setIsMenuOpen(false);
+          return desktop;
+        }
+        return prev;
+      });
     };
 
     const handleResize = () => {
-      debounceResize();
+      if (timeoutId) clearTimeout(timeoutId);
+      timeoutId = setTimeout(updateViewport, 100);
     };
 
-    if (isClient) {
-      window.addEventListener("resize", handleResize);
-      updateViewport();
-    }
+    window.addEventListener("resize", handleResize);
+    updateViewport();
 
     return () => {
-      if (isClient) {
-        window.removeEventListener("resize", handleResize);
-      }
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
+      window.removeEventListener("resize", handleResize);
+      if (timeoutId) clearTimeout(timeoutId);
     };
   }, [isClient]);
 
@@ -170,7 +162,7 @@ const Navbar = () => {
   if (!isClient) {
     // Render minimal navbar during SSR
     return (
-      <nav className="sticky top-0 z-50 w-full border-b border-border/50 bg-background/80 backdrop-blur-xl py-4 shadow-sm">
+      <nav className="sticky top-0 z-50 w-full border-b border-border/50 bg-background/80 backdrop-blur-md lg:backdrop-blur-xl py-4 shadow-sm">
         <div className="container mx-auto flex h-14 items-center justify-between px-4 lg:px-6">
           <div className="flex items-center">
             <Link
@@ -192,7 +184,7 @@ const Navbar = () => {
   }
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b border-border/50 bg-background/80 backdrop-blur-xl py-4 shadow-sm">
+    <nav className="sticky top-0 z-50 w-full border-b border-border/50 bg-background/80 backdrop-blur-md lg:backdrop-blur-xl py-4 shadow-sm">
       <div className="container mx-auto flex h-14 items-center justify-between px-4 lg:px-6">
         {/* Left Section: Logo + Left Navigation */}
         <div className="flex items-center gap-8">
