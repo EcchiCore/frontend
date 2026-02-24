@@ -65,8 +65,9 @@ export const authSlice = createSlice({
             state.error = null;
             state.loading = false;
             localStorage.removeItem(CACHE_KEY);
-            // Clear cookie
-            document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT';
+            // Clear cookies
+            document.cookie = 'token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT; SameSite=Lax; Secure';
+            document.cookie = 'refreshToken=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT; SameSite=Lax; Secure';
         },
         initializeAuth: (state) => {
             // Optimistic load from localStorage

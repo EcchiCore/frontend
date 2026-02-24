@@ -7,6 +7,7 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Cookies from 'js-cookie';
 import { supabase } from "@/lib/supabaseClient";
+import { userApi } from "../member/dashboard/utils/api";
 
 const LogoutPage = () => {
   const router = useRouter();
@@ -15,8 +16,16 @@ const LogoutPage = () => {
 
   useEffect(() => {
     const performLogout = async () => {
-      // Remove the JWT token from cookies
+      try {
+        // Revoke token on the server
+        await userApi.logout();
+      } catch (e) {
+        console.error("Failed to revoke token on server", e);
+      }
+
+      // Remove tokens from cookies
       Cookies.remove('token');
+      Cookies.remove('refreshToken');
 
       // Sign out from Supabase
       await supabase.auth.signOut();

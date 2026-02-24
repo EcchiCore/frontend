@@ -24,10 +24,20 @@ export const setCookie = (name: string, value: string, days: number) => {
   try {
     const expires = new Date();
     expires.setTime(expires.getTime() + days * 24 * 60 * 60 * 1000);
-    document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/;SameSite=Lax`;
+    document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/;SameSite=Lax;Secure`;
     return true;
   } catch (error) {
     console.error('Error setting cookie:', error);
+    return false;
+  }
+};
+
+export const removeCookie = (name: string) => {
+  try {
+    document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;SameSite=Lax;Secure`;
+    return true;
+  } catch (error) {
+    console.error('Error removing cookie:', error);
     return false;
   }
 };
@@ -46,15 +56,55 @@ export class ApiError extends Error {
   }
 }
 
-export const apiRequest = async <T>(endpoint: string, options: RequestInit = {}): Promise<T> => {
-  const url = `${API_URL}${endpoint}`;
-  const token = getCookie('token');
+let isRefreshing = false;
+let refreshSubscribers: ((token: string) => void)[] = [];
 
-  if (!token) {
-    throw new ApiError('Authorization token not found. Please log in.', 401);
+const subscribeTokenRefresh = (cb: (token: string) => void) => {
+  refreshSubscribers.push(cb);
+};
+
+const onTokenRefreshed = (token: string) => {
+  refreshSubscribers.forEach((cb) => cb(token));
+  refreshSubscribers = [];
+};
+
+export const refreshTokenRequest = async (): Promise<{ token: string; refreshToken: string }> => {
+  const refreshToken = getCookie('refreshToken');
+  if (!refreshToken) {
+    throw new Error('No refresh token available');
   }
 
-  const headers: Record<string, string> = getAuthHeaders();
+  const response = await fetch(`${API_URL}/api/auth/refresh`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ refreshToken }),
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to refresh token');
+  }
+
+  const json = await response.json();
+  const data = json.data || json;
+  return {
+    token: data.token || data.user?.token,
+    refreshToken: data.refreshToken,
+  };
+};
+
+export const apiRequest = async <T>(endpoint: string, options: RequestInit = {}): Promise<T> => {
+  const url = `${API_URL}${endpoint}`;
+  let token = getCookie('token');
+
+  // If initial request has no token, it might be a public request or will fail 401 later
+  // However, the original code had a check here. I'll make it more flexible.
+  // if (!token) {
+  //   throw new ApiError('Authorization token not found. Please log in.', 401);
+  // }
+
+  const headers: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {};
   if (options.method !== 'DELETE') {
     headers['Content-Type'] = 'application/json';
   }
@@ -69,6 +119,45 @@ export const apiRequest = async <T>(endpoint: string, options: RequestInit = {})
 
   try {
     const response = await fetch(url, defaultOptions);
+
+    if (response.status === 401 && !endpoint.includes('/refresh')) {
+      const refreshToken = getCookie('refreshToken');
+      if (refreshToken) {
+        if (!isRefreshing) {
+          isRefreshing = true;
+          try {
+            const newTokens = await refreshTokenRequest();
+            setCookie('token', newTokens.token, 7);
+            if (newTokens.refreshToken) {
+              setCookie('refreshToken', newTokens.refreshToken, 7);
+            }
+            isRefreshing = false;
+            onTokenRefreshed(newTokens.token);
+          } catch (refreshError) {
+            isRefreshing = false;
+            removeCookie('token');
+            removeCookie('refreshToken');
+            window.location.href = '/login';
+            throw new ApiError('Session expired. Please log in again.', 401);
+          }
+        }
+
+        return new Promise((resolve) => {
+          subscribeTokenRefresh((newToken) => {
+            const retriedHeaders = { ...headers, Authorization: `Bearer ${newToken}` };
+            resolve(
+              apiRequest<T>(endpoint, {
+                ...options,
+                headers: {
+                  ...options.headers,
+                  ...retriedHeaders,
+                },
+              })
+            );
+          });
+        });
+      }
+    }
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
@@ -118,6 +207,14 @@ export const userApi = {
   deleteAccount: () =>
     apiRequest<void>('/api/user', {
       method: 'DELETE',
+    }),
+  logout: () =>
+    apiRequest<void>('/api/auth/logout', {
+      method: 'POST',
+    }),
+  logoutAll: () =>
+    apiRequest<void>('/api/auth/logout-all', {
+      method: 'POST',
     }),
 };
 
