@@ -72,7 +72,12 @@ export default function GameUploadForm({ availableTags, availableCategories }: {
         </div>
         <div className="col-span-3">
           {renderSection()}
-          <div className="flex justify-end mt-8">
+          <div className="flex flex-col items-end gap-2 mt-8">
+            {ongoingUploads > 0 && (
+              <p className="text-sm text-yellow-400 animate-pulse">
+                ⏳ กรุณารอให้อัพโหลดภาพเสร็จก่อน ({ongoingUploads} remaining)
+              </p>
+            )}
             <Button onClick={handleSubmit} disabled={isUploading || ongoingUploads > 0}>
               {isUploading ? 'Uploading...' : 'Upload Game'}
             </Button>
