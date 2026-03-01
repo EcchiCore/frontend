@@ -22,6 +22,8 @@ import { useViewHistory } from "./hooks/useViewHistory";
 import ArticleDownloadDialog from "./ArticleDownloadDialog";
 import RelatedArticles from "./RelatedArticles";
 import { Button, Card, CardContent } from "@/components/ui";
+import { ExternalLink } from "lucide-react";
+import Link from "next/link";
 // import ArticleModsSection from "./ArticleModsSection"; // Removed
 import ArticleCommunityTabs from "./ArticleCommunityTabs";
 import { useTranslations } from 'next-intl';
@@ -188,6 +190,23 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
                   article={article}
                   isDarkMode={isDarkMode}
                 />
+
+                {/* Original Sources Section */}
+                {article.officialDownloadSources && article.officialDownloadSources.length > 0 && (
+                  <div className="mb-8 mt-2 space-y-3">
+                    {/* Only show the heading if there's more than 1 source, or just keep it simple. Let's keep it clean without a big heading, just the buttons */}
+                    <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+                      {article.officialDownloadSources.map((source, index) => (
+                        <Link key={index} href={source.url} target="_blank" rel="noopener noreferrer" className="block w-full sm:w-auto flex-1">
+                          <Button variant="outline" className="w-full flex items-center justify-center gap-2 h-12 border-primary/20 hover:border-primary/50 hover:bg-primary/5 transition-all">
+                            <ExternalLink className="w-4 h-4 text-primary" />
+                            <span className="font-medium">โหลดต้นฉบับ {source.name ? `(${source.name})` : ""}</span>
+                          </Button>
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 {/* Lightweight HTML renderer */}
                 <div

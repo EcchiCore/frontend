@@ -144,6 +144,11 @@ export async function fetchArticleAndDownloads(
       images {
         url
       }
+      officialDownloadSources {
+        name
+        url
+        status
+      }
       platforms {
         name
       }
@@ -226,6 +231,11 @@ export async function getArticleBySlug(slug: string, language?: string): Promise
       images {
         url
       }
+      officialDownloadSources {
+        name
+        url
+        status
+      }
       platforms {
         name
       }
@@ -287,6 +297,11 @@ export async function getArticleWithDownloads(
       mainImage
       images {
         url
+      }
+      officialDownloadSources {
+        name
+        url
+        status
       }
       platforms {
         name
