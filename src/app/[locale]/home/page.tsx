@@ -68,11 +68,10 @@ export default async function HomePage({ params }: { params: { locale: string } 
 
       <main className="bg-background">
         <h1 className="sr-only">ChanomHub - Adult Gaming Hub</h1>
+        <SponsoredArticles articles={homeData.sponsored} />
 
 
         <HomeCarousel articles={homeData.carousel} loading={false} />
-
-        <SponsoredArticles articles={homeData.sponsored} />
 
         <div className="grid lg:grid-cols-5 gap-3 container mx-auto px-2 pb-4">
           {/* Main Content */}
