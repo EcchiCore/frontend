@@ -6,6 +6,7 @@ import { OverviewTab } from './tabs/OverviewTab';
 import { UserManagementTab } from './tabs/UserManagementTab';
 import { ContentManagementTab } from './tabs/ContentManagementTab';
 import { SubscriptionPlansTab } from './tabs/SubscriptionPlansTab';
+import { SponsoredArticlesTab } from './tabs/SponsoredArticlesTab';
 import { SettingsTab } from './tabs/SettingsTab';
 import { AdminGuard } from './components/AdminGuard';
 
@@ -25,6 +26,7 @@ export default function AdminDashboard() {
                         <TabsTrigger value="overview">Overview</TabsTrigger>
                         <TabsTrigger value="users">Users</TabsTrigger>
                         <TabsTrigger value="content">Content</TabsTrigger>
+                        <TabsTrigger value="sponsored">Sponsored</TabsTrigger>
                         <TabsTrigger value="finance">Finance</TabsTrigger>
                         <TabsTrigger value="settings">Settings</TabsTrigger>
                     </TabsList>
@@ -36,6 +38,9 @@ export default function AdminDashboard() {
                     </TabsContent>
                     <TabsContent value="content" className="space-y-4">
                         <ContentManagementTab />
+                    </TabsContent>
+                    <TabsContent value="sponsored" className="space-y-4">
+                        <SponsoredArticlesTab />
                     </TabsContent>
                     <TabsContent value="finance" className="space-y-4">
                         <SubscriptionPlansTab />

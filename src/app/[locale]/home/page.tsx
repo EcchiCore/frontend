@@ -2,6 +2,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import Navbar from '../components/Navbar';
 import FeaturedPosts from './components/FeaturedPosts';
 import HomeCarousel from './components/HomeCarousel';
+import SponsoredArticles from './components/SponsoredArticles';
 import CategoryGrid from './components/CategoryGrid';
 import { generatePageMetadata } from '@/utils/metadataUtils';
 import { getTranslations } from 'next-intl/server';
@@ -34,20 +35,22 @@ const getCachedHomeData = unstable_cache(
     try {
       const sdk = createChanomhubClient();
 
-      const [carouselData, featuredData, latestData] = await Promise.all([
+      const [carouselData, featuredData, latestData, sponsoredData] = await Promise.all([
         sdk.articles.getAll({ limit: 3, status: 'PUBLISHED' }),
         sdk.articles.getByPlatform('windows', { limit: 25 }),
         sdk.articles.getAll({ limit: 10, status: 'PUBLISHED' }),
+        sdk.sponsoredArticles.getAll().catch(() => []),
       ]);
 
       return {
         carousel: carouselData || [],
         featured: featuredData || [],
         latest: latestData || [],
+        sponsored: sponsoredData || [],
       };
     } catch (error) {
       console.error('Error fetching home page data:', error);
-      return { carousel: [], featured: [], latest: [] };
+      return { carousel: [], featured: [], latest: [], sponsored: [] };
     }
   },
   ['home-page-data'],
@@ -68,6 +71,8 @@ export default async function HomePage({ params }: { params: { locale: string } 
 
 
         <HomeCarousel articles={homeData.carousel} loading={false} />
+
+        <SponsoredArticles articles={homeData.sponsored} />
 
         <div className="grid lg:grid-cols-5 gap-3 container mx-auto px-2 pb-4">
           {/* Main Content */}
