@@ -18,6 +18,6 @@ export async function getSdk() {
 
     return createChanomhubClient({
         apiUrl: process.env.NEXT_PUBLIC_API_URL || 'https://api.chanomhub.com',
-        token, // Optional: only if user is logged in
+        token: token ?? undefined, // Ensure token is passed
     });
 }

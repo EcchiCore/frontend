@@ -100,10 +100,12 @@ export async function fetchDownloadsByArticleId(
   }`;
 
   try {
+    const token = await getAuthToken();
     const data = await graphqlRequest<{ downloads: Article["downloads"] }>(
       query,
       { articleId },
-      "DownloadsByArticleId"
+      "DownloadsByArticleId",
+      token
     );
     return data.downloads ?? null;
   } catch (error) {
@@ -159,6 +161,9 @@ export async function fetchArticleAndDownloads(
       title
       updatedAt
       ver
+      price
+      isPaid
+      isUnlocked
     }
     downloads(articleId: $downloadsArticleId) {
       id
@@ -170,13 +175,15 @@ export async function fetchArticleAndDownloads(
   }`;
 
   try {
+    const token = await getAuthToken();
     const data = await graphqlRequest<{
       article: Article;
       downloads: Article["downloads"];
     }>(
       query,
       { slug, downloadsArticleId, language },
-      "ArticleAndDownloads"
+      "ArticleAndDownloads",
+      token
     );
 
     return {
@@ -246,14 +253,19 @@ export async function getArticleBySlug(slug: string, language?: string): Promise
       title
       updatedAt
       ver
+      price
+      isPaid
+      isUnlocked
     }
   }`;
 
   try {
+    const token = await getAuthToken();
     const data = await graphqlRequest<{ article: Article }>(
       query,
       { slug, language },
-      "ArticleBySlug"
+      "ArticleBySlug",
+      token
     );
 
     return data.article ? transformArticleImages(data.article) : null;
@@ -313,14 +325,19 @@ export async function getArticleWithDownloads(
       title
       updatedAt
       ver
+      price
+      isPaid
+      isUnlocked
     }
   }`;
 
   try {
+    const token = await getAuthToken();
     const articleData = await graphqlRequest<{ article: Article }>(
       query,
       { slug, language },
-      "ArticleWithDownloads"
+      "ArticleWithDownloads",
+      token
     );
 
     if (!articleData.article) {

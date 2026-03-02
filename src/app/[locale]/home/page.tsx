@@ -33,7 +33,13 @@ import { unstable_cache } from 'next/cache';
 const getCachedHomeData = unstable_cache(
   async () => {
     try {
-      const sdk = createChanomhubClient();
+      const { cookies } = await import('next/headers');
+      const cookieStore = await cookies();
+      const token = cookieStore.get('token')?.value;
+
+      const sdk = createChanomhubClient({
+        token: token ?? undefined
+      });
 
       const [carouselData, featuredData, latestData, sponsoredData] = await Promise.all([
         sdk.articles.getAll({ limit: 3, status: 'PUBLISHED' }),

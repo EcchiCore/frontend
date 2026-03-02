@@ -125,11 +125,20 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
         throw new Error(errorData.message || `Purchase failed with status ${response.status}`);
       }
 
-      const data = await response.json();
+      const responseJson = await response.json();
+      const data = responseJson.data || responseJson; // Handle both wrapped and unwrapped responses
+
+      console.log("Purchase API response:", data);
 
       // If backend provides a checkout URL (e.g. Stripe/Lago hosted page), redirect to it
       if (data.checkoutUrl) {
+        console.log("Redirecting to checkout:", data.checkoutUrl);
         window.location.href = data.checkoutUrl;
+        return;
+      }
+
+      if (data.status === 'pending' || data.invoiceId) {
+        showAlert(t("purchasePending") || "Invoice created. Please complete payment in your profile or check your email.", "info");
         return;
       }
 
