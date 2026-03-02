@@ -6,8 +6,6 @@ import {
   DashboardUser,
   Token,
   PasswordUpdateData,
-  Subscription,
-  SubscriptionPlan,
   RedeemTrueMoneyRequest,
 } from './types';
 
@@ -246,20 +244,6 @@ export const articlesApi = {
     apiRequest<void>(`/api/articles/${slug}/publish-request`, {
       method: 'POST',
       body: JSON.stringify({}),
-    }),
-};
-
-export const subscriptionApi = {
-  listPlans: () => apiRequest<SubscriptionPlan[]>('/api/subscriptions/plans'),
-  getUserSubscriptions: () => apiRequest<Subscription[]>('/api/subscriptions'),
-  createSubscription: (planId: string) =>
-    apiRequest<Subscription>('/api/subscriptions', {
-      method: 'POST',
-      body: JSON.stringify({ planId }),
-    }),
-  cancelSubscription: (id: number | string) =>
-    apiRequest<Subscription>(`/api/subscriptions/${id}`, {
-      method: 'DELETE',
     }),
 };
 

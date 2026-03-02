@@ -57,7 +57,7 @@ export interface ArticlesResponse {
   articlesCount: number;
 }
 
-export type PageType = 'profile' | 'articles' | 'moderation' | 'settings' | 'subscriptions' | 'wallet' | 'admin';
+export type PageType = 'profile' | 'articles' | 'moderation' | 'settings' | 'wallet' | 'admin';
 
 export interface NavigationItem {
   id: PageType;
@@ -118,34 +118,7 @@ export interface PasswordUpdateData {
   newPassword: string;
 }
 
-export type SubscriptionStatus =
-  | 'ACTIVE'
-  | 'CANCELED'
-  | 'SUSPENDED'
-  | 'PAST_DUE'
-  | 'UNPAID';
 
-export interface SubscriptionPlan {
-  planId: string;
-  name: string;
-  description?: string | null;
-  pointsCost: number;
-  durationDays: number;
-}
-
-export interface Subscription {
-  id: number;
-  userId: number;
-  planId: string;
-  status: SubscriptionStatus;
-  currentPeriodStart: string;
-  currentPeriodEnd: string;
-  cancelAtPeriodEnd: boolean;
-  startDate: string;
-  endDate?: string | null;
-  createdAt: string;
-  updatedAt: string;
-}
 
 export interface RedeemTrueMoneyRequest {
   voucherCode: string;

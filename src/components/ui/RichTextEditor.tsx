@@ -80,9 +80,8 @@ const RichTextEditor = ({ content, onUpdate }: { content: string, onUpdate: (htm
       // Check if it's a real change (not just whitespace/formatting normalization by Tiptap)
       const currentHtml = editor.getHTML();
       if (content !== currentHtml) {
-        // If content is empty and editor has content, it might be a reset from parent
-        // or if content is significantly different (e.g. loaded from API)
-        editor.commands.setContent(content, false);
+        // Pass options as an object to match the expected signature
+        editor.commands.setContent(content, { emitUpdate: false });
       }
     }
   }, [content, editor]);

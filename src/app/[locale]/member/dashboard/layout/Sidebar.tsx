@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { User, FileText, Shield, Settings, CreditCard, Wallet } from 'lucide-react';
+import { User, FileText, Shield, Settings, Wallet } from 'lucide-react';
 import { NAVIGATION_ITEMS } from '../utils/constants';
 import { NavigationItem, PageType } from '../utils/types';
 import { Button } from '@/components/ui/button';
@@ -12,7 +12,6 @@ import { setCurrentPage, setMobileOpen } from '@/store/features/dashboard/dashbo
 const iconMap = {
   User,
   FileText,
-  CreditCard,
   Wallet,
   Shield,
   Settings,

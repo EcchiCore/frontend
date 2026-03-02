@@ -15,12 +15,7 @@ export const NAVIGATION_ITEMS: NavigationItem[] = [
     icon: 'FileText',
     path: '#articles'
   },
-  {
-    id: 'subscriptions',
-    label: 'Subscriptions',
-    icon: 'CreditCard',
-    path: '#subscriptions'
-  },
+
   {
     id: 'wallet',
     label: 'Wallet',
