@@ -138,7 +138,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
       }
 
       if (data.status === 'pending' || data.invoiceId) {
-        showAlert(t("purchasePending") || "Invoice created. Please complete payment in your profile or check your email.", "info");
+        showAlert(t("purchasePending") || "Invoice created. Please complete payment in your profile or check your email.", "success");
         return;
       }
 
@@ -148,9 +148,9 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
       mutate(`${API_BASE_URL}/api/graphql:ArticleWithDownloads:${slug}`);
       mutate(`${API_BASE_URL}/api/graphql:ArticleBySlug:${slug}`);
 
-      // Refresh page to show unlocked content
+      // Refresh page to show unlocked content immediately
       setTimeout(() => {
-        window.location.reload();
+        window.location.href = window.location.pathname; // Reload without query params
       }, 1500);
     } catch (error: any) {
       console.error("Purchase failed:", error);
@@ -167,9 +167,17 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
       isPaid: article.isPaid, 
       isUnlocked: article.isUnlocked 
     });
+
+    // Case 1: Needs purchase
     if (searchParams.get('purchase') === 'true' && article.isPaid && !article.isUnlocked) {
       handlePurchase();
       // Clean up search params to avoid repeated purchase attempts
+      const newUrl = window.location.pathname;
+      window.history.replaceState({}, '', newUrl);
+    } 
+    // Case 2: Already purchased but still has the param (likely after redirect back)
+    else if (searchParams.get('purchase') === 'true' && article.isUnlocked) {
+      console.log("Article already unlocked, removing purchase param");
       const newUrl = window.location.pathname;
       window.history.replaceState({}, '', newUrl);
     }

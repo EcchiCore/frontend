@@ -35,7 +35,12 @@ export async function generateMetadata(props: ArticlePageProps): Promise<Metadat
   const paths = params.paths;
   const slug = decodeURIComponent(paths[0]);
 
-  const originalArticle = await getCachedArticle(slug, locale);
+  // Get token for server-side auth check
+  const { cookies } = await import('next/headers');
+  const cookieStore = await cookies();
+  const token = cookieStore.get('token')?.value;
+
+  const originalArticle = await getCachedArticle(slug, locale, token);
   if (!originalArticle) {
     return {
       title: 'Article Not Found',
@@ -129,8 +134,13 @@ export default async function ArticlePage(props: ArticlePageProps) {
   const paths = params.paths;
   const slug = decodeURIComponent(paths[0]);
 
+  // Get token for server-side auth check
+  const { cookies } = await import('next/headers');
+  const cookieStore = await cookies();
+  const token = cookieStore.get('token')?.value;
+
   // Fetch article and downloads together - no ID needed in URL
-  const { article: originalArticle, downloads } = await getCachedArticleWithDownloads(slug, locale);
+  const { article: originalArticle, downloads } = await getCachedArticleWithDownloads(slug, locale, token);
 
   let mods: any[] = [];
   if (originalArticle && paths[1] === 'mods') {
@@ -145,7 +155,8 @@ export default async function ArticlePage(props: ArticlePageProps) {
 
   // Fetch related articles based on tags (server-side, no extra client request)
   const tagNames = originalArticle.tags?.map((t: { name: string }) => t.name) || [];
-  const articlePool = await getCachedRecommendationPool();
+  
+  const articlePool = await getCachedRecommendationPool(token);
   const relatedArticles = getRelatedFromPool(articlePool, tagNames, originalArticle.id);
 
   // Generate structured data JSON-LD for the article (only once, SEO handles language)

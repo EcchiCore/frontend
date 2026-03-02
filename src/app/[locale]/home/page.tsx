@@ -31,14 +31,10 @@ import { unstable_cache } from 'next/cache';
 
 // Server-side data fetching using SDK with caching
 const getCachedHomeData = unstable_cache(
-  async () => {
+  async (token?: string) => {
     try {
-      const { cookies } = await import('next/headers');
-      const cookieStore = await cookies();
-      const token = cookieStore.get('token')?.value;
-
       const sdk = createChanomhubClient({
-        token: token ?? undefined
+        token
       });
 
       const [carouselData, featuredData, latestData, sponsoredData] = await Promise.all([
@@ -63,8 +59,19 @@ const getCachedHomeData = unstable_cache(
   { revalidate: 60 }
 );
 
+async function getAuthToken() {
+  try {
+    const { cookies } = await import('next/headers');
+    const cookieStore = await cookies();
+    return cookieStore.get('token')?.value;
+  } catch {
+    return undefined;
+  }
+}
+
 export default async function HomePage({ params }: { params: { locale: string } }) {
-  const homeData = await getCachedHomeData();
+  const token = await getAuthToken();
+  const homeData = await getCachedHomeData(token);
 
 
 

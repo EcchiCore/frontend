@@ -9,7 +9,8 @@ const sdk = createChanomhubClient();
 // Cache for recommendation pool - revalidates every 5 minutes
 // This is shared between all article pages to avoid extra API calls
 export const getCachedRecommendationPool = unstable_cache(
-    async (): Promise<ArticleListItem[]> => {
+    async (token?: string): Promise<ArticleListItem[]> => {
+        const sdk = createChanomhubClient({ token });
         const result = await sdk.articles.getAllPaginated({
             limit: 50, // Pool of articles for recommendations
             status: 'PUBLISHED',
