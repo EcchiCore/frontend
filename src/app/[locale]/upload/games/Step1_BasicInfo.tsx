@@ -107,16 +107,31 @@ export const Step1_BasicInfo = () => {
         </div>
         {formData.isPaid && (
           <div className="space-y-2">
-            <Label htmlFor="price">Price (CC - Chanom Coin)</Label>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="price">Price (THB)</Label>
+              {formData.price !== undefined && formData.price > 0 && (
+                <span className="text-sm text-muted-foreground">
+                  ≈ ${(formData.price / 35).toFixed(2)} USD
+                </span>
+              )}
+            </div>
             <Input
               id="price"
               type="number"
               min="0"
-              value={formData.price || 0}
-              onChange={(e) => dispatch(updateFormData({ price: Number(e.target.value) }))}
-              placeholder="e.g., 50"
+              value={formData.price === undefined ? '' : formData.price}
+              onChange={(e) => {
+                const val = e.target.value;
+                dispatch(updateFormData({ price: val === '' ? undefined : Number(val) }));
+              }}
+              placeholder="e.g., 99"
               required={formData.isPaid}
             />
+            {formData.price !== undefined && formData.price > 0 && formData.price < 79 && (
+              <p className="text-sm text-amber-600 dark:text-amber-500 mt-2">
+                เรารู้สึกเป็นห่วงกับราคาที่อาจจะน้อยไปกับความพยายามของคุณ เราแนะนำเป็น 79, 99 หรือมากกว่านั้น
+              </p>
+            )}
           </div>
         )}
       </div>

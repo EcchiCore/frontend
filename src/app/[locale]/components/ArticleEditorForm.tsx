@@ -988,15 +988,30 @@ export const ArticleEditorForm = ({ slug = '', initialData, mode, locale = 'en' 
                                 </div>
                                 {formData.isPaid && (
                                     <div className="pt-2">
-                                        <Label htmlFor="price" className="text-xs text-muted-foreground font-semibold mb-1.5 block">Price (CC)</Label>
+                                        <div className="flex items-center justify-between mb-1.5">
+                                            <Label htmlFor="price" className="text-xs text-muted-foreground font-semibold block">Price (THB)</Label>
+                                            {formData.price !== undefined && formData.price > 0 && (
+                                                <span className="text-xs text-muted-foreground">
+                                                    ≈ ${(formData.price / 35).toFixed(2)} USD
+                                                </span>
+                                            )}
+                                        </div>
                                         <Input
                                             id="price"
                                             name="price"
                                             type="number"
                                             min="0"
-                                            value={formData.price || 0}
-                                            onChange={(e) => setFormData((prev: any) => ({ ...prev, price: Number(e.target.value) }))}
+                                            value={formData.price === undefined ? '' : formData.price}
+                                            onChange={(e) => {
+                                                const val = e.target.value;
+                                                setFormData((prev: any) => ({ ...prev, price: val === '' ? undefined : Number(val) }));
+                                            }}
                                         />
+                                        {formData.price !== undefined && formData.price > 0 && formData.price < 79 && (
+                                            <p className="text-xs text-amber-600 mt-2">
+                                                เรารู้สึกเป็นห่วงกับราคาที่อาจจะน้อยไปกับความพยายามของคุณ เราแนะนำเป็น 79, 99 หรือมากกว่านั้น
+                                            </p>
+                                        )}
                                     </div>
                                 )}
                             </CardContent>
