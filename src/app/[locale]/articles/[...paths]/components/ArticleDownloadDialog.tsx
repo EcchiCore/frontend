@@ -48,8 +48,21 @@ const ArticleDownloadDialog: React.FC<ArticleDownloadDialogProps> = ({
       day: "numeric",
     });
 
-  const handleOpenDownload = (item: DownloadFile | TranslationFile) => {
-    const url = "url" in item ? item.url : item.fileUrl;
+  const handleOpenDownload = async (item: DownloadFile | TranslationFile) => {
+    let url = "url" in item ? item.url : item.fileUrl;
+
+    // If it's a relative path from our own R2 storage (starting with public/ or premium/)
+    // we use the gateway to handle it, especially for premium files.
+    if (url.startsWith('premium/') || url.startsWith('public/')) {
+        try {
+            const sdk = await getSdk();
+            url = sdk.storage.getProtectedUrl(url, article.id);
+        } catch (error) {
+            console.error('Failed to get protected URL:', error);
+            // Fallback to direct URL if possible, or show error
+        }
+    }
+
     window.open(url, "_blank");
   };
 

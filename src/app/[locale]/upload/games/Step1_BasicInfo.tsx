@@ -127,6 +127,25 @@ export const Step1_BasicInfo = () => {
               placeholder="e.g., 99"
               required={formData.isPaid}
             />
+            {formData.isPaid && formData.price !== undefined && formData.price > 0 && (
+              <div className="mt-3 p-3 rounded-lg bg-background border border-border space-y-1.5 text-xs">
+                <div className="flex justify-between text-muted-foreground">
+                  <span>Platform Fee (10%):</span>
+                  <span>-{(formData.price * 0.1).toFixed(2)} THB</span>
+                </div>
+                <div className="flex justify-between text-muted-foreground">
+                  <span>Payment Gateway (Stripe 3.65% + 10฿):</span>
+                  <span>-{((formData.price * 0.0365) + 10).toFixed(2)} THB</span>
+                </div>
+                <div className="pt-1.5 mt-1.5 border-t border-border flex justify-between font-bold text-green-600 dark:text-green-400 text-sm">
+                  <span>รายได้ที่คุณจะได้รับ (โดยประมาณ):</span>
+                  <span>{(formData.price - (formData.price * 0.1) - ((formData.price * 0.0365) + 10)).toFixed(2)} THB</span>
+                </div>
+                <p className="text-[10px] text-muted-foreground italic mt-1">
+                  * รายได้สุทธิอาจคลาดเคลื่อนเล็กน้อยตามภาษีมูลค่าเพิ่มของค่าธรรมเนียม
+                </p>
+              </div>
+            )}
             {formData.price !== undefined && formData.price > 0 && formData.price < 79 && (
               <p className="text-sm text-amber-600 dark:text-amber-500 mt-2">
                 เรารู้สึกเป็นห่วงกับราคาที่อาจจะน้อยไปกับความพยายามของคุณ เราแนะนำเป็น 79, 99 หรือมากกว่านั้น

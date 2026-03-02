@@ -179,13 +179,39 @@ const ImageManager: React.FC<{
     coverId?: string | null;
 }> = ({ imageItems, setImageItems, setSpecialImageId, mainId, backgroundId, coverId }) => {
     const [imageUrlInput, setImageUrlInput] = useState('');
+    const [uploading, setUploading] = useState(false);
 
-    const addImage = () => {
-        const url = imageUrlInput.trim();
-        if (!url) return;
+    const addImage = (url?: string) => {
+        const targetUrl = url || imageUrlInput.trim();
+        if (!targetUrl) return;
         const id = typeof crypto !== 'undefined' && (crypto as any).randomUUID ? (crypto as any).randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
-        setImageItems([...imageItems, { id, url }]);
-        setImageUrlInput('');
+        setImageItems([...imageItems, { id, url: targetUrl }]);
+        if (!url) setImageUrlInput('');
+    };
+
+    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = e.target.files;
+        if (!files || files.length === 0) return;
+
+        setUploading(true);
+        try {
+            const sdk = await getSdk();
+            const uploadPromises = Array.from(files).map(file => sdk.storage.upload(file, { bucket: 'images' }));
+            const results = await Promise.all(uploadPromises);
+
+            results.forEach(res => {
+                if (res && res.url) {
+                    addImage(res.url);
+                }
+            });
+            toast.success(`Successfully uploaded ${files.length} image(s)`);
+        } catch (error) {
+            console.error('Upload error:', error);
+            toast.error('Failed to upload image(s)');
+        } finally {
+            setUploading(false);
+            e.target.value = '';
+        }
     };
 
     const removeImage = (id: string) => {
@@ -210,7 +236,28 @@ const ImageManager: React.FC<{
                     }}
                     className="h-9"
                 />
-                <Button type="button" onClick={addImage} variant="secondary" size="sm" className="shrink-0">
+                <div className="relative">
+                    <Input
+                        type="file"
+                        id="imageUpload"
+                        className="hidden"
+                        multiple
+                        accept="image/*"
+                        onChange={handleFileUpload}
+                        disabled={uploading}
+                    />
+                    <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="h-9 px-2"
+                        onClick={() => document.getElementById('imageUpload')?.click()}
+                        disabled={uploading}
+                    >
+                        {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                    </Button>
+                </div>
+                <Button type="button" onClick={() => addImage()} variant="secondary" size="sm" className="shrink-0 h-9">
                     <Plus className="h-4 w-4" />
                 </Button>
             </div>
@@ -293,11 +340,41 @@ const DownloadManager: React.FC<{
     articleId: number | undefined;
     items: DownloadItem[];
     setItems: React.Dispatch<React.SetStateAction<DownloadItem[]>>;
-}> = ({ articleId, items, setItems }) => {
+    isPaid: boolean;
+}> = ({ articleId, items, setItems, isPaid }) => {
     const itemsRef = React.useRef(items);
+    const [uploadingId, setUploadingId] = useState<string | null>(null);
+
     useEffect(() => {
         itemsRef.current = items;
     }, [items]);
+
+    const handleFileUpload = async (tempId: string, e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setUploadingId(tempId);
+        try {
+            const sdk = await getSdk();
+            const result = await sdk.storage.upload(file, { 
+                bucket: 'storage',
+                path: isPaid ? 'premium' : 'public'
+            });
+            
+            if (result && result.url) {
+                updateDownload(tempId, 'url', result.url);
+                toast.success('File uploaded successfully');
+            } else {
+                throw new Error('Upload failed: No URL returned');
+            }
+        } catch (error) {
+            console.error('Upload error:', error);
+            toast.error(error instanceof Error ? error.message : 'Failed to upload file');
+        } finally {
+            setUploadingId(null);
+            e.target.value = '';
+        }
+    };
 
     useEffect(() => {
         const timeoutIds: Record<string, NodeJS.Timeout> = {};
@@ -525,7 +602,33 @@ const DownloadManager: React.FC<{
                             </div>
                             <div>
                                 <Label>URL</Label>
-                                <Input value={item.url} onChange={(e) => updateDownload(item.tempId, 'url', e.target.value)} className="mt-1" />
+                                <div className="flex gap-2 mt-1">
+                                    <Input 
+                                        value={item.url} 
+                                        onChange={(e) => updateDownload(item.tempId, 'url', e.target.value)} 
+                                        className="flex-1"
+                                    />
+                                    <div className="relative">
+                                        <Input
+                                            type="file"
+                                            id={`file-upload-${item.tempId}`}
+                                            className="hidden"
+                                            onChange={(e) => handleFileUpload(item.tempId, e)}
+                                            disabled={!!uploadingId}
+                                        />
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            size="icon"
+                                            className="h-10 w-10"
+                                            onClick={() => document.getElementById(`file-upload-${item.tempId}`)?.click()}
+                                            disabled={!!uploadingId}
+                                            title="Upload file directly"
+                                        >
+                                            {uploadingId === item.tempId ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                                        </Button>
+                                    </div>
+                                </div>
                             </div>
                             <div className="md:col-span-2">
                                 <Label>Embed / Iframe Code</Label>
@@ -946,7 +1049,7 @@ export const ArticleEditorForm = ({ slug = '', initialData, mode, locale = 'en' 
                                 <Badge variant="outline" className="bg-background border-border">{downloadItems.length} items</Badge>
                             </div>
                             <CardContent className="p-6">
-                                <DownloadManager articleId={formData.id ? Number(formData.id) : undefined} items={downloadItems} setItems={setDownloadItems} />
+                                <DownloadManager articleId={formData.id ? Number(formData.id) : undefined} items={downloadItems} setItems={setDownloadItems} isPaid={formData.isPaid} />
                             </CardContent>
                         </Card>
 
@@ -1007,6 +1110,25 @@ export const ArticleEditorForm = ({ slug = '', initialData, mode, locale = 'en' 
                                                 setFormData((prev: any) => ({ ...prev, price: val === '' ? undefined : Number(val) }));
                                             }}
                                         />
+                                        {formData.isPaid && formData.price !== undefined && formData.price > 0 && (
+                                            <div className="mt-3 p-3 rounded-lg bg-muted/50 border border-border space-y-1.5 text-xs">
+                                                <div className="flex justify-between text-muted-foreground">
+                                                    <span>Platform Fee (10%):</span>
+                                                    <span>-{(formData.price * 0.1).toFixed(2)} THB</span>
+                                                </div>
+                                                <div className="flex justify-between text-muted-foreground">
+                                                    <span>Payment Gateway (Stripe 3.65% + 10฿):</span>
+                                                    <span>-{((formData.price * 0.0365) + 10).toFixed(2)} THB</span>
+                                                </div>
+                                                <div className="pt-1.5 mt-1.5 border-t border-border flex justify-between font-bold text-green-600 dark:text-green-400 text-sm">
+                                                    <span>รายได้ที่คุณจะได้รับ (โดยประมาณ):</span>
+                                                    <span>{(formData.price - (formData.price * 0.1) - ((formData.price * 0.0365) + 10)).toFixed(2)} THB</span>
+                                                </div>
+                                                <p className="text-[10px] text-muted-foreground italic mt-1">
+                                                    * รายได้สุทธิอาจคลาดเคลื่อนเล็กน้อยตามภาษีมูลค่าเพิ่มของค่าธรรมเนียม
+                                                </p>
+                                            </div>
+                                        )}
                                         {formData.price !== undefined && formData.price > 0 && formData.price < 79 && (
                                             <p className="text-xs text-amber-600 mt-2">
                                                 เรารู้สึกเป็นห่วงกับราคาที่อาจจะน้อยไปกับความพยายามของคุณ เราแนะนำเป็น 79, 99 หรือมากกว่านั้น

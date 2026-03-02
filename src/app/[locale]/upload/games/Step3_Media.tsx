@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { updateFormData, incrementOngoingUploads, decrementOngoingUploads, setOngoingUploads } from '@/store/features/upload/uploadSlice';
 import { Loader2, CheckCircle2, XCircle, RotateCcw } from 'lucide-react';
+import { getSdk } from '@/lib/sdk';
 
 const UPLOAD_TIMEOUT_MS = 30_000; // 30 seconds
 const POLL_TIMEOUT_MS = 30_000;   // 30 seconds total for polling
@@ -29,90 +30,6 @@ export const Step3_Media = () => {
     otherImages: { status: 'idle' },
   });
 
-  const getUploadUrl = () => {
-    return 'https://oi.chanomhub.com/upload';
-  };
-
-  const fetchWithTimeout = async (url: string, options: RequestInit, timeoutMs: number): Promise<Response> => {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
-
-    try {
-      const response = await fetch(url, {
-        ...options,
-        signal: controller.signal,
-      });
-      return response;
-    } finally {
-      clearTimeout(timeoutId);
-    }
-  };
-
-  const uploadFileWithRetry = async (file: File, uploadUrl: string, maxRetries = 3) => {
-    let attempt = 0;
-    while (attempt < maxRetries) {
-      try {
-        const uploadFormData = new FormData();
-        uploadFormData.append('image', file);
-
-        const response = await fetchWithTimeout(uploadUrl, {
-          method: 'POST',
-          body: uploadFormData,
-        }, UPLOAD_TIMEOUT_MS);
-
-        if (!response.ok) {
-          throw new Error(`Upload failed with status: ${response.status}`);
-        }
-
-        return await response.json();
-      } catch (error: any) {
-        attempt++;
-        if (error.name === 'AbortError') {
-          throw new Error(`Upload timed out for ${file.name} (attempt ${attempt})`);
-        }
-        console.error(`Attempt ${attempt} failed for ${file.name}:`, error);
-        if (attempt >= maxRetries) {
-          throw error;
-        }
-        await new Promise(resolve => setTimeout(resolve, 1000));
-      }
-    }
-  };
-
-  const pollForUrl = async (statusUrl: string, maxRetries = 10): Promise<string> => {
-    let attempt = 0;
-    const domain = getUploadUrl().replace('/upload', '');
-    const fullStatusUrl = statusUrl.startsWith('http') ? statusUrl : `${domain}${statusUrl}`;
-    const startTime = Date.now();
-
-    while (attempt < maxRetries) {
-      // Check total polling timeout
-      if (Date.now() - startTime > POLL_TIMEOUT_MS) {
-        throw new Error('Polling timed out waiting for file URL.');
-      }
-
-      try {
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        const response = await fetchWithTimeout(fullStatusUrl, {}, 10_000);
-        const data = await response.json();
-
-        if (response.ok && data.status === 'Completed' && data.response && data.response.url) {
-          const finalUrl = data.response.url;
-          return finalUrl.startsWith('http') ? finalUrl : `${domain}${finalUrl}`;
-        }
-
-      } catch (error: any) {
-        if (error.name === 'AbortError') {
-          console.error(`Polling attempt ${attempt + 1} timed out`);
-        } else {
-          console.error(`Polling attempt ${attempt + 1} failed:`, error);
-        }
-      }
-      attempt++;
-    }
-    throw new Error('Failed to retrieve file URL after multiple attempts.');
-  };
-
   const updateFileState = (id: string, state: Partial<FileUploadState>) => {
     setFileStates(prev => ({ ...prev, [id]: { ...prev[id], ...state } }));
   };
@@ -126,18 +43,14 @@ export const Step3_Media = () => {
       dispatch(incrementOngoingUploads());
 
       try {
-        const initialResult = await uploadFileWithRetry(file, getUploadUrl());
+        const sdk = await getSdk();
+        const result = await sdk.storage.upload(file, { bucket: 'images' });
 
-        let finalUrl: string;
-        if (initialResult && initialResult.url) {
-          finalUrl = initialResult.url;
-        } else if (initialResult && initialResult.status_url) {
-          finalUrl = await pollForUrl(initialResult.status_url);
-        } else {
-          throw new Error('Upload initiation failed or did not return a status or final URL.');
+        if (!result || !result.url) {
+          throw new Error('Upload failed: No URL returned');
         }
 
-        dispatch(updateFormData({ [fieldId]: finalUrl }));
+        dispatch(updateFormData({ [fieldId]: result.url }));
         updateFileState(fieldId, { status: 'success' });
 
       } catch (error) {
@@ -163,23 +76,21 @@ export const Step3_Media = () => {
 
       for (let i = 0; i < files.length; i++) dispatch(incrementOngoingUploads());
 
-      const uploadAndPoll = async (file: File): Promise<string> => {
+      const uploadOne = async (file: File): Promise<string> => {
         try {
-          const initialResult = await uploadFileWithRetry(file, getUploadUrl());
-          if (initialResult && initialResult.url) {
-            return initialResult.url;
-          } else if (initialResult && initialResult.status_url) {
-            return await pollForUrl(initialResult.status_url);
-          } else {
-            throw new Error(`Upload initiation failed for ${file.name}`);
+          const sdk = await getSdk();
+          const result = await sdk.storage.upload(file, { bucket: 'images' });
+          if (!result || !result.url) {
+            throw new Error(`Upload failed for ${file.name}`);
           }
+          return result.url;
         } finally {
           dispatch(decrementOngoingUploads());
         }
       };
 
       try {
-        const urls = await Promise.all(files.map(uploadAndPoll));
+        const urls = await Promise.all(files.map(uploadOne));
         dispatch(updateFormData({ [fieldId]: urls }));
         updateFileState(fieldId, { status: 'success' });
       } catch (error) {

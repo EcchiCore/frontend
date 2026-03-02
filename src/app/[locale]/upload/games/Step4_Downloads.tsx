@@ -31,7 +31,10 @@ import {
   Globe,
   AlertCircle,
   ExternalLink,
+  Upload,
+  Loader2,
 } from 'lucide-react';
+import { getSdk } from '@/lib/sdk';
 
 export const Step4_Downloads = () => {
   const dispatch = useAppDispatch();
@@ -44,6 +47,8 @@ export const Step4_Downloads = () => {
   const [downloadUrlError, setDownloadUrlError] = useState('');
   const [downloadPlatforms, setDownloadPlatforms] = useState<string[]>([]);
   const [isDownloadDialogOpen, setIsDownloadDialogOpen] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   const [purchaseName, setPurchaseName] = useState('');
   const [purchaseUrl, setPurchaseUrl] = useState('');
@@ -122,6 +127,33 @@ export const Step4_Downloads = () => {
     setDownloadUrlError('');
     setDownloadPlatforms([]);
     setIsDownloadDialogOpen(false);
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    setDownloadUrlError('');
+
+    try {
+      const sdk = await getSdk();
+      const result = await sdk.storage.upload(file, { 
+        bucket: 'storage',
+        path: formData.isPaid ? 'premium' : 'public'
+      });
+      
+      if (result && result.url) {
+        setDownloadUrl(result.url);
+      } else {
+        throw new Error('Upload failed: No URL returned');
+      }
+    } catch (error) {
+      console.error('File upload error:', error);
+      setDownloadUrlError(error instanceof Error ? error.message : 'Upload failed');
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const handleAddPurchaseSource = () => {
@@ -211,15 +243,38 @@ export const Step4_Downloads = () => {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="downloadUrl">URL</Label>
-                  <Input
-                    id="downloadUrl"
-                    placeholder="https://example.com/file.zip"
-                    value={downloadUrl}
-                    onChange={(e) => {
-                      setDownloadUrl(e.target.value);
-                      setDownloadUrlError('');
-                    }}
-                  />
+                  <div className="flex gap-2">
+                    <Input
+                      id="downloadUrl"
+                      placeholder="https://example.com/file.zip"
+                      value={downloadUrl}
+                      onChange={(e) => {
+                        setDownloadUrl(e.target.value);
+                        setDownloadUrlError('');
+                      }}
+                      className="flex-1"
+                    />
+                    <div className="relative">
+                      <Input
+                        type="file"
+                        id="fileUpload"
+                        className="hidden"
+                        onChange={handleFileUpload}
+                        disabled={isUploading}
+                      />
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        size="icon"
+                        onClick={() => document.getElementById('fileUpload')?.click()}
+                        disabled={isUploading}
+                        title="Upload file directly"
+                      >
+                        {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                      </Button>
+                    </div>
+                  </div>
+                  {isUploading && <p className="text-xs text-blue-400">Uploading file...</p>}
                   {downloadUrlError && <p className="text-sm text-destructive">{downloadUrlError}</p>}
                 </div>
                 <div className="space-y-2">
