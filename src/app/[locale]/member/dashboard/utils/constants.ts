@@ -10,6 +10,12 @@ export const NAVIGATION_ITEMS: NavigationItem[] = [
     path: '#profile'
   },
   {
+    id: 'studio',
+    label: 'Studio',
+    icon: 'Activity',
+    path: '#studio'
+  },
+  {
     id: 'articles',
     label: 'Articles',
     icon: 'FileText',

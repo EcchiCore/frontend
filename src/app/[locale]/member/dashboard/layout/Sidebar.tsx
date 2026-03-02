@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { User, FileText, Shield, Settings, Wallet } from 'lucide-react';
+import { User, FileText, Shield, Settings, Wallet, Activity } from 'lucide-react';
 import { NAVIGATION_ITEMS } from '../utils/constants';
 import { NavigationItem, PageType } from '../utils/types';
 import { Button } from '@/components/ui/button';
@@ -15,6 +15,7 @@ const iconMap = {
   Wallet,
   Shield,
   Settings,
+  Activity,
 };
 
 interface SidebarProps {

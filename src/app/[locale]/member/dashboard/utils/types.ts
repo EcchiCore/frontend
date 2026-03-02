@@ -57,7 +57,7 @@ export interface ArticlesResponse {
   articlesCount: number;
 }
 
-export type PageType = 'profile' | 'articles' | 'moderation' | 'settings' | 'wallet' | 'admin';
+export type PageType = 'profile' | 'articles' | 'moderation' | 'settings' | 'wallet' | 'admin' | 'studio';
 
 export interface NavigationItem {
   id: PageType;
