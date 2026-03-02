@@ -125,6 +125,14 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
         throw new Error(errorData.message || `Purchase failed with status ${response.status}`);
       }
 
+      const data = await response.json();
+
+      // If backend provides a checkout URL (e.g. Stripe/Lago hosted page), redirect to it
+      if (data.checkoutUrl) {
+        window.location.href = data.checkoutUrl;
+        return;
+      }
+
       showAlert(t("purchaseSuccess") || "Purchase successful! Article unlocked.", "success");
 
       // Re-fetch article data to get full body
