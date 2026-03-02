@@ -32,4 +32,7 @@ export type Article = {
   mods?: { downloadLink: string; description: string; creditTo: string; categories: { name: string }[]; images: { url: string }[]; name: string; status: string; version: string }[];
   officialDownloadSources?: { name: string; url: string; status: string }[];
   version?: string;
+  price?: number;
+  isPaid?: boolean;
+  isUnlocked?: boolean;
 };

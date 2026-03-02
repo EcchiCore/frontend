@@ -68,6 +68,14 @@ const SidebarLeft: React.FC<SidebarLeftProps> = ({
                   unoptimized
                 />
 
+                {article.isPaid && (
+                  <div className="absolute top-3 left-3 z-20">
+                    <Badge className="bg-amber-500 hover:bg-amber-600 text-white border-none font-bold shadow-lg">
+                      PREMIUM
+                    </Badge>
+                  </div>
+                )}
+
                 {/* Decorative corner accent */}
                 <div className="absolute top-3 right-3 w-8 h-8 bg-primary/20 rounded-full backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
                   <div className="w-3 h-3 bg-primary rounded-full animate-pulse" />

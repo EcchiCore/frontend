@@ -95,6 +95,31 @@ export const Step1_BasicInfo = () => {
           </div>
         </div>
       </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 border rounded-md bg-amber-50/30 dark:bg-amber-500/5">
+        <div className="flex items-center space-x-2">
+          <Checkbox
+            id="isPaid"
+            checked={formData.isPaid || false}
+            onCheckedChange={(checked) => dispatch(updateFormData({ isPaid: !!checked }))}
+          />
+          <Label htmlFor="isPaid" className="font-bold text-amber-600 dark:text-amber-500">Premium (Paid Article)</Label>
+        </div>
+        {formData.isPaid && (
+          <div className="space-y-2">
+            <Label htmlFor="price">Price (CC - Chanom Coin)</Label>
+            <Input
+              id="price"
+              type="number"
+              min="0"
+              value={formData.price || 0}
+              onChange={(e) => dispatch(updateFormData({ price: Number(e.target.value) }))}
+              placeholder="e.g., 50"
+              required={formData.isPaid}
+            />
+          </div>
+        )}
+      </div>
     </div>
   );
 };

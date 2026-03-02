@@ -26,6 +26,8 @@ export interface GameUploadFormData {
     body?: string; // HTML content
     engine?: string;
     platforms?: string[];
+    isPaid?: boolean;
+    price?: number;
 
     // Step 2: Categorization
     tags?: string[];

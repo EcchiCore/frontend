@@ -259,7 +259,14 @@ const ArticleTitleMeta: React.FC<ArticleTitleMetaProps> = ({ article, isDarkMode
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-6 mb-10">
         <div className="flex-1">
-          <h1 className={`${styles.title} mb-4`}>{article.title}</h1>
+          <h1 className={`${styles.title} mb-4`}>
+            {article.title}
+            {article.isPaid && (
+              <span className="ml-3 inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-amber-500 text-white shadow-lg shadow-amber-500/20">
+                PREMIUM
+              </span>
+            )}
+          </h1>
           {article.creators && article.creators.length > 0 && (
             <p className={`${subtitleClass} mb-2`}>Creator / Studio: <span className={subtitleValueClass}>{article.creators[0]?.name}</span></p>
           )}

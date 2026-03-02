@@ -22,8 +22,11 @@ import { useViewHistory } from "./hooks/useViewHistory";
 import ArticleDownloadDialog from "./ArticleDownloadDialog";
 import RelatedArticles from "./RelatedArticles";
 import { Button, Card, CardContent } from "@/components/ui";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, Lock, Unlock, ShoppingCart } from "lucide-react";
 import Link from "next/link";
+import { getSdk } from "@/lib/sdk";
+import { useRouter, useSearchParams } from "next/navigation";
+import Cookies from "js-cookie";
 // import ArticleModsSection from "./ArticleModsSection"; // Removed
 import ArticleCommunityTabs from "./ArticleCommunityTabs";
 import { useTranslations } from 'next-intl';
@@ -85,6 +88,76 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
   const { user } = useAppSelector((state) => state.auth);
   const isAuthenticated = isClient && !!user;
   const isCurrentUserAuthor = isClient && !!user && user?.username === article.author?.name;
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [isPurchasing, setIsPurchasing] = React.useState(false);
+
+  const handlePurchase = React.useCallback(async () => {
+    if (!isAuthenticated) {
+      router.push(`/login?redirect=/articles/${slug}`);
+      return;
+    }
+
+    if (!article.id) return;
+
+    try {
+      setIsPurchasing(true);
+      
+      // Get token for authentication
+      const token = Cookies.get('token');
+      
+      if (!token) {
+        throw new Error("No authentication token found");
+      }
+
+      // Call the specific backend endpoint provided by user
+      const response = await fetch(`${API_BASE_URL}/api/v1/lago/purchase/article/${article.id}`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({})
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `Purchase failed with status ${response.status}`);
+      }
+
+      showAlert(t("purchaseSuccess") || "Purchase successful! Article unlocked.", "success");
+
+      // Re-fetch article data to get full body
+      mutate(`${API_BASE_URL}/api/graphql:ArticleWithDownloads:${slug}`);
+      mutate(`${API_BASE_URL}/api/graphql:ArticleBySlug:${slug}`);
+
+      // Refresh page to show unlocked content
+      setTimeout(() => {
+        window.location.reload();
+      }, 1500);
+    } catch (error: any) {
+      console.error("Purchase failed:", error);
+      showAlert(error.message || t("purchaseError") || "Failed to unlock article. Check your balance.", "error");
+    } finally {
+      setIsPurchasing(false);
+    }
+  }, [isAuthenticated, article.id, slug, router, showAlert, t]);
+
+  // Handle ?purchase=true from pseudo download links
+  useEffect(() => {
+    console.log("Purchase trigger check:", { 
+      purchase: searchParams.get('purchase'), 
+      isPaid: article.isPaid, 
+      isUnlocked: article.isUnlocked 
+    });
+    if (searchParams.get('purchase') === 'true' && article.isPaid && !article.isUnlocked) {
+      handlePurchase();
+      // Clean up search params to avoid repeated purchase attempts
+      const newUrl = window.location.pathname;
+      window.history.replaceState({}, '', newUrl);
+    }
+  }, [searchParams, article.isPaid, article.isUnlocked, handlePurchase]);
+
   const handleDownloadClick = () => {
     setOpenDownloadDialog(true);
   };
@@ -191,10 +264,9 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
                   isDarkMode={isDarkMode}
                 />
 
-                {/* Original Sources Section */}
-                {article.officialDownloadSources && article.officialDownloadSources.length > 0 && (
+                {/* Original Sources Section - Hidden if paid and locked */}
+                {article.officialDownloadSources && article.officialDownloadSources.length > 0 && (!article.isPaid || article.isUnlocked) && (
                   <div className="mb-8 mt-2 space-y-3">
-                    {/* Only show the heading if there's more than 1 source, or just keep it simple. Let's keep it clean without a big heading, just the buttons */}
                     <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                       {article.officialDownloadSources.map((source, index) => (
                         <Link key={index} href={source.url} target="_blank" rel="noopener noreferrer" className="block w-full sm:w-auto flex-1">
@@ -221,6 +293,53 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
                   style={{ fontSize: `${fontSize}px` }}
                   dangerouslySetInnerHTML={{ __html: sanitizedBody }}
                 />
+
+                {/* Paid Article Section - Locked state */}
+                {article.isPaid && !article.isUnlocked && (
+                  <div className={`mt-8 p-8 rounded-2xl border-2 border-dashed flex flex-col items-center justify-center gap-6 text-center transition-all ${isDarkMode ? "bg-amber-500/5 border-amber-500/20" : "bg-amber-50/50 border-amber-200"
+                    }`}>
+                    <div className={`p-4 rounded-full ${isDarkMode ? "bg-amber-500/20 text-amber-400" : "bg-amber-100 text-amber-600"
+                      }`}>
+                      <Lock className="w-8 h-8" />
+                    </div>
+
+                    <div className="space-y-2">
+                      <h3 className="text-xl font-bold">บทความนี้สำหรับสมาชิก Premium</h3>
+                      <p className="text-muted-foreground max-w-md">
+                        {Number(article.price || 0) > 0
+                          ? `ปลดล็อกเพื่ออ่านเนื้อหาทั้งหมดในราคา ${article.price} CC (เหรียญชานม)`
+                          : 'ปลดล็อกเพื่ออ่านเนื้อหาทั้งหมด'}
+                      </p>
+                    </div>
+
+                    <Button
+                      onClick={handlePurchase}
+                      disabled={isPurchasing}
+                      size="lg"
+                      className="gap-2 bg-amber-500 hover:bg-amber-600 text-white font-bold h-14 px-8 rounded-xl shadow-lg shadow-amber-500/20"
+                    >
+                      {isPurchasing ? (
+                        <div className="animate-spin rounded-full h-5 w-5 border-2 border-white/30 border-t-white" />
+                      ) : (
+                        <ShoppingCart className="w-5 h-5" />
+                      )}
+                      {Number(article.price || 0) > 0 ? `Unlock for ${article.price} CC` : 'Unlock Content'}
+                    </Button>
+
+                    {!isAuthenticated && (
+                      <p className="text-sm text-muted-foreground">
+                        Already have an account? <Link href="/login" className="text-primary hover:underline">Sign in</Link>
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                {article.isPaid && article.isUnlocked && (
+                  <div className="flex items-center gap-2 mb-6 p-3 rounded-lg bg-green-500/10 text-green-600 border border-green-500/20">
+                    <Unlock className="w-4 h-4" />
+                    <span className="text-sm font-medium">Unlocked: You have full access to this article.</span>
+                  </div>
+                )}
 
                 <InteractionBar
                   isCurrentUserAuthor={isCurrentUserAuthor}
@@ -272,6 +391,8 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
             isFavorited={isFavorited}
             handleFavorite={handleFavorite}
             setOpenDownloadDialog={handleDownloadClick}
+            handlePurchase={handlePurchase}
+            isPurchasing={isPurchasing}
             isDarkBackground={isDarkMode}
             downloads={downloads}
             translationFiles={[]}

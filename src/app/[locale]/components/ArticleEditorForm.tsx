@@ -15,7 +15,9 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { X, Image as ImageIcon, LayoutIcon, BookOpenIcon, Save, ArrowLeft, Plus, Trash2, Eye, FileText, Download, Gamepad, FolderOpen, Loader2, Check } from 'lucide-react';
 import { toast } from 'sonner';
 import Image from 'next/image';
+import Cookies from 'js-cookie';
 import { getSdk } from '@/lib/sdk';
+import { resolveArticleImageUrl } from '@/lib/articleImageUrl';
 import { NewArticleDTO, UpdateArticleDTO } from '@chanomhub/sdk';
 import RichTextEditor from '@/components/ui/RichTextEditor';
 
@@ -575,6 +577,8 @@ export const ArticleEditorForm = ({ slug = '', initialData, mode, locale = 'en' 
         tags: initialData?.tags || [],
         categories: initialData?.categories || [],
         platforms: initialData?.platforms || [],
+        isPaid: initialData?.isPaid || false,
+        price: initialData?.price || 0,
 
         mainImageId: null,
         backgroundImageId: null,
@@ -591,6 +595,7 @@ export const ArticleEditorForm = ({ slug = '', initialData, mode, locale = 'en' 
 
     const [loading, setLoading] = useState<boolean>(true);
     const [saving, setSaving] = useState<boolean>(false);
+    const [showValidationErrors, setShowValidationErrors] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
@@ -600,92 +605,91 @@ export const ArticleEditorForm = ({ slug = '', initialData, mode, locale = 'en' 
                 setLoading(true);
                 const sdk = await getSdk();
 
-                const [tags, categories, platforms] = await Promise.all([
+                const [tags, categories, platforms, engines] = await Promise.all([
                     sdk.articles.getTags(),
                     sdk.articles.getCategories(),
-                    sdk.articles.getPlatforms()
+                    sdk.articles.getPlatforms(),
+                    sdk.articles.getEngines()
                 ]);
 
                 if (tags) setAvailableTags(tags);
                 if (categories) setAvailableCategories(categories);
                 if (platforms) setAvailablePlatforms(platforms);
+                if (engines) setAvailableEngines(engines.map(e => ({ id: Number(e.id), name: e.name })));
 
                 if (mode === 'edit' && slug) {
-                    let articleData = null;
-                    let downloadsData: any[] = [];
-
-                    // Fetch complete article + downloads in one GraphQL request bypassing SDK preset bugs
-                    const query = `
-                      query GetCompleteArticleForEditor($slug: String!) {
-                        public {
-                          article(slug: $slug) {
-                            id title slug description body ver mainImage coverImage backgroundImage
-                            createdAt updatedAt status sequentialCode favoritesCount favorited
-                            engine { id name }
-                            author { id name image }
-                            creators { id name }
-                            tags { id name }
-                            platforms { id name }
-                            categories { id name }
-                            images { id url }
-                            downloads { id name url isActive vipOnly }
-                          }
-                        }
-                      }
-                    `;
-                    const res = await sdk.graphql<{ public: { article: any } }>(query, { slug }, { operationName: 'GetCompleteArticleForEditor' });
-                    const article = res.data?.public?.article || null;
-
-                    if (article) {
-                        articleData = article;
-
-                        // Extract downloads directly from the complete article payload
-                        downloadsData = article.downloads || [];
-
-                        const rawImages = article.images || [];
-                        const imageUrls = Array.isArray(rawImages)
-                            ? rawImages.map((img: any) => typeof img === 'string' ? img : img.url)
-                            : [];
-
-                        const items: ImageItem[] = imageUrls.map((url: string) => ({
-                            id: typeof crypto !== 'undefined' && (crypto as any).randomUUID ? (crypto as any).randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
-                            url
-                        }));
-                        setImageItems(items);
-
-                        let engineName = null;
-                        if (article.engine && typeof article.engine === 'object') {
-                            engineName = article.engine.name;
-                        } else if (typeof article.engine === 'string') {
-                            engineName = article.engine;
-                        }
-
-                        const dls = downloadsData.map((d: any) => ({
-                            id: d.id,
-                            tempId: `dl-${d.id}`,
-                            name: d.name,
-                            url: d.url,
-                            iframe: d.iframe || '',
-                            isActive: d.isActive ?? true,
-                            vipOnly: d.vipOnly ?? false,
-                            fileSize: d.fileSize,
-                            syncStatus: 'synced' as const
-                        }));
-                        setDownloadItems(dls);
-
-                        setFormData({
-                            ...article,
-                            id: Number(article.id),
-                            tags: article.tags?.map((t: any) => t.name || t) || [],
-                            categories: article.categories?.map((c: any) => c.name || c) || [],
-                            platforms: article.platforms?.map((p: any) => p.name || p) || [],
-                            creator: article.creators && article.creators.length > 0 ? article.creators[0].name : '',
-                            engine: engineName,
-
-                            mainImageId: article.mainImage ? items.find(i => i.url === article.mainImage)?.id : null,
-                            backgroundImageId: article.backgroundImage ? items.find(i => i.url === article.backgroundImage)?.id : null,
-                            coverImageId: article.coverImage ? items.find(i => i.url === article.coverImage)?.id : null
+                    try {
+                        const token = Cookies.get('token');
+                        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://api.chanomhub.com'}/api/articles/${slug}`, {
+                            headers: {
+                                'Authorization': token ? `Bearer ${token}` : ''
+                            }
                         });
+                        
+                        if (!response.ok) throw new Error("Failed to fetch article via REST");
+                        
+                        const resData = await response.json();
+                        const article = resData.data?.article || resData.article || resData;
+
+                        if (article) {
+                            const downloadsData = article.downloads || [];
+                            const rawImages = article.images || [];
+                            const imageUrls = Array.isArray(rawImages)
+                                ? rawImages.map((img: any) => {
+                                    const url = typeof img === 'string' ? img : img.url;
+                                    return resolveArticleImageUrl(url);
+                                })
+                                : [];
+
+                            const items: ImageItem[] = imageUrls
+                                .filter((url): url is string => !!url)
+                                .map((url: string) => ({
+                                    id: typeof crypto !== 'undefined' && (crypto as any).randomUUID ? (crypto as any).randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+                                    url
+                                }));
+                            setImageItems(items);
+
+                            let engineName = article.engine?.name || article.engine;
+
+                            const dls = downloadsData.map((d: any) => ({
+                                id: d.id,
+                                tempId: `dl-${d.id}`,
+                                name: d.name,
+                                url: d.url,
+                                isActive: d.isActive ?? true,
+                                vipOnly: d.vipOnly ?? false,
+                                forVersion: d.forVersion,
+                                syncStatus: 'synced' as const
+                            }));
+                            setDownloadItems(dls);
+
+                            setFormData({
+                                ...article,
+                                id: Number(article.id),
+                                title: article.title || '',
+                                slug: article.slug || '',
+                                description: article.description || '',
+                                body: article.body || '',
+                                sequentialCode: article.sequentialCode || '',
+                                ver: article.ver || '',
+                                tags: article.tags?.map((t: any) => t.tag?.name || t.name || t) || [],
+                                categories: article.categories?.map((c: any) => c.category?.name || c.name || c) || [],
+                                platforms: article.platforms?.map((p: any) => p.platform?.name || p.name || p) || [],
+                                creator: article.creators && article.creators.length > 0 
+                                    ? (article.creators[0].creator?.name || article.creators[0].name || '') 
+                                    : '',
+                                engine: typeof article.engine === 'string' ? article.engine : (article.engine?.name || null),
+                                isPaid: article.isPaid || false,
+                                price: article.price || 0,
+
+                                mainImageId: article.mainImage ? items.find(i => i.url === resolveArticleImageUrl(article.mainImage))?.id : null,
+                                backgroundImageId: article.backgroundImage ? items.find(i => i.url === resolveArticleImageUrl(article.backgroundImage))?.id : null,
+                                coverImageId: article.coverImage ? items.find(i => i.url === resolveArticleImageUrl(article.coverImage))?.id : null
+                            });
+                        }
+                    } catch (err) {
+                        console.error("Init Error", err);
+                        setError("Failed to load data via REST");
                     }
                 }
             } catch (err) {
@@ -750,8 +754,17 @@ export const ArticleEditorForm = ({ slug = '', initialData, mode, locale = 'en' 
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!formData.title || !formData.description || !formData.body || !formData.creator) {
-            setError('Please fill in all required fields.');
+        
+        const missingFields = [];
+        if (!formData.title) missingFields.push('Title');
+        if (!formData.description) missingFields.push('Short Description');
+        if (!formData.body || formData.body === '<p></p>') missingFields.push('Content Body');
+        if (!formData.creator) missingFields.push('Creator');
+
+        if (missingFields.length > 0) {
+            setShowValidationErrors(true);
+            setError(`Please fill in all required fields: ${missingFields.join(', ')}`);
+            toast.error("Validation failed. Please check required fields.");
             return;
         }
 
@@ -768,11 +781,14 @@ export const ArticleEditorForm = ({ slug = '', initialData, mode, locale = 'en' 
                 body: formData.body,
                 creator: formData.creator,
                 ver: formData.ver,
+                sequentialCode: formData.sequentialCode,
                 engine: formData.engine,
                 tags: formData.tags,
                 categories: formData.categories,
                 platforms: formData.platforms,
                 language: 'en',
+                isPaid: formData.isPaid,
+                price: Number(formData.price || 0),
 
                 mainImage: formData.mainImageId ? imageItems.find(i => i.id === formData.mainImageId)?.url : (formData.mainImage?.url || formData.mainImage),
                 backgroundImage: formData.backgroundImageId ? imageItems.find(i => i.id === formData.backgroundImageId)?.url : (formData.backgroundImage?.url || formData.backgroundImage),
@@ -785,8 +801,25 @@ export const ArticleEditorForm = ({ slug = '', initialData, mode, locale = 'en' 
                 setSuccessMessage('Article created successfully!');
                 router.push(`/articles/${res.slug}`);
             } else {
-                await sdk.articles.update(slug, payload as UpdateArticleDTO);
+                // Use direct fetch to be sure about the payload
+                const token = Cookies.get('token');
+                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://api.chanomhub.com'}/api/articles/${slug}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': token ? `Bearer ${token}` : '',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ article: payload })
+                });
+
+                if (!response.ok) {
+                    const errData = await response.json().catch(() => ({}));
+                    throw new Error(errData.message || `Update failed with status ${response.status}`);
+                }
+
                 setSuccessMessage('Article updated successfully!');
+                
+                // Optional: force clear cache if needed
                 router.push(`/articles/${slug}`);
             }
 
@@ -841,14 +874,16 @@ export const ArticleEditorForm = ({ slug = '', initialData, mode, locale = 'en' 
                         <Card className="border border-border shadow-sm">
                             <CardContent className="p-8 space-y-6">
                                 <div className="space-y-2">
-                                    <Label htmlFor="title" className="text-xs uppercase text-muted-foreground font-bold tracking-wider">Article Title</Label>
+                                    <Label htmlFor="title" className="text-xs uppercase text-muted-foreground font-bold tracking-wider flex items-center gap-1">
+                                        Article Title <span className="text-destructive">*</span>
+                                    </Label>
                                     <Input
                                         id="title"
                                         name="title"
                                         value={formData.title || ''}
                                         onChange={handleInputChange}
                                         placeholder="Enter a descriptive title"
-                                        className="text-lg font-semibold h-12 px-4 border-gray-200 focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all"
+                                        className={`text-lg font-semibold h-12 px-4 border-gray-200 focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all ${showValidationErrors && !formData.title ? 'border-destructive ring-2 ring-destructive/10' : ''}`}
                                         required
                                     />
                                 </div>
@@ -861,13 +896,15 @@ export const ArticleEditorForm = ({ slug = '', initialData, mode, locale = 'en' 
                                             name="slug"
                                             value={formData.slug || ''}
                                             onChange={handleInputChange}
-                                            disabled={mode === 'create'}
                                             className="bg-transparent border-none w-full focus:ring-0 p-0 text-foreground font-mono"
+                                            placeholder="auto-generated-slug"
                                         />
                                     </div>
                                 </div>
                                 <div className="space-y-2">
-                                    <Label htmlFor="description" className="text-xs uppercase text-muted-foreground font-bold tracking-wider">Short Description</Label>
+                                    <Label htmlFor="description" className="text-xs uppercase text-muted-foreground font-bold tracking-wider flex items-center gap-1">
+                                        Short Description <span className="text-destructive">*</span>
+                                    </Label>
                                     <Textarea
                                         id="description"
                                         name="description"
@@ -875,22 +912,27 @@ export const ArticleEditorForm = ({ slug = '', initialData, mode, locale = 'en' 
                                         onChange={handleInputChange}
                                         placeholder="Brief overview of the game or content..."
                                         rows={3}
-                                        className="resize-none border-gray-200 focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all"
+                                        className={`resize-none border-gray-200 focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all ${showValidationErrors && !formData.description ? 'border-destructive ring-2 ring-destructive/10' : ''}`}
                                         required
                                     />
                                 </div>
                             </CardContent>
                         </Card>
 
-                        <Card className="border border-border shadow-sm h-full">
+                        <Card className={`border border-border shadow-sm h-full transition-all ${showValidationErrors && (!formData.body || formData.body === '<p></p>') ? 'ring-2 ring-destructive/20 border-destructive' : ''}`}>
                             <div className="border-b border-border px-6 py-4 flex items-center gap-2 bg-muted/20">
                                 <FileText className="h-5 w-5 text-muted-foreground" />
-                                <h3 className="font-semibold text-foreground">Content Body</h3>
+                                <h3 className="font-semibold text-foreground flex items-center gap-1">
+                                    Content Body <span className="text-destructive">*</span>
+                                </h3>
                             </div>
                             <CardContent className="p-0 min-h-[500px]">
                                 <RichTextEditor
                                     content={formData.body || ''}
-                                    onUpdate={(html) => setFormData((prev: any) => ({ ...prev, body: html }))}
+                                    onUpdate={(html) => {
+                                        setFormData((prev: any) => ({ ...prev, body: html }));
+                                        if (html && html !== '<p></p>') setShowValidationErrors(false);
+                                    }}
                                 />
                             </CardContent>
                         </Card>
@@ -940,6 +982,23 @@ export const ArticleEditorForm = ({ slug = '', initialData, mode, locale = 'en' 
                                     <Label htmlFor="favorited" className="text-sm text-gray-600">Featured / Favorite</Label>
                                     <Switch id="favorited" checked={formData.favorited || false} onCheckedChange={handleFavoritedChange} />
                                 </div>
+                                <div className="flex items-center justify-between border-t pt-4">
+                                    <Label htmlFor="isPaid" className="text-sm font-bold text-amber-600">Premium (Paid Article)</Label>
+                                    <Switch id="isPaid" checked={formData.isPaid || false} onCheckedChange={(checked) => setFormData((prev: any) => ({ ...prev, isPaid: checked }))} />
+                                </div>
+                                {formData.isPaid && (
+                                    <div className="pt-2">
+                                        <Label htmlFor="price" className="text-xs text-muted-foreground font-semibold mb-1.5 block">Price (CC)</Label>
+                                        <Input
+                                            id="price"
+                                            name="price"
+                                            type="number"
+                                            min="0"
+                                            value={formData.price || 0}
+                                            onChange={(e) => setFormData((prev: any) => ({ ...prev, price: Number(e.target.value) }))}
+                                        />
+                                    </div>
+                                )}
                             </CardContent>
                         </Card>
 
@@ -950,12 +1009,15 @@ export const ArticleEditorForm = ({ slug = '', initialData, mode, locale = 'en' 
                             </div>
                             <CardContent className="p-4 space-y-4">
                                 <div>
-                                    <Label className="text-xs text-muted-foreground font-semibold mb-1.5 block">Creator / Studio</Label>
+                                    <Label className="text-xs text-muted-foreground font-semibold mb-1.5 flex items-center gap-1">
+                                        Creator / Studio <span className="text-destructive">*</span>
+                                    </Label>
                                     <Input
                                         value={formData.creator || ''}
                                         onChange={handleInputChange}
                                         name="creator"
                                         placeholder="Developer Name"
+                                        className={`${showValidationErrors && !formData.creator ? 'border-destructive ring-2 ring-destructive/10' : ''}`}
                                     />
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">

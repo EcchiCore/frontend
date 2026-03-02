@@ -99,6 +99,8 @@ export interface SidebarRightProps {
   isFavorited: boolean;
   handleFavorite: () => void;
   setOpenDownloadDialog: () => void;
+  handlePurchase?: () => void;
+  isPurchasing?: boolean;
   isDarkBackground: boolean; // Add this
   downloads: Article["downloads"];
   translationFiles: TranslationFile[];

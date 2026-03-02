@@ -81,6 +81,11 @@ export default function ArticleBodyServer({ article }: ArticleBodyServerProps) {
                             v{article.ver}
                         </span>
                     )}
+                    {article.isPaid && (
+                        <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-500/10 text-amber-500 border border-amber-500/20">
+                            Premium {article.price && article.price > 0 ? `(${article.price} CC)` : ''}
+                        </span>
+                    )}
                 </h1>
 
                 {/* Creator/Author info */}

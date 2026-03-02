@@ -43,6 +43,8 @@ const ArticleInfoSidebar: React.FC<ArticleInfoSidebarProps> = ({
   isFavorited,
   handleFavorite,
   setOpenDownloadDialog,
+  handlePurchase,
+  isPurchasing,
 }) => {
   // The t variable is not used in this component, so useTranslations is commented out.
   // const t = useTranslations("sidebar");
@@ -137,13 +139,34 @@ const ArticleInfoSidebar: React.FC<ArticleInfoSidebarProps> = ({
             </div>
           </CardHeader>
           <CardContent>
-            <Button
-              className="w-full flex items-center justify-center gap-2"
-              onClick={() => setOpenDownloadDialog()}
-            >
-              <Download className="w-5 h-5" />
-              View All
-            </Button>
+            {article.isPaid && !article.isUnlocked ? (
+              <div className="space-y-3">
+                <p className="text-xs text-amber-600 font-medium bg-amber-50 dark:bg-amber-500/10 p-2 rounded border border-amber-200 dark:border-amber-500/20">
+                  ต้องซื้อบทความนี้ก่อนจึงจะสามารถเข้าถึงไฟล์ดาวน์โหลดได้
+                </p>
+                <Button 
+                  variant="default"
+                  className="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold"
+                  onClick={handlePurchase}
+                  disabled={isPurchasing}
+                >
+                  {isPurchasing ? (
+                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-white/30 border-t-white mr-2" />
+                  ) : (
+                    <Download className="w-4 h-4 mr-2" />
+                  )}
+                  Purchase to Unlock
+                </Button>
+              </div>
+            ) : (
+              <Button
+                className="w-full flex items-center justify-center gap-2"
+                onClick={() => setOpenDownloadDialog()}
+              >
+                <Download className="w-5 h-5" />
+                View All
+              </Button>
+            )}
           </CardContent>
         </Card>
 
@@ -210,6 +233,26 @@ const ArticleInfoSidebar: React.FC<ArticleInfoSidebarProps> = ({
                   <span className="text-sm text-muted-foreground">Version:</span>
                 </div>
                 <Badge variant="secondary">v{article.ver}</Badge>
+              </div>
+            )}
+
+            {article.isPaid && (
+              <div className="flex justify-between items-center pt-2 border-t">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-bold text-amber-600">Price:</span>
+                </div>
+                <span className="text-sm font-bold text-amber-600">{article.price} CC</span>
+              </div>
+            )}
+
+            {article.isPaid && (
+              <div className="flex justify-between items-center">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground">Status:</span>
+                </div>
+                <Badge variant={article.isUnlocked ? "success" : "warning"}>
+                  {article.isUnlocked ? "Unlocked" : "Locked"}
+                </Badge>
               </div>
             )}
           </CardContent>
@@ -355,13 +398,34 @@ const ArticleInfoSidebar: React.FC<ArticleInfoSidebarProps> = ({
             </div>
           </CardHeader>
           <CardContent>
-            <Button
-              className="w-full flex items-center justify-center gap-2"
-              onClick={() => setOpenDownloadDialog()}
-            >
-              <Download className="w-5 h-5" />
-              View All
-            </Button>
+            {article.isPaid && !article.isUnlocked ? (
+              <div className="space-y-3">
+                <p className="text-xs text-amber-600 font-medium bg-amber-50 dark:bg-amber-500/10 p-2 rounded border border-amber-200 dark:border-amber-500/20">
+                  ต้องซื้อบทความนี้ก่อนจึงจะสามารถเข้าถึงไฟล์ดาวน์โหลดได้
+                </p>
+                <Button 
+                  variant="default"
+                  className="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold"
+                  onClick={handlePurchase}
+                  disabled={isPurchasing}
+                >
+                  {isPurchasing ? (
+                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-white/30 border-t-white mr-2" />
+                  ) : (
+                    <Download className="w-4 h-4 mr-2" />
+                  )}
+                  Purchase to Unlock
+                </Button>
+              </div>
+            ) : (
+              <Button
+                className="w-full flex items-center justify-center gap-2"
+                onClick={() => setOpenDownloadDialog()}
+              >
+                <Download className="w-5 h-5" />
+                View All
+              </Button>
+            )}
           </CardContent>
         </Card>
 
@@ -428,6 +492,26 @@ const ArticleInfoSidebar: React.FC<ArticleInfoSidebarProps> = ({
                   <span className="text-sm text-muted-foreground">Version:</span>
                 </div>
                 <Badge variant="secondary">v{article.ver}</Badge>
+              </div>
+            )}
+
+            {article.isPaid && (
+              <div className="flex justify-between items-center pt-2 border-t">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-bold text-amber-600">Price:</span>
+                </div>
+                <span className="text-sm font-bold text-amber-600">{article.price} CC</span>
+              </div>
+            )}
+
+            {article.isPaid && (
+              <div className="flex justify-between items-center">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground">Status:</span>
+                </div>
+                <Badge variant={article.isUnlocked ? "success" : "warning"}>
+                  {article.isUnlocked ? "Unlocked" : "Locked"}
+                </Badge>
               </div>
             )}
           </CardContent>

@@ -73,10 +73,17 @@ const RichTextEditor = ({ content, onUpdate }: { content: string, onUpdate: (htm
     immediatelyRender: false,
   });
 
-  // Sync content updates (e.g. from JSON import) to the editor
+  // Sync content updates only when they differ significantly from current editor state
+  // to avoid cursor resets while typing
   useEffect(() => {
     if (editor && content !== editor.getHTML()) {
-      editor.commands.setContent(content);
+      // Check if it's a real change (not just whitespace/formatting normalization by Tiptap)
+      const currentHtml = editor.getHTML();
+      if (content !== currentHtml) {
+        // If content is empty and editor has content, it might be a reset from parent
+        // or if content is significantly different (e.g. loaded from API)
+        editor.commands.setContent(content, false);
+      }
     }
   }, [content, editor]);
 
