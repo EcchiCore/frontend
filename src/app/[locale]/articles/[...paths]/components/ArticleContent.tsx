@@ -103,37 +103,19 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
     try {
       setIsPurchasing(true);
       
-      // Get token for authentication
-      const token = Cookies.get('token');
-      
-      if (!token) {
-        throw new Error("No authentication token found");
-      }
-
-      // Call the specific backend endpoint provided by user
-      const response = await fetch(`${API_BASE_URL}/api/v1/lago/purchase/article/${article.id}`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({})
+      // Use the new SDK checkout repository
+      const sdk = await getSdk();
+      const data = await sdk.checkout.purchaseArticle(Number(article.id), {
+        successUrl: window.location.href,
+        cancelUrl: window.location.href,
       });
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || `Purchase failed with status ${response.status}`);
-      }
-
-      const responseJson = await response.json();
-      const data = responseJson.data || responseJson; // Handle both wrapped and unwrapped responses
-
-      console.log("Purchase API response:", data);
+      console.log("Purchase SDK response:", data);
 
       // If backend provides a checkout URL (e.g. Stripe/Lago hosted page), redirect to it
-      if (data.checkoutUrl) {
-        console.log("Redirecting to checkout:", data.checkoutUrl);
-        window.location.href = data.checkoutUrl;
+      if (data.paymentUrl) {
+        console.log("Redirecting to checkout:", data.paymentUrl);
+        window.location.href = data.paymentUrl;
         return;
       }
 

@@ -9,6 +9,7 @@ import { getFileIcon, getFileSize } from "@/utils/fileUtils";
 import { DownloadFile, TranslationFile } from "./Interfaces";
 import { useDownloadDialog } from './hooks/useDownloadDialog';
 import { Article } from '@/types/article'; // Assuming you need article data for formatDate
+import { getSdk } from '@/lib/sdk';
 
 interface ArticleDownloadDialogProps {
   article: Article;
@@ -21,6 +22,7 @@ interface ArticleDownloadDialogProps {
 }
 
 const ArticleDownloadDialog: React.FC<ArticleDownloadDialogProps> = ({
+  article,
   downloads,
   isMobile,
   isDarkMode,

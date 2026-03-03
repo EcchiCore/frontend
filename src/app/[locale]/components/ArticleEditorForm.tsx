@@ -12,7 +12,7 @@ import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { X, Image as ImageIcon, LayoutIcon, BookOpenIcon, Save, ArrowLeft, Plus, Trash2, Eye, FileText, Download, Gamepad, FolderOpen, Loader2, Check } from 'lucide-react';
+import { X, Image as ImageIcon, LayoutIcon, BookOpenIcon, Save, ArrowLeft, Plus, Trash2, Eye, FileText, Download, Gamepad, FolderOpen, Loader2, Check, Upload } from 'lucide-react';
 import { toast } from 'sonner';
 import Image from 'next/image';
 import Cookies from 'js-cookie';

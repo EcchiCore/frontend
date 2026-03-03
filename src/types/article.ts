@@ -29,7 +29,7 @@ export type Article = {
   favoritesCount: number;
   sequentialCode: string | null;
   downloads?: { id: number; isActive: boolean; name: string; url: string; vipOnly: boolean }[];
-  mods?: { downloadLink: string; description: string; creditTo: string; categories: { name: string }[]; images: { url: string }[]; name: string; status: string; version: string }[];
+  mods?: { id: number; downloadLink: string; description: string; creditTo: string; categories: { name: string }[]; images: { url: string }[]; name: string; status: string; version: string }[];
   officialDownloadSources?: { name: string; url: string; status: string }[];
   version?: string;
   price?: number;
