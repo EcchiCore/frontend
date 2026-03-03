@@ -1,8 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { Copy, Eye, EyeOff, Shield, Sparkles } from "lucide-react";
+import Link from "next/link";
+import { Copy, Eye, EyeOff, Shield, Sparkles, Settings, User, Globe, Palette } from "lucide-react";
+
+interface SocialMediaLink {
+  platform: string;
+  url: string;
+}
 
 interface UserData {
   username: string;
@@ -12,6 +17,8 @@ interface UserData {
   token: string;
   ranks: string[];
   backgroundImage?: string;
+  points: number;
+  socialMediaLinks: SocialMediaLink[];
 }
 
 interface UserPageClientProps {
@@ -21,7 +28,7 @@ interface UserPageClientProps {
 export default function UserPageClient({ userData }: UserPageClientProps) {
   const [showToken, setShowToken] = useState(false);
   const [copied, setCopied] = useState(false);
-  useRouter();
+
   const toggleShowToken = () => {
     setShowToken(!showToken);
   };
@@ -36,154 +43,116 @@ export default function UserPageClient({ userData }: UserPageClientProps) {
 
   return (
     <div className="space-y-6">
-      {/* Token Widget */}
-      <div className="backdrop-blur-lg bg-white/10 border border-white/20 p-6 rounded-2xl shadow-2xl hover:bg-white/15 transition-all duration-300">
-        {/* Header */}
-        <div className="flex items-center gap-3 mb-4">
-          <div className="p-2 bg-gradient-to-r from-purple-500/20 to-blue-500/20 rounded-lg">
-            <Shield className="h-5 w-5 text-purple-300" />
+      {/* Stats Widget */}
+      <div className="card bg-slate-900/50 backdrop-blur-xl border border-white/10 shadow-xl overflow-hidden rounded-3xl">
+        <div className="card-body p-6">
+          <h3 className="text-sm font-bold text-slate-500 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-yellow-500" />
+            Statistics
+          </h3>
+          
+          <div className="grid grid-cols-2 gap-4">
+            <div className="p-4 bg-white/5 rounded-2xl border border-white/5 text-center">
+              <div className="text-2xl font-black text-white">{userData.points || 0}</div>
+              <div className="text-xs font-bold text-slate-500 uppercase mt-1">Points</div>
+            </div>
+            <div className="p-4 bg-white/5 rounded-2xl border border-white/5 text-center">
+              <div className="text-2xl font-black text-white">{userData.ranks?.length || 0}</div>
+              <div className="text-xs font-bold text-slate-500 uppercase mt-1">Roles</div>
+            </div>
           </div>
-          <h3 className="text-lg font-semibold text-white">API Token</h3>
-          {showToken && (
-            <div className="flex items-center gap-1 px-2 py-1 bg-green-500/20 border border-green-400/30 rounded-full">
-              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-              <span className="text-xs font-medium text-green-300">Active</span>
+          
+          <div className="mt-4 p-4 bg-green-500/10 border border-green-500/20 rounded-2xl flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+              <span className="text-sm font-bold text-green-400">Account Status</span>
             </div>
-          )}
+            <span className="text-xs font-black text-green-500 uppercase">Active</span>
+          </div>
         </div>
+      </div>
 
-        {/* Action Buttons */}
-        <div className="flex gap-2 mb-4">
-          <button
-            onClick={toggleShowToken}
-            className="flex-1 group relative px-4 py-2 bg-purple-500/20 backdrop-blur-sm border border-purple-400/30 text-purple-300 rounded-xl hover:bg-purple-500/30 hover:text-white transition-all duration-300 hover:scale-105"
-          >
-            <div className="flex items-center justify-center gap-2">
-              {showToken ? (
-                <EyeOff className="h-4 w-4 transition-transform duration-300 group-hover:scale-110" />
-              ) : (
-                <Eye className="h-4 w-4 transition-transform duration-300 group-hover:scale-110" />
-              )}
-              <span className="text-sm font-medium">
-                {showToken ? "ซ่อน" : "แสดง"}
-              </span>
-            </div>
-          </button>
-
-          {showToken && (
+      {/* Token Widget */}
+      <div className="card bg-slate-900/50 backdrop-blur-xl border border-white/10 shadow-xl overflow-hidden rounded-3xl">
+        <div className="card-body p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-sm font-bold text-slate-500 uppercase tracking-[0.2em] flex items-center gap-2">
+              <Shield className="w-4 h-4 text-purple-500" />
+              API Token
+            </h3>
             <button
-              onClick={copyToken}
-              disabled={copied}
-              className="flex-1 group relative px-4 py-2 bg-blue-500/20 backdrop-blur-sm border border-blue-400/30 text-blue-300 rounded-xl hover:bg-blue-500/30 hover:text-white transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105"
+              onClick={toggleShowToken}
+              className="btn btn-ghost btn-xs text-slate-400 hover:text-white"
             >
-              <div className="flex items-center justify-center gap-2">
-                {copied ? (
-                  <Sparkles className="h-4 w-4 text-green-400 animate-pulse" />
-                ) : (
-                  <Copy className="h-4 w-4 transition-transform duration-300 group-hover:scale-110" />
-                )}
-                <span className="text-sm font-medium">
-                  {copied ? "คัดลอกแล้ว!" : "คัดลอก"}
-                </span>
-              </div>
+              {showToken ? <EyeOff size={14} /> : <Eye size={14} />}
+              {showToken ? "Hide" : "Show"}
             </button>
-          )}
-        </div>
+          </div>
 
-        {/* Token Display */}
-        <div className="relative overflow-hidden rounded-xl">
-          {showToken ? (
-            <div className="relative">
-              <div className="bg-slate-900/50 backdrop-blur-sm border border-slate-700/50 p-4 rounded-xl">
-                <code className="text-xs font-mono text-green-300 break-all leading-relaxed selection:bg-green-500/20">
-                  {userData.token}
-                </code>
-              </div>
-              {/* Animated border */}
-              <div className="absolute inset-0 rounded-xl">
-                <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 via-blue-500/20 to-purple-500/20 rounded-xl opacity-50 animate-pulse"></div>
-              </div>
+          <div className="relative group">
+            <div className={`p-4 rounded-2xl font-mono text-xs break-all transition-all duration-300 ${
+              showToken 
+                ? "bg-slate-950 text-purple-300 border border-purple-500/30" 
+                : "bg-slate-950/50 text-slate-600 blur-sm select-none border border-white/5"
+            }`}>
+              {showToken ? userData.token : "••••••••••••••••••••••••••••••••••••••••••••••••"}
             </div>
-          ) : (
-            <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-600/50 p-4 rounded-xl">
-              <div className="flex flex-col items-center justify-center gap-3 text-gray-400">
-                <Shield className="h-5 w-5" />
-                <p className="text-xs text-center">คลิกที่ปุ่ม &#34;แสดง&#34; เพื่อดู Token ของคุณ</p>
-              </div>
-              {/* Animated dots */}
-              <div className="flex justify-center gap-1 mt-3">
-                <div className="w-2 h-2 bg-gray-500 rounded-full animate-pulse"></div>
-                <div className="w-2 h-2 bg-gray-500 rounded-full animate-pulse delay-200"></div>
-                <div className="w-2 h-2 bg-gray-500 rounded-full animate-pulse delay-400"></div>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Security Notice */}
-        <div className="mt-4 p-3 bg-amber-500/10 border border-amber-400/20 rounded-lg">
-          <p className="text-xs text-amber-300 flex items-start gap-2">
-            <Shield className="h-3 w-3 mt-0.5 flex-shrink-0" />
-            <span>อย่าแชร์ Token นี้กับใคร เพื่อความปลอดภัยของบัญชีของคุณ</span>
+            
+            {showToken && (
+              <button
+                onClick={copyToken}
+                className="absolute right-2 top-1/2 -translate-y-1/2 btn btn-circle btn-ghost btn-sm text-purple-400"
+              >
+                {copied ? <Sparkles size={16} className="text-green-400" /> : <Copy size={16} />}
+              </button>
+            )}
+          </div>
+          
+          <p className="mt-3 text-[10px] text-slate-500 leading-tight">
+            Use this token to authenticate with our API. Keep it secret!
           </p>
         </div>
       </div>
 
-      {/* User Stats Widget */}
-      <div className="backdrop-blur-lg bg-white/10 border border-white/20 p-6 rounded-2xl shadow-2xl hover:bg-white/15 transition-all duration-300">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="p-2 bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-lg">
-            <Sparkles className="h-5 w-5 text-green-300" />
-          </div>
-          <h3 className="text-lg font-semibold text-white">สถิติ</h3>
-        </div>
-
-        <div className="space-y-3">
-          <div className="flex items-center justify-between p-3 bg-slate-800/30 rounded-lg">
-            <span className="text-sm text-gray-300">จำนวนระดับ</span>
-            <span className="text-lg font-bold text-white">{userData.ranks?.length || 0}</span>
-          </div>
-
-          <div className="flex items-center justify-between p-3 bg-slate-800/30 rounded-lg">
-            <span className="text-sm text-gray-300">สถานะบัญชี</span>
-            <div className="flex items-center gap-2">
-              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-              <span className="text-sm font-medium text-green-300">ออนไลน์</span>
-            </div>
-          </div>
-
-          <div className="flex items-center justify-between p-3 bg-slate-800/30 rounded-lg">
-            <span className="text-sm text-gray-300">มีข้อมูลโปรไฟล์</span>
-            <span className="text-sm font-medium text-blue-300">
-              {userData.bio ? 'ครบถ้วน' : 'ไม่ครบถ้วน'}
-            </span>
-          </div>
-        </div>
-      </div>
-
       {/* Quick Actions Widget */}
-      <div className="backdrop-blur-lg bg-white/10 border border-white/20 p-6 rounded-2xl shadow-2xl hover:bg-white/15 transition-all duration-300">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="p-2 bg-gradient-to-r from-blue-500/20 to-cyan-500/20 rounded-lg">
-            <svg className="h-5 w-5 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
+      <div className="card bg-slate-900/50 backdrop-blur-xl border border-white/10 shadow-xl overflow-hidden rounded-3xl">
+        <div className="card-body p-6">
+          <h3 className="text-sm font-bold text-slate-500 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
+            <Settings className="w-4 h-4 text-blue-500" />
+            Quick Actions
+          </h3>
+
+          <div className="grid grid-cols-1 gap-2">
+            <Link 
+              href="/member/dashboard#settings" 
+              className="flex items-center gap-3 p-3 bg-white/5 rounded-xl hover:bg-white/10 transition-all border border-transparent hover:border-white/10 group"
+            >
+              <div className="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center text-blue-400 group-hover:bg-blue-500 group-hover:text-white transition-colors">
+                <User size={16} />
+              </div>
+              <span className="text-sm font-bold text-slate-300">Edit Profile</span>
+            </Link>
+
+            <Link 
+              href="/member/dashboard#settings" 
+              className="flex items-center gap-3 p-3 bg-white/5 rounded-xl hover:bg-white/10 transition-all border border-transparent hover:border-white/10 group"
+            >
+              <div className="w-8 h-8 rounded-lg bg-purple-500/20 flex items-center justify-center text-purple-400 group-hover:bg-purple-500 group-hover:text-white transition-colors">
+                <Palette size={16} />
+              </div>
+              <span className="text-sm font-bold text-slate-300">Appearance</span>
+            </Link>
+
+            <Link 
+              href="/member/dashboard#settings" 
+              className="flex items-center gap-3 p-3 bg-white/5 rounded-xl hover:bg-white/10 transition-all border border-transparent hover:border-white/10 group"
+            >
+              <div className="w-8 h-8 rounded-lg bg-green-500/20 flex items-center justify-center text-green-400 group-hover:bg-green-500 group-hover:text-white transition-colors">
+                <Globe size={16} />
+              </div>
+              <span className="text-sm font-bold text-slate-300">Language</span>
+            </Link>
           </div>
-          <h3 className="text-lg font-semibold text-white">การกระทำ</h3>
-        </div>
-
-        <div className="space-y-3">
-          <button className="w-full p-3 bg-gradient-to-r from-purple-500/20 to-purple-600/20 border border-purple-400/30 text-purple-300 rounded-xl hover:bg-purple-500/30 hover:text-white transition-all duration-300 hover:scale-105 text-sm font-medium">
-            แก้ไขโปรไฟล์
-          </button>
-
-          <button className="w-full p-3 bg-gradient-to-r from-blue-500/20 to-blue-600/20 border border-blue-400/30 text-blue-300 rounded-xl hover:bg-blue-500/30 hover:text-white transition-all duration-300 hover:scale-105 text-sm font-medium">
-            เปลี่ยนรูปพื้นหลัง
-          </button>
-
-          <button className="w-full p-3 bg-gradient-to-r from-indigo-500/20 to-indigo-600/20 border border-indigo-400/30 text-indigo-300 rounded-xl hover:bg-indigo-500/30 hover:text-white transition-all duration-300 hover:scale-105 text-sm font-medium">
-            ตั้งค่าความปลอดภัย
-          </button>
         </div>
       </div>
     </div>

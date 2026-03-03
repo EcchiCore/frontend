@@ -28,8 +28,16 @@ export const SidebarShadcn: React.FC<SidebarProps> = ({ className = '' }) => {
   const user = useAppSelector((state) => state.auth.user);
 
   const hasRequiredRank = (item: NavigationItem): boolean => {
-    if (!item.requiredRanks || !user || !user.rank) return true;
-    return item.requiredRanks.includes(user.rank);
+    if (!item.requiredRanks || !user) return true;
+    
+    const userRanks = [
+      ...(user.rank ? [user.rank] : []),
+      ...(user.roles || [])
+    ].map(r => r.toUpperCase());
+
+    return item.requiredRanks.some(requiredRank => 
+      userRanks.includes(requiredRank.toUpperCase())
+    );
   };
 
   const getIcon = (iconName: keyof typeof iconMap) => {

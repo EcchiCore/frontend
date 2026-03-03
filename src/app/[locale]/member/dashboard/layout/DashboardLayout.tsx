@@ -10,8 +10,8 @@ import { Loader2, AlertCircle } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { setCurrentPage, setMobileOpen } from '@/store/features/dashboard/dashboardSlice';
 import { PageType } from '../utils/types';
+import { NAVIGATION_ITEMS } from '../utils/constants';
 
-// Lazy load pages
 // Lazy load pages
 const ArticlesPage = React.lazy(() => import('../pages/ArticlesPage').then(module => ({ default: module.ArticlesPage })));
 const ProfilePage = React.lazy(() => import('../profile/page'));
@@ -42,26 +42,48 @@ const getPageFromHash = (): PageType => {
 export const DashboardLayoutShadcn: React.FC<DashboardLayoutProps> = ({ title }) => {
   const dispatch = useAppDispatch();
   const { currentPage, mobileOpen } = useAppSelector((state) => state.dashboard);
-  const { loading, error } = useAppSelector((state) => state.auth);
+  const { user, loading, error } = useAppSelector((state) => state.auth);
 
   const handleMobileOpenChange = useCallback((open: boolean) => {
     dispatch(setMobileOpen(open));
   }, [dispatch]);
 
+  const isAuthorized = useCallback((pageId: PageType) => {
+    const navItem = NAVIGATION_ITEMS.find(item => item.id === pageId);
+    if (!navItem || !navItem.requiredRanks) return true;
+    if (!user) return false;
+
+    const userRanks = [
+      ...(user.rank ? [user.rank] : []),
+      ...(user.roles || [])
+    ].map(r => r.toUpperCase());
+
+    return navItem.requiredRanks.some(rank => userRanks.includes(rank.toUpperCase()));
+  }, [user]);
+
   // Sync hash with Redux state on mount and hashchange
   useEffect(() => {
     const handleHashChange = () => {
-      dispatch(setCurrentPage(getPageFromHash()));
+      const pageFromHash = getPageFromHash();
+      if (isAuthorized(pageFromHash)) {
+        dispatch(setCurrentPage(pageFromHash));
+      } else {
+        // Fallback to profile if not authorized
+        window.location.hash = 'profile';
+        dispatch(setCurrentPage('profile'));
+      }
     };
 
     // Initial load
-    handleHashChange();
+    if (!loading && user) {
+      handleHashChange();
+    }
 
     window.addEventListener('hashchange', handleHashChange);
     return () => {
       window.removeEventListener('hashchange', handleHashChange);
     };
-  }, [dispatch]);
+  }, [dispatch, isAuthorized, loading, user]);
 
   const LoadingFallback = () => (
     <div className="min-h-[50vh] flex items-center justify-center">
