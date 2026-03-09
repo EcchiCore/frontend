@@ -175,7 +175,10 @@ const SettingsPage: React.FC = () => {
 
     try {
       setLoading(true);
-      await userApi.updatePassword(profileForm.password, profileForm.newPassword);
+      await userApi.updatePassword({
+        currentPassword: profileForm.password,
+        newPassword: profileForm.newPassword
+      });
       setProfileForm((prev) => ({
         ...prev,
         password: '',
@@ -194,7 +197,10 @@ const SettingsPage: React.FC = () => {
   const handleCreateToken = async () => {
     try {
       setLoading(true);
-      const response = await userApi.createToken(newTokenDuration, newTokenRank);
+      const response = await userApi.createToken({
+        duration: newTokenDuration,
+        ranks: [newTokenRank]
+      });
       setNewCreatedToken(response.token);
       setIsCreatingToken(false);
       fetchTokens();
@@ -224,7 +230,7 @@ const SettingsPage: React.FC = () => {
   };
 
   const hasTokenAccess = () => {
-    return user?.roles?.some((role) => ['ADMIN', 'MODERATOR'].includes(role?.role?.name || '')) || false;
+    return user?.roles?.some((role) => ['ADMIN', 'MODERATOR'].includes(role || '')) || false;
   };
 
   const handleDeleteAccount = async () => {
@@ -272,7 +278,7 @@ const SettingsPage: React.FC = () => {
   };
 
   const hasDeveloperRole = useCallback(() => {
-    return user?.roles?.some(role => role?.role?.name === 'DEVELOPER') || false;
+    return user?.roles?.some(role => role === 'DEVELOPER') || false;
   }, [user]);
 
   // Special logic: Show developer tab ONLY if user IS a dev OR has a verification token in URL

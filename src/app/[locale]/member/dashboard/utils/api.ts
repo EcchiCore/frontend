@@ -87,7 +87,7 @@ export const refreshTokenRequest = async (): Promise<{ token: string; refreshTok
   const json = await response.json();
   const data = json.data || json;
   return {
-    token: data.token || data.user?.token,
+    token: data.accessToken || data.token || data.user?.token,
     refreshToken: data.refreshToken,
   };
 };

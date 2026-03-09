@@ -45,8 +45,8 @@ const ProfilePage: React.FC = () => {
     image: user?.image || ''
   });
 
-  const hasDeveloperRole = user?.roles?.some(role => role?.role?.name === 'DEVELOPER') || false;
-  const isAdminOrMod = user?.roles?.some(role => ['ADMIN', 'MODERATOR'].includes(role?.role?.name || '')) || false;
+  const hasDeveloperRole = user?.roles?.some(role => role === 'DEVELOPER') || false;
+  const isAdminOrMod = user?.roles?.some(role => ['ADMIN', 'MODERATOR'].includes(role || '')) || false;
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;

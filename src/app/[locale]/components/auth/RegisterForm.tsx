@@ -136,8 +136,10 @@ export function RegisterForm({ onSwitch }: { onSwitch: () => void }) {
       );
 
       // Check for token in data.user (SDK/standard) or data.data.user (Actual response)
-      const user = response.data?.data?.user || response.data?.user;
+      const responseData = response.data?.data || response.data;
+      const user = responseData?.user;
       const token = user?.token;
+      const refreshToken = responseData?.refreshToken;
 
       if (token) {
         Cookies.set('token', token, {
@@ -145,6 +147,14 @@ export function RegisterForm({ onSwitch }: { onSwitch: () => void }) {
           secure: true,
           sameSite: 'strict'
         });
+
+        if (refreshToken) {
+          Cookies.set('refreshToken', refreshToken, {
+            expires: 7,
+            secure: true,
+            sameSite: 'strict'
+          });
+        }
 
         toast.success(t('successMessage'), { autoClose: 2000 });
         setTimeout(() => {

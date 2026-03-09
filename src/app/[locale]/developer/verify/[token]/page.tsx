@@ -3,8 +3,8 @@
 import { useParams } from "next/navigation";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import Switch from "../../../../components/Switch/switch";
-import { VerificationForm } from "../../../../components/developer/VerificationForm";
+import Switch from "../../../components/Switch/switch";
+import { VerificationForm } from "../../../components/developer/VerificationForm";
 
 export default function VerificationPage() {
   const params = useParams();

@@ -21,6 +21,7 @@ export interface SocialMediaLink {
 export interface Token {
   id: number;
   token: string;
+  createdAt: string;
   expiresAt: string;
   ranks: { id: number; rank: string }[];
 }
