@@ -570,5 +570,18 @@
     "stableRelease": "Stable Release",
     "lookingForFull": "Looking for the full experience?",
     "goToChanoX2": "Go to ChanoX2 Pro"
+  },
+  "Admin": {
+    "developerOnboarding": "Developer Onboarding",
+    "generateTokenDescription": "Generate a one-time verification link for a new game developer.",
+    "userIdLabel": "User ID",
+    "userIdPlaceholder": "Enter user ID (e.g. 25)",
+    "generateButton": "Generate Token",
+    "generating": "Generating...",
+    "tokenGenerated": "Verification token generated successfully!",
+    "oneTimeLink": "One-Time Verification Link",
+    "copyTooltip": "Copy to clipboard",
+    "copied": "Copied!",
+    "linkExpiryNotice": "This link will expire in 7 days and can only be used once. Send this to the developer."
   }
 }

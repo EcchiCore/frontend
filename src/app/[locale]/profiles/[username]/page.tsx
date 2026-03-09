@@ -21,6 +21,7 @@ interface Profile {
   backgroundImage: string | null;
   following: boolean;
   socialMediaLinks?: SocialMediaLink[];
+  roles?: string[];
 }
 
 interface Article {
@@ -198,9 +199,17 @@ export default async function ProfilePage({
                   </div>
 
                   {/* Username */}
-                  <h1 className="text-3xl font-bold text-white tracking-tight">
-                    {profile.name}
-                  </h1>
+                  <div className="flex flex-col items-center gap-2">
+                    <h1 className="text-3xl font-bold text-white tracking-tight">
+                      {profile.name}
+                    </h1>
+                    {profile.roles?.includes('DEVELOPER') && (
+                      <div className="badge badge-info gap-2 py-3 px-4 font-bold">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="inline-block w-4 h-4 stroke-current"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path></svg>
+                        OFFICIAL DEVELOPER
+                      </div>
+                    )}
+                  </div>
 
                   {/* Bio */}
                   <p className="text-white/60 mt-2 max-w-sm leading-relaxed">

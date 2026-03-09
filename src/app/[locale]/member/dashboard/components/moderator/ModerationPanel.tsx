@@ -29,6 +29,15 @@ interface ModerationRequest {
   entityDetails: any; // This will vary based on entityType
 }
 
+// Icon helper since HeroIcons was used in other files
+function IdentificationIcon({ className }: { className?: string }) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M15 9h3.75M15 12h3.75M15 15h3.75M4.5 19.5h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5zm6-10.125a1.875 1.875 0 11-3.75 0 1.875 1.875 0 013.75 0zm1.294 6.336a6.721 6.721 0 01-3.17.789 6.721 6.721 0 01-3.168-.789 3.376 3.376 0 016.338 0z" />
+    </svg>
+  );
+}
+
 const ModerationPanel: React.FC = () => {
   const [pendingRequests, setPendingRequests] = useState<ModerationRequest[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -105,6 +114,16 @@ const ModerationPanel: React.FC = () => {
                   name
                   url
                   status
+                }
+                ... on DeveloperProfileDetails {
+                  id
+                  realName
+                  bankType
+                  bankName
+                  bankAccount
+                  swiftCode
+                  bankAddress
+                  citizenId
                 }
                 ... on OtherDetails {
                   id
@@ -188,6 +207,27 @@ const ModerationPanel: React.FC = () => {
                 <p><strong>Status:</strong> {request.status}</p>
                 <p><strong>Requested by:</strong> {request.requester.name}</p>
                 {request.requestNote && <p><strong>Requester Note:</strong> {request.requestNote}</p>}
+                
+                {request.entityType === 'DEVELOPER_PROFILE' && request.entityDetails && (
+                  <div className="mt-4 p-4 bg-base-200 rounded-lg border border-base-300">
+                    <h4 className="font-bold text-lg mb-2 flex items-center gap-2">
+                      <IdentificationIcon className="h-5 w-5" />
+                      Applicant Details
+                    </h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2 text-sm">
+                      <p><strong>Real Name:</strong> {request.entityDetails.realName}</p>
+                      <p><strong>Bank Type:</strong> {request.entityDetails.bankType}</p>
+                      <p><strong>Bank Name:</strong> {request.entityDetails.bankName}</p>
+                      <p><strong>Account:</strong> {request.entityDetails.bankAccount}</p>
+                      {request.entityDetails.swiftCode && <p><strong>SWIFT:</strong> {request.entityDetails.swiftCode}</p>}
+                      {request.entityDetails.citizenId && <p><strong>ID/Passport:</strong> {request.entityDetails.citizenId}</p>}
+                      {request.entityDetails.bankAddress && (
+                        <p className="col-span-full"><strong>Bank Address:</strong> {request.entityDetails.bankAddress}</p>
+                      )}
+                    </div>
+                  </div>
+                )}
+
                 <div className="card-actions justify-end mt-4">
                   <button
                     className="btn btn-success"

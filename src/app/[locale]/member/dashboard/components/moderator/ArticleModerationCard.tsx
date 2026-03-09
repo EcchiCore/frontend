@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Check, X, ChevronDown, ChevronUp, FileText, Link, ShoppingCart, MessageCircle, ExternalLink } from 'lucide-react';
+import { Check, X, ChevronDown, ChevronUp, FileText, Link, ShoppingCart, MessageCircle, ExternalLink, UserCheck, Landmark, Globe } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -13,7 +13,7 @@ import { resolveArticleImageUrl } from '@/lib/articleImageUrl';
 
 // Types matching new backend API
 export type RequestStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'NEEDS_REVISION';
-export type EntityType = 'ARTICLE' | 'DOWNLOAD_LINK' | 'OFFICIAL_DOWNLOAD_SOURCE' | 'COMMENT';
+export type EntityType = 'ARTICLE' | 'DOWNLOAD_LINK' | 'OFFICIAL_DOWNLOAD_SOURCE' | 'COMMENT' | 'DEVELOPER_PROFILE';
 export type EntityStatus = 'DRAFT' | 'PUBLISHED' | 'ARCHIVED' | 'DELETED' | 'PENDING_REVIEW' | 'PENDING' | 'NEEDS_REVISION';
 
 // New API response types
@@ -50,6 +50,14 @@ export interface ModerationRequest {
         url?: string;
         // For COMMENT
         content?: string;
+        // For DEVELOPER_PROFILE
+        realName?: string;
+        bankType?: string;
+        bankName?: string;
+        bankAccount?: string;
+        swiftCode?: string;
+        bankAddress?: string;
+        citizenId?: string;
     } | null;
 }
 
@@ -83,6 +91,8 @@ const EntityIcon = ({ type }: { type: EntityType }) => {
             return <ShoppingCart className="w-4 h-4" />;
         case 'COMMENT':
             return <MessageCircle className="w-4 h-4" />;
+        case 'DEVELOPER_PROFILE':
+            return <UserCheck className="w-4 h-4" />;
         default:
             return <FileText className="w-4 h-4" />;
     }
@@ -94,10 +104,11 @@ const EntityTypeBadge = ({ type }: { type: EntityType }) => {
         DOWNLOAD_LINK: { variant: 'secondary', label: 'Download' },
         OFFICIAL_DOWNLOAD_SOURCE: { variant: 'outline', label: 'Official' },
         COMMENT: { variant: 'destructive', label: 'Comment' },
+        DEVELOPER_PROFILE: { variant: 'default', label: 'Dev Profile' },
     }[type] || { variant: 'secondary', label: type };
 
     return (
-        <Badge variant={config.variant as 'default' | 'secondary' | 'outline' | 'destructive'} className="gap-1 text-xs">
+        <Badge variant={config.variant as 'default' | 'secondary' | 'outline' | 'destructive'} className={`gap-1 text-xs ${type === 'DEVELOPER_PROFILE' ? 'bg-indigo-600 hover:bg-indigo-700' : ''}`}>
             <EntityIcon type={type} />
             {config.label}
         </Badge>
@@ -305,6 +316,9 @@ const RequestRow: React.FC<RequestRowProps> = ({
         if (request.entityType === 'ARTICLE') {
             return 'Article Review Request';
         }
+        if (request.entityType === 'DEVELOPER_PROFILE') {
+            return `Dev: ${request.entityDetails?.realName} (${request.entityDetails?.bankName})`;
+        }
         if (request.entityDetails?.name) {
             return request.entityDetails.name;
         }
@@ -315,45 +329,81 @@ const RequestRow: React.FC<RequestRowProps> = ({
     };
 
     return (
-        <div className="flex items-center gap-3 p-2 rounded-lg bg-white dark:bg-gray-800 border">
-            <Checkbox
-                checked={isSelected}
-                onCheckedChange={onToggleSelect}
-                className="h-4 w-4"
-            />
-            <EntityTypeBadge type={request.entityType} />
-            <span className="flex-1 text-sm truncate">{getEntityLabel()}</span>
-            {request.entityDetails?.url && (
-                <a
-                    href={request.entityDetails.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-500 hover:text-blue-600"
-                >
-                    <ExternalLink className="w-4 h-4" />
-                </a>
-            )}
-            <StatusBadge status={request.status} />
-            <div className="flex gap-1">
-                <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={onApprove}
-                    disabled={loading}
-                    className="h-7 w-7 p-0 text-green-600 hover:text-green-700 hover:bg-green-50"
-                >
-                    <Check className="w-4 h-4" />
-                </Button>
-                <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={onReject}
-                    disabled={loading}
-                    className="h-7 w-7 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
-                >
-                    <X className="w-4 h-4" />
-                </Button>
+        <div className="flex flex-col gap-2 p-3 rounded-lg bg-white dark:bg-gray-800 border">
+            <div className="flex items-center gap-3">
+                <Checkbox
+                    checked={isSelected}
+                    onCheckedChange={onToggleSelect}
+                    className="h-4 w-4"
+                />
+                <EntityTypeBadge type={request.entityType} />
+                <span className="flex-1 text-sm font-medium truncate">{getEntityLabel()}</span>
+                <StatusBadge status={request.status} />
+                <div className="flex gap-1">
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={onApprove}
+                        disabled={loading}
+                        className="h-7 w-7 p-0 text-green-600 hover:text-green-700 hover:bg-green-50"
+                    >
+                        <Check className="w-4 h-4" />
+                    </Button>
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={onReject}
+                        disabled={loading}
+                        className="h-7 w-7 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                    >
+                        <X className="w-4 h-4" />
+                    </Button>
+                </div>
             </div>
+
+            {request.entityType === 'DEVELOPER_PROFILE' && request.entityDetails && (
+                <div className="ml-7 mt-1 grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 text-xs text-muted-foreground bg-gray-50 dark:bg-gray-900/50 p-2 rounded border border-dashed">
+                    <div className="flex items-center gap-1.5">
+                        <Landmark className="h-3 w-3" />
+                        <span className="font-bold">Bank:</span> {request.entityDetails.bankName}
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                        {request.entityDetails.bankType === 'LOCAL' ? <Landmark className="h-3 w-3" /> : <Globe className="h-3 w-3" />}
+                        <span className="font-bold">Account:</span> {request.entityDetails.bankAccount}
+                    </div>
+                    {request.entityDetails.swiftCode && (
+                        <div className="flex items-center gap-1.5">
+                            <Globe className="h-3 w-3" />
+                            <span className="font-bold">SWIFT:</span> {request.entityDetails.swiftCode}
+                        </div>
+                    )}
+                    {request.entityDetails.citizenId && (
+                        <div className="flex items-center gap-1.5">
+                            <UserCheck className="h-3 w-3" />
+                            <span className="font-bold">ID:</span> {request.entityDetails.citizenId}
+                        </div>
+                    )}
+                    {request.entityDetails.bankAddress && (
+                        <div className="col-span-full mt-1 border-t pt-1 border-gray-200 dark:border-gray-700">
+                            <span className="font-bold">Address:</span> {request.entityDetails.bankAddress}
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {request.entityDetails?.url && (
+                <div className="ml-7">
+                    <a
+                        href={request.entityDetails.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs text-blue-500 hover:underline flex items-center gap-1"
+                    >
+                        <ExternalLink className="w-3 h-3" />
+                        View Attachment
+                    </a>
+                </div>
+            )}
         </div>
     );
 };

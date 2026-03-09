@@ -36,7 +36,7 @@ export const TopBarShadcn: React.FC<TopBarProps> = ({ title }) => {
   };
 
   return (
-    <header className="bg-primary text-primary-content shadow-md min-h-[64px] px-4 flex items-center">
+    <header className="bg-background text-foreground border-b border-border shadow-sm min-h-[64px] px-4 flex items-center">
       {/* Mobile Menu Button */}
       <div className="lg:hidden">
         <Button
@@ -56,7 +56,7 @@ export const TopBarShadcn: React.FC<TopBarProps> = ({ title }) => {
             {title}
           </h1>
           {user && (
-            <span className="text-xs sm:text-sm text-primary-content/80">
+            <span className="text-xs sm:text-sm text-muted-foreground">
               {user.rank || 'No rank'}
             </span>
           )}

@@ -15,6 +15,7 @@ import {
 import { userApi, ApiError, getCookie, setCookie } from '../utils/api';
 import { DashboardUser, SocialMediaLink, Token } from '../utils/types';
 import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
 import ImageWithFallback from '@/components/ImageWithFallback';
 
 // shadcn/ui components
@@ -36,9 +37,12 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
 
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { updateUserLocal } from '@/store/features/auth/authSlice';
+import { DeveloperSettingsTab } from './DeveloperSettingsTab';
+import { Landmark as LandmarkIcon } from 'lucide-react';
 
 interface SettingsFormData {
   username: string;
@@ -53,37 +57,26 @@ interface SettingsFormData {
   socialMediaLinks: SocialMediaLink[];
 }
 
-interface NotificationSettings {
-  emailArticles: boolean;
-  emailComments: boolean;
-  emailFollows: boolean;
-  pushArticles: boolean;
-  pushComments: boolean;
-  pushFollows: boolean;
-}
 
-interface PrivacySettings {
-  profileVisibility: 'public' | 'private';
-  showEmail: boolean;
-  showBio: boolean;
-  allowFollows: boolean;
-}
-
-interface AppearanceSettings {
-  theme: 'light' | 'dark' | 'auto';
-  language: string;
-  articlesPerPage: number;
-  compactView: boolean;
-  fontSize: 'small' | 'medium' | 'large';
-}
 
 const SettingsPage: React.FC = () => {
   const dispatch = useAppDispatch();
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const user = useAppSelector((state) => state.auth.user);
 
   const [activeTab, setActiveTab] = useState<
-    'profile' | 'security' | 'notifications' | 'privacy' | 'appearance' | 'tokens' | 'danger'
+    'profile' | 'security' | 'tokens' | 'developer' | 'danger'
   >('profile');
+
+  // Handle URL parameters for tab switching
+  useEffect(() => {
+    const tabParam = searchParams.get('tab');
+    if (tabParam && ['profile', 'security', 'tokens', 'developer', 'danger'].includes(tabParam)) {
+      setActiveTab(tabParam as any);
+    }
+  }, [searchParams]);
+
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [tokens, setTokens] = useState<Token[]>([]);
@@ -106,102 +99,37 @@ const SettingsPage: React.FC = () => {
     socialMediaLinks: [],
   });
 
-  const [notificationSettings, setNotificationSettings] = useState<NotificationSettings>({
-    emailArticles: true,
-    emailComments: true,
-    emailFollows: true,
-    pushArticles: false,
-    pushComments: false,
-    pushFollows: false,
-  });
 
-  const [privacySettings, setPrivacySettings] = useState<PrivacySettings>({
-    profileVisibility: 'public',
-    showEmail: false,
-    showBio: true,
-    allowFollows: true,
-  });
 
-  const [appearanceSettings, setAppearanceSettings] = useState<AppearanceSettings>({
-    theme: 'light',
-    language: 'en',
-    articlesPerPage: 10,
-    compactView: false,
-    fontSize: 'medium',
-  });
-
-  // Memoized fetchTokens
-  const fetchTokens = useCallback(async () => {
-    setLoading(true);
-    try {
-      const data = await userApi.getTokens();
-      setTokens(data);
-    } catch {
-      showMessage('error', 'Failed to load tokens');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  const hasTokenAccess = useCallback(() => {
-    return user?.rank && ['USER', 'MODERATOR', 'ADMIN'].includes(user.rank);
-  }, [user]);
-
+  // Load user data
   useEffect(() => {
     if (user) {
-      setProfileForm({
+      setProfileForm((prev) => ({
+        ...prev,
         username: user.username || '',
         email: user.email || '',
         bio: user.bio || '',
         image: user.image || '',
         backgroundImage: user.backgroundImage || '',
-        password: '',
-        newPassword: '',
-        confirmPassword: '',
-        shrtflyApiKey: user.shrtflyApiKey || '',
         socialMediaLinks: user.socialMediaLinks || [],
-      });
-
-      const savedTheme = localStorage.getItem('userTheme') || 'light';
-      const savedFontSize = localStorage.getItem('userFontSize') || 'medium';
-      const savedLanguage = getCookie('userLanguage') || 'en';
-      setAppearanceSettings((prev) => ({
-        ...prev,
-        theme: savedTheme as 'light' | 'dark' | 'auto',
-        fontSize: savedFontSize as 'small' | 'medium' | 'large',
-        language: savedLanguage,
       }));
-
-      applyTheme(savedTheme);
-      applyFontSize(savedFontSize);
-
-      if (hasTokenAccess()) {
-        fetchTokens();
-      }
     }
-  }, [user, fetchTokens, hasTokenAccess]);
+  }, [user]);
 
-
-  /* 
-  * Conflicting with DashboardLayout hash routing.
-  * Disabling hash sync for tabs.
-  */
-
-  const applyTheme = (theme: string) => {
-    document.documentElement.setAttribute('data-theme', theme);
-  };
-
-  const applyFontSize = (size: string) => {
-    let rootSize = '16px';
-    switch (size) {
-      case 'small':
-        rootSize = '14px';
-        break;
-      case 'large':
-        rootSize = '18px';
-        break;
+  // Load tokens if on tokens tab
+  useEffect(() => {
+    if (activeTab === 'tokens' && user) {
+      fetchTokens();
     }
-    document.documentElement.style.fontSize = rootSize;
+  }, [activeTab, user]);
+
+  const fetchTokens = async () => {
+    try {
+      const response = await userApi.getTokens();
+      setTokens(response);
+    } catch (error) {
+      console.error('Failed to fetch tokens:', error);
+    }
   };
 
   const showMessage = (type: 'success' | 'error', text: string) => {
@@ -209,81 +137,27 @@ const SettingsPage: React.FC = () => {
     setTimeout(() => setMessage(null), 5000);
   };
 
-  const getHighestRank = () => {
-    if (!user?.rank) return null;
-    if (user.rank === 'ADMIN') return 'ADMIN';
-    if (user.rank === 'MODERATOR') return 'MODERATOR';
-    if (user.rank === 'USER') return 'USER';
-    return null;
-  };
-
-  const getFilteredRankOptions = () => {
-    const highestRank = getHighestRank();
-    const allRankOptions = [
-      { value: 'USER', label: 'User' },
-      { value: 'MODERATOR', label: 'Moderator' },
-      { value: 'ADMIN', label: 'Admin' },
-    ];
-    if (!highestRank) return [];
-    switch (highestRank) {
-      case 'ADMIN':
-        return allRankOptions;
-      case 'MODERATOR':
-        return allRankOptions.filter((option) => option.value !== 'ADMIN');
-      case 'USER':
-        return allRankOptions.filter((option) => option.value === 'USER');
-      default:
-        return [];
-    }
-  };
-
-  const createToken = async () => {
-    setIsCreatingToken(true);
-    setNewCreatedToken(null);
-    try {
-      const data = await userApi.createToken({
-        duration: newTokenDuration,
-        ranks: [newTokenRank],
-      });
-      setNewCreatedToken(data.token);
-      showMessage('success', 'Token created successfully!');
-      fetchTokens();
-    } catch {
-      showMessage('error', 'Failed to create token');
-    } finally {
-      setIsCreatingToken(false);
-    }
-  };
-
-  const deleteToken = async (id: number) => {
-    try {
-      await userApi.deleteToken(id);
-      setTokens(tokens.filter((t) => t.id !== id));
-      showMessage('success', 'Token deleted successfully!');
-    } catch {
-      showMessage('error', 'Failed to delete token');
-    }
-  };
-
-  const handleProfileUpdate = async (e: React.FormEvent) => {
+  const handleProfileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) return;
-
     try {
       setLoading(true);
-      const updateData: Partial<DashboardUser> = {
+      await userApi.updateUser({
         username: profileForm.username,
         email: profileForm.email,
-        bio: profileForm.bio || null,
-        image: profileForm.image || null,
-        backgroundImage: profileForm.backgroundImage || null,
-        shrtflyApiKey: profileForm.shrtflyApiKey || null,
+        bio: profileForm.bio,
+        image: profileForm.image,
+        backgroundImage: profileForm.backgroundImage,
         socialMediaLinks: profileForm.socialMediaLinks,
-      };
-
-      await userApi.updateUser(updateData);
-      dispatch(updateUserLocal(updateData));
-      showMessage('success', 'Profile updated successfully!');
+      });
+      dispatch(updateUserLocal({
+        username: profileForm.username,
+        email: profileForm.email,
+        bio: profileForm.bio,
+        image: profileForm.image,
+        backgroundImage: profileForm.backgroundImage,
+        socialMediaLinks: profileForm.socialMediaLinks,
+      }));
+      showMessage('success', 'Profile updated successfully');
     } catch (error) {
       const errorMessage = error instanceof ApiError ? error.message : 'Failed to update profile';
       showMessage('error', errorMessage);
@@ -292,34 +166,23 @@ const SettingsPage: React.FC = () => {
     }
   };
 
-  const handlePasswordChange = async (e: React.FormEvent) => {
+  const handlePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (profileForm.newPassword !== profileForm.confirmPassword) {
       showMessage('error', 'New passwords do not match');
       return;
     }
 
-    if (profileForm.newPassword.length < 8) {
-      showMessage('error', 'Password must be at least 8 characters long');
-      return;
-    }
-
     try {
       setLoading(true);
-      await userApi.updatePassword({
-        currentPassword: profileForm.password,
-        newPassword: profileForm.newPassword,
-      });
-
+      await userApi.updatePassword(profileForm.password, profileForm.newPassword);
       setProfileForm((prev) => ({
         ...prev,
         password: '',
         newPassword: '',
         confirmPassword: '',
       }));
-
-      showMessage('success', 'Password updated successfully!');
+      showMessage('success', 'Password updated successfully');
     } catch (error) {
       const errorMessage = error instanceof ApiError ? error.message : 'Failed to update password';
       showMessage('error', errorMessage);
@@ -328,21 +191,40 @@ const SettingsPage: React.FC = () => {
     }
   };
 
-  const handleAppearanceUpdate = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleCreateToken = async () => {
     try {
       setLoading(true);
-      localStorage.setItem('userTheme', appearanceSettings.theme);
-      localStorage.setItem('userFontSize', appearanceSettings.fontSize);
-      setCookie('userLanguage', appearanceSettings.language, 365);
-      applyTheme(appearanceSettings.theme);
-      applyFontSize(appearanceSettings.fontSize);
-      showMessage('success', 'Appearance settings saved successfully!');
-    } catch {
-      showMessage('error', 'Failed to save appearance settings');
+      const response = await userApi.createToken(newTokenDuration, newTokenRank);
+      setNewCreatedToken(response.token);
+      setIsCreatingToken(false);
+      fetchTokens();
+      showMessage('success', 'Token created successfully');
+    } catch (error) {
+      const errorMessage = error instanceof ApiError ? error.message : 'Failed to create token';
+      showMessage('error', errorMessage);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleDeleteToken = async (tokenId: number) => {
+    if (!confirm('Are you sure you want to delete this token?')) return;
+
+    try {
+      setLoading(true);
+      await userApi.deleteToken(tokenId);
+      fetchTokens();
+      showMessage('success', 'Token deleted successfully');
+    } catch (error) {
+      const errorMessage = error instanceof ApiError ? error.message : 'Failed to delete token';
+      showMessage('error', errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const hasTokenAccess = () => {
+    return user?.roles?.some((role) => ['ADMIN', 'MODERATOR'].includes(role?.role?.name || '')) || false;
   };
 
   const handleDeleteAccount = async () => {
@@ -389,12 +271,27 @@ const SettingsPage: React.FC = () => {
     }));
   };
 
+  const hasDeveloperRole = useCallback(() => {
+    return user?.roles?.some(role => role?.role?.name === 'DEVELOPER') || false;
+  }, [user]);
+
+  // Special logic: Show developer tab ONLY if user IS a dev OR has a verification token in URL
+  const shouldShowDeveloperTab = useCallback(() => {
+    if (hasDeveloperRole()) return true;
+    const hasTokenInUrl = searchParams.has('token');
+    const isCurrentlyOnTab = activeTab === 'developer';
+    return hasTokenInUrl || isCurrentlyOnTab;
+  }, [hasDeveloperRole, searchParams, activeTab]);
+
   const tabs = [
     { id: 'profile', label: 'Profile', icon: UserIcon },
     { id: 'security', label: 'Security', icon: LockClosedIcon },
-    { id: 'notifications', label: 'Notifications', icon: BellIcon },
-    { id: 'privacy', label: 'Privacy', icon: EyeIcon },
-    { id: 'appearance', label: 'Appearance', icon: PaintBrushIcon },
+    ...(shouldShowDeveloperTab() ? [{
+      id: 'developer',
+      label: 'Developer',
+      icon: LandmarkIcon,
+      badge: !hasDeveloperRole() ? 'Verification' : null
+    }] : []),
     ...(hasTokenAccess() ? [{ id: 'tokens', label: 'API Tokens', icon: KeyIcon }] : []),
     { id: 'danger', label: 'Danger Zone', icon: ExclamationTriangleIcon },
   ] as const;
@@ -403,15 +300,6 @@ const SettingsPage: React.FC = () => {
     { code: 'en', name: 'English', nativeName: 'English' },
     { code: 'th', name: 'Thai', nativeName: 'ไทย' },
     { code: 'es', name: 'Spanish', nativeName: 'Español' },
-  ];
-
-  const durations = [
-    { value: '1d', label: '1 Day' },
-    { value: '7d', label: '7 Days' },
-    { value: '30d', label: '30 Days' },
-    { value: '90d', label: '90 Days' },
-    { value: '365d', label: '1 Year' },
-    { value: 'permanent', label: 'Permanent' },
   ];
 
   if (!user) {
@@ -426,13 +314,16 @@ const SettingsPage: React.FC = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <div className="container mx-auto px-0 sm:px-4 py-4 sm:py-8 animate-in fade-in duration-500">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
         {/* Sidebar Navigation */}
         <div className="lg:col-span-1">
-          <div className="sticky top-4">
-            <h2 className="text-lg font-bold mb-4 text-foreground">Settings</h2>
-            <Card>
+          <div className="sticky top-4 space-y-4">
+            <h2 className="text-xl font-bold px-1 text-foreground flex items-center gap-2">
+              <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
+              Settings
+            </h2>
+            <Card className="border-border bg-card text-card-foreground shadow-sm">
               <CardContent className="p-2">
                 <nav className="space-y-1">
                   {tabs.map((tab) => {
@@ -441,652 +332,269 @@ const SettingsPage: React.FC = () => {
                       <Button
                         key={tab.id}
                         variant={activeTab === tab.id ? 'secondary' : 'ghost'}
-                        className="w-full justify-start"
+                        className={`w-full justify-start relative group transition-all duration-200 ${activeTab === tab.id ? 'bg-primary/10 text-primary' : 'hover:bg-primary/5'}`}
                         onClick={() => setActiveTab(tab.id as typeof activeTab)}
                       >
-                        <Icon className="h-4 w-4 mr-2" />
+                        <Icon className={`h-4 w-4 mr-2 transition-transform duration-200 ${activeTab === tab.id ? 'scale-110' : 'group-hover:translate-x-0.5'}`} />
                         {tab.label}
+                        {(tab as any).badge && (
+                          <Badge
+                            variant="secondary"
+                            className="ml-auto text-[10px] py-0 px-1.5 h-4 bg-primary/20 text-primary border-none shadow-none group-hover:bg-primary/30"
+                          >
+                            {(tab as any).badge}
+                          </Badge>
+                        )}
                       </Button>
                     );
                   })}
                 </nav>
               </CardContent>
             </Card>
-            {/* Preview Section */}
-            <Card className="mt-8">
-              <CardHeader>
-                <h3 className="text-lg font-semibold">Preview</h3>
-              </CardHeader>
-              <CardContent>
-                {activeTab === 'profile' && (
-                  <Card>
-                    {profileForm.backgroundImage && (
-                      <div className="relative h-32 overflow-hidden">
-                        <ImageWithFallback
-                          src={profileForm.backgroundImage}
-                          alt="Profile background"
-                          fill
-                          style={{ objectFit: 'cover' }}
-                          type="nextImage"
-                        />
-                      </div>
-                    )}
-                    <CardContent className="pt-6">
-                      <div className="flex flex-col items-center mb-4">
-                        <Avatar
-                          className={`h-24 w-24 ${profileForm.backgroundImage ? '-mt-12' : ''}`}
-                        >
-                          {profileForm.image ? (
-                            <ImageWithFallback src={profileForm.image} alt={profileForm.username} type="avatarImage" />
-                          ) : (
-                            <AvatarFallback>
-                              {profileForm.username.charAt(0).toUpperCase()}
-                            </AvatarFallback>
-                          )}
-                        </Avatar>
-                        <h2 className="text-xl font-bold mt-4">{profileForm.username || 'Username'}</h2>
-                        <p className="text-sm text-muted-foreground">{profileForm.email || 'email@example.com'}</p>
-                      </div>
-                      <div className="divider">Bio</div>
-                      <p className="whitespace-pre-line">{profileForm.bio || 'No bio provided yet.'}</p>
-                    </CardContent>
-                  </Card>
-                )}
-                {activeTab === 'appearance' && (
-                  <div className="space-y-4">
-                    <h4 className="text-lg font-semibold">Theme Preview</h4>
-                    <div className="grid grid-cols-2 gap-2">
-                      <div className="bg-primary text-primary-foreground p-2 rounded text-center">Primary</div>
-                      <div className="bg-secondary text-secondary-foreground p-2 rounded text-center">Secondary</div>
-                      <div className="bg-accent text-accent-foreground p-2 rounded text-center">Accent</div>
-                      <div className="bg-muted text-muted-foreground p-2 rounded text-center">Neutral</div>
-                    </div>
-                    <p><strong>Theme:</strong> {appearanceSettings.theme}</p>
-                    <p><strong>Font Size:</strong> {appearanceSettings.fontSize}</p>
-                    <p><strong>Language:</strong> {languages.find((l) => l.code === appearanceSettings.language)?.name}</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
           </div>
         </div>
 
         {/* Content Area */}
-        <div className="lg:col-span-2">
-          <h1 className="text-2xl font-bold mb-6 text-foreground">Your Settings</h1>
-
-          {/* Mobile Tabs */}
-          <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as typeof activeTab)} className="lg:hidden mb-6">
-            <TabsList className="grid grid-cols-2 lg:grid-cols-4">
-              {tabs.map((tab) => (
-                <TabsTrigger key={tab.id} value={tab.id}>
-                  {tab.label}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-          </Tabs>
-
-          {/* Message Alert */}
+        <div className="lg:col-span-2 space-y-6">
           {message && (
             <Alert variant={message.type === 'success' ? 'default' : 'destructive'} className="mb-6">
-              {message.type === 'success' ? (
-                <CheckIcon className="h-6 w-6" />
-              ) : (
-                <XMarkIcon className="h-6 w-6" />
-              )}
-              <AlertDescription>{message.text}</AlertDescription>
+              <AlertDescription>
+                {message.text}
+              </AlertDescription>
             </Alert>
           )}
 
-          {/* Profile Tab */}
           {activeTab === 'profile' && (
-            <form onSubmit={handleProfileUpdate} className="space-y-6 text-foreground">
-              <div className="space-y-2">
-                <Label htmlFor="image">Profile Picture URL</Label>
-                <Input
-                  id="image"
-                  type="url"
-                  value={profileForm.image}
-                  onChange={(e) => setProfileForm((prev) => ({ ...prev, image: e.target.value }))}
-                  placeholder="https://example.com/avatar.jpg"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="backgroundImage">Background Image URL</Label>
-                <Input
-                  id="backgroundImage"
-                  type="url"
-                  value={profileForm.backgroundImage}
-                  onChange={(e) => setProfileForm((prev) => ({ ...prev, backgroundImage: e.target.value }))}
-                  placeholder="https://example.com/background.jpg"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="username">Username</Label>
-                <Input
-                  id="username"
-                  type="text"
-                  value={profileForm.username}
-                  onChange={(e) => setProfileForm((prev) => ({ ...prev, username: e.target.value }))}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={profileForm.email}
-                  onChange={(e) => setProfileForm((prev) => ({ ...prev, email: e.target.value }))}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="bio">Bio</Label>
-                <Textarea
-                  id="bio"
-                  value={profileForm.bio}
-                  onChange={(e) => setProfileForm((prev) => ({ ...prev, bio: e.target.value }))}
-                  placeholder="Tell us about yourself..."
-                  className="h-24"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="shrtflyApiKey">ShrtFly API Key</Label>
-                <Input
-                  id="shrtflyApiKey"
-                  type="text"
-                  value={profileForm.shrtflyApiKey}
-                  onChange={(e) => setProfileForm((prev) => ({ ...prev, shrtflyApiKey: e.target.value }))}
-                  placeholder="ShrtFly API Key"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Social Media Links</Label>
-                {profileForm.socialMediaLinks.map((link, index) => (
-                  <div key={index} className="flex gap-2 items-end">
-                    <div className="w-1/3">
-                      <Input
-                        value={link.platform}
-                        onChange={(e) => handleSocialMediaChange(index, 'platform', e.target.value)}
-                        placeholder="Platform (e.g., Twitter)"
-                      />
-                    </div>
-                    <div className="w-2/3">
-                      <Input
-                        type="url"
-                        value={link.url}
-                        onChange={(e) => handleSocialMediaChange(index, 'url', e.target.value)}
-                        placeholder="URL (e.g., https://twitter.com/username)"
-                      />
-                    </div>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => removeSocialMediaLink(index)}
-                    >
-                      Remove
-                    </Button>
-                  </div>
-                ))}
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={addSocialMediaLink}
-                  className="mt-2"
-                >
-                  Add Social Media Link
-                </Button>
-              </div>
-              <div className="flex justify-between items-center mt-6">
-                <Button type="submit" disabled={loading}>
-                  {loading ? (
-                    <svg className="animate-spin h-5 w-5 mr-2" viewBox="0 0 24 24">
-                      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                      <path fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-                    </svg>
-                  ) : (
-                    'Save Profile'
-                  )}
-                </Button>
-                <Button variant="ghost" asChild>
-                  <Link href="/dashboard/profile">Cancel</Link>
-                </Button>
-              </div>
-            </form>
-          )}
-
-          {/* Security Tab */}
-          {activeTab === 'security' && (
-            <form onSubmit={handlePasswordChange} className="space-y-6 text-foreground">
-              <div className="space-y-2">
-                <Label htmlFor="currentPassword">Current Password</Label>
-                <Input
-                  id="currentPassword"
-                  type="password"
-                  value={profileForm.password}
-                  onChange={(e) => setProfileForm((prev) => ({ ...prev, password: e.target.value }))}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="newPassword">New Password</Label>
-                <Input
-                  id="newPassword"
-                  type="password"
-                  value={profileForm.newPassword}
-                  onChange={(e) => setProfileForm((prev) => ({ ...prev, newPassword: e.target.value }))}
-                  minLength={8}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirm New Password</Label>
-                <Input
-                  id="confirmPassword"
-                  type="password"
-                  value={profileForm.confirmPassword}
-                  onChange={(e) => setProfileForm((prev) => ({ ...prev, confirmPassword: e.target.value }))}
-                  minLength={8}
-                  required
-                />
-              </div>
-              <div className="flex justify-between items-center mt-6">
-                <Button type="submit" disabled={loading}>
-                  {loading ? (
-                    <svg className="animate-spin h-5 w-5 mr-2" viewBox="0 0 24 24">
-                      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                      <path fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-                    </svg>
-                  ) : (
-                    'Update Password'
-                  )}
-                </Button>
-                <Button variant="ghost" asChild>
-                  <Link href="/dashboard/profile">Cancel</Link>
-                </Button>
-              </div>
-            </form>
-          )}
-
-          {/* Notifications Tab */}
-          {activeTab === 'notifications' && (
-            <div className="space-y-6 text-foreground">
-              <h3 className="text-lg font-medium">Email Notifications</h3>
-              {Object.entries(notificationSettings)
-                .filter(([key]) => key.startsWith('email'))
-                .map(([key, value]) => (
-                  <div key={key} className="flex items-center justify-between">
-                    <Label>{key.replace('email', '').replace(/([A-Z])/g, ' $1').trim()}</Label>
-                    <Switch
-                      checked={value}
-                      onCheckedChange={(checked) =>
-                        setNotificationSettings((prev) => ({ ...prev, [key]: checked }))
-                      }
-                    />
-                  </div>
-                ))}
-              <h3 className="text-lg font-medium mt-6">Push Notifications</h3>
-              {Object.entries(notificationSettings)
-                .filter(([key]) => key.startsWith('push'))
-                .map(([key, value]) => (
-                  <div key={key} className="flex items-center justify-between">
-                    <Label>{key.replace('push', '').replace(/([A-Z])/g, ' $1').trim()}</Label>
-                    <Switch
-                      checked={value}
-                      onCheckedChange={(checked) =>
-                        setNotificationSettings((prev) => ({ ...prev, [key]: checked }))
-                      }
-                    />
-                  </div>
-                ))}
-            </div>
-          )}
-
-          {/* Privacy Tab */}
-          {activeTab === 'privacy' && (
-            <div className="space-y-6 text-foreground">
-              <div className="space-y-2">
-                <Label>Profile Visibility</Label>
-                <Select
-                  value={privacySettings.profileVisibility}
-                  onValueChange={(value) =>
-                    setPrivacySettings((prev) => ({
-                      ...prev,
-                      profileVisibility: value as 'public' | 'private',
-                    }))
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select visibility" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="public">Public</SelectItem>
-                    <SelectItem value="private">Private</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex items-center justify-between">
-                <Label>Show Email Address</Label>
-                <Switch
-                  checked={privacySettings.showEmail}
-                  onCheckedChange={(checked) =>
-                    setPrivacySettings((prev) => ({ ...prev, showEmail: checked }))
-                  }
-                />
-              </div>
-              <div className="flex items-center justify-between">
-                <Label>Show Bio</Label>
-                <Switch
-                  checked={privacySettings.showBio}
-                  onCheckedChange={(checked) =>
-                    setPrivacySettings((prev) => ({ ...prev, showBio: checked }))
-                  }
-                />
-              </div>
-              <div className="flex items-center justify-between">
-                <Label>Allow Others to Follow</Label>
-                <Switch
-                  checked={privacySettings.allowFollows}
-                  onCheckedChange={(checked) =>
-                    setPrivacySettings((prev) => ({ ...prev, allowFollows: checked }))
-                  }
-                />
-              </div>
-            </div>
-          )}
-
-          {/* Appearance Tab */}
-          {activeTab === 'appearance' && (
-            <form onSubmit={handleAppearanceUpdate} className="space-y-6 text-foreground">
-              <div className="space-y-2">
-                <Label>Theme</Label>
-                <Select
-                  value={appearanceSettings.theme}
-                  onValueChange={(value) =>
-                    setAppearanceSettings((prev) => ({
-                      ...prev,
-                      theme: value as 'light' | 'dark' | 'auto',
-                    }))
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select theme" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="light">Light</SelectItem>
-                    <SelectItem value="dark">Dark</SelectItem>
-                    <SelectItem value="auto">Auto</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Font Size</Label>
-                <Select
-                  value={appearanceSettings.fontSize}
-                  onValueChange={(value) =>
-                    setAppearanceSettings((prev) => ({
-                      ...prev,
-                      fontSize: value as 'small' | 'medium' | 'large',
-                    }))
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select font size" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="small">Small</SelectItem>
-                    <SelectItem value="medium">Medium</SelectItem>
-                    <SelectItem value="large">Large</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Language</Label>
-                <Select
-                  value={appearanceSettings.language}
-                  onValueChange={(value) =>
-                    setAppearanceSettings((prev) => ({ ...prev, language: value }))
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select language" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {languages.map((lang) => (
-                      <SelectItem key={lang.code} value={lang.code}>
-                        {lang.name} ({lang.nativeName})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Articles Per Page</Label>
-                <Select
-                  value={appearanceSettings.articlesPerPage.toString()}
-                  onValueChange={(value) =>
-                    setAppearanceSettings((prev) => ({
-                      ...prev,
-                      articlesPerPage: parseInt(value),
-                    }))
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select articles per page" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="5">5</SelectItem>
-                    <SelectItem value="10">10</SelectItem>
-                    <SelectItem value="20">20</SelectItem>
-                    <SelectItem value="50">50</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex items-center justify-between">
-                <Label>Compact View</Label>
-                <Switch
-                  checked={appearanceSettings.compactView}
-                  onCheckedChange={(checked) =>
-                    setAppearanceSettings((prev) => ({ ...prev, compactView: checked }))
-                  }
-                />
-              </div>
-              <div className="flex justify-between items-center mt-6">
-                <Button type="submit" disabled={loading}>
-                  {loading ? (
-                    <svg className="animate-spin h-5 w-5 mr-2" viewBox="0 0 24 24">
-                      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                      <path fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-                    </svg>
-                  ) : (
-                    'Save Settings'
-                  )}
-                </Button>
-                <Button variant="ghost" asChild>
-                  <Link href="/dashboard/profile">Cancel</Link>
-                </Button>
-              </div>
-            </form>
-          )}
-
-          {/* Tokens Tab */}
-          {activeTab === 'tokens' && hasTokenAccess() && (
-            <div className="space-y-6">
-              <h2 className="text-xl font-bold">API Tokens</h2>
-              <Card>
+            <div className="space-y-6 animate-in slide-in-from-right-4 duration-500">
+              <Card className="border-border bg-card text-card-foreground shadow-sm overflow-hidden">
+                <CardHeader className="border-b border-border bg-muted/30">
+                  <h3 className="text-xl font-bold">Profile Settings</h3>
+                  <p className="text-sm text-muted-foreground">Manage your public profile information.</p>
+                </CardHeader>
                 <CardContent className="pt-6">
-                  <h3 className="font-semibold mb-3">Create New Token</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                  <form onSubmit={handleProfileSubmit} className="space-y-4">
                     <div className="space-y-2">
-                      <Label>Duration</Label>
-                      <Select value={newTokenDuration} onValueChange={setNewTokenDuration}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select duration" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {durations.map((option) => (
-                            <SelectItem key={option.value} value={option.value}>
-                              {option.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <Label htmlFor="username">Username</Label>
+                      <Input
+                        id="username"
+                        value={profileForm.username}
+                        onChange={(e) => setProfileForm({ ...profileForm, username: e.target.value })}
+                      />
                     </div>
                     <div className="space-y-2">
-                      <Label>Permission Level</Label>
-                      <Select value={newTokenRank} onValueChange={setNewTokenRank}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select permission" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {getFilteredRankOptions().map((option) => (
-                            <SelectItem key={option.value} value={option.value}>
-                              {option.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <Label htmlFor="email">Email Address</Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        value={profileForm.email}
+                        onChange={(e) => setProfileForm({ ...profileForm, email: e.target.value })}
+                      />
                     </div>
                     <div className="space-y-2">
-                      <Button
-                        className="w-full"
-                        onClick={createToken}
-                        disabled={isCreatingToken}
-                      >
-                        {isCreatingToken ? (
-                          <>
-                            <svg className="animate-spin h-5 w-5 mr-2" viewBox="0 0 24 24">
-                              <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                              <path fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-                            </svg>
-                            Creating...
-                          </>
-                        ) : (
-                          'Create Token'
-                        )}
-                      </Button>
+                      <Label htmlFor="bio">Bio</Label>
+                      <Textarea
+                        id="bio"
+                        rows={4}
+                        value={profileForm.bio}
+                        onChange={(e) => setProfileForm({ ...profileForm, bio: e.target.value })}
+                        placeholder="Tell the world about yourself..."
+                      />
                     </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="image">Profile Image URL</Label>
+                      <Input
+                        id="image"
+                        value={profileForm.image}
+                        onChange={(e) => setProfileForm({ ...profileForm, image: e.target.value })}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="backgroundImage">Background Image URL</Label>
+                      <Input
+                        id="backgroundImage"
+                        value={profileForm.backgroundImage}
+                        onChange={(e) => setProfileForm({ ...profileForm, backgroundImage: e.target.value })}
+                      />
+                    </div>
+
+                    <div className="pt-4 border-t">
+                      <div className="flex items-center justify-between mb-4">
+                        <Label className="font-bold">Social Media Links</Label>
+                        <Button type="button" variant="outline" size="sm" onClick={addSocialMediaLink}>
+                          Add Link
+                        </Button>
+                      </div>
+                      <div className="space-y-3">
+                        {profileForm.socialMediaLinks.map((link, index) => (
+                          <div key={index} className="flex gap-2">
+                            <Input
+                              placeholder="Platform (e.g. Twitter)"
+                              className="flex-1"
+                              value={link.platform}
+                              onChange={(e) => handleSocialMediaChange(index, 'platform', e.target.value)}
+                            />
+                            <Input
+                              placeholder="URL"
+                              className="flex-2"
+                              value={link.url}
+                              onChange={(e) => handleSocialMediaChange(index, 'url', e.target.value)}
+                            />
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className="text-red-500"
+                              onClick={() => removeSocialMediaLink(index)}
+                            >
+                              <XMarkIcon className="h-5 w-5" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <Button type="submit" disabled={loading} className="w-full">
+                      {loading ? 'Saving...' : 'Save Profile Changes'}
+                    </Button>
+                  </form>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {activeTab === 'security' && (
+            <div className="space-y-6">
+              <Card>
+                <CardHeader>
+                  <h3 className="text-xl font-bold">Security Settings</h3>
+                  <p className="text-sm text-muted-foreground">Change your password and manage security preferences.</p>
+                </CardHeader>
+                <CardContent>
+                  <form onSubmit={handlePasswordSubmit} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="current-password">Current Password</Label>
+                      <Input
+                        id="current-password"
+                        type="password"
+                        value={profileForm.password}
+                        onChange={(e) => setProfileForm({ ...profileForm, password: e.target.value })}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="new-password">New Password</Label>
+                      <Input
+                        id="new-password"
+                        type="password"
+                        value={profileForm.newPassword}
+                        onChange={(e) => setProfileForm({ ...profileForm, newPassword: e.target.value })}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="confirm-password">Confirm New Password</Label>
+                      <Input
+                        id="confirm-password"
+                        type="password"
+                        value={profileForm.confirmPassword}
+                        onChange={(e) => setProfileForm({ ...profileForm, confirmPassword: e.target.value })}
+                      />
+                    </div>
+                    <Button type="submit" disabled={loading} className="w-full">
+                      {loading ? 'Updating...' : 'Update Password'}
+                    </Button>
+                  </form>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {activeTab === 'developer' && (
+            <DeveloperSettingsTab />
+          )}
+
+          {activeTab === 'tokens' && (
+            <div className="space-y-6">
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0">
+                  <div>
+                    <h3 className="text-xl font-bold">API Tokens</h3>
+                    <p className="text-sm text-muted-foreground">Access tokens for external applications.</p>
                   </div>
+                  <Button onClick={() => setIsCreatingToken(true)}>Create Token</Button>
+                </CardHeader>
+                <CardContent>
                   {newCreatedToken && (
-                    <div className="mt-4 p-3 bg-muted rounded-lg">
-                      <span className="text-sm text-muted-foreground mb-1 block">Your new API token:</span>
-                      <div className="flex items-center">
-                        <code className="text-sm bg-background p-2 rounded flex-1 overflow-x-auto">
-                          {newCreatedToken}
-                        </code>
+                    <Alert className="mb-6 border-primary bg-primary/10">
+                      <AlertDescription>
+                        <p className="font-bold mb-1 text-primary">New Token Created:</p>
+                        <code className="block p-2 bg-background border border-border rounded break-all">{newCreatedToken}</code>
+                        <p className="text-xs mt-2 text-muted-foreground font-medium">Please copy this token now. You won't be able to see it again!</p>
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="ml-2"
-                          onClick={() => {
-                            navigator.clipboard.writeText(newCreatedToken);
-                            showMessage('success', 'Token copied to clipboard!');
-                          }}
+                          className="mt-2"
+                          onClick={() => setNewCreatedToken(null)}
                         >
-                          Copy
+                          I've copied it
                         </Button>
-                      </div>
-                      <p className="text-sm text-warning mt-2">
-                        Copy your token now. You won’t see it again!
-                      </p>
-                    </div>
+                      </AlertDescription>
+                    </Alert>
                   )}
+
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Created At</TableHead>
+                        <TableHead>Expires At</TableHead>
+                        <TableHead className="text-right">Action</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {tokens.map((token) => (
+                        <TableRow key={token.id}>
+                          <TableCell>{new Date(token.createdAt).toLocaleDateString()}</TableCell>
+                          <TableCell>
+                            {token.expiresAt ? new Date(token.expiresAt).toLocaleDateString() : 'Never'}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="text-red-500"
+                              onClick={() => handleDeleteToken(token.id)}
+                            >
+                              Delete
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                      {tokens.length === 0 && (
+                        <TableRow>
+                          <TableCell colSpan={3} className="text-center py-8 text-muted-foreground">
+                            No API tokens found.
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
                 </CardContent>
               </Card>
-              <h3 className="font-semibold mt-6 mb-3">Your Tokens</h3>
-              {loading ? (
-                <div className="flex items-center justify-center p-8">
-                  <svg className="animate-spin h-8 w-8 text-primary" viewBox="0 0 24 24">
-                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                    <path fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-                  </svg>
-                </div>
-              ) : tokens.length > 0 ? (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>ID</TableHead>
-                      <TableHead>Token</TableHead>
-                      <TableHead>Permissions</TableHead>
-                      <TableHead>Expires</TableHead>
-                      <TableHead>Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {tokens.map((token) => (
-                      <TableRow key={token.id}>
-                        <TableCell>{token.id}</TableCell>
-                        <TableCell>
-                          <code className="text-xs">
-                            {token.token.substring(0, 10)}...
-                            {token.token.substring(token.token.length - 10)}
-                          </code>
-                        </TableCell>
-                        <TableCell>
-                          {token.ranks.map((rank) => (
-                            <span key={rank.id} className="inline-block bg-primary text-primary-foreground text-xs px-2 py-1 rounded mr-1">
-                              {rank.rank}
-                            </span>
-                          ))}
-                        </TableCell>
-                        <TableCell>
-                          {new Date(token.expiresAt).toLocaleDateString(undefined, {
-                            year: 'numeric',
-                            month: 'short',
-                            day: 'numeric',
-                          })}
-                        </TableCell>
-                        <TableCell>
-                          <Button
-                            variant="destructive"
-                            size="sm"
-                            onClick={() => deleteToken(token.id)}
-                          >
-                            Delete
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              ) : (
-                <Card>
-                  <CardContent className="pt-6 text-center">
-                    <p className="text-muted-foreground">You don’t have any API tokens yet.</p>
-                  </CardContent>
-                </Card>
-              )}
             </div>
           )}
 
-          {/* Danger Zone Tab */}
           {activeTab === 'danger' && (
-            <Card className="border-destructive/20">
-              <CardContent className="pt-6">
-                <h2 className="text-xl font-semibold mb-4 flex items-center gap-2 text-destructive">
-                  <ExclamationTriangleIcon className="h-5 w-5" />
-                  Danger Zone
-                </h2>
-                <h3 className="text-lg font-medium text-destructive mb-2">Delete Account</h3>
-                <p className="text-muted-foreground mb-4">
-                  Once you delete your account, there is no going back. All your data will be
-                  permanently removed.
-                </p>
-                <Button
-                  variant="destructive"
-                  onClick={handleDeleteAccount}
-                  disabled={loading}
-                >
-                  {loading ? (
-                    <svg className="animate-spin h-5 w-5 mr-2" viewBox="0 0 24 24">
-                      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                      <path fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-                    </svg>
-                  ) : (
-                    'Delete Account'
-                  )}
-                </Button>
+            <Card className="border-destructive/50">
+              <CardHeader>
+                <h3 className="text-xl font-bold text-destructive">Danger Zone</h3>
+                <p className="text-sm text-muted-foreground">Irreversible actions concerning your account.</p>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="p-4 border border-destructive/20 rounded-lg bg-destructive/10">
+                  <h4 className="font-bold text-destructive mb-1">Delete Account</h4>
+                  <p className="text-sm text-destructive/80 mb-4">Once you delete your account, all your articles, mods, and data will be permanently removed.</p>
+                  <Button variant="destructive" onClick={handleDeleteAccount}>
+                    Permanently Delete Account
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           )}

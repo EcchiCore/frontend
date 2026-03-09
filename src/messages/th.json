@@ -570,5 +570,18 @@
     "stableRelease": "เวอร์ชันเสถียร",
     "lookingForFull": "ต้องการประสบการณ์เต็มรูปแบบ?",
     "goToChanoX2": "ไปที่ ChanoX2 Pro"
+  },
+  "Admin": {
+    "developerOnboarding": "การรับนักพัฒนาใหม่",
+    "generateTokenDescription": "สร้างลิงก์ยืนยันตัวตนแบบใช้ครั้งเดียวสำหรับนักพัฒนาเกมคนใหม่",
+    "userIdLabel": "รหัสผู้ใช้ (User ID)",
+    "userIdPlaceholder": "ป้อนรหัสผู้ใช้ (เช่น 25)",
+    "generateButton": "สร้างโทเค็น",
+    "generating": "กำลังสร้าง...",
+    "tokenGenerated": "สร้างโทเค็นยืนยันตัวตนสำเร็จแล้ว!",
+    "oneTimeLink": "ลิงก์ยืนยันตัวตนแบบใช้ครั้งเดียว",
+    "copyTooltip": "คัดลอกไปยังคลิปบอร์ด",
+    "copied": "คัดลอกแล้ว!",
+    "linkExpiryNotice": "ลิงก์นี้จะหมดอายุใน 7 วันและใช้งานได้เพียงครั้งเดียวเท่านั้น ส่งลิงก์นี้ให้กับนักพัฒนา"
   }
 }

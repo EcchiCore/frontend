@@ -147,7 +147,7 @@ export const DashboardLayoutShadcn: React.FC<DashboardLayoutProps> = ({ title })
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background text-foreground">
       <Sheet open={mobileOpen} onOpenChange={handleMobileOpenChange}>
         <SheetContent side="left" className="p-0 w-64">
           <SheetHeader className="sr-only">

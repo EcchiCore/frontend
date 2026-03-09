@@ -148,6 +148,15 @@ export const ModerationPage: React.FC = () => {
                   ... on CommentDetails {
                     content
                   }
+                  ... on DeveloperProfileDetails {
+                    realName
+                    bankType
+                    bankName
+                    bankAccount
+                    swiftCode
+                    bankAddress
+                    citizenId
+                  }
                 }
               }
             }
