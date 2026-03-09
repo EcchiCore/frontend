@@ -277,12 +277,24 @@ export function SponsoredArticlesTab() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {items.map((item) => (
-                                <TableRow key={item.id}>
-                                    <TableCell>
-                                        <div className="font-medium line-clamp-1">{item.article?.title || `Article #${item.articleId}`}</div>
-                                        <div className="text-xs text-muted-foreground">ID: {item.articleId}</div>
-                                    </TableCell>
+                            {items.map((item) => {
+                                const isExpired = item.endDate && new Date(item.endDate) < new Date();
+
+                                return (
+                                    <TableRow key={item.id} className={isExpired ? 'opacity-70 bg-muted/30' : ''}>
+                                        <TableCell>
+                                            <div className="flex items-center gap-2">
+                                                <div className="font-medium line-clamp-1">
+                                                    {item.article?.title || `Article #${item.articleId}`}
+                                                </div>
+                                                {isExpired && (
+                                                    <Badge variant="destructive" className="h-5 px-1.5 text-[10px] uppercase">
+                                                        หมดอายุ
+                                                    </Badge>
+                                                )}
+                                            </div>
+                                            <div className="text-xs text-muted-foreground">ID: {item.articleId}</div>
+                                        </TableCell>
                                     <TableCell className="text-center font-mono">{item.priority}</TableCell>
                                     <TableCell className="text-center">
                                         <Switch
@@ -328,7 +340,8 @@ export function SponsoredArticlesTab() {
                                         </Button>
                                     </TableCell>
                                 </TableRow>
-                            ))}
+                                );
+                            })}
                         </TableBody>
                     </Table>
                 )}
