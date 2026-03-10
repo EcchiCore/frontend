@@ -1,6 +1,6 @@
 'use client';
 import { useState, useEffect, useMemo } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "react-toastify";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,6 +15,8 @@ import { createChanomhubClient, type LoginResponse } from '@chanomhub/sdk';
 export function LoginForm({ onSwitch }: { onSwitch: () => void }) {
   const t = useTranslations('Login');
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get('redirect') || '/';
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -28,7 +30,7 @@ export function LoginForm({ onSwitch }: { onSwitch: () => void }) {
   const handleGoogleLogin = async () => {
     try {
       await sdk.auth.signInWithGoogle({
-        redirectTo: `${window.location.origin}/login`,
+        redirectTo: `${window.location.origin}/login${redirectTo !== '/' ? `?redirect=${encodeURIComponent(redirectTo)}` : ''}`,
       });
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : t('unexpectedErrorMessage');
@@ -69,7 +71,7 @@ export function LoginForm({ onSwitch }: { onSwitch: () => void }) {
       }
 
       // Force reload to update auth state or redirect
-      setTimeout(() => router.push("/"), 1000);
+      setTimeout(() => router.push(redirectTo), 1000);
     }
   };
 
@@ -131,7 +133,7 @@ export function LoginForm({ onSwitch }: { onSwitch: () => void }) {
           });
         }
 
-        setTimeout(() => router.push("/"), 2000);
+        setTimeout(() => router.push(redirectTo), 2000);
       } else {
         toast.error(t('invalidResponseMessage'));
       }
