@@ -11,6 +11,8 @@ import { locales } from '@/app/[locale]/lib/navigation';
 import { createChanomhubClient } from '@chanomhub/sdk';
 import DiscordWidget from './components/DiscordWidget';
 import PromotionsWidget from './components/PromotionsWidget';
+import DonationSidebarWidget from '@/components/DonationSidebarWidget';
+import DonationCTA from '@/components/DonationCTA';
 
 
 
@@ -85,6 +87,10 @@ export default async function HomePage({ params }: { params: { locale: string } 
 
 
         <HomeCarousel articles={homeData.carousel} loading={false} />
+
+        <div className="container mx-auto px-2 pt-4">
+          <DonationCTA />
+        </div>
 
         <div className="grid lg:grid-cols-5 gap-3 container mx-auto px-2 pb-4">
           {/* Main Content */}
@@ -201,6 +207,8 @@ export default async function HomePage({ params }: { params: { locale: string } 
 
             {/* Discord Widget */}
             <DiscordWidget />
+
+            <DonationSidebarWidget />
           </div>
         </div>
       </main>

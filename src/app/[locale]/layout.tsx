@@ -8,6 +8,7 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import { siteUrl, defaultMetadataContent, supportedLocales, defaultLocale } from "@/utils/localeUtils";
 import Footer from '@/components/Footer';
+import GlobalDonationAlert from '@/components/GlobalDonationAlert';
 import Script from "next/script";
 import { ReduxProvider } from "@/store/ReduxProvider";
 // Vercel Analytics removed for Cloudflare deployment
@@ -183,6 +184,7 @@ export default async function LocaleSegmentLayout({
           <ReduxProvider>
             <Suspense fallback={null}>
               <NextIntlClientProvider locale={validLocale} messages={messages}>
+                <GlobalDonationAlert />
                 {children}
                 <Footer />
               </NextIntlClientProvider>
