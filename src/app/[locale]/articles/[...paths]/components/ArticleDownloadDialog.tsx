@@ -3,12 +3,12 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { useTranslations } from 'next-intl';
 import cn from 'classnames';
-import { Dialog, DialogContent, DialogTitle, Tabs, TabsList, TabsTrigger, TabsContent, Select, SelectTrigger, SelectValue, SelectContent, SelectItem, Button, Input } from '@/components/ui';
-import { Download, CalendarDays, Folder, User, Info, Check, Clipboard, Search, ShieldCheck } from 'lucide-react';
+import { Dialog, DialogContent, DialogTitle, Button } from '@/components/ui';
+import { Download, ShieldCheck, LogIn } from 'lucide-react';
 import { getFileIcon, getFileSize } from "@/utils/fileUtils";
 import { DownloadFile, TranslationFile } from "./Interfaces";
 import { useDownloadDialog } from './hooks/useDownloadDialog';
-import { Article } from '@/types/article'; // Assuming you need article data for formatDate
+import { Article } from '@/types/article';
 import { getSdk } from '@/lib/sdk';
 
 interface ArticleDownloadDialogProps {
@@ -32,293 +32,149 @@ const ArticleDownloadDialog: React.FC<ArticleDownloadDialogProps> = ({
 }) => {
   const t = useTranslations('ArticleContent');
   const {
-    searchQuery,
-    setSearchQuery,
-    sortBy,
-    setSortBy,
-    sortOrder,
-    setSortOrder,
     filteredDownloads,
-    handleCopyLink,
-    copiedLink,
   } = useDownloadDialog(downloads, showAlert);
-
-  const formatDate = (date: string) =>
-    new Date(date).toLocaleDateString("th-TH", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
 
   const handleOpenDownload = async (item: DownloadFile | TranslationFile) => {
     let url = "url" in item ? item.url : item.fileUrl;
 
-    // If it's a relative path from our own R2 storage (starting with public/ or premium/)
-    // we use the gateway to handle it, especially for premium files.
+    // Detect pseudo-download URLs that point back to the article (e.g. ?purchase=true)
+    if (url.includes('purchase=true') || (url.includes('/articles/') && !url.startsWith('http'))) {
+      showAlert('กรุณาซื้อบทความก่อนเพื่อเข้าถึงไฟล์ดาวน์โหลด', 'error');
+      return;
+    }
+
+    // If it's a relative path from our own R2 storage
     if (url.startsWith('premium/') || url.startsWith('public/')) {
-        try {
-            const sdk = await getSdk();
-            url = sdk.storage.getProtectedUrl(url, article.id);
-        } catch (error) {
-            console.error('Failed to get protected URL:', error);
-            // Fallback to direct URL if possible, or show error
-        }
+      try {
+        const sdk = await getSdk();
+        url = sdk.storage.getProtectedUrl(url, article.id);
+      } catch (error) {
+        console.error('Failed to get protected URL:', error);
+      }
     }
 
     window.open(url, "_blank");
   };
 
-  const FileCard = ({ item, index }: { item: DownloadFile | TranslationFile; index: number }) => (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
-      transition={{ delay: index * 0.05 }}
-      className={cn(
-        "group relative overflow-hidden rounded-2xl border shadow-sm hover:shadow-lg transition-all duration-300",
-        "hover:scale-[1.02] hover:-translate-y-1",
-        isDarkMode
-          ? "bg-gray-800/50 border-gray-700/50 hover:bg-gray-800 hover:border-gray-600"
-          : "bg-white/70 border-gray-200 hover:bg-white hover:border-gray-300"
-      )}
-    >
-      <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-black/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+  const isPseudoLink = (item: DownloadFile | TranslationFile) => {
+    const url = "url" in item ? item.url : item.fileUrl;
+    return url.includes('purchase=true') || (url.includes('/articles/') && !url.startsWith('http'));
+  };
 
-      <div className="relative p-6">
-        <div className="flex items-start gap-4 mb-4">
-          <div className={cn(
-            "flex size-14 items-center justify-center rounded-xl transition-all duration-300 group-hover:scale-110",
-            isDarkMode ? "bg-gray-700/50 group-hover:bg-gray-600" : "bg-gray-50 group-hover:bg-gray-100"
-          )}>
-            {getFileIcon(item.name)}
-          </div>
-
-          <div className="min-w-0 flex-1">
-            <h5 className={cn(
-              "font-semibold break-words mb-2 line-clamp-2",
-              isDarkMode ? "text-gray-100" : "text-gray-900"
-            )}>
-              {item.name}
-            </h5>
-
-            <div className="space-y-2">
-              {"createdAt" in item && (
-                <div className={cn(
-                  "flex items-center gap-2 text-sm",
-                  isDarkMode ? "text-gray-400" : "text-gray-500"
-                )}>
-                  <CalendarDays className="size-4" />
-                  <span>{formatDate(item.createdAt)}</span>
-                </div>
-              )}
-
-              {"size" in item && typeof item.size === 'number' && (
-                <div className={cn(
-                  "flex items-center gap-2 text-sm",
-                  isDarkMode ? "text-gray-400" : "text-gray-500"
-                )}>
-                  <Folder className="size-4" />
-                  <span>{getFileSize(item.size)}</span>
-                </div>
-              )}
-
-              {"translator" in item && item.translator && (
-                <div className={cn(
-                  "flex items-center gap-2 text-sm",
-                  isDarkMode ? "text-gray-400" : "text-gray-500"
-                )}>
-                  <User className="size-4" />
-                  <span>{t("translatedBy", { name: item.translator.name, language: item.language })}</span>
-                </div>
-              )}
-            </div>
-
-            {"description" in item && item.description && (
-              <div className={cn(
-                "flex items-start gap-2 text-sm mt-3 p-3 rounded-lg",
-                isDarkMode ? "bg-gray-700/30 text-gray-300" : "bg-gray-50 text-gray-600"
-              )}>
-                <Info className="size-4 mt-0.5 flex-shrink-0" />
-                <p className="line-clamp-2">{item.description}</p>
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className="flex gap-3 mt-4 text-foreground">
-          <Button
-            className="flex-1"
-            onClick={() => handleOpenDownload(item)}
-          >
-            <Download className="size-5 mr-2" />
-            <span>{t("downloadFiles")}</span>
-          </Button>
-
-          <Button
-            variant="outline"
-            onClick={() => handleCopyLink("url" in item ? item.url : item.fileUrl)}
-            aria-label={t("copyLink")}
-          >
-            {copiedLink === ("url" in item ? item.url : item.fileUrl) ? (
-              <>
-                <Check className="size-5 mr-2" />
-                <span>{t("copied")}</span>
-              </>
-            ) : (
-              <>
-                <Clipboard className="size-5 mr-2 " />
-                <span>{t("copy")}</span>
-              </>
-            )}
-          </Button>
-        </div>
-      </div>
-    </motion.div>
-  );
-
-  const ITEMS_PER_PAGE = isMobile ? 4 : 12;
-  const [currentPage, setCurrentPage] = React.useState(1);
-
-  // Reset page when filters change or dialog opens
-  React.useEffect(() => {
-    setCurrentPage(1);
-  }, [searchQuery, sortBy, sortOrder, openDownloadDialog, isMobile]);
-
-  const renderFileItems = (items: (DownloadFile | TranslationFile)[], title: string) => {
-    const totalPages = Math.ceil(items.length / ITEMS_PER_PAGE);
-    const visibleItems = items.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
-
-    const handleNext = () => {
-      setCurrentPage((prev) => Math.min(prev + 1, totalPages));
-    };
-
-    const handlePrev = () => {
-      setCurrentPage((prev) => Math.max(prev - 1, 1));
-    };
+  const FileRow = ({ item, index }: { item: DownloadFile | TranslationFile; index: number }) => {
+    const pseudo = isPseudoLink(item);
+    const size = "size" in item && typeof item.size === 'number' ? getFileSize(item.size) : null;
 
     return (
-      <div className="space-y-6">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <h4 className="text-lg font-semibold flex items-center gap-2 text-foreground">
-            <Folder className="size-5" />
-            {title} ({items.length})
-          </h4>
-
-          <div className="flex items-center gap-2 text-foreground w-full sm:w-auto">
-            <Select value={sortBy} onValueChange={(value) => setSortBy(value as "name" | "date")}>
-              <SelectTrigger className="w-full sm:w-[180px]">
-                <SelectValue placeholder="Sort by" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="date">{t("sortByDate")}</SelectItem>
-                <SelectItem value="name">{t("sortByName")}</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Button
-              variant="outline"
-              onClick={() => setSortOrder(prev => prev === "asc" ? "desc" : "asc")}
-            >
-              {sortOrder === "asc" ? "↑" : "↓"}
-            </Button>
-          </div>
-        </div>
-
-        {items.length > 0 ? (
-          <>
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-              {visibleItems.map((item, index) => (
-                <FileCard key={item.id} item={item} index={index} />
-              ))}
-            </div>
-
-            {totalPages > 1 && (
-              <div className="flex items-center justify-center gap-4 mt-8 text-foreground">
-                <Button
-                  onClick={handlePrev}
-                  variant="outline"
-                  disabled={currentPage === 1}
-                  className="min-w-[100px]"
-                >
-                  {t("previous") || "Previous"}
-                </Button>
-
-                <span className="text-sm font-medium text-muted-foreground">
-                  {currentPage} / {totalPages}
-                </span>
-
-                <Button
-                  onClick={handleNext}
-                  variant="outline"
-                  disabled={currentPage === totalPages}
-                  className="min-w-[100px]"
-                >
-                  {t("next") || "Next"}
-                </Button>
-              </div>
-            )}
-          </>
-        ) : (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-center py-12"
-          >
-            <Folder className="size-16 mx-auto mb-4 text-gray-400" />
-            <p className="text-lg font-medium mb-2 text-gray-500">
-              {searchQuery ? t("noSearchResults") : t("noFiles")}
-            </p>
-            {searchQuery && (
-              <p className="text-sm text-gray-400">
-                {t("tryDifferentSearch")}
-              </p>
-            )}
-          </motion.div>
+      <motion.div
+        initial={{ opacity: 0, x: -10 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ delay: index * 0.04 }}
+        className={cn(
+          "flex items-center gap-3 px-4 py-3 rounded-lg transition-colors duration-200",
+          isDarkMode
+            ? "bg-gray-800/60 hover:bg-gray-700/80 border border-gray-700/50"
+            : "bg-gray-50 hover:bg-gray-100 border border-gray-200"
         )}
-      </div>
+      >
+        {/* Download / Login Button */}
+        {pseudo ? (
+          <Button
+            size="sm"
+            className="shrink-0 bg-amber-500 hover:bg-amber-600 text-white font-bold px-4"
+            onClick={() => window.location.href = `/login?redirect=${encodeURIComponent(window.location.pathname)}`}
+          >
+            <LogIn className="size-4 mr-1.5" />
+            Login
+          </Button>
+        ) : (
+          <Button
+            size="sm"
+            className="shrink-0 bg-cyan-500 hover:bg-cyan-600 text-white font-bold px-4"
+            onClick={() => handleOpenDownload(item)}
+          >
+            <Download className="size-4 mr-1.5" />
+            Download
+          </Button>
+        )}
+
+        {/* File Name */}
+        <span className={cn(
+          "flex-1 font-semibold text-sm truncate",
+          isDarkMode ? "text-gray-100" : "text-gray-900"
+        )}>
+          {item.name}
+        </span>
+
+        {/* File Size */}
+        {size && (
+          <span className={cn(
+            "text-xs font-medium shrink-0",
+            isDarkMode ? "text-gray-400" : "text-gray-500"
+          )}>
+            {size}
+          </span>
+        )}
+
+        {/* File Type Icon */}
+        <div className="shrink-0">
+          {getFileIcon(item.name)}
+        </div>
+      </motion.div>
     );
   };
 
   return (
     <Dialog open={openDownloadDialog} onOpenChange={setOpenDownloadDialog}>
-      <DialogContent className={isMobile ? "max-w-[95vw] h-[80vh] overflow-y-auto" : "max-w-6xl"}>
+      <DialogContent className={cn(
+        "p-0 overflow-hidden",
+        isMobile ? "max-w-[95vw]" : "max-w-2xl"
+      )}>
         <DialogTitle className="sr-only">{t("downloadsAndTranslations")}</DialogTitle>
 
-        <div className="relative mb-4">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 size-5 text-gray-500" />
-          <Input
-            type="text"
-            placeholder={t("searchPlaceholder")}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 pr-4 py-3 rounded-xl"
-          />
+        {/* Header */}
+        <div className={cn(
+          "px-6 pt-6 pb-4",
+          isDarkMode ? "bg-gray-900" : "bg-white"
+        )}>
+          <h3 className={cn(
+            "text-xl font-bold flex items-center gap-2",
+            isDarkMode ? "text-cyan-400" : "text-cyan-600"
+          )}>
+            <Download className="size-6" />
+            Download
+          </h3>
         </div>
-        <Tabs defaultValue="downloads" className="w-full">
-          <TabsList className={isMobile ? "flex-col h-auto" : ""}>
-            <TabsTrigger value="downloads">{t("downloadFiles")} ({filteredDownloads.length})</TabsTrigger>
-          </TabsList>
-          <TabsContent value="downloads">
-            {renderFileItems(filteredDownloads, t("downloadFiles"))}
-          </TabsContent>
-        </Tabs>
 
-        <div className="mt-6 pt-4 border-t flex justify-center">
-          {isMobile ? (
-            <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
-              <ShieldCheck className="size-5" />
-              <span className="text-sm font-medium">Scanned with VirusTotal</span>
-            </div>
+        {/* Download List */}
+        <div className={cn(
+          "px-6 pb-4 space-y-2 max-h-[60vh] overflow-y-auto",
+          isDarkMode ? "bg-gray-900" : "bg-white"
+        )}>
+          {filteredDownloads.length > 0 ? (
+            filteredDownloads.map((item, index) => (
+              <FileRow key={item.id} item={item} index={index} />
+            ))
           ) : (
-            <div className="flex items-center gap-2 opacity-80 hover:opacity-100 transition-opacity">
-              {/* Placeholder for VirusTotal Logo - Replace with local asset if available */}
-              <img
-                src="https://upload.wikimedia.org/wikipedia/commons/b/b7/VirusTotal_logo.svg"
-                alt="Scanned with VirusTotal"
-                className="h-8 w-auto"
-              />
+            <div className="text-center py-8">
+              <Download className={cn("size-12 mx-auto mb-3", isDarkMode ? "text-gray-600" : "text-gray-300")} />
+              <p className={cn("text-sm", isDarkMode ? "text-gray-500" : "text-gray-400")}>
+                {t("noFiles")}
+              </p>
             </div>
           )}
+        </div>
+
+        {/* Footer */}
+        <div className={cn(
+          "px-6 py-3 border-t flex justify-center",
+          isDarkMode ? "bg-gray-900 border-gray-800" : "bg-gray-50 border-gray-200"
+        )}>
+          <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
+            <ShieldCheck className="size-4" />
+            <span className="text-xs font-medium">Scanned with VirusTotal</span>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
