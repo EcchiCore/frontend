@@ -160,7 +160,7 @@ const ArticleInfoSidebar: React.FC<ArticleInfoSidebarProps> = ({
               </div>
             ) : (
               <Button
-                className="w-full flex items-center justify-center gap-2"
+                className="w-full flex items-center justify-center gap-2 text-white bg-cyan-600 hover:bg-cyan-700"
                 onClick={() => setOpenDownloadDialog()}
               >
                 <Download className="w-5 h-5" />
@@ -419,7 +419,7 @@ const ArticleInfoSidebar: React.FC<ArticleInfoSidebarProps> = ({
               </div>
             ) : (
               <Button
-                className="w-full flex items-center justify-center gap-2"
+                className="w-full flex items-center justify-center gap-2 text-white bg-cyan-600 hover:bg-cyan-700"
                 onClick={() => setOpenDownloadDialog()}
               >
                 <Download className="w-5 h-5" />

@@ -65,6 +65,10 @@ const ArticleDownloadDialog: React.FC<ArticleDownloadDialogProps> = ({
   const FileRow = ({ item, index }: { item: DownloadFile | TranslationFile; index: number }) => {
     const pseudo = isPseudoLink(item);
     const size = "size" in item && typeof item.size === 'number' ? getFileSize(item.size) : null;
+    
+    // If the article is already unlocked (free or purchased), we should show the Download button
+    // even if it looks like a pseudo link (though backend shouldn't send pseudo links if unlocked)
+    const showDownloadButton = article.isUnlocked || !pseudo;
 
     return (
       <motion.div
@@ -79,16 +83,7 @@ const ArticleDownloadDialog: React.FC<ArticleDownloadDialogProps> = ({
         )}
       >
         {/* Download / Login Button */}
-        {pseudo ? (
-          <Button
-            size="sm"
-            className="shrink-0 bg-amber-500 hover:bg-amber-600 text-white font-bold px-4"
-            onClick={() => window.location.href = `/login?redirect=${encodeURIComponent(window.location.pathname)}`}
-          >
-            <LogIn className="size-4 mr-1.5" />
-            Login
-          </Button>
-        ) : (
+        {showDownloadButton ? (
           <Button
             size="sm"
             className="shrink-0 bg-cyan-500 hover:bg-cyan-600 text-white font-bold px-4"
@@ -96,6 +91,15 @@ const ArticleDownloadDialog: React.FC<ArticleDownloadDialogProps> = ({
           >
             <Download className="size-4 mr-1.5" />
             Download
+          </Button>
+        ) : (
+          <Button
+            size="sm"
+            className="shrink-0 bg-amber-500 hover:bg-amber-600 text-white font-bold px-4"
+            onClick={() => window.location.href = `/login?redirect=${encodeURIComponent(window.location.pathname)}`}
+          >
+            <LogIn className="size-4 mr-1.5" />
+            Login
           </Button>
         )}
 

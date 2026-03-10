@@ -217,7 +217,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
 
   return (
     <div
-      className={`client-article-loaded min-h-screen ${isDarkMode ? "bg-muted text-foreground" : "bg-muted text-foreground"
+      className={`client-article-loaded min-h-screen overflow-x-hidden ${isDarkMode ? "bg-muted text-foreground" : "bg-muted text-foreground"
         }`}
     >
       <div className="fixed top-0 left-0 w-full h-1 bg-muted z-50">
@@ -289,7 +289,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
 
                 {/* Lightweight HTML renderer */}
                 <div
-                  className={`prose prose-lg max-w-none mb-6 ${isDarkMode ? "prose-invert" : ""} prose-primary
+                  className={`prose prose-lg max-w-none mb-6 overflow-hidden break-words ${isDarkMode ? "prose-invert" : ""} prose-primary
                             prose-headings:mb-4 prose-headings:font-bold
                             prose-p:mb-4
                             prose-a:text-primary prose-a:underline hover:prose-a:text-primary/80
@@ -335,7 +335,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
 
                     {!isAuthenticated && (
                       <p className="text-sm text-muted-foreground">
-                        Already have an account? <Link href="/login" className="text-primary hover:underline">Sign in</Link>
+                        Already have an account? <Link href={`/login?redirect=/articles/${slug}`} className="text-primary hover:underline">Sign in</Link>
                       </p>
                     )}
                   </div>

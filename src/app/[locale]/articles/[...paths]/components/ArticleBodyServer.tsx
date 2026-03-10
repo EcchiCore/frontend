@@ -142,7 +142,7 @@ export default function ArticleBodyServer({ article }: ArticleBodyServerProps) {
 
             {/* Article Body - SSR HTML for SEO */}
             <div
-                className="prose prose-lg max-w-none dark:prose-invert mb-8"
+                className="prose prose-lg max-w-none dark:prose-invert mb-8 overflow-hidden break-words"
                 dangerouslySetInnerHTML={{ __html: sanitizeHtml(article.body) }}
             />
 
