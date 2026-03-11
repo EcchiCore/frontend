@@ -362,7 +362,7 @@ const DownloadManager: React.FC<{
             const result = await sdk.storage.uploadMultipart(file, {
                 bucket: 'storage',
                 path: isPaid ? 'premium' : 'public',
-                game: gameSlug || 'misc',
+                game: gameSlug || 'pending',
                 onProgress: (percent) => setUploadProgress(percent)
             });
 
