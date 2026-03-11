@@ -345,6 +345,7 @@ const DownloadManager: React.FC<{
 }> = ({ articleId, gameSlug, items, setItems, isPaid }) => {
     const itemsRef = React.useRef(items);
     const [uploadingId, setUploadingId] = useState<string | null>(null);
+    const [uploadProgress, setUploadProgress] = useState(0);
 
     useEffect(() => {
         itemsRef.current = items;
@@ -355,14 +356,16 @@ const DownloadManager: React.FC<{
         if (!file) return;
 
         setUploadingId(tempId);
+        setUploadProgress(0);
         try {
             const sdk = await getSdk();
-            const result = await sdk.storage.upload(file, { 
+            const result = await sdk.storage.uploadMultipart(file, {
                 bucket: 'storage',
                 path: isPaid ? 'premium' : 'public',
-                game: gameSlug || 'misc'
+                game: gameSlug || 'misc',
+                onProgress: (percent) => setUploadProgress(percent)
             });
-            
+
             if (result && result.url) {
                 updateDownload(tempId, 'url', result.url);
                 toast.success('File uploaded successfully');
@@ -374,10 +377,10 @@ const DownloadManager: React.FC<{
             toast.error(error instanceof Error ? error.message : 'Failed to upload file');
         } finally {
             setUploadingId(null);
+            setUploadProgress(0);
             e.target.value = '';
         }
     };
-
     useEffect(() => {
         const timeoutIds: Record<string, NodeJS.Timeout> = {};
 
@@ -631,6 +634,20 @@ const DownloadManager: React.FC<{
                                         </Button>
                                     </div>
                                 </div>
+                                {uploadingId === item.tempId && (
+                                    <div className="mt-1">
+                                        <div className="flex justify-between text-[10px] text-primary mb-0.5">
+                                            <span>Uploading...</span>
+                                            <span>{uploadProgress}%</span>
+                                        </div>
+                                        <div className="w-full bg-muted rounded-full h-1 overflow-hidden">
+                                            <div 
+                                                className="bg-primary h-full transition-all duration-300" 
+                                                style={{ width: `${uploadProgress}%` }}
+                                            />
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                             <div className="md:col-span-2">
                                 <Label>Embed / Iframe Code</Label>

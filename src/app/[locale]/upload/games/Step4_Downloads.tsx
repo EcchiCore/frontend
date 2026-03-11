@@ -134,13 +134,15 @@ export const Step4_Downloads = () => {
     if (!file) return;
 
     setIsUploading(true);
+    setUploadProgress(0);
     setDownloadUrlError('');
 
     try {
       const sdk = await getSdk();
-      const result = await sdk.storage.upload(file, { 
+      const result = await sdk.storage.uploadMultipart(file, { 
         bucket: 'storage',
-        path: formData.isPaid ? 'premium' : 'public'
+        path: formData.isPaid ? 'premium' : 'public',
+        onProgress: (percent) => setUploadProgress(percent)
       });
       
       if (result && result.url) {
@@ -153,6 +155,7 @@ export const Step4_Downloads = () => {
       setDownloadUrlError(error instanceof Error ? error.message : 'Upload failed');
     } finally {
       setIsUploading(false);
+      setUploadProgress(0);
     }
   };
 
@@ -274,8 +277,21 @@ export const Step4_Downloads = () => {
                       </Button>
                     </div>
                   </div>
-                  {isUploading && <p className="text-xs text-blue-400">Uploading file...</p>}
-                  {downloadUrlError && <p className="text-sm text-destructive">{downloadUrlError}</p>}
+                  {isUploading && (
+                    <div className="space-y-1 mt-2">
+                      <div className="flex justify-between text-xs text-blue-400">
+                        <span>Uploading file...</span>
+                        <span>{uploadProgress}%</span>
+                      </div>
+                      <div className="w-full bg-muted/30 rounded-full h-1.5 overflow-hidden">
+                        <div 
+                          className="bg-blue-500 h-full transition-all duration-300" 
+                          style={{ width: `${uploadProgress}%` }}
+                        />
+                      </div>
+                    </div>
+                  )}
+                  {downloadUrlError && <p className="text-sm text-destructive mt-2">{downloadUrlError}</p>}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="downloadSubmitNote">Reviewer note (optional)</Label>
