@@ -356,7 +356,7 @@ export const Step4_Downloads = () => {
                           className="text-xs text-muted-foreground hover:text-primary flex items-center gap-1 truncate max-w-[150px]"
                         >
                           <ExternalLink className="h-3 w-3" />
-                          {new URL(download.url).hostname}
+                          {getDomainName(download.url)}
                         </a>
                       </div>
                     </div>
