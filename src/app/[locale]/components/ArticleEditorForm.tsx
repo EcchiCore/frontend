@@ -863,7 +863,7 @@ export const ArticleEditorForm = ({ slug = '', initialData, mode, locale = 'en' 
                 const sdk = await getSdk();
                 const data = await sdk.articles.reserveSlug(formData.title);
                 if (data.slug) {
-                    setFormData(prev => ({ ...prev, slug: data.slug }));
+                    setFormData((prev: any) => ({ ...prev, slug: data.slug }));
                 }
             } catch (err) {
                 console.error("Failed to reserve slug via SDK", err);
