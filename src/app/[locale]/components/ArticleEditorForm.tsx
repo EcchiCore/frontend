@@ -512,24 +512,30 @@ const DownloadManager: React.FC<{
 
                 if (isNameEmptyOrPrefixOnly) {
                     try {
-                        const urlObj = new URL(value);
-                        const domain = urlObj.hostname.replace('www.', '');
+                        let detectedProvider = '';
+                        
+                        if (value.startsWith('public/') || value.startsWith('premium/')) {
+                            detectedProvider = 'Storage';
+                        } else {
+                            const urlObj = new URL(value);
+                            const domain = urlObj.hostname.replace('www.', '');
 
-                        let detectedProvider = DOMAIN_MAPPINGS[domain];
-                        if (!detectedProvider) {
-                            for (const key in DOMAIN_MAPPINGS) {
-                                if (domain.includes(key)) {
-                                    detectedProvider = DOMAIN_MAPPINGS[key];
-                                    break;
+                            detectedProvider = DOMAIN_MAPPINGS[domain];
+                            if (!detectedProvider) {
+                                for (const key in DOMAIN_MAPPINGS) {
+                                    if (domain.includes(key)) {
+                                        detectedProvider = DOMAIN_MAPPINGS[key];
+                                        break;
+                                    }
                                 }
                             }
-                        }
 
-                        if (!detectedProvider) {
-                            const parts = domain.split('.');
-                            if (parts.length > 0) {
-                                const name = parts[0];
-                                detectedProvider = name.charAt(0).toUpperCase() + name.slice(1);
+                            if (!detectedProvider) {
+                                const parts = domain.split('.');
+                                if (parts.length > 0) {
+                                    const name = parts[0];
+                                    detectedProvider = name.charAt(0).toUpperCase() + name.slice(1);
+                                }
                             }
                         }
 

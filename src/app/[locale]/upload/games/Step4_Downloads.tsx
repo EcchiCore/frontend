@@ -57,6 +57,10 @@ export const Step4_Downloads = () => {
   const [isPurchaseDialogOpen, setIsPurchaseDialogOpen] = useState(false);
 
   const isValidUrl = (url: string) => {
+    // Allow relative paths from our storage
+    if (url.startsWith('public/') || url.startsWith('premium/')) {
+      return true;
+    }
     try {
       new URL(url);
       return true;
@@ -64,8 +68,10 @@ export const Step4_Downloads = () => {
       return false;
     }
   };
-
   const getDomainName = (url: string) => {
+    if (url.startsWith('public/') || url.startsWith('premium/')) {
+      return 'Storage';
+    }
     try {
       const hostname = new URL(url).hostname;
       const parts = hostname.split('.');
