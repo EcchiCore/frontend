@@ -342,7 +342,8 @@ const DownloadManager: React.FC<{
     items: DownloadItem[];
     setItems: React.Dispatch<React.SetStateAction<DownloadItem[]>>;
     isPaid: boolean;
-}> = ({ articleId, gameSlug, items, setItems, isPaid }) => {
+    title: string;
+}> = ({ articleId, gameSlug, items, setItems, isPaid, title }) => {
     const itemsRef = React.useRef(items);
     const [uploadingId, setUploadingId] = useState<string | null>(null);
     const [uploadProgress, setUploadProgress] = useState(0);
@@ -355,6 +356,15 @@ const DownloadManager: React.FC<{
         const file = e.target.files?.[0];
         if (!file) return;
 
+        // Ensure we have a valid slug or derive it from title
+        const titleSlug = title?.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-');
+        const targetSlug = gameSlug || titleSlug;
+
+        if (!targetSlug) {
+            toast.error("Please enter a title before uploading files.");
+            return;
+        }
+
         setUploadingId(tempId);
         setUploadProgress(0);
         try {
@@ -362,7 +372,7 @@ const DownloadManager: React.FC<{
             const result = await sdk.storage.uploadMultipart(file, {
                 bucket: 'storage',
                 path: isPaid ? 'premium' : 'public',
-                game: gameSlug || 'pending',
+                game: targetSlug,
                 onProgress: (percent) => setUploadProgress(percent)
             });
 
@@ -1083,14 +1093,14 @@ export const ArticleEditorForm = ({ slug = '', initialData, mode, locale = 'en' 
                                 <Badge variant="outline" className="bg-background border-border">{downloadItems.length} items</Badge>
                             </div>
                             <CardContent className="p-6">
-                                <DownloadManager 
-                                    articleId={formData.id ? Number(formData.id) : undefined} 
+                                <DownloadManager
+                                    articleId={formData.id ? Number(formData.id) : undefined}
                                     gameSlug={formData.slug}
-                                    items={downloadItems} 
-                                    setItems={setDownloadItems} 
-                                    isPaid={formData.isPaid} 
-                                />
-                            </CardContent>
+                                    items={downloadItems}
+                                    setItems={setDownloadItems}
+                                    isPaid={formData.isPaid}
+                                    title={formData.title}
+                                />                            </CardContent>
                         </Card>
 
                     </div>

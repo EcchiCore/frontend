@@ -139,9 +139,17 @@ export const Step4_Downloads = () => {
 
     try {
       const sdk = await getSdk();
+      
+      const gameSlug = formData.slug;
+
+      if (!gameSlug) {
+        throw new Error('Game title reservation is still in progress or no title entered. Please wait or go back to Step 1.');
+      }
+
       const result = await sdk.storage.uploadMultipart(file, { 
         bucket: 'storage',
         path: formData.isPaid ? 'premium' : 'public',
+        game: gameSlug,
         onProgress: (percent) => setUploadProgress(percent)
       });
       

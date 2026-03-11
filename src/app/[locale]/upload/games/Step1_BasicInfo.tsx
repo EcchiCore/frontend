@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect, useCallback } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -7,6 +8,8 @@ import { Checkbox } from '@/components/ui/checkbox';
 import dynamic from 'next/dynamic';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { updateFormData } from '@/store/features/upload/uploadSlice';
+import { getSdk } from '@/lib/sdk';
+import { Loader2, CheckCircle2 } from 'lucide-react';
 
 const RichTextEditor = dynamic(() => import('@/components/ui/RichTextEditor'), {
   ssr: false,
@@ -18,9 +21,41 @@ import { engines, platforms } from '@/lib/gameData';
 export const Step1_BasicInfo = () => {
   const dispatch = useAppDispatch();
   const formData = useAppSelector((state) => state.upload.formData);
+  const [isReserving, setIsReserving] = useState(false);
+
+  const reserveSlug = useCallback(async (title: string) => {
+    if (!title || title.length < 3) return;
+    
+    setIsReserving(true);
+    try {
+      const sdk = await getSdk();
+      const { slug } = await sdk.articles.reserveSlug(title);
+      dispatch(updateFormData({ slug }));
+    } catch (error) {
+      console.error('Failed to reserve slug:', error);
+    } finally {
+      setIsReserving(false);
+    }
+  }, [dispatch]);
+
+  // Debounce slug reservation
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (formData.title && !formData.slug) {
+        reserveSlug(formData.title);
+      }
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [formData.title, formData.slug, reserveSlug]);
 
   const handleChange = (e: { target: { id: string; value: string } }) => {
-    dispatch(updateFormData({ [e.target.id]: e.target.value }));
+    const { id, value } = e.target;
+    dispatch(updateFormData({ [id]: value }));
+    
+    // If title changes, clear existing derived slug to trigger re-reservation
+    if (id === 'title') {
+      dispatch(updateFormData({ slug: undefined }));
+    }
   };
 
   const handleBodyChange = (html: string) => {
@@ -40,8 +75,19 @@ export const Step1_BasicInfo = () => {
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
-          <Label htmlFor="title">Game Title</Label>
-          <Input id="title" value={formData.title || ''} onChange={handleChange} placeholder="Enter your game's title" required />
+          <Label htmlFor="title" className="flex items-center gap-2">
+            Game Title
+            {isReserving && <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />}
+            {formData.slug && !isReserving && <CheckCircle2 className="h-3 w-3 text-green-500" />}
+          </Label>
+          <div className="relative">
+            <Input id="title" value={formData.title || ''} onChange={handleChange} placeholder="Enter your game's title" required />
+            {formData.slug && (
+              <p className="text-[10px] text-muted-foreground mt-1 px-1">
+                Reserved slug: <span className="font-mono">{formData.slug}</span>
+              </p>
+            )}
+          </div>
         </div>
         <div className="space-y-2">
           <Label htmlFor="creator">Creator / Studio</Label>
