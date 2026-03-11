@@ -90,7 +90,7 @@ export function generatePageMetadata(options: {
     keywords = [],
     locale,
     contentPath = '',
-    images = [{ url: '/favicon.ico', width: 1200, height: 630, alt: 'ChanomHub Logo' }],
+    images = [{ url: '/chanomhub.ico', width: 1200, height: 630, alt: 'ChanomHub Logo' }],
     type = 'website',
     publishedTime,
     modifiedTime,
@@ -178,7 +178,7 @@ export function generateArticleStructuredData(options: {
     datePublished,
     dateModified,
     authors = ['ChanomHub'],
-    images = [`${siteUrl}/favicon.ico`],
+    images = [`${siteUrl}/chanomhub.ico`],
     locale
   } = options;
 
@@ -200,7 +200,7 @@ export function generateArticleStructuredData(options: {
       "url": siteUrl,
       "logo": {
         "@type": "ImageObject",
-        "url": `${siteUrl}/favicon.ico`
+        "url": `${siteUrl}/chanomhub.ico`
       }
     },
     "image": images,
