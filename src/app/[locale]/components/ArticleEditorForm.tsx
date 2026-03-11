@@ -338,10 +338,11 @@ const ImageManager: React.FC<{
 
 const DownloadManager: React.FC<{
     articleId: number | undefined;
+    gameSlug: string;
     items: DownloadItem[];
     setItems: React.Dispatch<React.SetStateAction<DownloadItem[]>>;
     isPaid: boolean;
-}> = ({ articleId, items, setItems, isPaid }) => {
+}> = ({ articleId, gameSlug, items, setItems, isPaid }) => {
     const itemsRef = React.useRef(items);
     const [uploadingId, setUploadingId] = useState<string | null>(null);
 
@@ -358,7 +359,8 @@ const DownloadManager: React.FC<{
             const sdk = await getSdk();
             const result = await sdk.storage.upload(file, { 
                 bucket: 'storage',
-                path: isPaid ? 'premium' : 'public'
+                path: isPaid ? 'premium' : 'public',
+                game: gameSlug || 'misc'
             });
             
             if (result && result.url) {
@@ -855,6 +857,20 @@ export const ArticleEditorForm = ({ slug = '', initialData, mode, locale = 'en' 
         if (type === 'cover') setFormData((prev: any) => ({ ...prev, coverImageId: id }));
     };
 
+    const handleTitleBlur = async () => {
+        if (mode === 'create' && formData.title && !formData.slug) {
+            try {
+                const sdk = await getSdk();
+                const data = await sdk.articles.reserveSlug(formData.title);
+                if (data.slug) {
+                    setFormData(prev => ({ ...prev, slug: data.slug }));
+                }
+            } catch (err) {
+                console.error("Failed to reserve slug via SDK", err);
+            }
+        }
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         
@@ -985,6 +1001,7 @@ export const ArticleEditorForm = ({ slug = '', initialData, mode, locale = 'en' 
                                         name="title"
                                         value={formData.title || ''}
                                         onChange={handleInputChange}
+                                        onBlur={handleTitleBlur}
                                         placeholder="Enter a descriptive title"
                                         className={`text-lg font-semibold h-12 px-4 border-gray-200 focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all ${showValidationErrors && !formData.title ? 'border-destructive ring-2 ring-destructive/10' : ''}`}
                                         required
@@ -1049,7 +1066,13 @@ export const ArticleEditorForm = ({ slug = '', initialData, mode, locale = 'en' 
                                 <Badge variant="outline" className="bg-background border-border">{downloadItems.length} items</Badge>
                             </div>
                             <CardContent className="p-6">
-                                <DownloadManager articleId={formData.id ? Number(formData.id) : undefined} items={downloadItems} setItems={setDownloadItems} isPaid={formData.isPaid} />
+                                <DownloadManager 
+                                    articleId={formData.id ? Number(formData.id) : undefined} 
+                                    gameSlug={formData.slug}
+                                    items={downloadItems} 
+                                    setItems={setDownloadItems} 
+                                    isPaid={formData.isPaid} 
+                                />
                             </CardContent>
                         </Card>
 
