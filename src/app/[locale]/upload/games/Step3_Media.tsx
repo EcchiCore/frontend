@@ -44,7 +44,10 @@ export const Step3_Media = () => {
 
       try {
         const sdk = await getSdk();
-        const result = await sdk.storage.upload(file, { bucket: 'images' });
+        const result = await sdk.storage.upload(file, { 
+          bucket: 'images',
+          game: formData.slug 
+        });
 
         if (!result || !result.url) {
           throw new Error('Upload failed: No URL returned');
@@ -79,7 +82,10 @@ export const Step3_Media = () => {
       const uploadOne = async (file: File): Promise<string> => {
         try {
           const sdk = await getSdk();
-          const result = await sdk.storage.upload(file, { bucket: 'images' });
+          const result = await sdk.storage.upload(file, { 
+            bucket: 'images',
+            game: formData.slug
+          });
           if (!result || !result.url) {
             throw new Error(`Upload failed for ${file.name}`);
           }
