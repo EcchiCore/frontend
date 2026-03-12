@@ -52,7 +52,7 @@ export function SponsoredArticlesTab() {
         try {
             setLoading(true);
             const sdk = await getSdk();
-            const data = await sdk.sponsoredArticles.getAll();
+            const data = await sdk.sponsoredArticles.getAll({ all: true });
             setItems(data);
             setError(null);
         } catch (err: any) {
