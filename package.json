@@ -12,7 +12,7 @@
     "i18n:scan": "i18next-scanner"
   },
   "dependencies": {
-    "@chanomhub/sdk": "1.3.16",
+    "@chanomhub/sdk": "1.3.18",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@google-analytics/data": "^5.2.1",
@@ -63,7 +63,7 @@
     "dompurify": "^3.3.3",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-react-hooks": "^5.2.0",
-    "framer-motion": "^12.35.2",
+    "framer-motion": "^12.36.0",
     "groq-sdk": "^0.36.0",
     "html-react-parser": "^5.2.17",
     "ioredis": "^5.10.0",
@@ -128,7 +128,7 @@
     "@types/xml": "^1.0.11",
     "@typescript-eslint/eslint-plugin": "8.50.0",
     "base64-url": "^2.3.3",
-    "baseline-browser-mapping": "^2.10.0",
+    "baseline-browser-mapping": "^2.10.7",
     "eslint": "^9.39.4",
     "eslint-config-next": "16.1.0",
     "formidable": "^3.5.4",

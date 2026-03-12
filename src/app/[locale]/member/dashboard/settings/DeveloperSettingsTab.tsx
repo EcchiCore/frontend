@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Loader2, Save, Globe, Landmark, Sparkles, Send, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Loader2, Save, Globe, Landmark, Sparkles, Send, CheckCircle2, AlertCircle, Key } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { getSdk } from '@/lib/sdk';
 import { DeveloperProfile } from '@chanomhub/sdk';
@@ -16,13 +16,16 @@ import Cookies from 'js-cookie';
 
 export function DeveloperSettingsTab() {
   const searchParams = useSearchParams();
-  const urlToken = searchParams.get('token');
+  const rawToken = searchParams.get('token');
+  const urlToken = rawToken === 'undefined' ? null : rawToken;
+  const cookieToken = Cookies.get('dev_verification_token');
+  const activeToken = urlToken || cookieToken;
 
   const [profile, setProfile] = useState<DeveloperProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [isApplying, setIsApplying] = useState(!!urlToken); // Set to true if token exists in URL
-  const [verificationToken, setVerificationToken] = useState<string | null>(urlToken);
+  const [isApplying, setIsApplying] = useState(!!activeToken); 
+  const [verificationToken, setVerificationToken] = useState<string | null>(activeToken || null);
 
   // Form states
   const [realName, setRealName] = useState("");
@@ -34,12 +37,6 @@ export function DeveloperSettingsTab() {
   const [citizenId, setCitizenId] = useState("");
 
   const fetchProfile = async () => {
-    // Optimization: If we are already applying with a token, don't even try to fetch profile
-    if (urlToken) {
-      setLoading(false);
-      return;
-    }
-
     try {
       setLoading(true);
       const sdk = await getSdk();
@@ -59,14 +56,7 @@ export function DeveloperSettingsTab() {
           setCitizenId(data.citizenId || "");
         }
       } catch (sdkError: any) {
-        // If 404, just set profile to null and don't log error
-        const errorStr = typeof sdkError === 'string' ? sdkError : (sdkError?.message || "");
-        if (errorStr.includes('404') || sdkError?.status === 404) {
-          setProfile(null);
-        } else {
-          // Real errors should still be logged
-          console.error("SDK fetch error:", sdkError);
-        }
+        setProfile(null);
       }
     } catch (error: any) {
       console.error("General fetch error:", error);
@@ -77,53 +67,21 @@ export function DeveloperSettingsTab() {
 
   useEffect(() => {
     fetchProfile();
-  }, [urlToken]);
+  }, []);
 
-  const handleStartApplication = async () => {
-    setSaving(true);
-    try {
-      const token = Cookies.get('token');
-      const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.chanomhub.com';
-      const apiPath = baseUrl.endsWith('/api') ? baseUrl : `${baseUrl}/api`;
-
-      const response = await fetch(`${apiPath}/developer/generate-token`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({})
-      });
-
-      if (!response.ok) throw new Error('Failed to start application');
-
-      const data = await response.json();
-      setVerificationToken(data.token);
-      setIsApplying(true);
-    } catch (error: any) {
-      toast.error(error.message || "Failed to start application process");
-    } finally {
-      setSaving(false);
-    }
+  const handleStartApplication = () => {
+    setIsApplying(true);
   };
 
   const handleSubmitApplication = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!verificationToken) return;
-
     setSaving(true);
     try {
-      const token = Cookies.get('token');
-      const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.chanomhub.com';
-      const apiPath = baseUrl.endsWith('/api') ? baseUrl : `${baseUrl}/api`;
-
-      const response = await fetch(`${apiPath}/developer/verify/${verificationToken}`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
+      const sdk = await getSdk();
+      
+      if (verificationToken) {
+        // Step 2: Final Activation using the token received from Admin
+        await sdk.developer.verifyDeveloper(verificationToken, {
           realName,
           bankType,
           bankName,
@@ -131,21 +89,29 @@ export function DeveloperSettingsTab() {
           swiftCode: bankType === "INTERNATIONAL" ? swiftCode : undefined,
           bankAddress: bankType === "INTERNATIONAL" ? bankAddress : undefined,
           citizenId: citizenId || undefined,
-        })
-      });
-
-      if (!response.ok) {
-        const err = await response.json();
-        throw new Error(err.message || 'Failed to submit application');
+        });
+        toast.success("Account activated! You are now a verified developer.");
+        Cookies.remove('dev_verification_token');
+      } else {
+        // Step 1: Initial submission of identity info for Admin review
+        await sdk.developer.submitApplication({
+          realName,
+          bankType,
+          bankName,
+          bankAccount,
+          swiftCode: bankType === "INTERNATIONAL" ? swiftCode : undefined,
+          bankAddress: bankType === "INTERNATIONAL" ? bankAddress : undefined,
+          citizenId: citizenId || undefined,
+        });
+        toast.success("Information submitted! Admin will review and send your verification link.");
       }
 
-      toast.success("Application submitted! Our administrators will review it shortly.");
       setIsApplying(false);
-      // Clean up URL token after submission
       window.history.replaceState({}, '', window.location.pathname + '?tab=developer');
       fetchProfile();
     } catch (error: any) {
-      toast.error(error.message || "Failed to submit application");
+      console.error("Submission error:", error);
+      toast.error(error.message || "Failed to process application");
     } finally {
       setSaving(false);
     }
@@ -192,8 +158,12 @@ export function DeveloperSettingsTab() {
       <div className="space-y-6 animate-in slide-in-from-bottom-4 duration-500">
         <Card className="border-primary/20 shadow-lg">
           <CardHeader className="bg-primary/5">
-            <CardTitle>Developer Application</CardTitle>
-            <CardDescription>Enter your payout and identity details for verification.</CardDescription>
+            <CardTitle>{verificationToken ? 'Activate Developer Status' : 'Developer Identity & Payouts'}</CardTitle>
+            <CardDescription>
+              {verificationToken 
+                ? 'Your link is valid. Click the button below to receive your developer role.'
+                : 'Enter your legal identity and payout details. Admin will review this to generate your activation link.'}
+            </CardDescription>
           </CardHeader>
           <CardContent className="pt-6">
             <form onSubmit={handleSubmitApplication} className="space-y-6">
@@ -275,9 +245,9 @@ export function DeveloperSettingsTab() {
 
               <div className="pt-4 flex items-center justify-between gap-4">
                 <Button type="button" variant="ghost" onClick={() => setIsApplying(false)}>Cancel</Button>
-                <Button type="submit" disabled={saving} className="flex-1 gap-2">
-                  {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-                  Submit Application
+                <Button type="submit" disabled={saving} className={`flex-1 gap-2 ${verificationToken ? 'bg-green-600 hover:bg-green-700' : ''}`}>
+                  {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : verificationToken ? <Key className="h-4 w-4" /> : <Send className="h-4 w-4" />}
+                  {verificationToken ? 'Activate Developer Account' : 'Submit for Admin Review'}
                 </Button>
               </div>
             </form>
@@ -320,7 +290,7 @@ export function DeveloperSettingsTab() {
           <CardFooter className="bg-muted/30 border-t py-3 justify-center">
             <p className="text-xs text-muted-foreground flex items-center gap-1.5">
               <AlertCircle className="h-3 w-3" />
-              Applications are usually reviewed within 24-48 hours.
+              Applications are reviewed manually. After review, you will receive an activation link.
             </p>
           </CardFooter>
         </Card>
@@ -335,11 +305,11 @@ export function DeveloperSettingsTab() {
         <div className="flex items-center gap-3">
           {profile.isVerified ? <CheckCircle2 className="h-5 w-5" /> : <Loader2 className="h-5 w-5 animate-spin" />}
           <div className="flex-1">
-            <AlertTitle className="font-bold">{profile.isVerified ? 'Developer Verified' : 'Pending Verification'}</AlertTitle>
+            <AlertTitle className="font-bold">{profile.isVerified ? 'Developer Verified' : 'Awaiting Final Activation'}</AlertTitle>
             <AlertDescription className="text-xs opacity-90">
               {profile.isVerified
                 ? `Your account was successfully verified on ${new Date(profile.verifiedAt!).toLocaleDateString()}.`
-                : 'Your application is currently being reviewed by our moderation team. You can still manage your data below.'}
+                : 'Admin has received your data. Once they approve, they will send you a link to activate your developer role.'}
             </AlertDescription>
           </div>
           <Badge variant={profile.isVerified ? 'default' : 'outline'} className={profile.isVerified ? 'bg-green-600 text-white hover:bg-green-700' : 'text-yellow-700 border-yellow-700/30 dark:text-yellow-400 dark:border-yellow-400/30'}>
@@ -383,6 +353,24 @@ export function DeveloperSettingsTab() {
                 <Label htmlFor="bankAccount">Account Number</Label>
                 <Input id="bankAccount" value={bankAccount} onChange={(e) => setBankAccount(e.target.value)} required />
               </div>
+            </div>
+
+            {bankType === "INTERNATIONAL" && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-in fade-in">
+                <div className="space-y-2">
+                  <Label htmlFor="swiftCode">SWIFT/BIC Code</Label>
+                  <Input id="swiftCode" value={swiftCode} onChange={(e) => setSwiftCode(e.target.value)} required />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="bankAddress">Bank Branch Address</Label>
+                  <Input id="bankAddress" value={bankAddress} onChange={(e) => setBankAddress(e.target.value)} required />
+                </div>
+              </div>
+            )}
+
+            <div className="space-y-2">
+              <Label htmlFor="updateCitizenId">Identification (Citizen ID / Passport)</Label>
+              <Input id="updateCitizenId" value={citizenId} onChange={(e) => setCitizenId(e.target.value)} placeholder="For verification purpose" />
             </div>
 
             <div className="flex justify-end pt-4 border-t">

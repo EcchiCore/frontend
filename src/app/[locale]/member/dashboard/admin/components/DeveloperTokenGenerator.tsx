@@ -41,8 +41,13 @@ export function DeveloperTokenGenerator() {
     const getVerificationUrl = () => {
         if (!generatedToken) return '';
         const origin = window.location.origin;
-        // Assuming current locale is needed in the URL
-        const locale = window.location.pathname.split('/')[1] || 'en';
+        
+        // Get locale safely from path or fallback to default
+        const pathParts = window.location.pathname.split('/');
+        // Path is usually /[locale]/member/dashboard/...
+        const locale = pathParts[1] || 'en';
+        
+        // Final URL should point to the standalone redirector
         return `${origin}/${locale}/developer/verify/${generatedToken}`;
     };
 

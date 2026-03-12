@@ -26,6 +26,7 @@ import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { updateUserLocal } from '@/store/features/auth/authSlice';
 import { toast } from 'react-toastify';
 import Cookies from 'js-cookie';
+import { getSdk } from '@/lib/sdk';
 
 const ProfilePage: React.FC = () => {
   const router = useRouter();
@@ -92,36 +93,20 @@ const ProfilePage: React.FC = () => {
   };
 
   const handleStartApplication = async () => {
-    setApplying(true);
     try {
-      // 1. Get Token directly from Cookies (Standard way in this project)
-      const token = Cookies.get('token');
-      if (!token) throw new Error('You must be logged in to apply');
+      setApplying(true);
+      const sdk = await getSdk();
 
-      // 2. Build API URL
-      const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.chanomhub.com';
-      const apiPath = baseUrl.endsWith('/api') ? baseUrl : `${baseUrl}/api`;
-      
-      // 3. Direct fetch call
-      const response = await fetch(`${apiPath}/developer/generate-token`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({})
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || `Server error: ${response.status}`);
-      }
-      
-      const data = await response.json();
+      // Use SDK to start application
+      const result = await sdk.developer.startApplication();
+      const tokenValue = (result as any)?.token || result;
+      // Save to cookie for persistence
+      Cookies.set('dev_verification_token', tokenValue, { expires: 7 });
+
       toast.success("Application started! Redirecting...");
-      
-      // 4. Redirect to settings
-      router.push(`/member/dashboard/settings?tab=developer&token=${data.token}`);
+
+      // Redirect to settings without token in URL
+      router.push(`/member/dashboard/settings?tab=developer`);
     } catch (err: any) {
       console.error("Application Error:", err);
       toast.error(err.message || "Failed to start application");
