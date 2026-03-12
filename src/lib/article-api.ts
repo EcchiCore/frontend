@@ -66,11 +66,35 @@ async function getAuthToken(): Promise<string | null> {
   }
 }
 
+// CDN Base URL - can be configured via environment variable
+const CDN_BASE_URL = process.env.NEXT_PUBLIC_CDN_URL || 'https://cdn.chanomhub.com/cdn-cgi/image/format=auto';
+const STORAGE_DOWNLOAD_URL = process.env.NEXT_PUBLIC_STORAGE_DOWNLOAD_URL || 'https://storage.chanomhub.com';
+
 /**
- * Transform article image URLs from filename to full CDN URLs
+ * Resolves an article download URL.
+ * - If it's already a full URL, returns it as-is
+ * - If it's just a path (e.g., "public/abc.zip"), prepends the storage base URL
+ * - Handles null/undefined gracefully
  */
-function transformArticleImages(article: Article): Article {
-  return {
+export function resolveDownloadUrl(url: string | null | undefined): string | null {
+  if (!url) return null;
+
+  // Already a full URL - return as-is
+  if (url.startsWith('http://') || url.startsWith('https://')) {
+    return url;
+  }
+
+  // Path only - prepend storage base URL
+  const baseUrl = STORAGE_DOWNLOAD_URL.endsWith('/') ? STORAGE_DOWNLOAD_URL.slice(0, -1) : STORAGE_DOWNLOAD_URL;
+  const path = url.startsWith('/') ? url : `/${url}`;
+  return `${baseUrl}${path}`;
+}
+
+/**
+ * Transform article data (images and downloads) from filename/paths to full URLs
+ */
+function transformArticleData(article: Article): Article {
+  const transformed = {
     ...article,
     mainImage: resolveArticleImageUrl(article.mainImage),
     backgroundImage: resolveArticleImageUrl(article.backgroundImage),
@@ -83,7 +107,22 @@ function transformArticleImages(article: Article): Article {
       image: resolveArticleImageUrl(article.author.image),
       backgroundImage: resolveArticleImageUrl(article.author.backgroundImage),
     },
+    // Transform official download sources
+    officialDownloadSources: article.officialDownloadSources?.map(source => ({
+      ...source,
+      url: resolveDownloadUrl(source.url) || source.url
+    })) || [],
   };
+
+  // Transform downloads if they exist in the article object
+  if (transformed.downloads) {
+    transformed.downloads = transformed.downloads.map(download => ({
+      ...download,
+      url: resolveDownloadUrl(download.url) || download.url
+    }));
+  }
+
+  return transformed;
 }
 
 export async function fetchDownloadsByArticleId(
@@ -107,7 +146,14 @@ export async function fetchDownloadsByArticleId(
       "DownloadsByArticleId",
       token
     );
-    return data.downloads ?? null;
+
+    if (!data.downloads) return null;
+
+    // Transform download URLs in the standalone fetch
+    return data.downloads.map(download => ({
+      ...download,
+      url: resolveDownloadUrl(download.url) || download.url
+    }));
   } catch (error) {
     console.error(`Failed to fetch downloads for article ${articleId}:`, error);
     return null;
@@ -186,9 +232,15 @@ export async function fetchArticleAndDownloads(
       token
     );
 
+    const article = data.article ? transformArticleData(data.article) : null;
+    const downloads = data.downloads ? data.downloads.map(d => ({
+      ...d,
+      url: resolveDownloadUrl(d.url) || d.url
+    })) : null;
+
     return {
-      article: data.article ? transformArticleImages(data.article) : null,
-      downloads: data.downloads ?? null
+      article,
+      downloads
     };
   } catch (error) {
     console.error(`Failed to fetch article "${slug}" and downloads:`, error);
@@ -201,9 +253,15 @@ import { getSdk } from '@/lib/sdk';
 export async function getArticleMods(articleId: number): Promise<any[]> {
   try {
     const sdk = await getSdk();
-    return await sdk.articles.getMods(articleId, {
+    const mods = await sdk.articles.getMods(articleId, {
       fields: ['id', 'name', 'version', 'description', 'status', 'downloadLink', 'images', 'creditTo', 'categories']
     });
+
+    // SDK might already transform URLs, but ensure consistency
+    return mods.map(mod => ({
+      ...mod,
+      downloadLink: resolveDownloadUrl(mod.downloadLink) || mod.downloadLink
+    }));
   } catch (error) {
     console.error(`Failed to fetch mods for article ${articleId}:`, error);
     return [];
@@ -268,7 +326,7 @@ export async function getArticleBySlug(slug: string, language?: string): Promise
       token
     );
 
-    return data.article ? transformArticleImages(data.article) : null;
+    return data.article ? transformArticleData(data.article) : null;
   } catch (error) {
     console.error(`Failed to fetch article by slug "${slug}":`, error);
     return null;
@@ -344,7 +402,7 @@ export async function getArticleWithDownloads(
       return { article: null, downloads: null };
     }
 
-    const article = transformArticleImages(articleData.article);
+    const article = transformArticleData(articleData.article);
 
     // Ensure ID is a number for the downloads query
     const articleId = typeof article.id === 'string' ? parseInt(article.id, 10) : article.id;
