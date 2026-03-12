@@ -293,7 +293,29 @@ export function SponsoredArticlesTab() {
                                                     </Badge>
                                                 )}
                                             </div>
-                                            <div className="text-xs text-muted-foreground">ID: {item.articleId}</div>
+                                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                                <span>ID: {item.articleId}</span>
+                                                {item.article?.sequentialCode && (
+                                                    <>
+                                                        <span>•</span>
+                                                        <span className="font-mono text-primary">{item.article.sequentialCode}</span>
+                                                    </>
+                                                )}
+                                                {item.article?.status && (
+                                                    <>
+                                                        <span>•</span>
+                                                        <Badge variant={item.article.status === 'PUBLISHED' ? 'secondary' : 'outline'} className="text-[9px] h-4 px-1 uppercase">
+                                                            {item.article.status}
+                                                        </Badge>
+                                                    </>
+                                                )}
+                                                {item.article?.author && (
+                                                    <>
+                                                        <span>•</span>
+                                                        <span>โดย {item.article.author.name}</span>
+                                                    </>
+                                                )}
+                                            </div>
                                         </TableCell>
                                     <TableCell className="text-center font-mono">{item.priority}</TableCell>
                                     <TableCell className="text-center">
