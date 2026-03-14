@@ -10,6 +10,7 @@ import GTMArticleTracker from './components/GTMArticleTracker';
 import Script from 'next/script';
 import ArticleModsPage from './components/ArticleModsPage';
 import ArticleDiscussionsPage from './components/ArticleDiscussionsPage';
+import ArticleViewTracker from './components/ArticleViewTracker';
 import {
   generatePageMetadata,
   generateArticleStructuredData,
@@ -183,6 +184,8 @@ export default async function ArticlePage(props: ArticlePageProps) {
         categoryList={originalArticle.categories.map((c: { name: string }) => c.name)}
         authorUsername={originalArticle.author.name}
       />
+
+      <ArticleViewTracker slug={slug} />
 
       {/* Workshop Page Routing */}
       {paths[1] === 'mods' ? (

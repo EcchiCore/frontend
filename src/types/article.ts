@@ -35,4 +35,5 @@ export type Article = {
   price?: number;
   isPaid?: boolean;
   isUnlocked?: boolean;
+  viewsCount?: number;
 };

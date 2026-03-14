@@ -179,6 +179,14 @@ const ArticleInfoSidebar: React.FC<ArticleInfoSidebarProps> = ({
             </div>
           </CardHeader>
           <CardContent className="space-y-3">
+            <div className="flex justify-between items-center border-b border-border/50 pb-2 mb-2">
+              <div className="flex items-center gap-2">
+                <EyeIcon className="w-4 h-4 text-primary" />
+                <span className="text-sm font-medium">Views:</span>
+              </div>
+              <span className="text-sm font-bold text-primary">{(article.viewsCount || 0).toLocaleString()}</span>
+            </div>
+
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-2">
                 <ClockIcon className="w-4 h-4 text-muted-foreground" />
@@ -438,6 +446,14 @@ const ArticleInfoSidebar: React.FC<ArticleInfoSidebarProps> = ({
             </div>
           </CardHeader>
           <CardContent className="space-y-3">
+            <div className="flex justify-between items-center border-b border-border/50 pb-2 mb-2">
+              <div className="flex items-center gap-2">
+                <EyeIcon className="w-4 h-4 text-primary" />
+                <span className="text-sm font-medium">Views:</span>
+              </div>
+              <span className="text-sm font-bold text-primary">{(article.viewsCount || 0).toLocaleString()}</span>
+            </div>
+
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-2">
                 <ClockIcon className="w-4 h-4 text-muted-foreground" />
