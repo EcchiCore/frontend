@@ -17,7 +17,7 @@ export const getCachedRecommendationPool = unstable_cache(
             fields: [
                 'id', 'title', 'slug', 'description',
                 'mainImage', 'coverImage', 'backgroundImage',
-                'author', 'tags', 'price', 'isPaid', 'isUnlocked'
+                'author', 'tags', 'price', 'isPaid', 'isUnlocked', 'viewsCount'
             ]
         });
         return result.items;

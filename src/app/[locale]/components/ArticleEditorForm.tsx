@@ -1173,18 +1173,19 @@ export const ArticleEditorForm = ({ slug = '', initialData, mode, locale = 'en' 
                                                     <span>-{(formData.price * 0.1).toFixed(2)} THB</span>
                                                 </div>
                                                 <div className="flex justify-between text-muted-foreground">
-                                                    <span>Payment Gateway (Stripe 3.65% + 10฿):</span>
-                                                    <span>-{((formData.price * 0.0365) + 10).toFixed(2)} THB</span>
+                                                    <span>Payment Gateway (Stripe 3.65% + 10฿ + 7% VAT):</span>
+                                                    <span>-{( ((formData.price * 0.0365) + 10) * 1.07 ).toFixed(2)} THB</span>
                                                 </div>
                                                 <div className="pt-1.5 mt-1.5 border-t border-border flex justify-between font-bold text-green-600 dark:text-green-400 text-sm">
                                                     <span>รายได้ที่คุณจะได้รับ (โดยประมาณ):</span>
-                                                    <span>{(formData.price - (formData.price * 0.1) - ((formData.price * 0.0365) + 10)).toFixed(2)} THB</span>
+                                                    <span>{(formData.price - (formData.price * 0.1) - (((formData.price * 0.0365) + 10) * 1.07)).toFixed(2)} THB</span>
                                                 </div>
                                                 <p className="text-[10px] text-muted-foreground italic mt-1">
-                                                    * รายได้สุทธิอาจคลาดเคลื่อนเล็กน้อยตามภาษีมูลค่าเพิ่มของค่าธรรมเนียม
+                                                    * รายได้สุทธิคำนวณรวมภาษีมูลค่าเพิ่มของค่าธรรมเนียมแล้ว
                                                 </p>
                                             </div>
                                         )}
+
                                         {formData.price !== undefined && formData.price > 0 && formData.price < 79 && (
                                             <p className="text-xs text-amber-600 mt-2">
                                                 เรารู้สึกเป็นห่วงกับราคาที่อาจจะน้อยไปกับความพยายามของคุณ เราแนะนำเป็น 79, 99 หรือมากกว่านั้น

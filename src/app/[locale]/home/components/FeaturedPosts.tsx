@@ -35,9 +35,9 @@ function PostRow({ post, index }: { post: ArticleListItem; index: number }) {
     setTimeString(getRelativeTime(post.createdAt));
   }, [post.createdAt]);
 
-  // Generate mock data for replies and views (deterministic based on ID to avoid hydration mismatch)
+  // Generate mock data for replies (deterministic based on ID to avoid hydration mismatch)
   const replies = (post.id * 7) % 70 + 12;
-  const views = (post.id * 13) % 900 + 145;
+  const views = post.viewsCount || 0;
   const relativeTime = timeString || "";
 
   return (

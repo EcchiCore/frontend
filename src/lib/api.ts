@@ -121,6 +121,7 @@ export async function fetchArticles(params: Record<string, string | string[] | u
     tags {
       name
     }
+    viewsCount
   }
 }`;
 
@@ -296,6 +297,7 @@ export async function fetchArticle(slug: string): Promise<Article | null> {
       title
       updatedAt
       ver
+      viewsCount
     }
   }`;
 

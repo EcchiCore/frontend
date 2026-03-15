@@ -210,6 +210,7 @@ export async function fetchArticleAndDownloads(
       price
       isPaid
       isUnlocked
+      viewsCount
     }
     downloads(articleId: $downloadsArticleId) {
       id
@@ -314,6 +315,7 @@ export async function getArticleBySlug(slug: string, language?: string): Promise
       price
       isPaid
       isUnlocked
+      viewsCount
     }
   }`;
 
@@ -386,6 +388,7 @@ export async function getArticleWithDownloads(
       price
       isPaid
       isUnlocked
+      viewsCount
     }
   }`;
 
