@@ -92,34 +92,34 @@ export default async function HomePage({ params }: { params: { locale: string } 
           <DonationCTA />
         </div>
 
-        <div className="grid lg:grid-cols-5 gap-3 container mx-auto px-2 pb-4">
+        <div className="grid lg:grid-cols-4 gap-4 container mx-auto px-2 pb-4">
           {/* Main Content */}
-          <div className="lg:col-span-4">
+          <div className="lg:col-span-3">
             {/* Compact Tabs Navigation */}
             <Tabs defaultValue="featured" className="mb-3">
               <div className="border-b border-border">
-                <TabsList className="grid w-full grid-cols-4 bg-transparent h-8">
+                <TabsList className="flex w-full bg-transparent h-10 gap-4 px-2">
                   <TabsTrigger
                     value="featured"
-                    className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-xs"
+                    className="relative h-full rounded-none bg-transparent px-2 pb-2 pt-2 font-semibold text-muted-foreground hover:text-foreground data-[state=active]:text-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:right-0 data-[state=active]:after:h-0.5 data-[state=active]:after:bg-primary text-sm sm:text-base transition-colors"
                   >
                     แนะนำ
                   </TabsTrigger>
                   <TabsTrigger
                     value="latest"
-                    className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-xs"
+                    className="relative h-full rounded-none bg-transparent px-2 pb-2 pt-2 font-semibold text-muted-foreground hover:text-foreground data-[state=active]:text-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:right-0 data-[state=active]:after:h-0.5 data-[state=active]:after:bg-primary text-sm sm:text-base transition-colors"
                   >
                     ล่าสุด
                   </TabsTrigger>
                   <TabsTrigger
                     value="trending"
-                    className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-xs"
+                    className="relative h-full rounded-none bg-transparent px-2 pb-2 pt-2 font-semibold text-muted-foreground hover:text-foreground data-[state=active]:text-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:right-0 data-[state=active]:after:h-0.5 data-[state=active]:after:bg-primary text-sm sm:text-base transition-colors"
                   >
                     ยอดนิยม
                   </TabsTrigger>
                   <TabsTrigger
                     value="myFeed"
-                    className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-xs"
+                    className="relative h-full rounded-none bg-transparent px-2 pb-2 pt-2 font-semibold text-muted-foreground hover:text-foreground data-[state=active]:text-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:right-0 data-[state=active]:after:h-0.5 data-[state=active]:after:bg-primary text-sm sm:text-base transition-colors"
                   >
                     ฟีดของฉัน
                   </TabsTrigger>
@@ -139,11 +139,11 @@ export default async function HomePage({ params }: { params: { locale: string } 
               </TabsContent>
 
               <TabsContent value="trending" className="space-y-3 mt-3">
-                <div className="text-xs text-muted-foreground px-2">กระทู้ที่ได้รับความสนใจมากที่สุดในวันนี้</div>
+                <div className="text-xs text-muted-foreground px-2 py-8 text-center border border-dashed border-border rounded-lg">กำลังพัฒนาระบบกระทู้ยอดนิยม...</div>
               </TabsContent>
 
               <TabsContent value="myFeed" className="space-y-3 mt-3">
-                <div className="text-xs text-muted-foreground px-2">เข้าสู่ระบบเพื่อดูกระทู้ที่คุณติดตาม</div>
+                <div className="text-xs text-muted-foreground px-2 py-8 text-center border border-dashed border-border rounded-lg">เข้าสู่ระบบเพื่อดูกระทู้ที่คุณติดตาม</div>
               </TabsContent>
             </Tabs>
           </div>

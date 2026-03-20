@@ -12,6 +12,9 @@ interface FeaturedPostsProps {
 }
 
 
+import Image from 'next/image';
+import imageLoader from '@/lib/imageLoader';
+
 // Helper function to get relative time
 function getRelativeTime(dateString: string): string {
   const now = new Date();
@@ -27,104 +30,94 @@ function getRelativeTime(dateString: string): string {
   return new Date(dateString).toLocaleDateString('th-TH', { day: 'numeric', month: 'short' });
 }
 
-// Separate component for each post row to properly use React hooks
-function PostRow({ post, index }: { post: ArticleListItem; index: number }) {
+function PostCard({ post }: { post: ArticleListItem }) {
   const [timeString, setTimeString] = useState("");
+  const [imageError, setImageError] = useState(false);
 
   useEffect(() => {
     setTimeString(getRelativeTime(post.createdAt));
   }, [post.createdAt]);
 
-  // Generate mock data for replies (deterministic based on ID to avoid hydration mismatch)
-  const replies = (post.id * 7) % 70 + 12;
   const views = post.viewsCount || 0;
   const relativeTime = timeString || "";
+  const src = post.coverImage || post.mainImage || null;
 
   return (
-    <tr
-      className={`border-b border-border last:border-b-0 hover:bg-accent/30 transition-colors ${index % 2 === 1 ? 'bg-muted/20' : ''
-        }`}
-    >
-      {/* Title Column */}
-      <td className="px-2 py-1.5 text-foreground  ">
-        <Link
-          href={`/articles/${post.slug}?id=${post.id}`}
-          className="hover:text-primary hover:underline font-medium line-clamp-2 sm:line-clamp-1"
-          title={post.description}
-        >
-          {post.title}
+    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 p-3 bg-card border border-border rounded-lg hover:border-primary/50 transition-colors group">
+      {/* Thumbnail */}
+      <Link href={`/articles/${post.slug}?id=${post.id}`} className="shrink-0 relative w-[80px] h-[80px] sm:w-[100px] sm:h-[100px] rounded-md overflow-hidden bg-muted">
+        {src && !imageError ? (
+          <Image
+            loader={imageLoader}
+            src={src}
+            alt={post.title}
+            fill
+            sizes="100px"
+            className="object-cover group-hover:scale-105 transition-transform duration-300"
+            onError={() => setImageError(true)}
+          />
+        ) : (
+          <div className="w-full h-full bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center text-2xl opacity-50">
+            📰
+          </div>
+        )}
+      </Link>
+
+      {/* Content */}
+      <div className="flex-1 min-w-0">
+        <Link href={`/articles/${post.slug}?id=${post.id}`} className="block">
+          <h3 className="text-foreground font-semibold text-sm sm:text-base line-clamp-2 group-hover:text-primary transition-colors mb-1">
+            {post.title}
+          </h3>
         </Link>
-        {/* Show author and category on mobile */}
-        <div className="md:hidden text-[10px] text-muted-foreground mt-0.5 space-x-2">
-          <span>โดย {post.author.name}</span>
-          <span>• {relativeTime}</span>
+        <p className="text-xs text-muted-foreground line-clamp-1 mb-2">
+          {post.description || 'ไม่มีคำอธิบาย'}
+        </p>
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] sm:text-xs text-muted-foreground">
+          {post.categories?.[0] && (
+            <span className="px-1.5 py-0.5 bg-primary/10 text-primary rounded font-medium">
+              {post.categories[0].name}
+            </span>
+          )}
+          <span className="flex items-center gap-1">
+            <span className="opacity-70">👤</span> {post.author.name}
+          </span>
+          <span className="flex items-center gap-1">
+            <span className="opacity-70">👁️</span> {views.toLocaleString()}
+          </span>
+          <span className="flex items-center gap-1">
+            <span className="opacity-70">🕒</span> {relativeTime}
+          </span>
         </div>
-      </td>
+      </div>
 
-      {/* Author Column - Hidden on mobile */}
-      <td className="px-2 py-1.5 text-muted-foreground hidden md:table-cell truncate">
-        {post.author.name}
-      </td>
-
-      {/* Category Column - Hidden on tablet and below */}
-      <td className="px-2 py-1.5 hidden lg:table-cell">
-        <span className="text-[10px] px-1.5 py-0.5 bg-primary/10 text-primary rounded truncate inline-block max-w-full">
-          {post.categories?.[0]?.name || 'ทั่วไป'}
-        </span>
-      </td>
-
-      {/* Replies Column - Hidden on laptop and below */}
-      <td className="px-2 py-1.5 text-center text-muted-foreground hidden xl:table-cell">
-        {replies}
-      </td>
-
-      {/* Views Column - Hidden on laptop and below */}
-      <td className="px-2 py-1.5 text-center text-muted-foreground hidden xl:table-cell">
-        {views.toLocaleString()}
-      </td>
-
-      {/* Last Post Column - Hidden on mobile */}
-      <td className="px-2 py-1.5 text-muted-foreground hidden sm:table-cell whitespace-nowrap">
-        {relativeTime}
-      </td>
-    </tr>
+      {/* Action Button */}
+      <div className="shrink-0 w-full sm:w-auto mt-2 sm:mt-0 flex items-center justify-end">
+        <Link 
+          href={`/articles/${post.slug}?id=${post.id}`}
+          className="w-full sm:w-auto text-center px-4 py-1.5 bg-primary hover:bg-primary/90 text-primary-foreground text-xs sm:text-sm font-semibold rounded-full shadow-sm transition-all"
+        >
+          อ่าน
+        </Link>
+      </div>
+    </div>
   );
 }
 
-// ลบ title ออกจากการรับค่า function
 export default function FeaturedPosts({ posts, loading }: FeaturedPostsProps) {
   if (loading) {
-    return <div className="text-center text-xs">กำลังโหลด...</div>;
+    return <div className="text-center text-xs py-4">กำลังโหลด...</div>;
   }
 
   if (!posts || posts.length === 0) {
-    return <div className="text-center text-xs text-muted-foreground">ไม่มีกระทู้</div>;
+    return <div className="text-center text-xs text-muted-foreground py-8 border border-dashed border-border rounded-lg">ไม่มีกระทู้</div>;
   }
 
   return (
-    <div className="mb-4">
-      {/* ลบส่วน Header ที่แสดง title ออกไปแล้ว */}
-
-      {/* Table Layout */}
-      <div className="border border-border rounded-md overflow-hidden">
-        <table className="w-full text-xs">
-          <thead className="bg-muted/50 border-b border-border text-foreground">
-            <tr>
-              <th className="text-left px-2 py-1.5 font-semibold">หัวข้อกระทู้</th>
-              <th className="text-left px-2 py-1.5 font-semibold hidden md:table-cell w-28">ผู้เขียน</th>
-              <th className="text-left px-2 py-1.5 font-semibold hidden lg:table-cell w-24">หมวดหมู่</th>
-              <th className="text-center px-2 py-1.5 font-semibold hidden xl:table-cell w-16">ตอบกลับ</th>
-              <th className="text-center px-2 py-1.5 font-semibold hidden xl:table-cell w-16">ดู</th>
-              <th className="text-left px-2 py-1.5 font-semibold hidden sm:table-cell w-24">โพสต์ล่าสุด</th>
-            </tr>
-          </thead>
-          <tbody>
-            {posts.map((post, index) => (
-              <PostRow key={post.id} post={post} index={index} />
-            ))}
-          </tbody>
-        </table>
-      </div>
+    <div className="flex flex-col gap-3 mb-4">
+      {posts.map((post) => (
+        <PostCard key={post.id} post={post} />
+      ))}
     </div>
   );
 }
