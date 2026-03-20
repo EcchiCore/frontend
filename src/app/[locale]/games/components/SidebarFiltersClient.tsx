@@ -6,10 +6,9 @@ import { useCallback, useEffect, useState } from "react"
 import { useTranslations } from "next-intl"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Search, X, ChevronDown, ChevronUp, Hash } from "lucide-react"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Search, X, ChevronDown, ChevronUp, Filter } from "lucide-react"
 import { cn } from "@/lib/utils"
-
-const GAME_CODE_PATTERN = /^[Hh][Jj]\d+$/
 
 type Props = {
   tags: string[]
@@ -41,25 +40,21 @@ function FilterSection({ title, children, defaultOpen = true }: FilterSectionPro
 }
 
 export default function SidebarFiltersClient({ tags, categories, platforms, engines }: Props) {
-  const t = useTranslations("gameCodeDetection")
   const tSearch = useTranslations("searchControls")
   const router = useRouter()
   const pathname = usePathname()
   const sp = useSearchParams()
 
-  const [searchText, setSearchText] = useState("")
   const [activeTag, setActiveTag] = useState("")
   const [activeCategory, setActiveCategory] = useState("")
   const [activePlatform, setActivePlatform] = useState("")
   const [author, setAuthor] = useState("")
   const [engine, setEngine] = useState("")
   const [sequentialCode, setSequentialCode] = useState("")
-  const [showCodeConfirm, setShowCodeConfirm] = useState(false)
-  const [detectedCode, setDetectedCode] = useState("")
+  const [isTagModalOpen, setIsTagModalOpen] = useState(false)
+  const [tagSearchQuery, setTagSearchQuery] = useState("")
 
-  // Sync state from URL params on load/navigation
   useEffect(() => {
-    setSearchText(sp.get("q") ?? "")
     setActiveTag(sp.get("tag") ?? "")
     setActiveCategory(sp.get("category") ?? "")
     setActivePlatform(sp.get("platform") ?? "")
@@ -81,11 +76,9 @@ export default function SidebarFiltersClient({ tags, categories, platforms, engi
     [router, pathname, sp]
   )
 
-  // Full search apply — from current state + optional overrides
   const applyAll = useCallback(
     (overrides: Record<string, string | null> = {}) => {
       pushParams({
-        q: searchText || null,
         tag: activeTag || null,
         category: activeCategory || null,
         platform: activePlatform || null,
@@ -95,18 +88,8 @@ export default function SidebarFiltersClient({ tags, categories, platforms, engi
         ...overrides,
       })
     },
-    [searchText, activeTag, activeCategory, activePlatform, author, engine, sequentialCode, pushParams]
+    [activeTag, activeCategory, activePlatform, author, engine, sequentialCode, pushParams]
   )
-
-  const handleSearch = useCallback(() => {
-    const trimmed = searchText.trim()
-    if (GAME_CODE_PATTERN.test(trimmed)) {
-      setDetectedCode(trimmed.toUpperCase())
-      setShowCodeConfirm(true)
-      return
-    }
-    applyAll()
-  }, [searchText, applyAll])
 
   const toggleTag = (val: string) => {
     const next = activeTag === val ? "" : val
@@ -127,7 +110,6 @@ export default function SidebarFiltersClient({ tags, categories, platforms, engi
   }
 
   const clearFilters = () => {
-    setSearchText("")
     setActiveTag("")
     setActiveCategory("")
     setActivePlatform("")
@@ -135,101 +117,127 @@ export default function SidebarFiltersClient({ tags, categories, platforms, engi
     setEngine("")
     setSequentialCode("")
     pushParams({
-      q: null, tag: null, category: null, platform: null,
+      tag: null, category: null, platform: null,
       author: null, engine: null, sequentialCode: null,
     })
   }
 
   const hasActiveFilters =
-    searchText || activeTag || activeCategory || activePlatform || author || engine || sequentialCode
+    activeTag || activeCategory || activePlatform || author || engine || sequentialCode
+
+  const filteredModalTags = tagSearchQuery.trim() === ""
+    ? tags
+    : tags.filter((t) => t.toLowerCase().includes(tagSearchQuery.toLowerCase()))
 
   return (
     <div className="bg-card border border-border/50 rounded-xl overflow-hidden">
-      {/* Search */}
-      <div className="p-3 border-b border-border/40">
-        <div className="relative">
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-          <Input
-            value={searchText}
-            onChange={(e) => setSearchText(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-            placeholder={tSearch("searchPlaceholder")}
-            className="pl-8 pr-8 h-8 text-sm bg-background border-border/50"
-          />
-          {searchText && (
-            <button
-              onClick={() => { setSearchText(""); applyAll({ q: null }) }}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-            >
-              <X className="h-3.5 w-3.5" />
-            </button>
-          )}
-        </div>
-
-        {/* Game code detection banner */}
-        {showCodeConfirm && (
-          <div className="mt-2 bg-primary/10 border border-primary/30 rounded-lg p-3 space-y-2">
-            <div className="flex items-center gap-1.5 text-xs font-medium text-foreground">
-              <Hash className="w-3.5 h-3.5" />
-              {t("title")}
-            </div>
-            <p className="text-xs text-foreground">{t("description", { code: detectedCode })}</p>
-            <div className="flex gap-1.5 flex-wrap">
-              <Button
-                onClick={() => {
-                  setSequentialCode(detectedCode)
-                  setSearchText("")
-                  setShowCodeConfirm(false)
-                  applyAll({ q: null, sequentialCode: detectedCode })
-                }}
-                size="sm"
-                className="h-6 text-xs px-2"
-              >
-                <Hash className="w-3 h-3 mr-1" />{t("searchByCode")}
-              </Button>
-              <Button
-                onClick={() => { setShowCodeConfirm(false); applyAll() }}
-                variant="outline" size="sm"
-                className="h-6 text-xs px-2 text-foreground"
-              >
-                {t("searchByText")}
-              </Button>
-              <Button
-                onClick={() => setShowCodeConfirm(false)}
-                variant="ghost" size="sm"
-                className="h-6 text-xs px-2 text-foreground"
-              >
-                {t("cancel")}
-              </Button>
-            </div>
-          </div>
-        )}
-      </div>
-
       <div className="p-3 space-y-3">
-        {/* Tags — primary filter (itch.io style pill cloud) */}
+        {/* Tags */}
         {tags.length > 0 && (
           <FilterSection title={tSearch("tag")} defaultOpen>
             <div className="flex flex-wrap gap-1.5 pt-1">
-              {tags.map((tag) => (
-                <button
-                  key={tag}
-                  onClick={() => toggleTag(tag)}
-                  className={cn(
-                    "rounded-md px-2 py-1 text-xs border transition-colors",
-                    activeTag === tag
-                      ? "bg-primary text-primary-foreground border-primary"
-                      : "border-border/50 text-muted-foreground hover:border-primary/50 hover:text-foreground"
-                  )}
-                >
-                  {tag}
-                </button>
-              ))}
+              {(() => {
+                let displayTags = tags
+                if (tags.length > 15) {
+                  displayTags = tags.slice(0, 15)
+                  if (activeTag && tags.includes(activeTag) && !displayTags.includes(activeTag)) {
+                    displayTags = [...tags.slice(0, 14), activeTag]
+                  }
+                }
+                return displayTags.map((tag) => (
+                  <button
+                    key={tag}
+                    onClick={() => toggleTag(tag)}
+                    className={cn(
+                      "rounded-md px-2 py-1 text-xs border transition-colors",
+                      activeTag === tag
+                        ? "bg-primary text-primary-foreground border-primary"
+                        : "border-border/50 text-muted-foreground hover:border-primary/50 hover:text-foreground"
+                    )}
+                  >
+                    {tag}
+                  </button>
+                ))
+              })()}
+
+              {tags.length > 15 && (
+                <Dialog open={isTagModalOpen} onOpenChange={setIsTagModalOpen}>
+                  <DialogTrigger asChild>
+                    <button className="rounded-md px-2 py-1 text-xs border border-border/50 text-muted-foreground hover:bg-accent hover:text-foreground transition-colors font-medium flex items-center gap-1">
+                      <Filter className="w-3 h-3" />
+                      +{tags.length - 15} แท็กทั้งหมด
+                    </button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-md max-h-[85vh] flex flex-col p-0 text-foreground">
+                    <DialogHeader className="p-4 border-b border-border/40 pb-4">
+                      <DialogTitle>เลือกแท็กเกม ({tags.length})</DialogTitle>
+                    </DialogHeader>
+
+                    <div className="p-4 border-b border-border/40">
+                      <div className="relative">
+                        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          value={tagSearchQuery}
+                          onChange={(e) => setTagSearchQuery(e.target.value)}
+                          placeholder="ค้นหาแท็ก..."
+                          className="pl-9 bg-accent/50 border-transparent focus-visible:border-primary"
+                          autoFocus
+                        />
+                        {tagSearchQuery && (
+                          <button
+                            onClick={() => setTagSearchQuery("")}
+                            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                          >
+                            <X className="h-4 w-4" />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="overflow-y-auto p-4 flex-1 min-h-[300px]">
+                      {filteredModalTags.length > 0 ? (
+                        <div className="flex flex-wrap gap-2">
+                          {activeTag && !filteredModalTags.includes(activeTag) && tagSearchQuery === "" && (
+                            <button
+                              onClick={() => toggleTag(activeTag)}
+                              className="rounded-md px-2.5 py-1.5 text-sm bg-primary text-primary-foreground border border-primary transition-colors"
+                            >
+                              {activeTag}
+                            </button>
+                          )}
+                          {filteredModalTags.map((tag) => (
+                            <button
+                              key={tag}
+                              onClick={() => {
+                                toggleTag(tag)
+                                setIsTagModalOpen(false)
+                                setTagSearchQuery("")
+                              }}
+                              className={cn(
+                                "rounded-md px-2.5 py-1.5 text-sm border transition-colors",
+                                activeTag === tag
+                                  ? "bg-primary text-primary-foreground border-primary"
+                                  : "border-border/50 text-foreground hover:border-primary/50 bg-card hover:bg-accent"
+                              )}
+                            >
+                              {tag}
+                            </button>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-center py-12 text-muted-foreground">
+                          ไม่พบแท็กที่ตรงกับ &quot;{tagSearchQuery}&quot;
+                        </div>
+                      )}
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              )}
             </div>
           </FilterSection>
         )}
 
-        {/* Categories — secondary list */}
+        {/* Categories */}
         {categories.length > 0 && (
           <FilterSection title={tSearch("category")} defaultOpen={false}>
             <button
@@ -282,7 +290,7 @@ export default function SidebarFiltersClient({ tags, categories, platforms, engi
           </FilterSection>
         )}
 
-        {/* Advanced: author, engine, game code */}
+        {/* Advanced */}
         <FilterSection title={tSearch("advancedFilters")} defaultOpen={false}>
           <div className="space-y-2">
             <Input
@@ -292,7 +300,6 @@ export default function SidebarFiltersClient({ tags, categories, platforms, engi
               placeholder={tSearch("author")}
               className="h-8 text-xs bg-background border-border/50"
             />
-            {/* Engine as pills if available */}
             {engines.length > 0 ? (
               <div className="flex flex-wrap gap-1.5">
                 {engines.map((eng) => (

@@ -120,11 +120,10 @@ function SortBar({
         <Link
           key={o.value}
           href={makeHref(o.value)}
-          className={`px-2.5 py-1 rounded-md text-xs transition-colors ${
-            current === o.value
+          className={`px-2.5 py-1 rounded-md text-xs transition-colors ${current === o.value
               ? "bg-primary text-primary-foreground font-medium"
               : "text-muted-foreground hover:text-foreground hover:bg-accent"
-          }`}
+            }`}
         >
           {o.label}
         </Link>
@@ -164,7 +163,7 @@ function Pager({
   const pageNumbers = Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i)
 
   return (
-    <div className="flex items-center justify-center gap-1.5 pt-4">
+    <div className="flex items-center justify-center gap-1.5 pt-4 text-foreground">
       <Button asChild variant="outline" size="sm" disabled={page === 1}>
         <Link href={toHref(prev)}><ChevronLeft className="w-4 h-4" /></Link>
       </Button>
