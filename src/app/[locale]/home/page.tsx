@@ -1,25 +1,20 @@
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import Navbar from '../components/Navbar';
-import FeaturedPosts from './components/FeaturedPosts';
 import HomeCarousel from './components/HomeCarousel';
 import SponsoredArticles from './components/SponsoredArticles';
-import CategoryGrid from './components/CategoryGrid';
+import GameShelf from './components/GameShelf';
+import ArticleShelf from './components/ArticleShelf';
+import CategoryPills from './components/CategoryPills';
+import ToolsShelf from './components/ToolsShelf';
+import DonationCTA from '@/components/DonationCTA';
 import { generatePageMetadata } from '@/utils/metadataUtils';
 import { getTranslations } from 'next-intl/server';
 import { locales } from '@/app/[locale]/lib/navigation';
-
 import { createChanomhubClient } from '@chanomhub/sdk';
-import DiscordWidget from './components/DiscordWidget';
-import PromotionsWidget from './components/PromotionsWidget';
-import DonationSidebarWidget from '@/components/DonationSidebarWidget';
-import DonationCTA from '@/components/DonationCTA';
-
-
+import { unstable_cache } from 'next/cache';
 
 export async function generateMetadata({ params }: { params: { locale?: string } }) {
-  const locale = (params?.locale || 'en') as (typeof locales)[number]; // Cast locale
+  const locale = (params?.locale || 'en') as (typeof locales)[number];
   const t = await getTranslations({ locale, namespace: 'Home' });
-
   return generatePageMetadata({
     locale,
     title: t('title'),
@@ -29,32 +24,27 @@ export async function generateMetadata({ params }: { params: { locale?: string }
   });
 }
 
-import { unstable_cache } from 'next/cache';
-
-// Server-side data fetching using SDK with caching
 const getCachedHomeData = unstable_cache(
   async (token?: string) => {
     try {
-      const sdk = createChanomhubClient({
-        token
-      });
-
-      const [carouselData, featuredData, latestData, sponsoredData] = await Promise.all([
+      const sdk = createChanomhubClient({ token });
+      const [carouselData, featuredData, latestData, windowsData, sponsoredData] = await Promise.all([
         sdk.articles.getAll({ limit: 3, status: 'PUBLISHED' }),
-        sdk.articles.getByPlatform('windows', { limit: 25 }),
+        sdk.articles.getByPlatform('windows', { limit: 16 }),
         sdk.articles.getAll({ limit: 10, status: 'PUBLISHED' }),
+        sdk.articles.getByPlatform('windows', { limit: 10 }),
         sdk.sponsoredArticles.getAll().catch(() => []),
       ]);
-
       return {
         carousel: carouselData || [],
         featured: featuredData || [],
         latest: latestData || [],
+        windows: windowsData || [],
         sponsored: sponsoredData || [],
       };
     } catch (error) {
       console.error('Error fetching home page data:', error);
-      return { carousel: [], featured: [], latest: [], sponsored: [] };
+      return { carousel: [], featured: [], latest: [], windows: [], sponsored: [] };
     }
   },
   ['home-page-data'],
@@ -71,11 +61,16 @@ async function getAuthToken() {
   }
 }
 
+const stats = [
+  { label: 'สมาชิก',  val: '45,231', color: '' },
+  { label: 'ออนไลน์', val: '892',    color: 'text-green-500' },
+  { label: 'กระทู้',  val: '123k',   color: '' },
+  { label: 'วันนี้',  val: '234',    color: 'text-primary' },
+];
+
 export default async function HomePage({ params }: { params: { locale: string } }) {
   const token = await getAuthToken();
   const homeData = await getCachedHomeData(token);
-
-
 
   return (
     <div className="min-h-screen bg-background">
@@ -83,136 +78,60 @@ export default async function HomePage({ params }: { params: { locale: string } 
 
       <main className="bg-background">
         <h1 className="sr-only">ChanomHub - Adult Gaming Hub</h1>
+
+        {/* Sponsored strip */}
         <SponsoredArticles articles={homeData.sponsored} />
 
-
+        {/* Hero carousel */}
         <HomeCarousel articles={homeData.carousel} loading={false} />
 
-        <div className="container mx-auto px-2 pt-4">
-          <DonationCTA />
-        </div>
+        {/* Single-column full-width content */}
+        <div className="container mx-auto px-3 pt-3 pb-12 max-w-5xl">
 
-        <div className="grid lg:grid-cols-4 gap-4 container mx-auto px-2 pb-4">
-          {/* Main Content */}
-          <div className="lg:col-span-3">
-            {/* Compact Tabs Navigation */}
-            <Tabs defaultValue="featured" className="mb-3">
-              <div className="border-b border-border">
-                <TabsList className="flex w-full bg-transparent h-10 gap-4 px-2">
-                  <TabsTrigger
-                    value="featured"
-                    className="relative h-full rounded-none bg-transparent px-2 pb-2 pt-2 font-semibold text-muted-foreground hover:text-foreground data-[state=active]:text-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:right-0 data-[state=active]:after:h-0.5 data-[state=active]:after:bg-primary text-sm sm:text-base transition-colors"
-                  >
-                    แนะนำ
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="latest"
-                    className="relative h-full rounded-none bg-transparent px-2 pb-2 pt-2 font-semibold text-muted-foreground hover:text-foreground data-[state=active]:text-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:right-0 data-[state=active]:after:h-0.5 data-[state=active]:after:bg-primary text-sm sm:text-base transition-colors"
-                  >
-                    ล่าสุด
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="trending"
-                    className="relative h-full rounded-none bg-transparent px-2 pb-2 pt-2 font-semibold text-muted-foreground hover:text-foreground data-[state=active]:text-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:right-0 data-[state=active]:after:h-0.5 data-[state=active]:after:bg-primary text-sm sm:text-base transition-colors"
-                  >
-                    ยอดนิยม
-                  </TabsTrigger>
-                  <TabsTrigger
-                    value="myFeed"
-                    className="relative h-full rounded-none bg-transparent px-2 pb-2 pt-2 font-semibold text-muted-foreground hover:text-foreground data-[state=active]:text-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:after:absolute data-[state=active]:after:bottom-0 data-[state=active]:after:left-0 data-[state=active]:after:right-0 data-[state=active]:after:h-0.5 data-[state=active]:after:bg-primary text-sm sm:text-base transition-colors"
-                  >
-                    ฟีดของฉัน
-                  </TabsTrigger>
-                </TabsList>
+          {/* Stats row */}
+          <div className="grid grid-cols-4 gap-2 mb-5">
+            {stats.map(({ label, val, color }) => (
+              <div key={label} className="bg-card border border-border rounded-xl px-2 py-2.5 text-center">
+                <div className={`text-sm font-bold leading-tight ${color || 'text-foreground'}`}>{val}</div>
+                <div className="text-[10px] text-muted-foreground mt-0.5">{label}</div>
               </div>
-
-              <TabsContent value="featured" className="space-y-3 mt-3">
-                <FeaturedPosts posts={homeData.featured} loading={false} />
-                {/* Category Grid with 4 columns */}
-                <CategoryGrid />
-              </TabsContent>
-
-              <TabsContent value="latest" className="space-y-3 mt-3">
-                <FeaturedPosts posts={homeData.latest} loading={false} />
-                {/* Category Grid with 4 columns */}
-                <CategoryGrid />
-              </TabsContent>
-
-              <TabsContent value="trending" className="space-y-3 mt-3">
-                <div className="text-xs text-muted-foreground px-2 py-8 text-center border border-dashed border-border rounded-lg">กำลังพัฒนาระบบกระทู้ยอดนิยม...</div>
-              </TabsContent>
-
-              <TabsContent value="myFeed" className="space-y-3 mt-3">
-                <div className="text-xs text-muted-foreground px-2 py-8 text-center border border-dashed border-border rounded-lg">เข้าสู่ระบบเพื่อดูกระทู้ที่คุณติดตาม</div>
-              </TabsContent>
-            </Tabs>
+            ))}
           </div>
 
-          {/* Compact Sidebar */}
-          <div className="space-y-3">
-            {/* Platform Card */}
-            {/* <CategoriesCard platforms={homeData.platforms} /> */}
-
-            {/* Stats Widget */}
-            <div className="border border-border rounded p-2 bg-card text-foreground">
-              <div className="text-xs font-semibold mb-2 px-1 flex items-center space-x-2">
-                <div className="w-0.5 h-4 bg-primary"></div>
-                <span>สถิติ</span>
-              </div>
-              <div className="space-y-1 text-xs px-1">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">สมาชิก:</span>
-                  <span className="font-medium">45,231</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">ออนไลน์:</span>
-                  <span className="font-medium text-green-600">892</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">กระทู้ทั้งหมด:</span>
-                  <span className="font-medium">123,456</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">โพสต์วันนี้:</span>
-                  <span className="font-medium text-primary">234</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Compact Trending Tags */}
-            {/* <div className="border border-border rounded p-2 bg-card">
-              <div className="text-xs font-semibold mb-2 px-1 flex items-center space-x-2">
-                <div className="w-0.5 h-4 bg-primary"></div>
-                <span>แท็กยอดนิยม</span>
-              </div>
-              <div className="space-y-0.5">
-                {homeData.tags.slice(0, 10).map((tag: any) => (
-                  <div
-                    key={tag.id}
-                    className="flex items-center justify-between px-1.5 py-1 hover:bg-accent/50 rounded cursor-pointer transition-colors text-xs group"
-                  >
-                    <span className="font-medium text-foreground group-hover:text-primary transition-colors truncate">
-                      #{tag.name}
-                    </span>
-                    <span className="text-[10px] text-muted-foreground flex-shrink-0 ml-1">
-                      {(tag.articleCount || 0).toLocaleString()}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div> */}
-
-            {/* Promotions Widget */}
-            <PromotionsWidget />
-
-            {/* Discord Widget */}
-            <DiscordWidget />
-
-            <DonationSidebarWidget />
+          {/* Donation CTA */}
+          <div className="mb-5">
+            <DonationCTA />
           </div>
+
+          {/* Category filter pills */}
+          <CategoryPills />
+
+          {/* Shelf: แนะนำ */}
+          <GameShelf
+            title="แนะนำสำหรับคุณ"
+            posts={homeData.featured}
+            href="/games"
+          />
+
+          {/* Shelf: กระทู้ล่าสุด */}
+          <ArticleShelf
+            title="กระทู้ล่าสุด"
+            posts={homeData.latest}
+            href="/articles"
+          />
+
+          {/* Shelf: เครื่องมือ */}
+          <ToolsShelf />
+
+          {/* Shelf: Windows */}
+          <GameShelf
+            title="🪟 ยอดนิยมบน Windows"
+            posts={homeData.windows}
+            href="/games?platform=windows"
+          />
+
         </div>
       </main>
-
     </div>
   );
 }
