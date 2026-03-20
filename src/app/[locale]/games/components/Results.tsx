@@ -6,35 +6,41 @@ import Link from "next/link"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { unstable_cache } from "next/cache"
 
-// Cached game results fetcher — shared across all concurrent users
 const getCachedGameResults = unstable_cache(
-  async (limit: number, offset: number, filter: Record<string, string | boolean | undefined>) => {
-    const sdk = createChanomhubClient();
+  async (
+    limit: number,
+    offset: number,
+    filter: Record<string, string | boolean | undefined>
+  ) => {
+    const sdk = createChanomhubClient()
     return sdk.articles.getAllPaginated({
       limit,
       offset,
-      status: 'PUBLISHED',
+      status: "PUBLISHED",
       filter,
       fields: [
-        'id', 'title', 'slug', 'description', 'ver',
-        'mainImage', 'coverImage', 'backgroundImage',
-        'author', 'tags', 'platforms', 'categories',
-        'favoritesCount', 'createdAt', 'updatedAt'
-      ]
-    });
+        "id", "title", "slug", "description", "ver",
+        "mainImage", "coverImage", "backgroundImage",
+        "author", "tags", "platforms", "categories",
+        "favoritesCount", "createdAt", "updatedAt",
+        "price", "isPaid",
+      ],
+    })
   },
-  ['game-results'],
-  { revalidate: 60 } // 1 minute
-);
+  ["game-results"],
+  { revalidate: 60 }
+)
 
 export default async function Results({
   searchParams,
-}: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
-  const params = await searchParams;
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>
+}) {
+  const params = await searchParams
 
-  // Default limit: smaller for better mobile performance
-  const limit = Number(params.pageSize ?? 30);
-  const offset = (Number(params.page ?? 1) - 1) * limit;
+  const limit = Number(params.pageSize ?? 30)
+  const offset = (Number(params.page ?? 1) - 1) * limit
+  const sort = String(params.sort ?? "latest")
 
   const filter = {
     q: params.q ? String(params.q) : undefined,
@@ -44,32 +50,32 @@ export default async function Results({
     author: params.author ? String(params.author) : undefined,
     engine: params.engine ? String(params.engine) : undefined,
     sequentialCode: params.sequentialCode ? String(params.sequentialCode) : undefined,
-    favorited: params.favorited === 'true' ? true : undefined,
-  };
+    favorited: params.favorited === "true" ? true : undefined,
+  }
 
-  const result = await getCachedGameResults(limit, offset, filter);
-
-  const { items, total, page, pageSize } = result;
+  const result = await getCachedGameResults(limit, offset, filter)
+  const { items, total, page, pageSize } = result
   const pages = Math.max(1, Math.ceil(total / pageSize))
 
-
   return (
-    <div className="space-y-6">
-      {items.length > 0 && (
-        <div className="text-sm text-muted-foreground">
-          พบ <span className="font-semibold text-foreground">{total}</span> รายการ
-        </div>
-      )}
+    <div className="space-y-4">
+      {/* Top bar */}
+      <div className="flex items-center justify-between gap-3 bg-card border border-border/50 rounded-xl px-4 py-2.5">
+        <span className="text-sm text-muted-foreground">
+          พบ <span className="font-semibold text-foreground">{total.toLocaleString()}</span> รายการ
+        </span>
+        <SortBar current={sort} searchParams={params} />
+      </div>
 
+      {/* Grid */}
       {items.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
           {items.map((a: ArticleListItem) => (
             <GameCard key={String(a.id)} article={a as any} />
           ))}
-
         </div>
       ) : (
-        <div className="flex flex-col items-center justify-center py-24 px-4">
+        <div className="flex flex-col items-center justify-center py-24 bg-card border border-border/50 rounded-xl">
           <div className="text-6xl mb-4 opacity-20">🎮</div>
           <h3 className="text-xl font-bold text-foreground mb-2">ไม่พบรายการ</h3>
           <p className="text-muted-foreground text-center max-w-md">
@@ -83,15 +89,63 @@ export default async function Results({
   )
 }
 
+function SortBar({
+  current,
+  searchParams,
+}: {
+  current: string
+  searchParams: Record<string, string | string[] | undefined>
+}) {
+  const options = [
+    { label: "ล่าสุด", value: "latest" },
+    { label: "ยอดนิยม", value: "popular" },
+    { label: "A–Z", value: "az" },
+  ]
+
+  const makeHref = (sort: string) => {
+    const usp = new URLSearchParams()
+    Object.entries(searchParams).forEach(([k, v]) => {
+      if (typeof v === "string" && v) usp.set(k, v)
+      else if (Array.isArray(v)) v.forEach((vv) => vv && usp.append(k, vv))
+    })
+    usp.set("sort", sort)
+    usp.delete("page")
+    return `?${usp.toString()}`
+  }
+
+  return (
+    <div className="flex items-center gap-1">
+      <span className="text-xs text-muted-foreground mr-1">เรียงโดย</span>
+      {options.map((o) => (
+        <Link
+          key={o.value}
+          href={makeHref(o.value)}
+          className={`px-2.5 py-1 rounded-md text-xs transition-colors ${
+            current === o.value
+              ? "bg-primary text-primary-foreground font-medium"
+              : "text-muted-foreground hover:text-foreground hover:bg-accent"
+          }`}
+        >
+          {o.label}
+        </Link>
+      ))}
+    </div>
+  )
+}
+
 function Pager({
   page,
   pages,
   searchParams,
-}: { page: number; pages: number; searchParams: Record<string, string | string[] | undefined> | null | undefined }) {
+}: {
+  page: number
+  pages: number
+  searchParams: Record<string, string | string[] | undefined> | null | undefined
+}) {
   const prev = page > 1 ? page - 1 : 1
   const next = page < pages ? page + 1 : pages
 
-  const params = (p: number) => {
+  const toHref = (p: number) => {
     const usp = new URLSearchParams()
     if (searchParams) {
       Object.entries(searchParams).forEach(([k, v]) => {
@@ -103,62 +157,44 @@ function Pager({
     return `?${usp.toString()}`
   }
 
-  // คำนวณช่วงหน้าที่จะแสดง (แสดง 5 หน้า โดยหน้าปัจจุบันอยู่กลาง)
   const maxVisible = 5
   let startPage = Math.max(1, page - Math.floor(maxVisible / 2))
   let endPage = Math.min(pages, startPage + maxVisible - 1)
-
-  // ปรับ startPage ถ้า endPage ชนขอบ
-  if (endPage - startPage + 1 < maxVisible) {
-    startPage = Math.max(1, endPage - maxVisible + 1)
-  }
-
-  const pageNumbers = Array.from(
-    { length: endPage - startPage + 1 },
-    (_, i) => startPage + i
-  )
+  if (endPage - startPage + 1 < maxVisible) startPage = Math.max(1, endPage - maxVisible + 1)
+  const pageNumbers = Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i)
 
   return (
-    <div className="flex items-center justify-center gap-2 pt-6 text-foreground">
+    <div className="flex items-center justify-center gap-1.5 pt-4">
       <Button asChild variant="outline" size="sm" disabled={page === 1}>
-        <Link href={params(prev)}>
-          <ChevronLeft className="w-4 h-4" />
-        </Link>
+        <Link href={toHref(prev)}><ChevronLeft className="w-4 h-4" /></Link>
       </Button>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1.5">
         {startPage > 1 && (
           <>
-            <Button asChild variant="outline" size="sm" className="min-w-[40px]">
-              <Link href={params(1)}>1</Link>
+            <Button asChild variant="outline" size="sm" className="min-w-[36px]">
+              <Link href={toHref(1)}>1</Link>
             </Button>
-            {startPage > 2 && <span className="text-muted-foreground">...</span>}
+            {startPage > 2 && <span className="text-muted-foreground text-sm px-1">…</span>}
           </>
         )}
-
-        {pageNumbers.map((pageNum) => {
-          const isActive = pageNum === page
-          return (
-            <Button key={pageNum} asChild variant={isActive ? "default" : "outline"} size="sm" className="min-w-[40px]">
-              <Link href={params(pageNum)}>{pageNum}</Link>
-            </Button>
-          )
-        })}
-
+        {pageNumbers.map((n) => (
+          <Button key={n} asChild variant={n === page ? "default" : "outline"} size="sm" className="min-w-[36px]">
+            <Link href={toHref(n)}>{n}</Link>
+          </Button>
+        ))}
         {endPage < pages && (
           <>
-            {endPage < pages - 1 && <span className="text-muted-foreground">...</span>}
-            <Button asChild variant="outline" size="sm" className="min-w-[40px]">
-              <Link href={params(pages)}>{pages}</Link>
+            {endPage < pages - 1 && <span className="text-muted-foreground text-sm px-1">…</span>}
+            <Button asChild variant="outline" size="sm" className="min-w-[36px]">
+              <Link href={toHref(pages)}>{pages}</Link>
             </Button>
           </>
         )}
       </div>
 
       <Button asChild variant="outline" size="sm" disabled={page === pages}>
-        <Link href={params(next)}>
-          <ChevronRight className="w-4 h-4" />
-        </Link>
+        <Link href={toHref(next)}><ChevronRight className="w-4 h-4" /></Link>
       </Button>
     </div>
   )

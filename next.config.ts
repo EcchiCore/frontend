@@ -51,9 +51,6 @@ const nextConfig: NextConfig = {
     }
   })(),
   staticPageGenerationTimeout: 300, // Increase timeout to 5 minutes to handle slow APIs
-  experimental: {
-    cpus: 1, // Limit CPUs to reduce concurrent requests to the API during build
-  },
   compiler: { removeConsole: process.env.NODE_ENV === 'production' },
   poweredByHeader: false,
   reactStrictMode: true,

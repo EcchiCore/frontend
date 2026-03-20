@@ -1,6 +1,6 @@
 import { Suspense } from "react"
 import Results from "./components/Results"
-import SearchControls from "./components/SearchControls"
+import SidebarFilters from "./components/SidebarFilters"
 import ResultsSkeleton from "./components/ResultsSkeleton"
 import Navbar from "../components/Navbar"
 import DonationSidebarWidget from "@/components/DonationSidebarWidget"
@@ -11,10 +11,6 @@ export const metadata = {
   description: "ค้นหาและสำรวจเกมที่คุณชื่นชอบ",
 }
 
-
-
-
-
 type PageProps = {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }
@@ -24,19 +20,28 @@ export default async function GamesPage({ searchParams }: PageProps) {
     <>
       <Navbar />
       <div className="min-h-screen bg-background">
-        <div className="container mx-auto px-4 py-8 space-y-8">
+        <div className="container mx-auto px-4 py-6">
           <DonationCTA />
-          <section className="space-y-6">
-            <SearchControls />
 
-            <Suspense fallback={<ResultsSkeleton />}>
-              <Results searchParams={searchParams} />
-            </Suspense>
-          </section>
+          <div className="flex gap-6 mt-6">
+            {/* Sidebar */}
+            <aside className="hidden lg:flex flex-col w-[220px] shrink-0 gap-4">
+              <SidebarFilters />
+              <DonationSidebarWidget />
+            </aside>
 
-          <aside className="lg:w-[320px] mx-auto w-full">
+            {/* Main content */}
+            <main className="flex-1 min-w-0">
+              <Suspense fallback={<ResultsSkeleton />}>
+                <Results searchParams={searchParams} />
+              </Suspense>
+            </main>
+          </div>
+
+          {/* Mobile: Donation widget below grid */}
+          <div className="lg:hidden mt-6">
             <DonationSidebarWidget />
-          </aside>
+          </div>
         </div>
       </div>
     </>
