@@ -57,14 +57,14 @@ export function LoginForm({ onSwitch }: { onSwitch: () => void }) {
       toast.success(t('successMessage'), { autoClose: 2000 });
 
       Cookies.set("token", token, {
-        secure: true,
+        secure: process.env.NODE_ENV === "production",
         sameSite: "strict",
         expires: 7,
       });
 
       if (refreshToken) {
         Cookies.set("refreshToken", refreshToken, {
-          secure: true,
+          secure: process.env.NODE_ENV === "production",
           sameSite: "strict",
           expires: 7,
         });
@@ -119,7 +119,7 @@ export function LoginForm({ onSwitch }: { onSwitch: () => void }) {
 
         // Set Access Token
         Cookies.set("token", token, {
-          secure: true,
+          secure: process.env.NODE_ENV === "production",
           sameSite: "strict",
           expires: 7,
         });
@@ -127,7 +127,7 @@ export function LoginForm({ onSwitch }: { onSwitch: () => void }) {
         // Set Refresh Token if available
         if (refreshToken) {
           Cookies.set("refreshToken", refreshToken, {
-            secure: true,
+            secure: process.env.NODE_ENV === "production",
             sameSite: "strict",
             expires: 7,
           });

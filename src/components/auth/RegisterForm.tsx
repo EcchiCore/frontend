@@ -63,14 +63,14 @@ export function RegisterForm({ onSwitch }: { onSwitch: () => void }) {
     if (token) {
       toast.success(t('successMessage'), { autoClose: 2000 });
       Cookies.set("token", token, {
-        secure: true,
+        secure: process.env.NODE_ENV === "production",
         sameSite: "strict",
         expires: 7,
       });
 
       if (refreshToken) {
         Cookies.set("refreshToken", refreshToken, {
-          secure: true,
+          secure: process.env.NODE_ENV === "production",
           sameSite: "strict",
           expires: 7,
         });
@@ -144,14 +144,14 @@ export function RegisterForm({ onSwitch }: { onSwitch: () => void }) {
       if (token) {
         Cookies.set('token', token, {
           expires: 7,
-          secure: true,
+          secure: process.env.NODE_ENV === "production",
           sameSite: 'strict'
         });
 
         if (refreshToken) {
           Cookies.set('refreshToken', refreshToken, {
             expires: 7,
-            secure: true,
+            secure: process.env.NODE_ENV === "production",
             sameSite: 'strict'
           });
         }
