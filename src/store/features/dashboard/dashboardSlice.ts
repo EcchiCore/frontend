@@ -1,6 +1,6 @@
 
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { PageType } from '@/app/[locale]/member/dashboard/utils/types';
+import { PageType } from '@/types/dashboard';
 
 interface DashboardState {
     currentPage: PageType;

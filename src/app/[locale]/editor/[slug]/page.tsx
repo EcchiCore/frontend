@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useParams } from 'next/navigation';
-import { ArticleEditorForm } from '@/app/[locale]/components/ArticleEditorForm';
+import { ArticleEditorForm } from '@/components/features/ArticleEditorForm';
 
 const EditArticlePage: React.FC = () => {
   const params = useParams();

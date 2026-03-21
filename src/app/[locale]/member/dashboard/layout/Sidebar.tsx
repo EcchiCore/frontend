@@ -2,8 +2,8 @@
 
 import React from 'react';
 import { User, FileText, Shield, Settings, Wallet, Activity } from 'lucide-react';
-import { NAVIGATION_ITEMS } from '../utils/constants';
-import { NavigationItem, PageType } from '../utils/types';
+import { NAVIGATION_ITEMS } from '@/constants/dashboard';
+import { NavigationItem, PageType } from '@/types/dashboard';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
@@ -93,8 +93,8 @@ export const SidebarShadcn: React.FC<SidebarProps> = ({ className = '' }) => {
         <div className="p-4 border-t border-sidebar-border flex-shrink-0">
           <div className="flex items-center gap-3">
             <Avatar>
-              <AvatarImage src={user.image || undefined} alt={user.username} />
-              <AvatarFallback>{user.username.charAt(0).toUpperCase()}</AvatarFallback>
+              <AvatarImage src={user.image || ""} alt={user.username || "User"} />
+              <AvatarFallback>{(user.username || "U").charAt(0).toUpperCase()}</AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium truncate text-sidebar-foreground">

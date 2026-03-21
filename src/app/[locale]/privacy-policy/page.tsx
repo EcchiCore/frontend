@@ -5,18 +5,18 @@ import {
   CardDescription,
   CardHeader,
   CardTitle
-} from '../components/ui/card';
+} from '@/components/ui/card';
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "../components/ui/collapsible";
+} from "@/components/ui/collapsible";
 import {
   Alert,
   AlertDescription,
   AlertTitle
-} from '../components/ui/alert';
-import { Badge } from '../components/ui/badge';
+} from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
 import {
   Shield,
   Info,

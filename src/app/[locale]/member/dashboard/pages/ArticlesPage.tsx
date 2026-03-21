@@ -14,9 +14,9 @@ import {
 } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
 import { useRouter } from 'next/navigation';
-import { useUserData } from '../hooks/useUserData';
-import { Article, ArticleStatus } from '../utils/types';
-import { ITEMS_PER_PAGE_OPTIONS } from '../utils/constants';
+import { useUserData } from '@/hooks/useUserData';
+import { Article, ArticleStatus } from '@/types/dashboard';
+import { ITEMS_PER_PAGE_OPTIONS } from '@/constants/dashboard';
 
 // shadcn/ui imports
 import { Button } from '@/components/ui/button';

@@ -1,6 +1,5 @@
 import { Inter } from 'next/font/google';
 import { ToolsClient } from './ToolsClient';
-import Navbar from "@/app/[locale]/components/Navbar";
 import { Tool } from '@/types/tool';
 import { client } from '@/lib/sanity';
 
@@ -30,7 +29,6 @@ export default async function ToolsPage() {
 
   return (
     <div className={`min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-gray-950 dark:via-gray-950 dark:to-gray-900 ${inter.className}`}>
-      <Navbar />
       <ToolsClient tools={tools} />
     </div>
   );

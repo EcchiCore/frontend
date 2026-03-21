@@ -9,8 +9,8 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Loader2, AlertCircle } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { setCurrentPage, setMobileOpen } from '@/store/features/dashboard/dashboardSlice';
-import { PageType } from '../utils/types';
-import { NAVIGATION_ITEMS } from '../utils/constants';
+import { PageType } from '@/types/dashboard';
+import { NAVIGATION_ITEMS } from '@/constants/dashboard';
 
 // Lazy load pages
 const ArticlesPage = React.lazy(() => import('../pages/ArticlesPage').then(module => ({ default: module.ArticlesPage })));
@@ -58,7 +58,7 @@ export const DashboardLayoutShadcn: React.FC<DashboardLayoutProps> = ({ title })
       ...(user.roles || [])
     ].map(r => r.toUpperCase());
 
-    return navItem.requiredRanks.some(rank => userRanks.includes(rank.toUpperCase()));
+    return (navItem.requiredRanks as string[]).some((rank: string) => userRanks.includes(rank.toUpperCase()));
   }, [user]);
 
   // Sync hash with Redux state on mount and hashchange

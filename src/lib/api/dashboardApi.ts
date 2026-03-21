@@ -1,4 +1,3 @@
-import { API_URL } from './constants';
 import {
   UserResponse,
   ArticlesResponse,
@@ -7,7 +6,8 @@ import {
   Token,
   PasswordUpdateData,
   RedeemTrueMoneyRequest,
-} from './types';
+} from '@/types/dashboard';
+import { API_URL } from '@/constants/dashboard';
 
 export const getCookie = (name: string): string | null => {
   if (typeof document === 'undefined') return null;

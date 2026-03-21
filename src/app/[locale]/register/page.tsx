@@ -1,10 +1,10 @@
 'use client';
 import { useState } from "react";
-import { LoginForm } from "../components/auth/LoginForm";
-import { RegisterForm } from "../components/auth/RegisterForm";
+import { LoginForm } from "@/components/auth/LoginForm";
+import { RegisterForm } from "@/components/auth/RegisterForm";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import Switch from "../components/Switch/switch";
+import Switch from "@/components/shared/Switch/switch";
 
 export default function RegisterPage() {
   const [showLogin, setShowLogin] = useState(false);

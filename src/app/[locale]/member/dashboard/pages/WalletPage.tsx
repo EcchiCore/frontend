@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { walletApi, ApiError } from '../utils/api';
+import { walletApi, ApiError } from '@/lib/api/dashboardApi';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';

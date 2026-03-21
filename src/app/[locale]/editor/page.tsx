@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { ArticleEditorForm } from '@/app/[locale]/components/ArticleEditorForm';
+import { ArticleEditorForm } from '@/components/features/ArticleEditorForm';
 
 const CreateArticlePage: React.FC = () => {
     return (

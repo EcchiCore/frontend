@@ -8,7 +8,7 @@ import { ContentManagementTab } from './tabs/ContentManagementTab';
 
 import { SponsoredArticlesTab } from './tabs/SponsoredArticlesTab';
 import { SettingsTab } from './tabs/SettingsTab';
-import { AdminGuard } from './components/AdminGuard';
+import { AdminGuard } from '@/components/features/admin/AdminGuard';
 
 export default function AdminDashboard() {
     return (

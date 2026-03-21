@@ -10,7 +10,7 @@ import {
   XMarkIcon,
   PhotoIcon,
 } from '@heroicons/react/24/outline';
-import { userApi, ApiError } from '../utils/api';
+import { userApi, ApiError } from '@/lib/api/dashboardApi';
 
 // shadcn/ui imports
 import { Button } from '@/components/ui/button';
@@ -201,7 +201,7 @@ const ProfilePage: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="flex flex-col items-center space-y-4">
               <Avatar className="h-32 w-32 border-4 border-muted">
-                <AvatarImage src={user.image || undefined} alt={user.username || 'User'} />
+                <AvatarImage src={user.image || ""} alt={user.username || 'User'} />
                 <AvatarFallback className="text-2xl bg-primary/10">
                   {user.username?.substring(0, 2).toUpperCase() || 'CH'}
                 </AvatarFallback>

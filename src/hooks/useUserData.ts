@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
-import { Article, ArticleStatus, ArticlesResponse } from '../utils/types';
-import { articlesApi, ApiError } from '../utils/api';
+import { Article, ArticleStatus, ArticlesResponse } from '@/types/dashboard';
+import { articlesApi, ApiError } from '@/lib/api/dashboardApi';
 
 const CACHE_PREFIX = 'user_articles_';
 

@@ -1,6 +1,6 @@
 // dashboard/hooks/useNavigation.ts
 import { useState, useEffect, useCallback } from 'react';
-import { PageType } from '../utils/types';
+import { PageType } from '@/types/dashboard';
 
 export const useNavigation = () => {
   const [currentPage, setCurrentPage] = useState<PageType>('profile');

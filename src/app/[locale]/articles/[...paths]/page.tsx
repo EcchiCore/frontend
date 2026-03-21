@@ -3,7 +3,6 @@
 import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import { Suspense } from 'react';
-import Navbar from './../../components/Navbar';
 import ArticleContent from './components/ArticleContent';
 import ArticleBodyServer from './components/ArticleBodyServer';
 import GTMArticleTracker from './components/GTMArticleTracker';
@@ -170,7 +169,6 @@ export default async function ArticlePage(props: ArticlePageProps) {
   // Client Content: Hydrates after JS loads - replaces SSR content
   return (
     <>
-      <Navbar />
       {/* Add JSON-LD structured data */}
       <Script
         id="article-jsonld"

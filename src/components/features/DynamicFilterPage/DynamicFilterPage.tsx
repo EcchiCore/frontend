@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import ErrorCard from '../../components/ErrorCard';
+import ErrorCard from '@/components/shared/ErrorCard';
 import { getTranslations } from 'next-intl/server';
 import ImageWithFallback from '@/components/ImageWithFallback';
 import { createChanomhubClient } from '@chanomhub/sdk';

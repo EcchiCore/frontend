@@ -12,8 +12,8 @@ import {
   CheckIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline';
-import { userApi, ApiError, getCookie, setCookie } from '../utils/api';
-import { DashboardUser, SocialMediaLink, Token } from '../utils/types';
+import { userApi, ApiError, getCookie, setCookie } from '@/lib/api/dashboardApi';
+import { DashboardUser, SocialMediaLink, Token } from '@/types/dashboard';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import ImageWithFallback from '@/components/ImageWithFallback';

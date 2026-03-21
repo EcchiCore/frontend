@@ -75,7 +75,7 @@ export const TopBarShadcn: React.FC<TopBarProps> = ({ title }) => {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="rounded-full">
               <Avatar>
-                <AvatarImage src={user?.image || undefined} alt={user?.username || 'User'} />
+                <AvatarImage src={user?.image || ""} alt={user?.username || 'User'} />
                 <AvatarFallback>
                   {user?.username ? user.username.charAt(0).toUpperCase() : <UserCircle className="h-6 w-6" />}
                 </AvatarFallback>

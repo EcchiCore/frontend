@@ -1,4 +1,3 @@
-import Navbar from '../components/Navbar';
 import HomeCarousel from './components/HomeCarousel';
 import SponsoredArticles from './components/SponsoredArticles';
 import GameShelf from './components/GameShelf';
@@ -74,8 +73,6 @@ export default async function HomePage({ params }: { params: { locale: string } 
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
-
       <main className="bg-background">
         <h1 className="sr-only">ChanomHub - Adult Gaming Hub</h1>
 

@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import DynamicFilterPage, { generateMetadata as generateDynamicMetadata } from '../../components/DynamicFilterPage/DynamicFilterPage';
+import DynamicFilterPage, { generateMetadata as generateDynamicMetadata } from '@/components/features/DynamicFilterPage/DynamicFilterPage';
 
 interface TagPageParams {
   slug: string;

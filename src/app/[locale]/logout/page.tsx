@@ -7,7 +7,7 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Cookies from 'js-cookie';
 import { supabase } from "@/lib/supabaseClient";
-import { userApi } from "../member/dashboard/utils/api";
+import { userApi } from "@/lib/api/dashboardApi";
 
 const LogoutPage = () => {
   const router = useRouter();

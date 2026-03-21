@@ -3,7 +3,6 @@ import Results from "./components/Results"
 import SidebarFilters from "./components/SidebarFilters"
 import ResultsSkeleton from "./components/ResultsSkeleton"
 import SearchControlsWrapper from "./components/SearchControlsWrapper"
-import Navbar from "../components/Navbar"
 import DonationSidebarWidget from "@/components/DonationSidebarWidget"
 import DonationCTA from "@/components/DonationCTA"
 
@@ -19,7 +18,6 @@ type PageProps = {
 export default async function GamesPage({ searchParams }: PageProps) {
   return (
     <>
-      <Navbar />
       <div className="min-h-screen bg-background">
         <div className="container mx-auto px-4 py-6">
           <DonationCTA />

@@ -30,8 +30,8 @@ import {
   ModerationRequest,
   EntityType,
   RequestStatus
-} from '../components/moderator/ArticleModerationCard';
-import { BulkActionBar } from '../components/moderator/BulkActionBar';
+} from '@/components/features/moderator/ArticleModerationCard';
+import { BulkActionBar } from '@/components/features/moderator/BulkActionBar';
 
 // API base URL
 const API_BASE_URL = `${process.env.NEXT_PUBLIC_API_URL || "https://api.chanomhub.com"}/api/graphql`;

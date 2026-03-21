@@ -1,4 +1,3 @@
-import Navbar from "../components/Navbar";
 import { getTranslations } from "next-intl/server";
 import { generatePageMetadata } from "@/utils/metadataUtils";
 import { locales } from "@/app/[locale]/lib/navigation";
@@ -445,7 +444,6 @@ export default async function DonationsPage() {
         </div>
 
         <div className="page-content">
-          <Navbar />
           {/* ── CTA ── */}
           <div className="cta-section">
             <div className="cta-inner">

@@ -189,7 +189,7 @@ export const ArticleModerationCard: React.FC<ArticleModerationCardProps> = ({
                         {firstRequester && (
                             <div className="flex items-center gap-2 mt-1">
                                 <Avatar className="h-5 w-5">
-                                    <AvatarImage src={firstRequester.image || undefined} />
+                                    <AvatarImage src={firstRequester.image || ""} alt={firstRequester.name || "User"} />
                                     <AvatarFallback className="text-xs">
                                         {firstRequester.name?.charAt(0) || '?'}
                                     </AvatarFallback>

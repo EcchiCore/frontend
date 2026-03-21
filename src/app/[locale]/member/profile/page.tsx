@@ -5,7 +5,6 @@ import { ReactNode, Suspense } from 'react';
 import { User, Shield, Star, Link as LinkIcon } from "lucide-react";
 import myImageLoader from "@/lib/imageLoader";
 import UserPageClient from "./UserPageClient";
-import Navbar from "../../components/Navbar";
 import BackgroundImage from "./BackgroundImage";
 import LogoutButton from "./LogoutButton";
 import { getSdk } from "@/lib/sdk";
@@ -78,7 +77,6 @@ export default async function UserPage() {
         </div>
 
         <div className="w-full fixed top-0 z-40">
-          <Navbar />
         </div>
 
         <div className="relative z-10 backdrop-blur-xl bg-white/5 border border-white/10 p-8 shadow-2xl rounded-3xl w-full max-w-md mt-20">
@@ -106,7 +104,6 @@ export default async function UserPage() {
 
       <div className="w-full sticky top-0 z-40">
         <Suspense fallback={<div className="h-16 w-full bg-background/80 backdrop-blur-md border-b border-border/50" />}>
-          <Navbar />
         </Suspense>
       </div>
 

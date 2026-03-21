@@ -1,7 +1,7 @@
 
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { DashboardUser } from '@/app/[locale]/member/dashboard/utils/types';
-import { userApi, ApiError } from '@/app/[locale]/member/dashboard/utils/api';
+import { DashboardUser } from '@/types/dashboard';
+import { userApi, ApiError } from '@/lib/api/dashboardApi';
 import { supabase } from "@/lib/supabaseClient";
 
 interface AuthState {

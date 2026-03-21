@@ -2,8 +2,8 @@
 import { useRouter } from "next/navigation";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import Switch from "../components/Switch/switch";
-import { LoginForm } from "../components/auth/LoginForm";
+import Switch from "@/components/shared/Switch/switch";
+import { LoginForm } from "@/components/auth/LoginForm";
 
 export default function LoginPage() {
   const router = useRouter();

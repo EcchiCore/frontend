@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { getAuthHeaders } from '../utils/api';
+import { getAuthHeaders } from '@/lib/api/dashboardApi';
 import { Loader2, DollarSign, ShoppingCart, TrendingUp, Package } from 'lucide-react';
 
 interface ArticleSaleStatDTO {

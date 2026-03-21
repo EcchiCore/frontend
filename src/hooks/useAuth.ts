@@ -1,7 +1,7 @@
 // dashboard/hooks/useAuth.ts
 import { useState, useEffect, useCallback } from 'react';
-import { DashboardUser } from '../utils/types';
-import { userApi, ApiError } from '../utils/api';
+import { DashboardUser } from '@/types/dashboard';
+import { userApi, ApiError } from '@/lib/api/dashboardApi';
 import { supabase } from "@/lib/supabaseClient";
 const CACHE_KEY = 'dashboard_user';
 
