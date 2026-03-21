@@ -71,7 +71,9 @@ export function LoginForm({ onSwitch }: { onSwitch: () => void }) {
       }
 
       // Force reload to update auth state or redirect
-      setTimeout(() => router.push(redirectTo), 1000);
+      setTimeout(() => {
+        window.location.href = redirectTo;
+      }, 1000);
     }
   };
 
@@ -133,7 +135,9 @@ export function LoginForm({ onSwitch }: { onSwitch: () => void }) {
           });
         }
 
-        setTimeout(() => router.push(redirectTo), 2000);
+        setTimeout(() => {
+          window.location.href = redirectTo;
+        }, 2000);
       } else {
         toast.error(t('invalidResponseMessage'));
       }

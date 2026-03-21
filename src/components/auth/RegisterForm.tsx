@@ -76,7 +76,9 @@ export function RegisterForm({ onSwitch }: { onSwitch: () => void }) {
         });
       }
 
-      setTimeout(() => router.push("/"), 2000);
+      setTimeout(() => {
+        window.location.href = "/";
+      }, 2000);
     }
   };
 
@@ -158,7 +160,7 @@ export function RegisterForm({ onSwitch }: { onSwitch: () => void }) {
 
         toast.success(t('successMessage'), { autoClose: 2000 });
         setTimeout(() => {
-          router.push("/");
+          window.location.href = "/";
         }, 2000);
       } else {
         toast.error(t('invalidResponseMessage'));
