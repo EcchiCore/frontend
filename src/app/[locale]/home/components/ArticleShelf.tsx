@@ -133,7 +133,7 @@ export default function ArticleShelf({ title, posts, loading, href }: ArticleShe
         md:grid md:grid-cols-3 md:overflow-visible md:pb-0
       ">
         {loading
-          ? Array.from({ length: 6 }).map((_, i) => <SkeletonCard key={i} />)
+          ? Array.from({ length: 12 }).map((_, i) => <SkeletonCard key={i} />)
           : posts.map((post, i) => <ArticleCard key={post.id} post={post} index={i} />)
         }
       </div>

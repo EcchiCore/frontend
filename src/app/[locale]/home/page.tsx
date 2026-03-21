@@ -27,11 +27,12 @@ const getCachedHomeData = unstable_cache(
   async (token?: string) => {
     try {
       const sdk = createChanomhubClient({ token });
-      const [carouselData, featuredData, latestData, windowsData, sponsoredData] = await Promise.all([
-        sdk.articles.getAll({ limit: 3, status: 'PUBLISHED' }),
-        sdk.articles.getByPlatform('windows', { limit: 16 }),
-        sdk.articles.getAll({ limit: 10, status: 'PUBLISHED' }),
-        sdk.articles.getByPlatform('windows', { limit: 10 }),
+      const [carouselData, featuredData, latestData, windowsData, androidData, sponsoredData] = await Promise.all([
+        sdk.articles.getAll({ limit: 5, status: 'PUBLISHED' }),
+        sdk.articles.getAll({ limit: 24, status: 'PUBLISHED' }),
+        sdk.articles.getAll({ limit: 12, status: 'PUBLISHED' }),
+        sdk.articles.getByPlatform('windows', { limit: 12 }),
+        sdk.articles.getByPlatform('android', { limit: 12 }),
         sdk.sponsoredArticles.getAll().catch(() => []),
       ]);
       return {
@@ -39,11 +40,12 @@ const getCachedHomeData = unstable_cache(
         featured: featuredData || [],
         latest: latestData || [],
         windows: windowsData || [],
+        android: androidData || [],
         sponsored: sponsoredData || [],
       };
     } catch (error) {
       console.error('Error fetching home page data:', error);
-      return { carousel: [], featured: [], latest: [], windows: [], sponsored: [] };
+      return { carousel: [], featured: [], latest: [], windows: [], android: [], sponsored: [] };
     }
   },
   ['home-page-data'],
@@ -125,6 +127,13 @@ export default async function HomePage({ params }: { params: { locale: string } 
             title="🪟 ยอดนิยมบน Windows"
             posts={homeData.windows}
             href="/games?platform=windows"
+          />
+
+          {/* Shelf: Android */}
+          <GameShelf
+            title="📱 ยอดนิยมบน Android"
+            posts={homeData.android}
+            href="/games?platform=android"
           />
 
         </div>

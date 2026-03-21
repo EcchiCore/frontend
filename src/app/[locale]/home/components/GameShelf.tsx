@@ -126,7 +126,7 @@ function SkeletonCard() {
 }
 
 export default function GameShelf({ title, posts, loading, href }: GameShelfProps) {
-  const items = loading ? Array.from({ length: 12 }) : posts;
+  const items = loading ? Array.from({ length: 24 }) : posts;
 
   return (
     <section className="mb-8">
@@ -153,7 +153,7 @@ export default function GameShelf({ title, posts, loading, href }: GameShelfProp
         md:grid md:grid-cols-6 md:overflow-visible md:pb-0
       ">
         {loading
-          ? Array.from({ length: 12 }).map((_, i) => <SkeletonCard key={i} />)
+          ? Array.from({ length: 24 }).map((_, i) => <SkeletonCard key={i} />)
           : posts.map((post, i) => <GameCard key={post.id} post={post} index={i} />)
         }
       </div>
