@@ -1,17 +1,15 @@
 "use client";
 import Link from "next/link";
-import React, { useState, useEffect, Suspense } from "react";
+import React, { useState, useEffect } from "react";
 import Cookies from "js-cookie";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { Input } from "@/components/ui/input";
-import { Search, X } from "lucide-react";
+import { User, CircleUser } from "lucide-react";
 import dynamic from "next/dynamic";
 import { cn } from "@/lib/utils";
-
-// Pattern สำหรับตรวจจับรหัสเกม เช่น HJ294, Hj103, hj999
-const GAME_CODE_PATTERN = /^[Hh][Jj]\d+$/;
+import { useAppSelector } from "@/store/hooks";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 // Lazy load heavy client-only components
 const NavbarLinks = dynamic(() => import("./Navbar/NavbarLinks"), {
@@ -92,11 +90,10 @@ const HamburgerIcon = ({
 
 const Navbar = () => {
   const t = useTranslations("Navbar");
+  const user = useAppSelector((state) => state.auth.user);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [hasToken, setHasToken] = useState(false);
   const [isClient, setIsClient] = useState(false);
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
   const [isDesktop, setIsDesktop] = useState(() =>
     typeof window !== "undefined" ? window.innerWidth >= 768 : false
   );
@@ -142,21 +139,6 @@ const Navbar = () => {
 
   const closeMenu = () => {
     setIsMenuOpen(false);
-  };
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    const trimmedQuery = searchQuery.trim();
-    if (trimmedQuery) {
-      // ตรวจจับรหัสเกม (HJ294, Hj103, hj999 etc.)
-      if (GAME_CODE_PATTERN.test(trimmedQuery)) {
-        // Navigate to games page with sequential code
-        window.location.href = `/games?sequentialCode=${encodeURIComponent(trimmedQuery.toUpperCase())}`;
-      } else {
-        // Navigate to games page with search query
-        window.location.href = `/games?q=${encodeURIComponent(trimmedQuery)}`;
-      }
-    }
   };
 
   if (!isClient) {
@@ -207,44 +189,32 @@ const Navbar = () => {
           </div>
         </div>
 
-        {/* Center Section: Search Bar (Desktop Only) */}
-        <div className="hidden lg:flex flex-1 max-w-md mx-8">
-          <form onSubmit={handleSearch} className="w-full relative">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                type="text"
-                placeholder="ค้นหากระทู้..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 pr-10 h-9 bg-background/50 border-border/50 focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all duration-200 text-foreground"
-              />
-              {searchQuery && (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setSearchQuery("")}
-                  className="absolute right-1 top-1/2 transform -translate-y-1/2 h-7 w-7 hover:bg-accent/50"
-                >
-                  <X className="h-3 w-3" />
-                </Button>
-              )}
-            </div>
-          </form>
-        </div>
-
         {/* Right Section: Right Navigation */}
         <div className="flex items-center gap-2 text-foreground">
-          {/* Search Button (Mobile) */}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setIsSearchOpen(!isSearchOpen)}
-            className="md:hidden hover:bg-accent/50 transition-all duration-200"
-          >
-            <Search className="h-4 w-4" />
-          </Button>
+          
+          {/* User Account / Login Icon - Dynamic behavior */}
+          <Link href={hasToken ? "/member/dashboard" : "/login"}>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="hover:bg-accent/50 transition-all duration-200 rounded-full p-0 overflow-hidden"
+              title={hasToken ? "Dashboard" : "Login"}
+            >
+              {hasToken ? (
+                <Avatar className="h-8 w-8">
+                  {user?.image ? (
+                    <AvatarImage src={user.image} alt={user?.username || "User"} />
+                  ) : (
+                    <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold w-full h-full flex items-center justify-center">
+                      {user?.username?.charAt(0).toUpperCase() || <User className="h-4 w-4" />}
+                    </AvatarFallback>
+                  )}
+                </Avatar>
+              ) : (
+                <CircleUser className="h-6 w-6 text-muted-foreground/60" />
+              )}
+            </Button>
+          </Link>
 
           {/* Right Navigation Links (Desktop Only) */}
           <div className="hidden md:flex items-center gap-4">
@@ -253,7 +223,7 @@ const Navbar = () => {
             {hasToken && isDesktop && <NotificationDropdown />}
 
             {!hasToken && (
-              <Link href="/login">
+              <Link href="/register">
                 <Button variant="outline" size="sm" className="h-9 px-4 font-medium hover:bg-primary/5 hover:border-primary/20 transition-all duration-200">
                   {t('signUp')}
                 </Button>
@@ -261,7 +231,7 @@ const Navbar = () => {
             )}
           </div>
 
-          {/* Mobile Section */}
+          {/* Mobile Section (Hamburger) */}
           <div className="flex md:hidden items-center gap-2 ">
             {hasToken && !isDesktop && <NotificationDropdown isMobile />}
 
@@ -312,7 +282,7 @@ const Navbar = () => {
                       {/* Login Button for non-authenticated users */}
                       {!hasToken && (
                         <div className="pt-4 border-t border-border/50">
-                          <Link href="/login" onClick={closeMenu} className="block">
+                          <Link href="/register" onClick={closeMenu} className="block">
                             <Button variant="outline" className="w-full h-11 font-medium hover:bg-primary/5 hover:border-primary/20 transition-all duration-200">
                               {t('signUp')}
                             </Button>
@@ -327,51 +297,6 @@ const Navbar = () => {
           </div>
         </div>
       </div>
-
-      {/* Mobile Search Overlay */}
-      {isSearchOpen && (
-        <div className="fixed inset-0 z-50 bg-background/95 backdrop-blur-sm lg:hidden">
-          <div className="p-4">
-            <div className="flex items-center gap-3 mb-4">
-              <form onSubmit={handleSearch} className="flex-1">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    type="text"
-                    placeholder="ค้นหากระทู้..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10 pr-10 h-11 bg-background/50 border-border/50 focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all duration-200 text-foreground"
-                    autoFocus
-                  />
-                  {searchQuery && (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => setSearchQuery("")}
-                      className="absolute right-1 top-1/2 transform -translate-y-1/2 h-7 w-7 hover:bg-accent/50"
-                    >
-                      <X className="h-3 w-3" />
-                    </Button>
-                  )}
-                </div>
-              </form>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setIsSearchOpen(false)}
-                className="h-11 w-11 hover:bg-accent/50"
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-            <div className="text-sm text-muted-foreground text-center">
-              กด Enter เพื่อค้นหา
-            </div>
-          </div>
-        </div>
-      )}
     </nav>
   );
 };
