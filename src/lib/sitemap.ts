@@ -91,7 +91,17 @@ export const buildArticleFields = (articles: Article[], generatedAt: string) => 
 // ... existing code ...
 
 export const buildStaticFields = (generatedAt: string) => {
-  const routes = ['', 'articles', 'games', 'search', 'about', 'contact'];
+  const routes = [
+    '',
+    'games',
+    'chanox2',
+    'chanolite',
+    'tools',
+    'nst',
+    'donations',
+    'contact',
+    'privacy-policy'
+  ];
 
   return routes.map(route => {
     const path = route ? `/${route}` : '';

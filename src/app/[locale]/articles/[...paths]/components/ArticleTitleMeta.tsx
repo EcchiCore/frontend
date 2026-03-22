@@ -238,7 +238,7 @@ const ArticleTitleMeta: React.FC<ArticleTitleMetaProps> = ({ article, isDarkMode
       <div className="mb-12">
         <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-8">
           <div className="flex-1 space-y-2">
-            <h1 className={`${styles.title} text-2xl sm:text-3xl`}>{article.title}</h1>
+            <div className={`${styles.title} text-2xl sm:text-3xl`}>{article.title}</div>
             {article.creators && article.creators.length > 0 && (
               <p className={subtitleClass}>Creator / Studio: <span className={subtitleValueClass}>{article.creators[0]?.name}</span></p>
             )}
@@ -259,17 +259,14 @@ const ArticleTitleMeta: React.FC<ArticleTitleMetaProps> = ({ article, isDarkMode
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-6 mb-10">
         <div className="flex-1">
-          <h1 className={`${styles.title} mb-4`}>
+          <div className={`${styles.title} mb-4`}>
             {article.title}
             {article.isPaid && (
               <span className="ml-3 inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-amber-500 text-white shadow-lg shadow-amber-500/20">
                 PREMIUM
               </span>
             )}
-          </h1>
-          {article.creators && article.creators.length > 0 && (
-            <p className={`${subtitleClass} mb-2`}>Creator / Studio: <span className={subtitleValueClass}>{article.creators[0]?.name}</span></p>
-          )}
+          </div>
           <div className="flex items-center gap-4">
             <span className={`text-sm font-medium ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
               {imageCount} {imageCount === 1 ? "Image" : "Images"}

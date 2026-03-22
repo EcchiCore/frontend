@@ -20,6 +20,7 @@ export default async function GamesPage({ searchParams }: PageProps) {
     <>
       <div className="min-h-screen bg-background">
         <div className="container mx-auto px-4 py-6">
+          <h1 className="sr-only">เกมคลับ - ค้นหาและสำรวจเกมที่คุณชื่นชอบ</h1>
           <DonationCTA />
 
           {/* Search bar — visible on ALL breakpoints */}

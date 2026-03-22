@@ -68,9 +68,9 @@ export default function ArticleList({
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6 capitalize">
+      <div className="text-3xl font-bold mb-6 capitalize">
         {filterType}: {slug}
-      </h1>
+      </div>
       {articles.length === 0 ? (
         <p className="text-gray-500">No articles found for {filterType} &quot;{slug}&quot;.</p>
       ) : (
