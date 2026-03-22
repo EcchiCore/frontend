@@ -12,9 +12,6 @@ FROM oven/bun:1 AS builder
 
 WORKDIR /app
 
-ENV UV_THREADPOOL_SIZE=1
-ENV NEXT_PRIVATE_MAX_WORKER_THREADS=1
-
 # คัดลอก node_modules จาก deps stage
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .

@@ -36,10 +36,14 @@ const nextConfig: NextConfig = {
   },
 
   // As per docs: experimental.dynamicIO -> cacheComponents (root)
-  // But TS types for NextConfig might not have it yet if @types/next is old.
-  // Package.json says next: 16.1.0. 
-  // Let's stick to the doc suggestion: cacheComponents: true at root.
   cacheComponents: true,
+
+  // ←←← เพิ่มส่วนจำกัด CPU เดียว (สำคัญมาก) ↓↓↓
+  experimental: {
+    workerThreads: false,   // ปิด worker threads ทั้งหมด
+    cpus: 1,                // บังคับใช้ CPU แค่ 1 core เท่านั้น
+  },
+
   // Use custom cache handler if DRAGONFLY_URL is set and the file exists
   cacheHandler: (() => {
     if (!process.env.DRAGONFLY_URL) return undefined;
@@ -50,6 +54,19 @@ const nextConfig: NextConfig = {
       return undefined;
     }
   })(),
+
+  // ปิด Terser parallel + ช่วยลด CPU เพิ่มอีกชั้น
+  webpack: (config) => {
+    if (config.optimization?.minimizer) {
+      config.optimization.minimizer.forEach((minimizer: any) => {
+        if (minimizer?.options?.parallel !== undefined) {
+          minimizer.options.parallel = false; // หรือ 1
+        }
+      });
+    }
+    return config;
+  },
+
   staticPageGenerationTimeout: 300, // Increase timeout to 5 minutes to handle slow APIs
   compiler: { removeConsole: process.env.NODE_ENV === 'production' },
   poweredByHeader: false,
