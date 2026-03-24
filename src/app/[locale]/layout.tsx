@@ -8,7 +8,6 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import { siteUrl, defaultMetadataContent, supportedLocales, defaultLocale } from "@/utils/localeUtils";
 import Footer from '@/components/layout/Footer';
-import GlobalDonationAlert from '@/components/layout/GlobalDonationAlert';
 import Navbar from '@/components/layout/Navbar';
 import Script from "next/script";
 import { ReduxProvider } from "@/store/ReduxProvider";
@@ -185,7 +184,6 @@ export default async function LocaleSegmentLayout({
           <ReduxProvider>
             <Suspense fallback={null}>
               <NextIntlClientProvider locale={validLocale} messages={messages}>
-                <GlobalDonationAlert />
                 <Navbar />
                 {children}
                 <Footer />
