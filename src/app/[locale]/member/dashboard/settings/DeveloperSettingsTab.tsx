@@ -382,6 +382,90 @@ export function DeveloperSettingsTab() {
           </form>
         </CardContent>
       </Card>
+
+      {profile.isVerified && (
+        <Card className="border-amber-500/20 shadow-sm overflow-hidden">
+          <CardHeader className="bg-amber-500/5">
+            <div className="flex items-center gap-2">
+              <div className="p-2 bg-amber-500/10 rounded-lg">
+                <Sparkles className="h-5 w-5 text-amber-600" />
+              </div>
+              <div>
+                <CardTitle className="text-lg">Patreon Integration</CardTitle>
+                <CardDescription>Connect your Patreon to allow members to unlock your content on ChanomHub.</CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="pt-6 space-y-4">
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 p-4 rounded-xl border border-dashed border-amber-200 bg-amber-50/30 dark:border-amber-500/20 dark:bg-amber-500/5">
+              <div className="space-y-1">
+                <p className="font-semibold text-amber-900 dark:text-amber-100 flex items-center gap-2">
+                  {profile.patreonCampaignId ? (
+                    <><CheckCircle2 className="h-4 w-4 text-green-500" /> Connected to Patreon</>
+                  ) : (
+                    "Not connected to Patreon"
+                  )}
+                </p>
+                <p className="text-xs text-amber-700/70 dark:text-amber-400/70">
+                  {profile.patreonCampaignId 
+                    ? `Campaign ID: ${profile.patreonCampaignId}` 
+                    : "Connect your Patreon account to sync your campaign and enable membership checks."}
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="bg-white hover:bg-amber-50 border-amber-200 text-amber-700 font-bold"
+                  onClick={async () => {
+                    try {
+                      const sdk = await getSdk();
+                      const { url } = await sdk.patreon.getAuthUrl();
+                      if (url) window.location.href = url;
+                    } catch (e) {
+                      toast.error("Failed to start Patreon connection");
+                    }
+                  }}
+                >
+                  {profile.patreonCampaignId ? "Reconnect Patreon" : "Connect Patreon"}
+                </Button>
+                {profile.patreonCampaignId ? (
+                   <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="text-amber-700 hover:bg-amber-100"
+                    onClick={async () => {
+                      setSaving(true);
+                      try {
+                        const sdk = await getSdk();
+                        const { campaignId } = await sdk.patreon.syncCampaign();
+                        if (campaignId) {
+                          toast.success("Patreon campaign synced successfully!");
+                          fetchProfile();
+                        }
+                      } catch (e) {
+                        toast.error("Failed to sync Patreon campaign");
+                      } finally {
+                        setSaving(false);
+                      }
+                    }}
+                    disabled={saving}
+                   >
+                     {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : "Sync Campaign"}
+                   </Button>
+                ) : null}
+              </div>
+            </div>
+            
+            <Alert className="bg-blue-500/5 border-blue-500/20 text-blue-700 dark:text-blue-400">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription className="text-[10px] leading-relaxed">
+                การเชื่อมต่อ Patreon จะทำให้ผู้ใช้ที่สมัครสมาชิก (Patreon Member) ของคุณสามารถเข้าถึงลิงก์ดาวน์โหลดแบบ "ปิด" (Closed Link) ในบทความที่คุณเป็นเจ้าของได้ทันที ระบบจะตรวจสอบสถานะสมาชิกแบบ Real-time ทุกครั้งที่มีการเข้าชม
+              </AlertDescription>
+            </Alert>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

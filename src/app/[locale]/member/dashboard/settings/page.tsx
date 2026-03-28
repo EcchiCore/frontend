@@ -424,6 +424,41 @@ const SettingsPage: React.FC = () => {
                     </div>
 
                     <div className="pt-4 border-t">
+                      <Label className="font-bold block mb-2">Patreon Integration</Label>
+                      <div className="flex items-center justify-between p-4 rounded-lg border border-dashed border-amber-200 bg-amber-50/30 dark:border-amber-500/10 dark:bg-amber-500/5">
+                        <div className="space-y-1">
+                          <p className="text-sm font-semibold text-amber-900 dark:text-amber-100 flex items-center gap-2">
+                            {(user as any)?.patreonAccount ? (
+                              <><CheckIcon className="h-4 w-4 text-green-500" /> Connected to Patreon</>
+                            ) : (
+                              "Not connected to Patreon"
+                            )}
+                          </p>
+                          <p className="text-[10px] text-amber-700/70 dark:text-amber-400/70">
+                            Connect your Patreon to unlock exclusive content from creators you support.
+                          </p>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="bg-white hover:bg-amber-50 border-amber-200 text-amber-700 font-bold"
+                          onClick={async () => {
+                            try {
+                              const sdk = await (await import('@/lib/sdk')).getSdk();
+                              const { url } = await sdk.patreon.getAuthUrl();
+                              if (url) window.location.href = url;
+                            } catch (e) {
+                              showMessage('error', "Failed to start Patreon connection");
+                            }
+                          }}
+                        >
+                          {(user as any)?.patreonAccount ? "Reconnect Patreon" : "Connect Patreon"}
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div className="pt-4 border-t">
                       <div className="flex items-center justify-between mb-4">
                         <Label className="font-bold">Social Media Links</Label>
                         <Button type="button" variant="outline" size="sm" onClick={addSocialMediaLink}>

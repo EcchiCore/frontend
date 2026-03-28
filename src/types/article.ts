@@ -35,5 +35,6 @@ export type Article = {
   price?: number;
   isPaid?: boolean;
   isUnlocked?: boolean;
+  patreonUrl?: string | null;
   viewsCount?: number;
 };

@@ -717,6 +717,7 @@ export const ArticleEditorForm = ({ slug = '', initialData, mode, locale = 'en' 
         platforms: initialData?.platforms || [],
         isPaid: initialData?.isPaid || false,
         price: initialData?.price || 0,
+        creatorUserId: initialData?.creatorUserId || null,
 
         mainImageId: null,
         backgroundImageId: null,
@@ -727,6 +728,7 @@ export const ArticleEditorForm = ({ slug = '', initialData, mode, locale = 'en' 
     const [availableCategories, setAvailableCategories] = useState<string[]>([]);
     const [availablePlatforms, setAvailablePlatforms] = useState<string[]>([]);
     const [availableEngines, setAvailableEngines] = useState<{ id: number; name: string }[]>([]);
+    const [availableDevelopers, setAvailableDevelopers] = useState<{ id: number; name: string }[]>([]);
 
     const [imageItems, setImageItems] = useState<ImageItem[]>([]);
     const [downloadItems, setDownloadItems] = useState<DownloadItem[]>([]);
@@ -754,6 +756,10 @@ export const ArticleEditorForm = ({ slug = '', initialData, mode, locale = 'en' 
                 if (categories) setAvailableCategories(categories);
                 if (platforms) setAvailablePlatforms(platforms);
                 if (engines) setAvailableEngines(engines.map(e => ({ id: Number(e.id), name: e.name })));
+
+                // Fetch developers list using SDK
+                const devs = await sdk.developer.listVerifiedDevelopers();
+                if (devs) setAvailableDevelopers(devs);
 
                 if (mode === 'edit' && slug) {
                     try {
@@ -819,6 +825,9 @@ export const ArticleEditorForm = ({ slug = '', initialData, mode, locale = 'en' 
                                 engine: typeof article.engine === 'string' ? article.engine : (article.engine?.name || null),
                                 isPaid: article.isPaid || false,
                                 price: article.price || 0,
+                                creatorUserId: article.creators && article.creators.length > 0 
+                                    ? (article.creators[0].creator?.userId || null) 
+                                    : null,
 
                                 mainImageId: article.mainImage ? items.find(i => i.url === resolveArticleImageUrl(article.mainImage))?.id : null,
                                 backgroundImageId: article.backgroundImage ? items.find(i => i.url === resolveArticleImageUrl(article.backgroundImage))?.id : null,
@@ -932,6 +941,7 @@ export const ArticleEditorForm = ({ slug = '', initialData, mode, locale = 'en' 
                 description: formData.description,
                 body: formData.body,
                 creator: formData.creator,
+                creatorUserId: formData.creatorUserId,
                 ver: formData.ver,
                 sequentialCode: formData.sequentialCode,
                 engine: formData.engine,
@@ -1213,6 +1223,26 @@ export const ArticleEditorForm = ({ slug = '', initialData, mode, locale = 'en' 
                                         placeholder="Developer Name"
                                         className={`${showValidationErrors && !formData.creator ? 'border-destructive ring-2 ring-destructive/10' : ''}`}
                                     />
+                                </div>
+                                <div className="pt-2">
+                                    <Label className="text-xs text-muted-foreground font-semibold mb-1.5 block">Link to Developer in System (Optional)</Label>
+                                    <Select 
+                                        value={formData.creatorUserId ? String(formData.creatorUserId) : 'null'} 
+                                        onValueChange={(val) => setFormData((prev: any) => ({ ...prev, creatorUserId: val === 'null' ? null : Number(val) }))}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Select a developer..." />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="null">-- None --</SelectItem>
+                                            {availableDevelopers.map((dev) => (
+                                                <SelectItem key={dev.id} value={String(dev.id)}>{dev.name}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                    <p className="text-[10px] text-muted-foreground mt-1 italic">
+                                        Linking to a developer will connect their Patreon and other social media to this article.
+                                    </p>
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
