@@ -3,12 +3,11 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Download, Box, User, Tag, Plus, Upload, Search, Filter, ArrowLeft } from "lucide-react";
+import { Download, Box, Search, ChevronRight, Clock, Plus } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Separator } from "@/components/ui/separator";
 import {
     Select,
     SelectContent,
@@ -26,7 +25,7 @@ import { useAppSelector } from "@/store/hooks";
 interface ArticleModsPageProps {
     article: Article;
     mods: NonNullable<Article["mods"]>;
-    isAuthenticated?: boolean; // Kept for backward compatibility if needed, but we'll prefer Redux
+    isAuthenticated?: boolean; 
 }
 
 const ArticleModsPage: React.FC<ArticleModsPageProps> = ({
@@ -46,118 +45,129 @@ const ArticleModsPage: React.FC<ArticleModsPageProps> = ({
     );
 
     return (
-        <div className="min-h-screen bg-[#1b2838] text-[#c6d4df]">
-            {/* Search Header roughly matching Steam's style */}
-            <div className="bg-[#171a21] pt-6 pb-0">
-                <div className="container mx-auto px-4">
-                    <div className="flex items-center gap-2 text-[#8F98A0] hover:text-white mb-2 text-sm uppercase font-bold tracking-wider">
-                        <Link href={`/articles/${article.slug}`}>
-                            {article.title}
-                        </Link>
-                        <span>&gt;</span>
-                        <span>Workshop</span>
-                    </div>
-                    <h1 className="text-2xl text-white font-medium mb-6 uppercase tracking-widest">
-                        {article.title} Workshop
-                    </h1>
+        <div className="min-h-screen bg-background text-foreground">
+            {/* Header with Tabs & Breadcrumbs */}
+            <div className="container mx-auto px-4 py-6 md:py-8">
+                
+                {/* 1. Primary Navigation Tabs - Highest priority */}
+                <div className="mb-4 border-b border-border/50">
+                    <ArticleCommunityTabs slug={article.slug} />
                 </div>
 
-                <ArticleCommunityTabs slug={article.slug} />
-            </div>
+                {/* 2. Secondary Breadcrumbs - Sub-navigation */}
+                <nav className="mb-6 flex flex-wrap items-center gap-2 text-[10px] sm:text-[11px] font-bold uppercase tracking-widest text-muted-foreground/60">
+                    <Link href="/games" className="hover:text-primary transition-colors">
+                        All Games
+                    </Link>
+                    
+                    {article.categories?.[0] && (
+                        <>
+                            <ChevronRight className="w-3.5 h-3.5 opacity-30" />
+                            <Link 
+                                href={`/games?category=${encodeURIComponent(article.categories[0].name)}`}
+                                className="hover:text-primary transition-colors"
+                            >
+                                {article.categories[0].name}
+                            </Link>
+                        </>
+                    )}
 
-            <div className="container mx-auto px-4 py-8">
-                {/* Steam-like Toolbar */}
-                <div className="bg-[#2a475e] p-1 flex flex-col md:flex-row gap-2 mb-6 rounded-sm">
-                    <div className="relative flex-1">
+                    <ChevronRight className="w-3.5 h-3.5 opacity-30" />
+                    <Link href={`/articles/${article.slug}`} className="hover:text-primary transition-colors">
+                        {article.title}
+                    </Link>
+
+                    <ChevronRight className="w-3.5 h-3.5 opacity-30" />
+                    <span className="text-primary">MODS</span>
+                </nav>
+
+                <h1 className="text-3xl md:text-4xl font-black mb-10 tracking-tight uppercase">
+                    {article.title} <span className="text-primary/50">Community Mods</span>
+                </h1>
+
+                {/* Toolbar & Search */}
+                <div className="flex flex-col md:flex-row gap-4 mb-8 items-center justify-between">
+                    <div className="relative w-full md:max-w-md group">
                         <Input
-                            placeholder="Search "
-                            className="bg-[#1b2838] border-none text-white placeholder:text-[#67c1f5] h-9 focus-visible:ring-1 focus-visible:ring-[#67c1f5]"
+                            placeholder="Search mods..."
+                            className="pl-10 h-12 bg-muted/50 border-none rounded-2xl focus-visible:ring-2 focus-visible:ring-primary/20 transition-all"
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
-                        <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#67c1f5]" />
+                        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                     </div>
-                    <div className="flex gap-2">
-                        <Button variant="ghost" className="h-9 text-[#67c1f5] hover:text-white hover:bg-white/10 text-xs font-bold bg-[#1b2838]">
-                            <Search className="w-4 h-4 mr-2" />
-                        </Button>
-                        {/* Add Mod Button */}
+
+                    <div className="flex gap-3 w-full md:w-auto">
+                        <Select defaultValue="all">
+                            <SelectTrigger className="h-12 w-full md:w-[160px] bg-muted/50 border-none rounded-2xl">
+                                <SelectValue placeholder="Sort by" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">All Time</SelectItem>
+                                <SelectItem value="week">This Week</SelectItem>
+                                <SelectItem value="month">This Month</SelectItem>
+                            </SelectContent>
+                        </Select>
+
                         {isAuthenticated && (
                             <AddModDialog slug={article.slug} articleId={article.id} />
                         )}
                     </div>
                 </div>
 
-                {/* Filter Bar */}
-                <div className="flex items-center justify-between mb-4 border-b border-[#3c4e66] pb-2">
-                    <h2 className="text-sm font-bold text-[#f3f3f3]">Most Popular</h2>
-
-                    <div className="flex gap-4 text-xs">
-                        <Select defaultValue="week">
-                            <SelectTrigger className="w-[140px] h-7 bg-transparent border-none text-[#67c1f5] hover:text-white p-0">
-                                <SelectValue placeholder="Time range" />
-                            </SelectTrigger>
-                            <SelectContent className="bg-[#3d4450] border-[#171a21] text-[#c6d4df]">
-                                <SelectItem value="week">One Week</SelectItem>
-                                <SelectItem value="month">One Month</SelectItem>
-                                <SelectItem value="all">All Time</SelectItem>
-                            </SelectContent>
-                        </Select>
-                    </div>
-                </div>
-
                 {/* Mods Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     {filteredMods.map((mod, index) => (
-                        <Card key={index} className="group overflow-hidden hover:shadow-lg transition-all duration-300 border-muted-foreground/20">
-                            <div className="relative aspect-video bg-muted overflow-hidden">
+                        <Card key={index} className="group overflow-hidden border-none shadow-lg hover:shadow-2xl transition-all duration-500 rounded-3xl bg-card">
+                            <div className="relative aspect-[4/3] bg-muted overflow-hidden">
                                 {mod.images && mod.images.length > 0 ? (
                                     <Image
                                         src={mod.images[0].url}
                                         alt={mod.name}
                                         fill
-                                        className="object-cover transition-transform duration-500 group-hover:scale-110"
+                                        className="object-cover transition-transform duration-700 group-hover:scale-110"
                                     />
                                 ) : (
                                     <div className="flex items-center justify-center w-full h-full text-muted-foreground bg-muted/50">
-                                        <Box className="w-12 h-12 opacity-20" />
+                                        <Box className="w-12 h-12 opacity-10" />
                                     </div>
                                 )}
-                                <div className="absolute top-2 right-2">
-                                    <Badge variant="secondary" className="bg-background/80 backdrop-blur">
+                                
+                                <div className="absolute top-3 right-3 flex flex-col gap-2">
+                                    <Badge className="bg-background/90 backdrop-blur-md text-foreground border-none font-bold shadow-sm">
                                         v{mod.version}
                                     </Badge>
                                 </div>
+
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                             </div>
 
-                            <CardContent className="p-4">
-                                <div className="mb-2">
-                                    <div className="flex justify-between items-start mb-1">
-                                        <h3 className="font-bold text-lg leading-tight line-clamp-1 group-hover:text-primary transition-colors" title={mod.name}>
-                                            {mod.name}
-                                        </h3>
-                                    </div>
-                                    <p className="text-xs text-muted-foreground flex items-center gap-1">
-                                        โดย <span className="font-medium text-foreground">{mod.creditTo}</span>
+                            <CardContent className="p-5">
+                                <div className="mb-3">
+                                    <h3 className="font-bold text-xl leading-tight line-clamp-1 group-hover:text-primary transition-colors mb-1" title={mod.name}>
+                                        {mod.name}
+                                    </h3>
+                                    <p className="text-xs text-muted-foreground">
+                                        by <span className="font-bold text-foreground hover:text-primary cursor-pointer">{mod.creditTo}</span>
                                     </p>
                                 </div>
 
-                                <p className="text-sm text-muted-foreground line-clamp-2 h-10 mb-4">
+                                <p className="text-sm text-muted-foreground line-clamp-2 h-10 mb-5 leading-relaxed">
                                     {mod.description}
                                 </p>
 
-                                <div className="flex gap-1 flex-wrap mb-4 h-11 overflow-hidden">
-                                    {mod.categories?.slice(0, 3).map((cat, idx) => (
-                                        <Badge key={idx} variant="outline" className="text-[10px] px-1.5 h-5 bg-muted/30">
-                                            {cat.name}
-                                        </Badge>
+                                <div className="flex gap-2 flex-wrap mb-5 h-6 overflow-hidden">
+                                    {mod.categories?.slice(0, 2).map((cat, idx) => (
+                                        <span key={idx} className="text-[10px] font-bold uppercase tracking-widest text-primary/70">
+                                            #{cat.name}
+                                        </span>
                                     ))}
                                 </div>
 
-                                <Button className="w-full gap-2 group-hover:bg-primary" asChild>
+                                <Button className="w-full gap-2 bg-muted hover:bg-primary hover:text-white text-foreground transition-all h-12 rounded-xl border-none shadow-none" asChild>
                                     <a href={mod.downloadLink} target="_blank" rel="noopener noreferrer">
                                         <Download className="w-4 h-4" />
-                                        ติดตั้ง
+                                        Download Mod
                                     </a>
                                 </Button>
                             </CardContent>
@@ -166,10 +176,15 @@ const ArticleModsPage: React.FC<ArticleModsPageProps> = ({
                 </div>
 
                 {filteredMods.length === 0 && (
-                    <div className="text-center py-20 text-muted-foreground">
-                        <Box className="w-16 h-16 mx-auto mb-4 opacity-20" />
-                        <h3 className="text-xl font-semibold mb-2">ไม่พบมอดที่คุณค้นหา</h3>
-                        <p>ลองค้นหาด้วยคำค้นอื่น หรือเป็นคนแรกที่สร้างมอดนี้!</p>
+                    <div className="text-center py-32 bg-muted/20 rounded-[3rem] mt-8 border-2 border-dashed border-border">
+                        <Box className="w-20 h-20 mx-auto mb-6 opacity-10 text-primary" />
+                        <h3 className="text-2xl font-black mb-2 uppercase tracking-tight">No Mods Found</h3>
+                        <p className="text-muted-foreground">Be the first one to create a mod for this game!</p>
+                        {isAuthenticated && (
+                            <div className="mt-8">
+                                <AddModDialog slug={article.slug} articleId={article.id} />
+                            </div>
+                        )}
                     </div>
                 )}
             </div>
