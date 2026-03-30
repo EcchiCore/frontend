@@ -426,3 +426,19 @@ html[data-event-theme="christmas"].dark body {
 [data-ssr-hidden="true"] .ssr-article-content {
   display: none;
 }
+
+/* ChanoX2 App Integration */
+.is-app-chanox2 nav,
+.is-app-chanox2 header,
+.is-app-chanox2 footer,
+.is-app-chanox2 [class*="SponsoredArticles"], /* Hide sponsored strip in app */
+.is-app-chanox2 [class*="ChatButton"], /* Hide floating chat */
+.is-app-chanox2 .sticky.top-0 {
+  display: none !important;
+}
+
+/* Ensure content takes full height when in app mode */
+.is-app-chanox2 body {
+  overflow-x: hidden;
+  padding-top: 0 !important;
+}

@@ -9,6 +9,7 @@ import { Inter } from 'next/font/google';
 import { siteUrl, defaultMetadataContent, supportedLocales, defaultLocale } from "@/utils/localeUtils";
 import Footer from '@/components/layout/Footer';
 import Navbar from '@/components/layout/Navbar';
+import AppBridge from '@/components/AppBridge';
 import Script from "next/script";
 import { ReduxProvider } from "@/store/ReduxProvider";
 // Vercel Analytics removed for Cloudflare deployment
@@ -179,7 +180,7 @@ export default async function LocaleSegmentLayout({
       </head>
 
       <body className={inter.className}>
-
+        <AppBridge />
         <ThemeProvider defaultTheme="dark" storageKey="chanomhub-theme">
           <ReduxProvider>
             <Suspense fallback={null}>
