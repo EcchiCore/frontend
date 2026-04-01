@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useTranslations } from 'next-intl';
-import axios from "axios";
 import Cookies from 'js-cookie';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { createChanomhubClient, type LoginResponse } from '@chanomhub/sdk';
@@ -126,19 +125,29 @@ export function RegisterForm({ onSwitch }: { onSwitch: () => void }) {
     }
 
     try {
-      const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/users`,
-        {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
           user: {
             username: formData.username,
             email: formData.email,
             password: formData.password,
           }
-        }
-      );
+        }),
+      });
+
+      const responseJson = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        const errorMessage = responseJson?.error?.message || responseJson?.errors?.body?.[0] || responseJson?.message || responseJson?.error || t('registrationFailedMessage');
+        throw new Error(typeof errorMessage === 'string' ? errorMessage : t('registrationFailedMessage'));
+      }
 
       // Check for token in data.user (SDK/standard) or data.data.user (Actual response)
-      const responseData = response.data?.data || response.data;
+      const responseData = responseJson.data || responseJson;
       const user = responseData?.user;
       const token = user?.token;
       const refreshToken = responseData?.refreshToken;
@@ -166,22 +175,9 @@ export function RegisterForm({ onSwitch }: { onSwitch: () => void }) {
         toast.error(t('invalidResponseMessage'));
       }
     } catch (error: unknown) {
-      if (axios.isAxiosError(error)) {
+      if (error instanceof Error) {
         console.error("Registration error:", error);
-
-        // Handle various error structures
-        // 1. { error: { message: "This username is already taken", ... } }
-        // 2. { errors: { body: ["error message"] } }
-        // 3. { message: "error message" }
-        const data = error.response?.data;
-        const errorMessage =
-          data?.error?.message ||
-          data?.errors?.body?.[0] ||
-          data?.message ||
-          data?.error || // Fallback string error
-          t('registrationFailedMessage');
-
-        toast.error(errorMessage);
+        toast.error(error.message);
       } else {
         console.error("Unexpected error:", error);
         toast.error(t('unexpectedErrorMessage'));

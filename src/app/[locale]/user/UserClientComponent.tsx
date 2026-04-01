@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import axios from 'axios';
 import Cookies from 'js-cookie';
 
 interface UserData {
@@ -38,12 +37,16 @@ const UserClientComponent = () => {
 
     const fetchUserData = async () => {
       try {
-        const response = await axios.get('http://127.0.0.1:1337/api/users/me', {
+        const response = await fetch('http://127.0.0.1:1337/api/users/me', {
           headers: {
             Authorization: `Bearer ${jwt}`,
           },
         });
-        setUserData(response.data);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        setUserData(data);
       } catch (error) {
         console.error('Error fetching user data:', error);
         router.push('/');

@@ -1,4 +1,3 @@
-import axios from "axios";
 import Link from "next/link";
 import { JSX } from "react";
 
@@ -12,10 +11,12 @@ interface Blog {
 
 const fetchBlogs = async (): Promise<Blog[] | string> => {
   try {
-    const response = await axios.get<{ data: Blog[] }>(
-      `${process.env.STRAPI_BASE_URL}/api/articles`
-    );
-    return response.data.data;
+    const response = await fetch(`${process.env.STRAPI_BASE_URL}/api/articles`);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data = await response.json();
+    return data.data;
   } catch (error) {
     console.error("Error fetching blogs:", error);
     return "Sorry, we couldn't load the blogs at this time. Please try again later.";

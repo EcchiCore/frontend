@@ -8,7 +8,6 @@ import { Label } from "@/components/ui/label";
 import { Flower } from "lucide-react";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useTranslations } from 'next-intl';
-import axios from "axios";
 import Cookies from 'js-cookie';
 import { createChanomhubClient, type LoginResponse } from '@chanomhub/sdk';
 
@@ -105,13 +104,23 @@ export function LoginForm({ onSwitch }: { onSwitch: () => void }) {
     setLoading(true);
 
     try {
-      const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/users/login`,
-        { user: { email, password } }
-      );
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ user: { email, password } }),
+      });
+
+      const responseJson = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        const errorMessage = responseJson?.error?.message || responseJson?.errors?.body?.[0] || responseJson?.message || responseJson?.error || t('invalidCredentialsMessage');
+        throw new Error(typeof errorMessage === 'string' ? errorMessage : t('invalidCredentialsMessage'));
+      }
 
       // Handle new backend response structure: { data: { user: { ... }, refreshToken: ... } }
-      const responseData = response.data?.data || response.data;
+      const responseData = responseJson.data || responseJson;
       const user = responseData?.user;
       const token = user?.token;
       const refreshToken = responseData?.refreshToken;
@@ -142,8 +151,8 @@ export function LoginForm({ onSwitch }: { onSwitch: () => void }) {
         toast.error(t('invalidResponseMessage'));
       }
     } catch (error: unknown) {
-      if (axios.isAxiosError(error)) {
-        toast.error(error.response?.data?.message || t('invalidCredentialsMessage'));
+      if (error instanceof Error) {
+        toast.error(error.message);
       } else {
         toast.error(t('unexpectedErrorMessage'));
       }
