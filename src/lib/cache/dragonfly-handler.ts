@@ -89,10 +89,13 @@ export default class DragonflyCacheHandler implements CacheHandler {
                 value: buffer.toString('base64'),
             };
 
-            // Calculate TTL
+            // Calculate TTL — ตั้ง TTL ให้ยาวกว่า revalidate 3 เท่า
+            // เพื่อให้ Next.js สามารถ serve stale content ระหว่าง revalidate ได้
+            // ถ้า TTL = revalidate เท่ากัน ข้อมูลจะหายตอน cache expired พอดี
+            // ทำให้ต้อง full re-render แทน → CPU spike
             let ttl = 31536000; // Default 1 year
             if (typeof data.revalidate === 'number') {
-                ttl = Math.max(data.revalidate, 60);
+                ttl = Math.max(data.revalidate * 3, 300); // 3x revalidate, ขั้นต่ำ 5 นาที
             }
 
             const cacheKey = this.prefix + key;

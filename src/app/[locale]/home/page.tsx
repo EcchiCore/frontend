@@ -10,6 +10,7 @@ import { getTranslations } from 'next-intl/server';
 import { locales } from '@/app/[locale]/lib/navigation';
 import { createChanomhubClient } from '@chanomhub/sdk';
 import { unstable_cache } from 'next/cache';
+import { singleFlight } from '@/lib/cache/singleFlight';
 
 export async function generateMetadata({ params }: { params: { locale?: string } }) {
   const locale = (params?.locale || 'en') as (typeof locales)[number];
@@ -23,7 +24,7 @@ export async function generateMetadata({ params }: { params: { locale?: string }
   });
 }
 
-const getCachedHomeData = unstable_cache(
+const _getCachedHomeData = unstable_cache(
   async (token?: string) => {
     try {
       const sdk = createChanomhubClient({ token });
@@ -49,8 +50,13 @@ const getCachedHomeData = unstable_cache(
     }
   },
   ['home-page-data'],
-  { revalidate: 60 }
+  { revalidate: 300 } // 5 นาที (เดิม 60 วินาที ถี่เกินไป → spike ทุกนาที)
 );
+
+// ห่อด้วย singleFlight ป้องกัน thundering herd
+// เมื่อ cache expired หลาย request พร้อมกัน → มีแค่ตัวเดียวที่ยิง API จริง
+const getCachedHomeData = (token?: string) =>
+  singleFlight(`home-data-${token ? 'auth' : 'guest'}`, () => _getCachedHomeData(token));
 
 async function getAuthToken() {
   try {

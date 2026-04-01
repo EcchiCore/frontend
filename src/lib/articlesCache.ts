@@ -3,12 +3,13 @@
 
 import { unstable_cache } from 'next/cache';
 import { createChanomhubClient, ArticleListItem } from '@chanomhub/sdk';
+import { singleFlight } from '@/lib/cache/singleFlight';
 
 const sdk = createChanomhubClient();
 
 // Cache for recommendation pool - revalidates every 5 minutes
 // This is shared between all article pages to avoid extra API calls
-export const getCachedRecommendationPool = unstable_cache(
+const _getCachedRecommendationPool = unstable_cache(
     async (token?: string): Promise<ArticleListItem[]> => {
         const sdk = createChanomhubClient({ token });
         const result = await sdk.articles.getAllPaginated({
@@ -25,6 +26,10 @@ export const getCachedRecommendationPool = unstable_cache(
     ['recommendation-pool'],
     { revalidate: 300 } // 5 minutes
 );
+
+// ห่อด้วย singleFlight ป้องกัน concurrent article pages trigger พร้อมกัน
+export const getCachedRecommendationPool = (token?: string) =>
+    singleFlight(`recommendation-pool-${token ? 'auth' : 'guest'}`, () => _getCachedRecommendationPool(token));
 
 // Get related articles from cached pool (no extra API calls)
 export function getRelatedFromPool(

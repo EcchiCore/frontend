@@ -5,8 +5,9 @@ import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { unstable_cache } from "next/cache"
+import { singleFlight } from "@/lib/cache/singleFlight"
 
-const getCachedGameResults = unstable_cache(
+const _getCachedGameResults = unstable_cache(
   async (
     limit: number,
     offset: number,
@@ -28,8 +29,19 @@ const getCachedGameResults = unstable_cache(
     })
   },
   ["game-results"],
-  { revalidate: 60 }
+  { revalidate: 300 } // 5 นาที (เดิม 60 วินาที)
 )
+
+// ห่อด้วย singleFlight ป้องกัน thundering herd
+const getCachedGameResults = (
+  limit: number,
+  offset: number,
+  filter: Record<string, string | boolean | undefined>
+) =>
+  singleFlight(
+    `game-results-${limit}-${offset}-${JSON.stringify(filter)}`,
+    () => _getCachedGameResults(limit, offset, filter)
+  )
 
 export default async function Results({
   searchParams,
