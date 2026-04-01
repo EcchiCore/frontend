@@ -7,13 +7,13 @@ import { singleFlight } from '@/lib/cache/singleFlight';
 
 const sdk = createChanomhubClient();
 
-// Cache for recommendation pool - revalidates every 5 minutes
+// Cache for recommendation pool - revalidates every 10 minutes
 // This is shared between all article pages to avoid extra API calls
 const _getCachedRecommendationPool = unstable_cache(
     async (token?: string): Promise<ArticleListItem[]> => {
         const sdk = createChanomhubClient({ token });
         const result = await sdk.articles.getAllPaginated({
-            limit: 50, // Pool of articles for recommendations
+            limit: 30, // Pool of articles for recommendations (ลดจาก 50 → 30)
             status: 'PUBLISHED',
             fields: [
                 'id', 'title', 'slug', 'description',
@@ -24,7 +24,7 @@ const _getCachedRecommendationPool = unstable_cache(
         return result.items;
     },
     ['recommendation-pool'],
-    { revalidate: 300 } // 5 minutes
+    { revalidate: 600 } // 10 นาที (เดิม 5 นาที → ลด frequency ของ cache refresh)
 );
 
 // ห่อด้วย singleFlight ป้องกัน concurrent article pages trigger พร้อมกัน

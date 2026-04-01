@@ -9,6 +9,7 @@ import { generatePageMetadata } from '@/utils/metadataUtils';
 import { getTranslations } from 'next-intl/server';
 import { locales } from '@/app/[locale]/lib/navigation';
 import { createChanomhubClient } from '@chanomhub/sdk';
+import type { ArticleField } from '@chanomhub/sdk';
 import { unstable_cache } from 'next/cache';
 import { singleFlight } from '@/lib/cache/singleFlight';
 
@@ -24,14 +25,23 @@ export async function generateMetadata({ params }: { params: { locale?: string }
   });
 }
 
+// Fields ที่ต้องใช้สำหรับ card display เท่านั้น (ไม่ดึง body → ลด memory)
+const HOME_CARD_FIELDS: ArticleField[] = [
+  'id', 'title', 'slug', 'description',
+  'mainImage', 'coverImage', 'backgroundImage',
+  'author', 'tags', 'platforms', 'categories',
+  'favoritesCount', 'createdAt', 'updatedAt',
+  'price', 'isPaid', 'ver',
+];
+
 const _getCachedHomeData = unstable_cache(
   async (token?: string) => {
     try {
       const sdk = createChanomhubClient({ token });
       const [carouselData, featuredData, latestData, windowsData, androidData, sponsoredData] = await Promise.all([
-        sdk.articles.getAll({ limit: 5, status: 'PUBLISHED' }),
-        sdk.articles.getAll({ limit: 24, status: 'PUBLISHED' }),
-        sdk.articles.getAll({ limit: 12, status: 'PUBLISHED' }),
+        sdk.articles.getAll({ limit: 5, status: 'PUBLISHED', fields: HOME_CARD_FIELDS }),
+        sdk.articles.getAll({ limit: 12, status: 'PUBLISHED', fields: HOME_CARD_FIELDS }),
+        sdk.articles.getAll({ limit: 12, status: 'PUBLISHED', fields: HOME_CARD_FIELDS }),
         sdk.articles.getByPlatform('windows', { limit: 12 }),
         sdk.articles.getByPlatform('android', { limit: 12 }),
         sdk.sponsoredArticles.getAll().catch(() => []),
@@ -50,7 +60,7 @@ const _getCachedHomeData = unstable_cache(
     }
   },
   ['home-page-data'],
-  { revalidate: 300 } // 5 นาที (เดิม 60 วินาที ถี่เกินไป → spike ทุกนาที)
+  { revalidate: 300 } // 5 นาที
 );
 
 // ห่อด้วย singleFlight ป้องกัน thundering herd

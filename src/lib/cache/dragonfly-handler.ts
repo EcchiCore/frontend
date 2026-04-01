@@ -72,14 +72,28 @@ export default class DragonflyCacheHandler implements CacheHandler {
                 // Handle ReadableStream
                 const reader = data.value.getReader();
                 const chunks: Uint8Array[] = [];
+                let totalSize = 0;
                 while (true) {
                     const { done, value } = await reader.read();
                     if (done) break;
-                    if (value) chunks.push(value);
+                    if (value) {
+                        totalSize += value.byteLength;
+                        // ป้องกัน memory spike: skip entries ที่ใหญ่เกิน 5MB
+                        if (totalSize > 5 * 1024 * 1024) {
+                            reader.cancel();
+                            return;
+                        }
+                        chunks.push(value);
+                    }
                 }
                 buffer = Buffer.concat(chunks);
             } else {
                 // Fallback or error
+                return;
+            }
+
+            // ตรวจสอบขนาดอีกครั้งก่อน encode base64 (เพิ่มขนาด ~33%)
+            if (buffer.byteLength > 5 * 1024 * 1024) {
                 return;
             }
 
