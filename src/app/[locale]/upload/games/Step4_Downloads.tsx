@@ -6,11 +6,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Card, CardContent } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { platforms as allPlatforms } from '@/lib/gameData';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { updateFormData, DownloadEntry, AuthorizedSourceEntry } from '@/store/features/upload/uploadSlice';
+import { toast } from 'sonner';
 import {
   Dialog,
   DialogContent,
@@ -33,6 +33,7 @@ import {
   ExternalLink,
   Upload,
   Loader2,
+  FileCode
 } from 'lucide-react';
 import { getSdk } from '@/lib/sdk';
 
@@ -57,10 +58,7 @@ export const Step4_Downloads = () => {
   const [isPurchaseDialogOpen, setIsPurchaseDialogOpen] = useState(false);
 
   const isValidUrl = (url: string) => {
-    // Allow relative paths from our storage
-    if (url.startsWith('public/') || url.startsWith('premium/')) {
-      return true;
-    }
+    if (url.startsWith('public/') || url.startsWith('premium/')) return true;
     try {
       new URL(url);
       return true;
@@ -68,25 +66,16 @@ export const Step4_Downloads = () => {
       return false;
     }
   };
+
   const getDomainName = (url: string) => {
-    if (url.startsWith('public/') || url.startsWith('premium/')) {
-      return 'Storage';
-    }
+    if (url.startsWith('public/') || url.startsWith('premium/')) return 'Storage';
     try {
       const hostname = new URL(url).hostname;
       const parts = hostname.split('.');
       const domain = parts.length > 2 ? parts[parts.length - 2] : parts[0];
-
-      // Common domains simplification
       if (domain.includes('mega')) return 'Mega';
       if (domain.includes('google') && hostname.includes('drive')) return 'Google Drive';
       if (domain.includes('mediafire')) return 'Mediafire';
-      if (domain.includes('dropbox')) return 'Dropbox';
-      if (domain.includes('onedrive')) return 'OneDrive';
-      if (domain.includes('pixeldrain')) return 'Pixeldrain';
-      if (domain.includes('gofile')) return 'Gofile';
-      if (domain.includes('qiwi')) return 'Qiwi';
-
       return domain.charAt(0).toUpperCase() + domain.slice(1);
     } catch {
       return 'Link';
@@ -108,30 +97,16 @@ export const Step4_Downloads = () => {
     : allPlatforms;
 
   const handleAddDownload = () => {
-    if (!canAddDownload) {
-      if (!isDownloadUrlValid) setDownloadUrlError('URL must be a valid HTTP or HTTPS URL');
-      return;
-    }
-
-    const newDownloads = [
-      ...downloads,
-      {
-        name: `[${downloadPlatforms.join('/')}] ${getDomainName(downloadUrl)}`,
-        url: downloadUrl.trim(),
-        submitNote: downloadSubmitNote.trim() || undefined,
-        isActive: downloadIsActive,
-        vipOnly: downloadVipOnly,
-      },
-    ];
-
+    if (!canAddDownload) return;
+    const newDownloads = [...downloads, {
+      name: `[${downloadPlatforms.join('/')}] ${getDomainName(downloadUrl)}`,
+      url: downloadUrl.trim(),
+      submitNote: downloadSubmitNote.trim() || undefined,
+      isActive: downloadIsActive,
+      vipOnly: downloadVipOnly,
+    }];
     dispatch(updateFormData({ downloads: newDownloads }));
-
     setDownloadUrl('');
-    setDownloadSubmitNote('');
-    setDownloadIsActive(true);
-    setDownloadVipOnly(false);
-    setDownloadUrlError('');
-    setDownloadPlatforms([]);
     setIsDownloadDialogOpen(false);
   };
 
@@ -139,372 +114,181 @@ export const Step4_Downloads = () => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    setIsUploading(true);
-    setUploadProgress(0);
-    setDownloadUrlError('');
-
-    try {
-      const sdk = await getSdk();
-      
-      const gameSlug = formData.slug;
-
-      if (!gameSlug) {
-        throw new Error('Game title reservation is still in progress or no title entered. Please wait or go back to Step 1.');
-      }
-
-      const result = await sdk.storage.uploadMultipart(file, { 
-        bucket: 'storage',
-        path: formData.isPaid ? 'premium' : 'public',
-        game: gameSlug,
-        onProgress: (percent) => setUploadProgress(percent)
-      });
-      
-      if (result && result.url) {
-        setDownloadUrl(result.url);
-      } else {
-        throw new Error('Upload failed: No URL returned');
-      }
-    } catch (error) {
-      console.error('File upload error:', error);
-      setDownloadUrlError(error instanceof Error ? error.message : 'Upload failed');
-    } finally {
-      setIsUploading(false);
-      setUploadProgress(0);
-    }
-  };
-
-  const handleAddPurchaseSource = () => {
-    if (!canAddPurchase) {
-      if (!isPurchaseUrlValid) setPurchaseUrlError('URL must be a valid HTTP or HTTPS URL');
+    // Critical: Ensure slug is reserved before allowing upload
+    if (!formData.slug) {
+      toast.error("URL reservation required. Please enter a Game Title first.");
       return;
     }
 
-    const newSources = [
-      ...authorizedPurchaseSources,
-      {
-        name: purchaseName.trim(),
-        url: purchaseUrl.trim(),
-        submitNote: purchaseSubmitNote.trim() || undefined,
-      },
-    ];
-
-    dispatch(updateFormData({ authorizedPurchaseSources: newSources }));
-
-    setPurchaseName('');
-    setPurchaseUrl('');
-    setPurchaseSubmitNote('');
-    setPurchaseUrlError('');
-    setIsPurchaseDialogOpen(false);
+    setIsUploading(true);
+    setUploadProgress(0);
+    try {
+      const sdk = await getSdk();
+      const result = await sdk.storage.uploadMultipart(file, { 
+        bucket: 'storage',
+        path: formData.isPaid ? 'premium' : 'public',
+        game: formData.slug, // Always use reserved slug
+        onProgress: (percent) => setUploadProgress(percent)
+      });
+      if (result?.url) {
+        setDownloadUrl(result.url);
+        toast.success("File uploaded to storage!");
+      }
+    } catch (err) {
+      console.error('Upload failed:', err);
+      toast.error(err instanceof Error ? err.message : "Upload failed");
+    } finally {
+      setIsUploading(false);
+    }
   };
 
-  const handleRemoveDownload = (indexToRemove: number) => {
-    const newDownloads = downloads.filter((_: any, index: number) => index !== indexToRemove);
-    dispatch(updateFormData({ downloads: newDownloads }));
-  };
-
-  const handleRemovePurchaseSource = (indexToRemove: number) => {
-    const newSources = authorizedPurchaseSources.filter((_: any, index: number) => index !== indexToRemove);
-    dispatch(updateFormData({ authorizedPurchaseSources: newSources }));
+  const handleRemoveDownload = (index: number) => {
+    dispatch(updateFormData({ downloads: downloads.filter((_, i) => i !== index) }));
   };
 
   const getPlatformIcon = (name: string) => {
     const lowerName = name.toLowerCase();
-    if (lowerName.includes('win') || lowerName.includes('pc') || lowerName.includes('linux') || lowerName.includes('mac')) return <Monitor className="h-4 w-4" />;
-    if (lowerName.includes('android') || lowerName.includes('ios') || lowerName.includes('mobile')) return <Smartphone className="h-4 w-4" />;
+    if (lowerName.includes('win') || lowerName.includes('pc')) return <Monitor className="h-4 w-4" />;
+    if (lowerName.includes('android') || lowerName.includes('ios')) return <Smartphone className="h-4 w-4" />;
     if (lowerName.includes('web')) return <Globe className="h-4 w-4" />;
-    return <Download className="h-4 w-4" />;
+    return <FileCode className="h-4 w-4" />;
   };
 
   return (
-    <div className="space-y-8">
-      {/* Download Links Section */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className="text-lg font-medium">Download Links</h3>
-            <p className="text-sm text-muted-foreground">Provide downloadable builds or assets.</p>
-          </div>
-          <Dialog open={isDownloadDialogOpen} onOpenChange={setIsDownloadDialogOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="mr-2 h-4 w-4" /> Add Link
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[500px] text-foreground">
-              <DialogHeader>
-                <DialogTitle>Add Download Link</DialogTitle>
-                <DialogDescription>
-                  Add a new download link for your game. Select platforms and provide a valid URL.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <div className="space-y-2">
-                  <Label>Platform</Label>
-                  <div className="grid grid-cols-2 gap-2 p-3 border rounded-md bg-muted/20">
-                    {selectedPlatforms.map((platform: string) => (
-                      <div key={platform} className="flex items-center space-x-2">
-                        <Checkbox
-                          id={`download-platform-${platform}`}
-                          checked={downloadPlatforms.includes(platform)}
-                          onCheckedChange={(checked) => {
-                            setDownloadPlatforms((prev) =>
-                              checked ? [...prev, platform] : prev.filter((p) => p !== platform)
-                            );
-                          }}
-                        />
-                        <Label htmlFor={`download-platform-${platform}`} className="cursor-pointer">{platform}</Label>
-                      </div>
-                    ))}
-                  </div>
-                  {downloadPlatforms.length === 0 && <p className="text-xs text-muted-foreground">Select at least one platform.</p>}
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="downloadUrl">URL</Label>
-                  <div className="flex gap-2">
-                    <Input
-                      id="downloadUrl"
-                      placeholder="https://example.com/file.zip"
-                      value={downloadUrl}
-                      onChange={(e) => {
-                        setDownloadUrl(e.target.value);
-                        setDownloadUrlError('');
-                      }}
-                      className="flex-1"
-                    />
-                    <div className="relative">
-                      <Input
-                        type="file"
-                        id="fileUpload"
-                        className="hidden"
-                        onChange={handleFileUpload}
-                        disabled={isUploading}
-                      />
-                      <Button
-                        type="button"
-                        variant="secondary"
-                        size="icon"
-                        onClick={() => document.getElementById('fileUpload')?.click()}
-                        disabled={isUploading}
-                        title="Upload file directly"
-                      >
-                        {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
-                      </Button>
-                    </div>
-                  </div>
-                  {isUploading && (
-                    <div className="space-y-1 mt-2">
-                      <div className="flex justify-between text-xs text-blue-400">
-                        <span>Uploading file...</span>
-                        <span>{uploadProgress}%</span>
-                      </div>
-                      <div className="w-full bg-muted/30 rounded-full h-1.5 overflow-hidden">
-                        <div 
-                          className="bg-blue-500 h-full transition-all duration-300" 
-                          style={{ width: `${uploadProgress}%` }}
-                        />
-                      </div>
-                    </div>
-                  )}
-                  {downloadUrlError && <p className="text-sm text-destructive mt-2">{downloadUrlError}</p>}
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="downloadSubmitNote">Reviewer note (optional)</Label>
-                  <Input
-                    id="downloadSubmitNote"
-                    placeholder="Provide context for moderators"
-                    value={downloadSubmitNote}
-                    onChange={(e) => setDownloadSubmitNote(e.target.value)}
-                  />
-                </div>
-                <div className="flex flex-wrap gap-6 pt-2">
-                  <div className="flex items-center gap-2">
-                    <Switch id="downloadActive" checked={downloadIsActive} onCheckedChange={(checked) => setDownloadIsActive(!!checked)} />
-                    <Label htmlFor="downloadActive">Active</Label>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Switch id="downloadVipOnly" checked={downloadVipOnly} onCheckedChange={(checked) => setDownloadVipOnly(!!checked)} />
-                    <Label htmlFor="downloadVipOnly">VIP Only</Label>
-                  </div>
-                </div>
-              </div>
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setIsDownloadDialogOpen(false)}>Cancel</Button>
-                <Button onClick={handleAddDownload} disabled={!canAddDownload}>Add Link</Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        </div>
-
+    <div className="space-y-4">
+      {/* Downloads List */}
+      <div className="space-y-1.5">
         {downloads.length > 0 ? (
-          <div className="grid gap-4 sm:grid-cols-2">
-            {downloads.map((download, index) => (
-              <Card key={`${download.url}-${index}`} className="relative overflow-hidden group">
-                <CardContent className="p-4">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-full bg-primary/10 text-primary">
-                        {getPlatformIcon(download.name)}
-                      </div>
-                      <div className="space-y-1">
-                        <p className="font-medium leading-none truncate max-w-[150px] sm:max-w-[200px]" title={download.name}>
-                          {download.name}
-                        </p>
-                        <a
-                          href={download.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-xs text-muted-foreground hover:text-primary flex items-center gap-1 truncate max-w-[150px]"
-                        >
-                          <ExternalLink className="h-3 w-3" />
-                          {getDomainName(download.url)}
-                        </a>
-                      </div>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity absolute top-2 right-2"
-                      onClick={() => handleRemoveDownload(index)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+          <div className="flex flex-col gap-1.5">
+            {downloads.map((dl, i) => (
+              <div key={i} className="flex items-center gap-2.5 px-3 py-2.5 bg-[#171717] border border-[#222] rounded-[4px] group">
+                <div className={`w-[6px] h-[6px] rounded-full shrink-0 ${dl.vipOnly ? 'bg-[#e8a000]' : 'bg-[#3d3d3d]'}`} />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 text-[12px] text-[#aaa] truncate">
+                    <span>{dl.name}</span>
+                    {dl.vipOnly && <span className="text-[9px] text-[#e8a000] font-bold">VIP</span>}
+                    {!dl.isActive && <span className="text-[9px] text-red-500/60 font-bold uppercase">Inactive</span>}
                   </div>
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    {download.vipOnly && <Badge variant="secondary" className="text-xs">VIP Only</Badge>}
-                    {!download.isActive && <Badge variant="destructive" className="text-xs">Inactive</Badge>}
-                    {download.submitNote && (
-                      <div className="w-full mt-2 text-xs text-muted-foreground bg-muted/50 p-2 rounded flex items-start gap-2">
-                        <AlertCircle className="h-3 w-3 mt-0.5 shrink-0" />
-                        <span>{download.submitNote}</span>
-                      </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
+                  <div className="text-[10px] text-[#3d3d3d] mt-0.5 truncate font-mono">{dl.url}</div>
+                </div>
+                <button
+                  className="text-[16px] text-[#333] hover:text-[#cc2f35] transition-all"
+                  onClick={() => handleRemoveDownload(i)}
+                >
+                  ×
+                </button>
+              </div>
             ))}
           </div>
-        ) : (
-          <div className="text-center py-8 border-2 border-dashed rounded-lg bg-muted/10">
-            <Download className="h-10 w-10 mx-auto text-muted-foreground/50 mb-3" />
-            <p className="text-sm text-muted-foreground">No download links added yet.</p>
-            <Button variant="link" onClick={() => setIsDownloadDialogOpen(true)}>Add your first link</Button>
-          </div>
-        )}
+        ) : null}
       </div>
 
-      {/* Authorized Sources Section */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className="text-lg font-medium">Authorized Sources</h3>
-            <p className="text-sm text-muted-foreground">Official purchase channels (Steam, Itch.io, etc).</p>
-          </div>
-          <Dialog open={isPurchaseDialogOpen} onOpenChange={setIsPurchaseDialogOpen}>
-            <DialogTrigger asChild>
-              <Button variant="outline">
-                <Plus className="mr-2 h-4 w-4" /> Add Source
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[500px] text-foreground">
-              <DialogHeader>
-                <DialogTitle>Add Authorized Source</DialogTitle>
-                <DialogDescription>
-                  Link to official storefronts where players can support the game.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <div className="space-y-2">
-                  <Label htmlFor="purchaseSourceName">Name</Label>
-                  <Input
-                    id="purchaseSourceName"
-                    placeholder="e.g. Steam, Itch.io"
-                    value={purchaseName}
-                    onChange={(e) => setPurchaseName(e.target.value)}
-                  />
+      {/* Add Link Button (Dashed) */}
+      <button 
+        onClick={() => setIsDownloadDialogOpen(true)}
+        className="w-full flex items-center justify-center gap-1.5 py-2 px-3 border border-dashed border-[#252525] rounded-[4px] bg-transparent text-[#3d3d3d] text-[11px] hover:border-[#3d3d3d] hover:text-[#666] transition-all"
+      >
+        <Plus className="h-3 w-3" />
+        Add link or upload file
+      </button>
+
+      <Dialog open={isDownloadDialogOpen} onOpenChange={setIsDownloadDialogOpen}>
+        <DialogContent className="sm:max-w-[500px] bg-[#1a1a1a] border-slate-800 text-white">
+          <DialogHeader>
+            <DialogTitle className="text-[14px]">Add Download Source</DialogTitle>
+            <DialogDescription className="text-[11px] text-slate-400">
+              Provide a URL or upload a file for your game builds.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-5 py-4">
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Platforms</label>
+              <div className="grid grid-cols-2 gap-2 p-3 rounded-md border border-slate-800 bg-slate-900/50">
+                {selectedPlatforms.map((platform: string) => (
+                  <div key={platform} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`dl-${platform}`}
+                      checked={downloadPlatforms.includes(platform)}
+                      onCheckedChange={(checked) => {
+                        setDownloadPlatforms(p => checked ? [...p, platform] : p.filter(x => x !== platform));
+                      }}
+                    />
+                    <Label htmlFor={`dl-${platform}`} className="text-[12px] cursor-pointer text-slate-300">{platform}</Label>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Source File or Link</label>
+              
+              {!formData.slug && (
+                <div className="p-2 rounded bg-amber-500/10 border border-amber-500/20 mb-2">
+                  <p className="text-[10px] text-amber-500 flex items-center gap-1.5 font-medium">
+                    <AlertCircle className="h-3 w-3" /> Enter game title first to enable storage uploads.
+                  </p>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="purchaseSourceUrl">URL</Label>
-                  <Input
-                    id="purchaseSourceUrl"
-                    placeholder="https://store.steampowered.com/app/..."
-                    value={purchaseUrl}
-                    onChange={(e) => {
-                      setPurchaseUrl(e.target.value);
-                      setPurchaseUrlError('');
-                    }}
+              )}
+
+              <div className="flex gap-2">
+                <Input
+                  placeholder="https://example.com/game.zip"
+                  value={downloadUrl}
+                  onChange={(e) => setDownloadUrl(e.target.value)}
+                  className="bg-slate-900 border-slate-700 h-9 text-[13px]"
+                />
+                <div className="relative">
+                  <Input 
+                    type="file" 
+                    id="dl-file" 
+                    className="hidden" 
+                    onChange={handleFileUpload} 
+                    disabled={isUploading || !formData.slug} 
                   />
-                  {purchaseUrlError && <p className="text-sm text-destructive">{purchaseUrlError}</p>}
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="purchaseSourceSubmitNote">Reviewer note (optional)</Label>
-                  <Input
-                    id="purchaseSourceSubmitNote"
-                    placeholder="Provide context for moderators"
-                    value={purchaseSubmitNote}
-                    onChange={(e) => setPurchaseSubmitNote(e.target.value)}
-                  />
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() => document.getElementById('dl-file')?.click()}
+                    disabled={isUploading || !formData.slug}
+                    className="h-9 px-3 bg-slate-800 hover:bg-slate-700 border-slate-700 disabled:opacity-30"
+                    title={!formData.slug ? "Enter title first" : "Upload file"}
+                  >
+                    {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                  </Button>
                 </div>
               </div>
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setIsPurchaseDialogOpen(false)}>Cancel</Button>
-                <Button onClick={handleAddPurchaseSource} disabled={!canAddPurchase}>Add Source</Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        </div>
-
-        {authorizedPurchaseSources.length > 0 ? (
-          <div className="grid gap-4 sm:grid-cols-2">
-            {authorizedPurchaseSources.map((source, index) => (
-              <Card key={`${source.url}-${index}`} className="relative overflow-hidden group">
-                <CardContent className="p-4">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-full bg-secondary text-secondary-foreground">
-                        <ShoppingCart className="h-4 w-4" />
-                      </div>
-                      <div className="space-y-1">
-                        <p className="font-medium leading-none truncate max-w-[150px] sm:max-w-[200px]" title={source.name}>
-                          {source.name}
-                        </p>
-                        <a
-                          href={source.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-xs text-muted-foreground hover:text-primary flex items-center gap-1 truncate max-w-[150px]"
-                        >
-                          <ExternalLink className="h-3 w-3" />
-                          {new URL(source.url).hostname}
-                        </a>
-                      </div>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity absolute top-2 right-2"
-                      onClick={() => handleRemovePurchaseSource(index)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+              {isUploading && (
+                <div className="space-y-1.5 pt-1">
+                  <div className="flex justify-between text-[10px] font-mono">
+                    <span className="text-blue-400">Uploading...</span>
+                    <span>{uploadProgress}%</span>
                   </div>
-                  {source.submitNote && (
-                    <div className="mt-3 w-full text-xs text-muted-foreground bg-muted/50 p-2 rounded flex items-start gap-2">
-                      <AlertCircle className="h-3 w-3 mt-0.5 shrink-0" />
-                      <span>{source.submitNote}</span>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            ))}
+                  <div className="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
+                    <div className="h-full bg-blue-500 transition-all duration-300" style={{ width: `${uploadProgress}%` }} />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="flex gap-6 pt-1">
+              <div className="flex items-center gap-2">
+                <Switch checked={downloadIsActive} onCheckedChange={setDownloadIsActive} />
+                <Label className="text-[12px]">Active</Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch checked={downloadVipOnly} onCheckedChange={setDownloadVipOnly} />
+                <Label className="text-[12px]">VIP Only</Label>
+              </div>
+            </div>
           </div>
-        ) : (
-          <div className="text-center py-8 border-2 border-dashed rounded-lg bg-muted/10">
-            <ShoppingCart className="h-10 w-10 mx-auto text-muted-foreground/50 mb-3" />
-            <p className="text-sm text-muted-foreground">No authorized sources added yet.</p>
-            <Button variant="link" onClick={() => setIsPurchaseDialogOpen(true)}>Add a source</Button>
-          </div>
-        )}
-      </div>
+          <DialogFooter className="bg-slate-900/50 p-4 -m-6 mt-6 rounded-b-lg border-t border-slate-800">
+            <Button variant="ghost" onClick={() => setIsDownloadDialogOpen(false)} className="text-[12px] text-slate-400">Cancel</Button>
+            <Button onClick={handleAddDownload} disabled={!canAddDownload} className="bg-red-600 hover:bg-red-500 text-[12px] px-6">
+              Confirm
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

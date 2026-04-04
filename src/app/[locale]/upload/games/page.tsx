@@ -1,39 +1,14 @@
 import GameUploadForm from './GameUploadForm';
-
-async function fetchTags() {
-  const response = await fetch(`${process.env.API_URL || 'https://api.chanomhub.com'}/api/tags`, { next: { revalidate: 3600 } }); // Revalidate every hour
-  if (!response.ok) {
-    console.error('Failed to fetch tags from backend');
-    return [];
-  }
-  const json = await response.json();
-  const data = json.data || json;
-  return data.tags || [];
-}
-
-async function fetchCategories() {
-  const response = await fetch(`${process.env.API_URL || 'https://api.chanomhub.com'}/api/categories`, { next: { revalidate: 3600 } }); // Revalidate every hour
-  if (!response.ok) {
-    console.error('Failed to fetch categories from backend');
-    return [];
-  }
-  const json = await response.json();
-  const data = json.data || json;
-  return data.categories || [];
-}
+import { getSdk } from '@/lib/sdk';
 
 export default async function UploadGamePage() {
-  const availableTags = await fetchTags();
-  const availableCategories = await fetchCategories();
+  const sdk = await getSdk();
+  const availableTags = await sdk.articles.getTags() as string[];
+  const availableCategories = await sdk.articles.getCategories() as string[];
 
   return (
-    <div className="relative min-h-screen bg-gradient-to-br from-purple-900 via-gray-900 to-black overflow-hidden p-6">
-      {/* วงกลมเบลอ (ตกแต่งพื้นหลัง) */}
-      <div className="absolute top-0 left-0 w-[40rem] h-[40rem] bg-purple-500/30 rounded-full blur-3xl animate-pulse" />
-      <div className="absolute bottom-0 right-0 w-[40rem] h-[40rem] bg-blue-500/30 rounded-full blur-3xl animate-pulse delay-500" />
-
-      {/* เนื้อหาหลัก */}
-      <div className="relative z-10 bg-white/10 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 p-8 w-full">
+    <div className="min-h-screen bg-[#121212] text-slate-200 p-4 md:p-8">
+      <div className="max-w-5xl mx-auto">
         <GameUploadForm availableTags={availableTags} availableCategories={availableCategories} />
       </div>
     </div>

@@ -40,7 +40,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { updateUserLocal } from '@/store/features/auth/authSlice';
+import { updateUserLocal, fetchUser } from '@/store/features/auth/authSlice';
 import { DeveloperSettingsTab } from './DeveloperSettingsTab';
 import { Landmark as LandmarkIcon } from 'lucide-react';
 
@@ -76,6 +76,27 @@ const SettingsPage: React.FC = () => {
       setActiveTab(tabParam as any);
     }
   }, [searchParams]);
+
+  // Handle Patreon connection status from URL
+  useEffect(() => {
+    const patreonStatus = searchParams.get('patreon');
+    if (patreonStatus === 'connected') {
+      showMessage('success', 'Successfully connected to Patreon!');
+      // Refresh user data to get the new patreonAccount info
+      dispatch(fetchUser());
+      
+      // Clean up URL
+      const newUrl = window.location.pathname + (searchParams.get('tab') ? `?tab=${searchParams.get('tab')}` : '');
+      window.history.replaceState({}, '', newUrl);
+    } else if (patreonStatus === 'error') {
+      const reason = searchParams.get('reason');
+      showMessage('error', reason === 'no_code' ? 'Patreon connection cancelled' : 'Failed to connect to Patreon');
+      
+      // Clean up URL
+      const newUrl = window.location.pathname + (searchParams.get('tab') ? `?tab=${searchParams.get('tab')}` : '');
+      window.history.replaceState({}, '', newUrl);
+    }
+  }, [searchParams, dispatch]);
 
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -256,97 +277,64 @@ const SettingsPage: React.FC = () => {
   };
 
   const handleSocialMediaChange = (index: number, field: keyof SocialMediaLink, value: string) => {
-    setProfileForm((prev) => {
-      const updatedLinks = [...prev.socialMediaLinks];
-      updatedLinks[index] = { ...updatedLinks[index], [field]: value };
-      return { ...prev, socialMediaLinks: updatedLinks };
-    });
+    const newLinks = [...profileForm.socialMediaLinks];
+    newLinks[index] = { ...newLinks[index], [field]: value };
+    setProfileForm({ ...profileForm, socialMediaLinks: newLinks });
   };
 
   const addSocialMediaLink = () => {
-    setProfileForm((prev) => ({
-      ...prev,
-      socialMediaLinks: [...prev.socialMediaLinks, { platform: '', url: '' }],
-    }));
+    setProfileForm({
+      ...profileForm,
+      socialMediaLinks: [...profileForm.socialMediaLinks, { platform: '', url: '' }],
+    });
   };
 
   const removeSocialMediaLink = (index: number) => {
-    setProfileForm((prev) => ({
-      ...prev,
-      socialMediaLinks: prev.socialMediaLinks.filter((_, i) => i !== index),
-    }));
+    const newLinks = profileForm.socialMediaLinks.filter((_, i) => i !== index);
+    setProfileForm({ ...profileForm, socialMediaLinks: newLinks });
   };
-
-  const hasDeveloperRole = useCallback(() => {
-    return user?.roles?.some(role => role === 'DEVELOPER') || false;
-  }, [user]);
-
-  // Special logic: Show developer tab ONLY if user IS a dev OR has a verification token in URL
-  const shouldShowDeveloperTab = useCallback(() => {
-    if (hasDeveloperRole()) return true;
-    const hasTokenInUrl = searchParams.has('token');
-    const isCurrentlyOnTab = activeTab === 'developer';
-    return hasTokenInUrl || isCurrentlyOnTab;
-  }, [hasDeveloperRole, searchParams, activeTab]);
 
   const tabs = [
     { id: 'profile', label: 'Profile', icon: UserIcon },
     { id: 'security', label: 'Security', icon: LockClosedIcon },
-    ...(shouldShowDeveloperTab() ? [{
-      id: 'developer',
-      label: 'Developer',
-      icon: LandmarkIcon,
-      badge: !hasDeveloperRole() ? 'Verification' : null
-    }] : []),
-    ...(hasTokenAccess() ? [{ id: 'tokens', label: 'API Tokens', icon: KeyIcon }] : []),
+    { id: 'tokens', label: 'API Tokens', icon: KeyIcon, hidden: !hasTokenAccess() },
+    { id: 'developer', label: 'Developer', icon: LandmarkIcon },
     { id: 'danger', label: 'Danger Zone', icon: ExclamationTriangleIcon },
-  ] as const;
-
-  const languages = [
-    { code: 'en', name: 'English', nativeName: 'English' },
-    { code: 'th', name: 'Thai', nativeName: 'ไทย' },
-    { code: 'es', name: 'Spanish', nativeName: 'Español' },
   ];
 
-  if (!user) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <svg className="animate-spin h-8 w-8 text-primary" viewBox="0 0 24 24">
-          <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-          <path fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
-        </svg>
-      </div>
-    );
-  }
-
   return (
-    <div className="container mx-auto px-0 sm:px-4 py-4 sm:py-8 animate-in fade-in duration-500">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
+    <div className="max-w-6xl mx-auto px-4 py-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Sidebar Navigation */}
         <div className="lg:col-span-1">
-          <div className="sticky top-4 space-y-4">
-            <h2 className="text-xl font-bold px-1 text-foreground flex items-center gap-2">
-              <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
-              Settings
-            </h2>
+          <div className="sticky top-24 space-y-4">
             <Card className="border-border bg-card text-card-foreground shadow-sm">
-              <CardContent className="p-2">
+              <CardContent className="p-4">
+                <div className="flex flex-col items-center text-center mb-6 pt-4">
+                  <Avatar className="h-24 w-24 border-2 border-primary shadow-lg mb-4">
+                    <AvatarFallback className="bg-primary/10 text-primary text-2xl font-bold">
+                      {user?.username?.charAt(0).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <h2 className="text-xl font-bold">{user?.username}</h2>
+                  <p className="text-sm text-muted-foreground">{user?.email}</p>
+                </div>
                 <nav className="space-y-1">
-                  {tabs.map((tab) => {
+                  {tabs.filter(tab => !tab.hidden).map((tab) => {
                     const Icon = tab.icon;
                     return (
                       <Button
                         key={tab.id}
-                        variant={activeTab === tab.id ? 'secondary' : 'ghost'}
-                        className={`w-full justify-start relative group transition-all duration-200 ${activeTab === tab.id ? 'bg-primary/10 text-primary' : 'hover:bg-primary/5'}`}
-                        onClick={() => setActiveTab(tab.id as typeof activeTab)}
+                        variant={activeTab === tab.id ? 'default' : 'ghost'}
+                        className="w-full justify-start gap-3 h-11"
+                        onClick={() => setActiveTab(tab.id as any)}
                       >
-                        <Icon className={`h-4 w-4 mr-2 transition-transform duration-200 ${activeTab === tab.id ? 'scale-110' : 'group-hover:translate-x-0.5'}`} />
-                        {tab.label}
+                        <Icon className="h-5 w-5" />
+                        <span className="font-medium">{tab.label}</span>
                         {(tab as any).badge && (
                           <Badge
                             variant="secondary"
-                            className="ml-auto text-[10px] py-0 px-1.5 h-4 bg-primary/20 text-primary border-none shadow-none group-hover:bg-primary/30"
+                            className="ml-auto text-[10px] px-1.5 py-0"
                           >
                             {(tab as any).badge}
                           </Badge>
@@ -504,42 +492,42 @@ const SettingsPage: React.FC = () => {
           )}
 
           {activeTab === 'security' && (
-            <div className="space-y-6">
+            <div className="space-y-6 animate-in slide-in-from-right-4 duration-500">
               <Card>
                 <CardHeader>
-                  <h3 className="text-xl font-bold">Security Settings</h3>
-                  <p className="text-sm text-muted-foreground">Change your password and manage security preferences.</p>
+                  <h3 className="text-xl font-bold">Security</h3>
+                  <p className="text-sm text-muted-foreground">Manage your password and account security.</p>
                 </CardHeader>
                 <CardContent>
                   <form onSubmit={handlePasswordSubmit} className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="current-password">Current Password</Label>
+                      <Label htmlFor="password">Current Password</Label>
                       <Input
-                        id="current-password"
+                        id="password"
                         type="password"
                         value={profileForm.password}
                         onChange={(e) => setProfileForm({ ...profileForm, password: e.target.value })}
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="new-password">New Password</Label>
+                      <Label htmlFor="newPassword">New Password</Label>
                       <Input
-                        id="new-password"
+                        id="newPassword"
                         type="password"
                         value={profileForm.newPassword}
                         onChange={(e) => setProfileForm({ ...profileForm, newPassword: e.target.value })}
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="confirm-password">Confirm New Password</Label>
+                      <Label htmlFor="confirmPassword">Confirm New Password</Label>
                       <Input
-                        id="confirm-password"
+                        id="confirmPassword"
                         type="password"
                         value={profileForm.confirmPassword}
                         onChange={(e) => setProfileForm({ ...profileForm, confirmPassword: e.target.value })}
                       />
                     </div>
-                    <Button type="submit" disabled={loading} className="w-full">
+                    <Button type="submit" disabled={loading}>
                       {loading ? 'Updating...' : 'Update Password'}
                     </Button>
                   </form>
@@ -548,96 +536,158 @@ const SettingsPage: React.FC = () => {
             </div>
           )}
 
-          {activeTab === 'developer' && (
-            <DeveloperSettingsTab />
-          )}
-
           {activeTab === 'tokens' && (
-            <div className="space-y-6">
+            <div className="space-y-6 animate-in slide-in-from-right-4 duration-500">
               <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0">
+                <CardHeader className="flex flex-row items-center justify-between">
                   <div>
                     <h3 className="text-xl font-bold">API Tokens</h3>
-                    <p className="text-sm text-muted-foreground">Access tokens for external applications.</p>
+                    <p className="text-sm text-muted-foreground">Access the Chanomhub API with these tokens.</p>
                   </div>
                   <Button onClick={() => setIsCreatingToken(true)}>Create Token</Button>
                 </CardHeader>
                 <CardContent>
+                  {isCreatingToken && (
+                    <Card className="mb-6 bg-muted/50">
+                      <CardContent className="pt-6 space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label>Duration</Label>
+                            <Select value={newTokenDuration} onValueChange={setNewTokenDuration}>
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="1d">1 Day</SelectItem>
+                                <SelectItem value="7d">7 Days</SelectItem>
+                                <SelectItem value="30d">30 Days</SelectItem>
+                                <SelectItem value="90d">90 Days</SelectItem>
+                                <SelectItem value="365d">1 Year</SelectItem>
+                                <SelectItem value="never">Never Expires</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label>Initial Rank</Label>
+                            <Select value={newTokenRank} onValueChange={setNewTokenRank}>
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="USER">User</SelectItem>
+                                <SelectItem value="PREMIUM">Premium</SelectItem>
+                                <SelectItem value="VIP">VIP</SelectItem>
+                                <SelectItem value="DEVELOPER">Developer</SelectItem>
+                                <SelectItem value="ADMIN">Admin</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button onClick={handleCreateToken} disabled={loading}>
+                            {loading ? 'Creating...' : 'Generate Token'}
+                          </Button>
+                          <Button variant="ghost" onClick={() => setIsCreatingToken(false)}>Cancel</Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+
                   {newCreatedToken && (
-                    <Alert className="mb-6 border-primary bg-primary/10">
-                      <AlertDescription>
-                        <p className="font-bold mb-1 text-primary">New Token Created:</p>
-                        <code className="block p-2 bg-background border border-border rounded break-all">{newCreatedToken}</code>
-                        <p className="text-xs mt-2 text-muted-foreground font-medium">Please copy this token now. You won't be able to see it again!</p>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="mt-2"
-                          onClick={() => setNewCreatedToken(null)}
-                        >
-                          I've copied it
-                        </Button>
+                    <Alert className="mb-6 bg-green-500/10 border-green-500/50">
+                      <AlertDescription className="space-y-2">
+                        <p className="font-bold text-green-700 dark:text-green-400">Token created! Copy it now, you won't see it again:</p>
+                        <div className="flex gap-2">
+                          <Input readOnly value={newCreatedToken} className="font-mono text-xs" />
+                          <Button size="sm" onClick={() => {
+                            navigator.clipboard.writeText(newCreatedToken);
+                            showMessage('success', 'Token copied to clipboard');
+                          }}>Copy</Button>
+                        </div>
                       </AlertDescription>
                     </Alert>
                   )}
 
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Created At</TableHead>
-                        <TableHead>Expires At</TableHead>
-                        <TableHead className="text-right">Action</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {tokens.map((token) => (
-                        <TableRow key={token.id}>
-                          <TableCell>{new Date(token.createdAt).toLocaleDateString()}</TableCell>
-                          <TableCell>
-                            {token.expiresAt ? new Date(token.expiresAt).toLocaleDateString() : 'Never'}
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="text-red-500"
-                              onClick={() => handleDeleteToken(token.id)}
-                            >
-                              Delete
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                      {tokens.length === 0 && (
+                  <div className="rounded-md border">
+                    <Table>
+                      <TableHeader>
                         <TableRow>
-                          <TableCell colSpan={3} className="text-center py-8 text-muted-foreground">
-                            No API tokens found.
-                          </TableCell>
+                          <TableHead>ID</TableHead>
+                          <TableHead>Ranks</TableHead>
+                          <TableHead>Expires</TableHead>
+                          <TableHead className="text-right">Actions</TableHead>
                         </TableRow>
-                      )}
-                    </TableBody>
-                  </Table>
+                      </TableHeader>
+                      <TableBody>
+                        {tokens.length === 0 ? (
+                          <TableRow>
+                            <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
+                              No API tokens found.
+                            </TableCell>
+                          </TableRow>
+                        ) : (
+                          tokens.map((token) => (
+                            <TableRow key={token.id}>
+                              <TableCell className="font-mono text-xs">#{token.id}</TableCell>
+                              <TableCell>
+                                <div className="flex gap-1">
+                                  {token.ranks.map(rank => (
+                                    <Badge key={rank} variant="outline" className="text-[10px]">
+                                      {rank}
+                                    </Badge>
+                                  ))}
+                                </div>
+                              </TableCell>
+                              <TableCell className="text-xs">
+                                {token.expiresAt ? new Date(token.expiresAt).toLocaleDateString() : 'Never'}
+                              </TableCell>
+                              <TableCell className="text-right">
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="text-destructive h-8 w-8"
+                                  onClick={() => handleDeleteToken(token.id)}
+                                >
+                                  <XMarkIcon className="h-4 w-4" />
+                                </Button>
+                              </TableCell>
+                            </TableRow>
+                          ))
+                        )}
+                      </TableBody>
+                    </Table>
+                  </div>
                 </CardContent>
               </Card>
             </div>
           )}
 
+          {activeTab === 'developer' && (
+            <div className="animate-in slide-in-from-right-4 duration-500">
+              <DeveloperSettingsTab />
+            </div>
+          )}
+
           {activeTab === 'danger' && (
-            <Card className="border-destructive/50">
-              <CardHeader>
-                <h3 className="text-xl font-bold text-destructive">Danger Zone</h3>
-                <p className="text-sm text-muted-foreground">Irreversible actions concerning your account.</p>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="p-4 border border-destructive/20 rounded-lg bg-destructive/10">
-                  <h4 className="font-bold text-destructive mb-1">Delete Account</h4>
-                  <p className="text-sm text-destructive/80 mb-4">Once you delete your account, all your articles, mods, and data will be permanently removed.</p>
-                  <Button variant="destructive" onClick={handleDeleteAccount}>
-                    Permanently Delete Account
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+            <div className="space-y-6 animate-in slide-in-from-right-4 duration-500">
+              <Card className="border-destructive/50">
+                <CardHeader>
+                  <h3 className="text-xl font-bold text-destructive">Danger Zone</h3>
+                  <p className="text-sm text-muted-foreground">Irreversible and destructive actions.</p>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="p-4 border border-destructive/20 rounded-lg bg-destructive/5">
+                    <h4 className="font-bold mb-1">Delete Account</h4>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Once you delete your account, there is no going back. Please be certain.
+                    </p>
+                    <Button variant="destructive" onClick={handleDeleteAccount}>
+                      Delete My Account
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           )}
         </div>
       </div>
