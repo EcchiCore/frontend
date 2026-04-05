@@ -103,7 +103,7 @@ export const TagSection = ({ availableTags }: TagSectionProps) => {
       />
 
       {/* Selected Tags Chips */}
-      {formData.tags?.length > 0 && (
+      {(formData.tags?.length ?? 0) > 0 && (
         <div className="flex flex-wrap gap-1.5">
           {formData.tags.map((tag: string) => (
             <button 
