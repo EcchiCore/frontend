@@ -78,7 +78,7 @@ export default function GameUploadForm({ availableTags, availableCategories }: {
   return (
     <div className="bg-[#0f0f0f] text-[#d0d0d0] min-h-screen font-sans selection:bg-red-500/30">
       {/* TOPBAR */}
-      <div className="h-[56px] bg-[#1a1a1a] border-b border-[#333] flex items-center px-6 gap-3 sticky top-0 z-[100] shadow-xl">
+      <div className="h-[56px] bg-[#1a1a1a] border-b border-[#333] flex items-center px-6 gap-3 sticky top-0 z-[40] shadow-xl">
         <span className="text-[13px] text-[#666] font-medium">My Projects</span>
         <span className="text-[#333]">/</span>
         <span className="text-[13px] text-white font-bold truncate">
