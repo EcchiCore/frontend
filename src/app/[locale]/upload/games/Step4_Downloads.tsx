@@ -9,7 +9,7 @@ import { Switch } from '@/components/ui/switch';
 import { Checkbox } from '@/components/ui/checkbox';
 import { platforms as allPlatforms } from '@/lib/gameData';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { updateFormData, DownloadEntry, AuthorizedSourceEntry } from '@/store/features/upload/uploadSlice';
+import { updateFormData, incrementOngoingUploads, decrementOngoingUploads, DownloadEntry, AuthorizedSourceEntry } from '@/store/features/upload/uploadSlice';
 import { toast } from 'sonner';
 import {
   Dialog,
@@ -122,6 +122,7 @@ export const Step4_Downloads = () => {
 
     setIsUploading(true);
     setUploadProgress(0);
+    dispatch(incrementOngoingUploads());
     try {
       const sdk = await getSdk();
       const result = await sdk.storage.uploadMultipart(file, { 
@@ -139,6 +140,7 @@ export const Step4_Downloads = () => {
       toast.error(err instanceof Error ? err.message : "Upload failed");
     } finally {
       setIsUploading(false);
+      dispatch(decrementOngoingUploads());
     }
   };
 

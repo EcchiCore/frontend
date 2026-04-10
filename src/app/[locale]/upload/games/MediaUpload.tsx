@@ -37,9 +37,9 @@ export const MediaUpload = ({ id, label, description, className }: MediaUploadPr
   const uploadFile = async (file: File) => {
     setIsUploading(true);
     setError(null);
-    dispatch(incrementOngoingUploads());
 
     try {
+      dispatch(incrementOngoingUploads());
       const sdk = await getSdk();
       const result = await sdk.storage.upload(file, { 
         bucket: 'images',

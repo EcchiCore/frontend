@@ -28,28 +28,40 @@ export const MediaGallery = () => {
 
   const uploadFiles = async (files: File[]) => {
     setIsUploading(true);
-    for (let i = 0; i < files.length; i++) dispatch(incrementOngoingUploads());
 
     try {
       const sdk = await getSdk();
       const uploadPromises = files.map(async (file) => {
-        const result = await sdk.storage.upload(file, { 
-          bucket: 'images',
-          game: formData.slug || 'temp'
-        });
-        dispatch(decrementOngoingUploads());
-        // Use full_url or url from SDK result
-        return result?.full_url || result?.url;
+        dispatch(incrementOngoingUploads());
+        try {
+          const result = await sdk.storage.upload(file, { 
+            bucket: 'images',
+            game: formData.slug || 'temp'
+          });
+          
+          if (!result || (!result.url && !result.full_url)) {
+            throw new Error('Upload failed');
+          }
+          
+          return result.full_url || result.url;
+        } catch (err) {
+          console.error(`Failed to upload ${file.name}:`, err);
+          return null;
+        } finally {
+          dispatch(decrementOngoingUploads());
+        }
       });
 
       const urls = await Promise.all(uploadPromises);
       const validUrls = urls.filter((url): url is string => !!url);
       
-      dispatch(updateFormData({ 
-        otherImages: [...images, ...validUrls] 
-      }));
+      if (validUrls.length > 0) {
+        dispatch(updateFormData({ 
+          otherImages: [...images, ...validUrls] 
+        }));
+      }
     } catch (err) {
-      console.error('Upload error:', err);
+      console.error('Upload gallery error:', err);
     } finally {
       setIsUploading(false);
     }
