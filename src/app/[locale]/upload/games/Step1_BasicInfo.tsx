@@ -59,26 +59,31 @@ export const Step1_BasicInfo = () => {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {/* Title */}
-      <div className="space-y-1.5">
-        <label htmlFor="title" className="text-[11px] text-[#555] uppercase tracking-wider">Title</label>
+      <div className="space-y-2">
+        <label htmlFor="title" className="text-[12px] text-[#aaa] font-bold uppercase tracking-wider flex items-center gap-1">
+          Title <span className="text-red-500">*</span>
+        </label>
         <input 
           id="title" 
           type="text"
           value={formData.title || ''} 
           onChange={handleChange} 
-          placeholder="Echoes of Abyss" 
-          className="w-full bg-[#191919] border border-[#252525] rounded-[4px] text-[#ccc] text-[13px] px-3 py-2 outline-none focus:border-[#333] focus:bg-[#1d1d1d] transition-all"
+          placeholder="e.g. Echoes of Abyss" 
+          className="w-full bg-[#141414] border border-[#333] rounded-[4px] text-white text-[14px] px-4 py-2.5 outline-none focus:border-red-500/50 focus:bg-[#1a1a1a] transition-all placeholder:text-[#444]"
           required 
         />
       </div>
 
       {/* Project URL */}
-      <div className="space-y-1.5">
-        <label htmlFor="slug" className="text-[11px] text-[#555] uppercase tracking-wider">URL <em className="not-italic text-[#444] lowercase">— generated from title, editable</em></label>
-        <div className="flex items-stretch">
-          <div className="flex items-center px-3 bg-[#161616] border border-r-0 border-[#252525] rounded-l-[4px] text-[#3d3d3d] text-[11px] font-mono whitespace-nowrap">
+      <div className="space-y-2">
+        <label htmlFor="slug" className="text-[12px] text-[#aaa] font-bold uppercase tracking-wider flex items-center gap-1">
+          Project URL <span className="text-red-500">*</span>
+          <em className="not-italic text-[#555] lowercase font-normal ml-2">— generated from title</em>
+        </label>
+        <div className="flex items-stretch group">
+          <div className="flex items-center px-4 bg-[#1a1a1a] border border-r-0 border-[#333] group-focus-within:border-red-500/30 rounded-l-[4px] text-[#666] text-[12px] font-mono whitespace-nowrap transition-all">
             chanomhub.com/
           </div>
           <div className="relative flex-1">
@@ -88,59 +93,68 @@ export const Step1_BasicInfo = () => {
               value={formData.slug || ''} 
               onChange={handleChange} 
               placeholder="url-slug" 
-              className="w-full rounded-r-[4px] bg-[#191919] border border-[#252525] text-[#5a8fbd] font-mono text-[13px] px-3 py-2 outline-none focus:border-[#333] transition-all"
+              className="w-full rounded-r-[4px] bg-[#141414] border border-[#333] text-red-400 font-mono text-[14px] px-4 py-2.5 outline-none focus:border-red-500/50 transition-all placeholder:text-[#444]"
               required 
             />
             <div className="absolute right-3 top-1/2 -translate-y-1/2">
-              {isReserving && <Loader2 className="h-4 w-4 animate-spin text-[#333]" />}
+              {isReserving && <Loader2 className="h-4 w-4 animate-spin text-red-500/50" />}
             </div>
           </div>
         </div>
       </div>
 
       {/* Tagline */}
-      <div className="space-y-1.5">
-        <label htmlFor="description" className="text-[11px] text-[#555] uppercase tracking-wider">Short description <em className="not-italic text-[#444] lowercase">— shown in search results</em></label>
+      <div className="space-y-2">
+        <label htmlFor="description" className="text-[12px] text-[#aaa] font-bold uppercase tracking-wider">
+          Short description 
+          <em className="not-italic text-[#555] lowercase font-normal ml-2">— shown in search results</em>
+        </label>
         <input 
           id="description" 
           type="text"
           value={formData.description || ''} 
           onChange={handleChange} 
           placeholder="One sentence about your game" 
-          className="w-full bg-[#191919] border border-[#252525] rounded-[4px] text-[#ccc] text-[13px] px-3 py-2 outline-none focus:border-[#333] focus:bg-[#1d1d1d] transition-all"
+          className="w-full bg-[#141414] border border-[#333] rounded-[4px] text-[#eee] text-[14px] px-4 py-2.5 outline-none focus:border-red-500/50 focus:bg-[#1a1a1a] transition-all placeholder:text-[#444]"
         />
       </div>
 
       {/* Creator & Version */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-        <div className="space-y-1.5">
-          <label htmlFor="creator" className="text-[11px] text-[#555] uppercase tracking-wider">Creator / Studio</label>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <label htmlFor="creator" className="text-[12px] text-[#aaa] font-bold uppercase tracking-wider flex items-center gap-1">
+            Creator / Studio <span className="text-red-500">*</span>
+          </label>
           <input 
             id="creator" 
             type="text"
             value={formData.creator || ''} 
             onChange={handleChange} 
             placeholder="ShadowForge Studio" 
-            className="w-full bg-[#191919] border border-[#252525] rounded-[4px] text-[#ccc] text-[13px] px-3 py-2 outline-none focus:border-[#333] focus:bg-[#1d1d1d] transition-all"
+            className="w-full bg-[#141414] border border-[#333] rounded-[4px] text-[#eee] text-[14px] px-4 py-2.5 outline-none focus:border-red-500/50 focus:bg-[#1a1a1a] transition-all placeholder:text-[#444]"
+            required
           />
         </div>
-        <div className="space-y-1.5">
-          <label htmlFor="ver" className="text-[11px] text-[#555] uppercase tracking-wider">Version</label>
+        <div className="space-y-2">
+          <label htmlFor="ver" className="text-[12px] text-[#aaa] font-bold uppercase tracking-wider">Version</label>
           <input 
             id="ver" 
             type="text"
             value={formData.ver || ''} 
             onChange={handleChange} 
             placeholder="e.g. 1.2.0" 
-            className="w-full bg-[#191919] border border-[#252525] rounded-[4px] text-[#ccc] text-[13px] px-3 py-2 outline-none focus:border-[#333] focus:bg-[#1d1d1d] transition-all font-mono"
+            className="w-full bg-[#141414] border border-[#333] rounded-[4px] text-[#eee] text-[14px] px-4 py-2.5 outline-none focus:border-red-500/50 focus:bg-[#1a1a1a] transition-all font-mono placeholder:text-[#444]"
           />
         </div>
       </div>
 
       {/* Details / Full Content */}
-      <div className="space-y-1.5 pt-2">
-        <label htmlFor="body" className="text-[11px] text-[#555] uppercase tracking-wider">Full description <em className="not-italic text-[#444] lowercase">— appears on your game page, HTML ok</em></label>
-        <div className="bg-[#191919] border border-[#252525] rounded-[4px] overflow-hidden min-h-[300px] focus-within:border-[#333] transition-all">
+      <div className="space-y-2 pt-2">
+        <label htmlFor="body" className="text-[12px] text-[#aaa] font-bold uppercase tracking-wider flex items-center gap-1">
+          Full description <span className="text-red-500">*</span>
+          <em className="not-italic text-[#555] lowercase font-normal ml-2">— HTML supported</em>
+        </label>
+        <div className="bg-[#141414] border border-[#333] rounded-[4px] overflow-hidden min-h-[300px] focus-within:border-red-500/50 transition-all">
           <RichTextEditor content={formData.body || ''} onUpdate={handleBodyChange} />
         </div>
       </div>
