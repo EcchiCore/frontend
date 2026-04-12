@@ -72,7 +72,7 @@
     "jwt-decode": "^4.0.0",
     "lucide-react": "^0.515.0",
     "nanoid": "^5.1.7",
-    "next": "16.2.1",
+    "next": "16.2.3",
     "next-intl": "^4.8.4",
     "next-sanity": "^11.6.12",
     "next-seo": "^6.8.0",
