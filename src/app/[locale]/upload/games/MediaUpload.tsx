@@ -46,12 +46,12 @@ export const MediaUpload = ({ id, label, description, className }: MediaUploadPr
         game: formData.slug || 'temp'
       });
 
-      if (!result || (!result.url && !result.full_url)) {
+      if (!result || !result.url) {
         throw new Error('Upload failed');
       }
 
       // Store the URL (either relative or full) in form data
-      dispatch(updateFormData({ [id]: result.full_url || result.url }));
+      dispatch(updateFormData({ [id]: result.url }));
     } catch (err) {
       console.error('Upload error:', err);
       setError(err instanceof Error ? err.message : 'Upload failed');
