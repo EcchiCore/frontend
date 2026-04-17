@@ -377,7 +377,7 @@ export default function Footer() {
                                 </a>
                             </li>
                             <li>
-                                <a href="https://theporndude.com/th" target="_blank" rel="nofollow noopener noreferrer">
+                                <a href="https://theporndude.com/th" target="_blank" rel="nofollow noopener">
                                     <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                         <img
                                             src="https://www.google.com/s2/favicons?domain=theporndude.com&sz=32"
