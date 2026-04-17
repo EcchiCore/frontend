@@ -11,9 +11,6 @@ interface LanguageSettingsFormProps {
 }
 
 export default function LanguageSettingsForm({ setError, setSuccessMessage }: LanguageSettingsFormProps) {
-  const [language, setLanguage] = useState('en'); // Default to English
-  const [isSaving, setIsSaving] = useState(false);
-
   const getCookie = (name: string): string | null => {
     if (typeof document === 'undefined') return null;
     const value = `; ${document.cookie}`;
@@ -22,6 +19,14 @@ export default function LanguageSettingsForm({ setError, setSuccessMessage }: La
     return null;
   };
 
+  const [language, setLanguage] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return getCookie('userLanguage') || 'en';
+    }
+    return 'en';
+  });
+  const [isSaving, setIsSaving] = useState(false);
+
   const setCookie = (name: string, value: string, days: number) => {
     if (typeof document === 'undefined') return;
     const date = new Date();
@@ -29,14 +34,6 @@ export default function LanguageSettingsForm({ setError, setSuccessMessage }: La
     const expires = `expires=${date.toUTCString()}`;
     document.cookie = `${name}=${value};${expires};path=/`;
   };
-
-  useEffect(() => {
-    // Load language from cookie on mount
-    if (typeof window !== 'undefined') {
-      const savedLanguage = getCookie('userLanguage') || 'en';
-      setLanguage(savedLanguage);
-    }
-  }, []);
 
   const handleSave = () => {
     setIsSaving(true);

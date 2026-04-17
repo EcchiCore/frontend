@@ -1,7 +1,7 @@
 
 // LogoutPage.tsx
 "use client";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -11,32 +11,35 @@ import { userApi } from "@/lib/api/dashboardApi";
 
 const LogoutPage = () => {
   const router = useRouter();
-
-
+  const logoutPerformed = useRef(false);
 
   useEffect(() => {
+    if (logoutPerformed.current) return;
+    logoutPerformed.current = true;
+
     const performLogout = async () => {
       try {
         // Revoke token on the server
-        await userApi.logout();
+        await userApi.logout().catch(e => console.error("Failed to revoke token on server", e));
+        
+        // Remove tokens from cookies
+        Cookies.remove('token');
+        Cookies.remove('refreshToken');
+
+        // Sign out from Supabase
+        await supabase.auth.signOut().catch(e => console.error("Supabase signOut error", e));
+
+        // Notify the user
+        toast.success("Logged out successfully! Redirecting to login...");
+
+        // Delay for 3 seconds before redirecting
+        setTimeout(() => {
+          router.push("/login");
+        }, 3000);
       } catch (e) {
-        console.error("Failed to revoke token on server", e);
-      }
-
-      // Remove tokens from cookies
-      Cookies.remove('token');
-      Cookies.remove('refreshToken');
-
-      // Sign out from Supabase
-      await supabase.auth.signOut();
-
-      // Notify the user
-      toast.success("Logged out successfully! Redirecting to login...");
-
-      // Delay for 3 seconds before redirecting
-      setTimeout(() => {
+        console.error("Critical logout failure", e);
         router.push("/login");
-      }, 3000);
+      }
     };
 
     performLogout();

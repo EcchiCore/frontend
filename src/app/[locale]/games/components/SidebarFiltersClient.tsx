@@ -45,23 +45,27 @@ export default function SidebarFiltersClient({ tags, categories, platforms, engi
   const pathname = usePathname()
   const sp = useSearchParams()
 
-  const [activeTag, setActiveTag] = useState("")
-  const [activeCategory, setActiveCategory] = useState("")
-  const [activePlatform, setActivePlatform] = useState("")
-  const [author, setAuthor] = useState("")
-  const [engine, setEngine] = useState("")
-  const [sequentialCode, setSequentialCode] = useState("")
+  // Get active values directly from URL search params (Derived State)
+  const activeTag = sp.get("tag") ?? ""
+  const activeCategory = sp.get("category") ?? ""
+  const activePlatform = sp.get("platform") ?? ""
+  const authorFromUrl = sp.get("author") ?? ""
+  const engineFromUrl = sp.get("engine") ?? ""
+  const sequentialCodeFromUrl = sp.get("sequentialCode") ?? ""
+
+  // Local state only for text inputs being edited (Drafts)
+  const [authorDraft, setAuthorDraft] = useState("")
+  const [engineDraft, setEngineDraft] = useState("")
+  const [sequentialCodeDraft, setSequentialCodeDraft] = useState("")
   const [isTagModalOpen, setIsTagModalOpen] = useState(false)
   const [tagSearchQuery, setTagSearchQuery] = useState("")
 
+  // Sync drafts with URL when it changes
   useEffect(() => {
-    setActiveTag(sp.get("tag") ?? "")
-    setActiveCategory(sp.get("category") ?? "")
-    setActivePlatform(sp.get("platform") ?? "")
-    setAuthor(sp.get("author") ?? "")
-    setEngine(sp.get("engine") ?? "")
-    setSequentialCode(sp.get("sequentialCode") ?? "")
-  }, [sp])
+    setAuthorDraft(authorFromUrl)
+    setEngineDraft(engineFromUrl)
+    setSequentialCodeDraft(sequentialCodeFromUrl)
+  }, [authorFromUrl, engineFromUrl, sequentialCodeFromUrl])
 
   const pushParams = useCallback(
     (overrides: Record<string, string | null>) => {
@@ -82,40 +86,34 @@ export default function SidebarFiltersClient({ tags, categories, platforms, engi
         tag: activeTag || null,
         category: activeCategory || null,
         platform: activePlatform || null,
-        author: author || null,
-        engine: engine || null,
-        sequentialCode: sequentialCode || null,
+        author: authorDraft || null,
+        engine: engineDraft || null,
+        sequentialCode: sequentialCodeDraft || null,
         ...overrides,
       })
     },
-    [activeTag, activeCategory, activePlatform, author, engine, sequentialCode, pushParams]
+    [activeTag, activeCategory, activePlatform, authorDraft, engineDraft, sequentialCodeDraft, pushParams]
   )
 
   const toggleTag = (val: string) => {
     const next = activeTag === val ? "" : val
-    setActiveTag(next)
-    applyAll({ tag: next || null })
+    pushParams({ tag: next || null })
   }
 
   const toggleCategory = (val: string) => {
     const next = activeCategory === val ? "" : val
-    setActiveCategory(next)
-    applyAll({ category: next || null })
+    pushParams({ category: next || null })
   }
 
   const togglePlatform = (val: string) => {
     const next = activePlatform === val ? "" : val
-    setActivePlatform(next)
-    applyAll({ platform: next || null })
+    pushParams({ platform: next || null })
   }
 
   const clearFilters = () => {
-    setActiveTag("")
-    setActiveCategory("")
-    setActivePlatform("")
-    setAuthor("")
-    setEngine("")
-    setSequentialCode("")
+    setAuthorDraft("")
+    setEngineDraft("")
+    setSequentialCodeDraft("")
     pushParams({
       tag: null, category: null, platform: null,
       author: null, engine: null, sequentialCode: null,
@@ -123,7 +121,7 @@ export default function SidebarFiltersClient({ tags, categories, platforms, engi
   }
 
   const hasActiveFilters =
-    activeTag || activeCategory || activePlatform || author || engine || sequentialCode
+    activeTag || activeCategory || activePlatform || authorFromUrl || engineFromUrl || sequentialCodeFromUrl
 
   const filteredModalTags = tagSearchQuery.trim() === ""
     ? tags
@@ -294,8 +292,8 @@ export default function SidebarFiltersClient({ tags, categories, platforms, engi
         <FilterSection title={tSearch("advancedFilters")} defaultOpen={false}>
           <div className="space-y-2">
             <Input
-              value={author}
-              onChange={(e) => setAuthor(e.target.value)}
+              value={authorDraft}
+              onChange={(e) => setAuthorDraft(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && applyAll()}
               placeholder={tSearch("author")}
               className="h-8 text-xs bg-background border-border/50"
@@ -306,13 +304,12 @@ export default function SidebarFiltersClient({ tags, categories, platforms, engi
                   <button
                     key={eng}
                     onClick={() => {
-                      const next = engine === eng ? "" : eng
-                      setEngine(next)
+                      const next = engineFromUrl === eng ? "" : eng
                       applyAll({ engine: next || null })
                     }}
                     className={cn(
                       "rounded-md px-2 py-1 text-xs border transition-colors",
-                      engine === eng
+                      engineFromUrl === eng
                         ? "bg-primary text-primary-foreground border-primary"
                         : "border-border/50 text-muted-foreground hover:border-primary/50 hover:text-foreground"
                     )}
@@ -323,16 +320,16 @@ export default function SidebarFiltersClient({ tags, categories, platforms, engi
               </div>
             ) : (
               <Input
-                value={engine}
-                onChange={(e) => setEngine(e.target.value)}
+                value={engineDraft}
+                onChange={(e) => setEngineDraft(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && applyAll()}
                 placeholder={tSearch("engine")}
                 className="h-8 text-xs bg-background border-border/50"
               />
             )}
             <Input
-              value={sequentialCode}
-              onChange={(e) => setSequentialCode(e.target.value)}
+              value={sequentialCodeDraft}
+              onChange={(e) => setSequentialCodeDraft(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && applyAll()}
               placeholder={tSearch("gameCode")}
               className="h-8 text-xs bg-background border-border/50"

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
@@ -36,45 +36,36 @@ type Release = {
 type OS = 'windows' | 'mac' | 'linux' | 'unknown'
 
 export default function DownloadSection({ releases }: { releases: Release[] }) {
-    const [os, setOs] = useState<OS>('unknown')
-    const [recommendedAsset, setRecommendedAsset] = useState<Asset | null>(null)
-    const [latestRelease, setLatestRelease] = useState<Release | null>(null)
+    // 1. Derived state from props and environment
+    const latestRelease = releases.length > 0 ? releases[0] : null;
+    
+    // 2. Client-side detection (Derived during render)
+    // Note: We use a fallback for SSR and suppressHydrationWarning for the specific parts
+    let detectedOS: OS = 'unknown';
+    if (typeof window !== 'undefined') {
+        const userAgent = window.navigator.userAgent.toLowerCase();
+        if (userAgent.includes('win')) detectedOS = 'windows';
+        else if (userAgent.includes('mac')) detectedOS = 'mac';
+        else if (userAgent.includes('linux')) detectedOS = 'linux';
+    }
 
-    useEffect(() => {
-        // Detect OS
-        const userAgent = window.navigator.userAgent.toLowerCase()
-        let detectedOS: OS = 'unknown'
-
-        if (userAgent.includes('win')) detectedOS = 'windows'
-        else if (userAgent.includes('mac')) detectedOS = 'mac'
-        else if (userAgent.includes('linux')) detectedOS = 'linux'
-
-        setOs(detectedOS)
-
-        if (releases.length > 0) {
-            const latest = releases[0]
-            setLatestRelease(latest)
-
-            // Find recommended asset based on OS
-            const asset = latest.assets.find(a => {
-                const name = a.name.toLowerCase()
-                if (detectedOS === 'windows') return name.endsWith('.exe') || name.endsWith('.msi')
-                if (detectedOS === 'mac') return name.endsWith('.dmg') || name.endsWith('.pkg') || (name.endsWith('.zip') && name.includes('mac'))
-                if (detectedOS === 'linux') return name.endsWith('.AppImage') || name.endsWith('.deb') || name.endsWith('.rpm')
-                return false
-            })
-            setRecommendedAsset(asset || null)
-        }
-    }, [releases])
+    // 3. Find recommended asset based on detected OS
+    const recommendedAsset = latestRelease ? latestRelease.assets.find(a => {
+        const name = a.name.toLowerCase();
+        if (detectedOS === 'windows') return name.endsWith('.exe') || name.endsWith('.msi');
+        if (detectedOS === 'mac') return name.endsWith('.dmg') || name.endsWith('.pkg') || (name.endsWith('.zip') && name.includes('mac'));
+        if (detectedOS === 'linux') return name.endsWith('.AppImage') || name.endsWith('.deb') || name.endsWith('.rpm');
+        return false;
+    }) || null : null;
 
     const getOsIcon = (osName: OS) => {
         switch (osName) {
-            case 'windows': return <Monitor className="w-5 h-5" />
-            case 'mac': return <Apple className="w-5 h-5" />
-            case 'linux': return <Box className="w-5 h-5" />
-            default: return <Download className="w-5 h-5" />
+            case 'windows': return <Monitor className="w-5 h-5" />;
+            case 'mac': return <Apple className="w-5 h-5" />;
+            case 'linux': return <Box className="w-5 h-5" />;
+            default: return <Download className="w-5 h-5" />;
         }
-    }
+    };
 
     const formatSize = (bytes: number) => {
         if (bytes === 0) return '0 B'
@@ -114,9 +105,9 @@ export default function DownloadSection({ releases }: { releases: Release[] }) {
                                 {recommendedAsset ? (
                                     <Button className="h-20 px-8 text-xl rounded-2xl bg-white text-black hover:bg-cyan-50 hover:text-cyan-900 transition-all shadow-[0_0_30px_-5px_rgba(34,211,238,0.4)] group w-full sm:w-auto flex flex-col items-center justify-center gap-1" asChild>
                                         <Link href={recommendedAsset.browser_download_url}>
-                                            <div className="flex items-center gap-2">
-                                                {getOsIcon(os)}
-                                                <span>Download for {os === 'windows' ? 'Windows' : os === 'mac' ? 'macOS' : os === 'linux' ? 'Linux' : 'Device'}</span>
+                                            <div className="flex items-center gap-2" suppressHydrationWarning>
+                                                {getOsIcon(detectedOS)}
+                                                <span>Download for {detectedOS === 'windows' ? 'Windows' : detectedOS === 'mac' ? 'macOS' : detectedOS === 'linux' ? 'Linux' : 'Device'}</span>
                                             </div>
                                             <span className="text-xs font-normal opacity-60 font-mono">
                                                 {recommendedAsset.name} • {formatSize(recommendedAsset.size)}

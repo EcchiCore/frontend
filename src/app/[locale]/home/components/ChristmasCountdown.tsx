@@ -3,49 +3,33 @@
 import { useEffect, useState } from 'react';
 
 export default function ChristmasCountdown() {
-    const [timeLeft, setTimeLeft] = useState({
-        days: 0,
-        hours: 0,
-        minutes: 0,
-        seconds: 0,
-    });
+    const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
 
     useEffect(() => {
-        const calculateTimeLeft = () => {
+        const updateCountdown = () => {
             const now = new Date();
-            const currentYear = now.getFullYear();
+            let targetDate = new Date(now.getFullYear(), 11, 1);
+            if (now > targetDate) targetDate = new Date(now.getFullYear() + 1, 11, 1);
+            
+            const diff = targetDate.getTime() - now.getTime();
 
-            // Target: December 1st of current year, or next year if we're past it
-            let targetDate = new Date(currentYear, 11, 1); // Month 11 = December
-
-            // If we're past December 1st this year, target next year
-            if (now > targetDate) {
-                targetDate = new Date(currentYear + 1, 11, 1);
-            }
-
-            const difference = targetDate.getTime() - now.getTime();
-
-            if (difference > 0) {
+            if (diff > 0) {
                 setTimeLeft({
-                    days: Math.floor(difference / (1000 * 60 * 60 * 24)),
-                    hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
-                    minutes: Math.floor((difference / 1000 / 60) % 60),
-                    seconds: Math.floor((difference / 1000) % 60),
+                    days: Math.floor(diff / 86400000),
+                    hours: Math.floor((diff / 3600000) % 24),
+                    minutes: Math.floor((diff / 60000) % 60),
+                    seconds: Math.floor((diff / 1000) % 60),
                 });
             }
         };
 
-        // Calculate immediately
-        calculateTimeLeft();
-
-        // Update every second
-        const timer = setInterval(calculateTimeLeft, 1000);
-
+        updateCountdown();
+        const timer = setInterval(updateCountdown, 1000);
         return () => clearInterval(timer);
     }, []);
 
     return (
-        <div className="flex items-center gap-2 text-xs">
+        <div className="flex items-center gap-2 text-xs" suppressHydrationWarning>
             <span className="hidden sm:inline text-muted-foreground">🎄 Christmas Countdown:</span>
             <div className="flex items-center gap-1 font-mono font-semibold">
                 <div className="flex flex-col items-center">

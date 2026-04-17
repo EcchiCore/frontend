@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import type { ArticleListItem } from '@chanomhub/sdk';
@@ -46,14 +46,10 @@ const gradients = [
 
 function GameCard({ post, index }: { post: ArticleListItem; index: number }) {
   const [imageError, setImageError] = useState(false);
-  const [timeString, setTimeString] = useState('');
   const src = post.coverImage || post.mainImage || null;
   const badge = getCardBadge(post);
   const fallback = gradients[index % gradients.length];
-
-  useEffect(() => {
-    setTimeString(getRelativeTime(post.createdAt));
-  }, [post.createdAt]);
+  const timeString = getRelativeTime(post.createdAt);
 
   return (
     <Link
@@ -113,7 +109,7 @@ function GameCard({ post, index }: { post: ArticleListItem; index: number }) {
           <span className="text-[10px] bg-muted text-muted-foreground px-1.5 py-0.5 rounded truncate max-w-[80px]">
             {post.categories?.[0]?.name || 'General'}
           </span>
-          <span className="text-[10px] text-muted-foreground flex-shrink-0">{timeString}</span>
+          <span className="text-[10px] text-muted-foreground flex-shrink-0" suppressHydrationWarning>{timeString}</span>
         </div>
       </div>
     </Link>
