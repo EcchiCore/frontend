@@ -1,0 +1,63 @@
+{
+  "welcomeTo": "ยินดีต้อนรับสู่ Chanom",
+  "hub": "Hub",
+  "heroDescription": "เข้าร่วมชุมชนนักพัฒนาและผู้สร้างเกมสำหรับผู้ใหญ่ที่กำลังเติบโตอย่างรวดเร็ว แบ่งปันไอเดียและสร้างประสบการณ์ที่น่าตื่นเต้นไปด้วยกัน!",
+  "seasonalMessage": "ร่วมฉลองฮาโลวีนกับภารกิจล่าคอนเทนต์สุดพิเศษตลอดเดือนตุลาคม!",
+  "forumStats": {
+    "activeMembers": "สมาชิกที่ใช้งาน",
+    "totalPosts": "โพสต์ทั้งหมด",
+    "categories": "หมวดหมู่",
+    "onlineNow": "ออนไลน์ตอนนี้"
+  },
+  "liveActivity": "กิจกรรมล่าสุด",
+  "quickNavigation": "การนำทางอย่างรวดเร็ว",
+  "communityGuidelines": "แนวทางชุมชน",
+  "communityGuidelinesDescription": "เข้าร่วมชุมชนนักพัฒนาที่เต็มไปด้วยความหลงใหล ปฏิบัติตามแนวทางของเราเพื่อให้การสนทนามีประสิทธิผลและเป็นมิตรสำหรับทุกคน",
+  "readGuidelines": "อ่านแนวทาง",
+  "recentActivity": {
+    "repliedTo": "ตอบกลับ",
+    "created": "สร้าง",
+    "liked": "ถูกใจ",
+    "pinned": "ปักหมุด",
+    "answered": "ตอบแล้ว"
+  },
+  "quickLinks": {
+    "latestPosts": "โพสต์ล่าสุด",
+    "popularTopics": "หัวข้อยอดนิยม",
+    "allCategories": "ทุกหมวดหมู่",
+    "memberDirectory": "รายชื่อสมาชิก",
+    "communityGuidelinesLink": "แนวทางชุมชน",
+    "helpSupport": "ช่วยเหลือและสนับสนุน"
+  },
+  "forumCategoriesTitle": "หมวดหมู่ฟอรัม",
+  "lockedCategoryMessage": "หมวดหมู่นี้ถูกล็อก",
+  "lockedCategoryTooltip": "หมวดหมู่ที่ถูกล็อก - ไม่สามารถเข้าถึงได้",
+  "lockedCategoryAriaLabel": "หมวดหมู่นี้ถูกล็อก",
+  "externalLinkMessage": "ลิงก์ภายนอกจะเปิดในแท็บใหม่ | หมวดหมู่ที่ถูกล็อกไม่สามารถเข้าถึงได้",
+  "categories": {
+    "announcements": {
+      "name": "ประกาศ",
+      "description": "ข่าวสารและประกาศสำคัญจากผู้ดูแล"
+    },
+    "generalDiscussion": {
+      "name": "การสนทนาทั่วไป",
+      "description": "สำหรับการสนทนาหัวข้อทั่วไปที่ไม่เหมาะกับหมวดหมู่อื่น"
+    },
+    "hGames": {
+      "name": "เกมสำหรับผู้ใหญ่",
+      "description": "รวมเกมสำหรับผู้ใหญ่และนิยายภาพ"
+    },
+    "tools": {
+      "name": "เครื่องมือ",
+      "description": "เครื่องมือที่สร้างโดยชุมชน"
+    },
+    "videos": {
+      "name": "วิดีโอ",
+      "description": "วิดีโอสำหรับผู้ใหญ่"
+    },
+    "vipRoom": {
+      "name": "ห้องวีไอพี",
+      "description": "สำหรับสมาชิกวีไอพี"
+    }
+  }
+}

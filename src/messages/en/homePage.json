@@ -1,0 +1,63 @@
+{
+  "welcomeTo": "Welcome to Chanom",
+  "hub": "Hub",
+  "heroDescription": "Join a rapidly growing community of H-game developers and creators, sharing ideas and crafting thrilling experiences together!",
+  "seasonalMessage": "Celebrate Halloween with special content hunts all October long!",
+  "forumStats": {
+    "activeMembers": "Active Members",
+    "totalPosts": "Total Posts",
+    "categories": "Categories",
+    "onlineNow": "Online Now"
+  },
+  "liveActivity": "Live Activity",
+  "quickNavigation": "Quick Navigation",
+  "communityGuidelines": "Community Guidelines",
+  "communityGuidelinesDescription": "Join our thriving community of passionate developers. Follow our guidelines to keep discussions productive and welcoming for everyone.",
+  "readGuidelines": "Read Guidelines",
+  "recentActivity": {
+    "repliedTo": "replied to",
+    "created": "created",
+    "liked": "liked",
+    "pinned": "pinned",
+    "answered": "answered"
+  },
+  "quickLinks": {
+    "latestPosts": "Latest Posts",
+    "popularTopics": "Popular Topics",
+    "allCategories": "All Categories",
+    "memberDirectory": "Member Directory",
+    "communityGuidelinesLink": "Community Guidelines",
+    "helpSupport": "Help & Support"
+  },
+  "forumCategoriesTitle": "Forum Categories",
+  "lockedCategoryMessage": "This category is locked",
+  "lockedCategoryTooltip": "Locked category - cannot be accessed",
+  "lockedCategoryAriaLabel": "This category is locked",
+  "externalLinkMessage": "External links open in a new tab | Locked categories cannot be accessed",
+  "categories": {
+    "announcements": {
+      "name": "Announcements",
+      "description": "News and important announcements from admins"
+    },
+    "generalDiscussion": {
+      "name": "General Discussion",
+      "description": "For discussing general topics that don’t fit other categories"
+    },
+    "hGames": {
+      "name": "H-Games",
+      "description": "Collection of adult games and visual novels"
+    },
+    "tools": {
+      "name": "Tools",
+      "description": "Tools created by the community"
+    },
+    "videos": {
+      "name": "Videos",
+      "description": "H-Videos"
+    },
+    "vipRoom": {
+      "name": "VIP Room",
+      "description": "For VIP members"
+    }
+  }
+}

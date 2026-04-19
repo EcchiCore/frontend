@@ -1,0 +1,17 @@
+{
+  "title": "Download Files",
+  "close": "Close",
+  "searchPlaceholder": "Search files...",
+  "download": "Download",
+  "copy": "Copy",
+  "copied": "Copied",
+  "copyLink": "Copy Link",
+  "noSearchResults": "No files found matching your search",
+  "tryDifferentSearch": "Try a different search term",
+  "noFiles": "No files available",
+  "downloadFiles": "Download Files",
+  "translationFiles": "Translation Files",
+  "sortByDate": "Sort by date",
+  "sortByName": "Sort by name",
+  "translatedBy": "Translated by {name} ({language})"
+}

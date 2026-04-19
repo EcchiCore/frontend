@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "bun run scripts/check-translations.ts && bun run scripts/warn-hardcoded-text.ts && next build",
     "start": "next start",
     "export": "next export",
     "lint": "next lint",

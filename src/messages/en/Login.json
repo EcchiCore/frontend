@@ -1,0 +1,15 @@
+{
+  "title": "Login",
+  "email": "Email",
+  "password": "Password",
+  "emailPlaceholder": "Enter your email",
+  "passwordPlaceholder": "Enter your password",
+  "loginButton": "Login",
+  "registerLink": "Create an account",
+  "homeLink": "Back to Home",
+  "successMessage": "Login successful! Redirecting...",
+  "invalidResponseMessage": "Login failed: Invalid response",
+  "invalidCredentialsMessage": "Invalid credentials",
+  "unexpectedErrorMessage": "Login failed due to an unexpected error",
+  "loading": "Logging in..."
+}

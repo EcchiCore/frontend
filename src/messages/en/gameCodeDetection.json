@@ -1,0 +1,7 @@
+{
+  "title": "Game Code Detected!",
+  "description": "\"{code}\" looks like a game code (Sequential Code). Would you like to search by game code?",
+  "searchByCode": "Search by Game Code",
+  "searchByText": "Search as Text",
+  "cancel": "Cancel"
+}

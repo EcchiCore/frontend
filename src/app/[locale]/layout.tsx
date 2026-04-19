@@ -98,10 +98,10 @@ export default async function LocaleSegmentLayout({
   // Load locale-specific messages
   let messages;
   try {
-    messages = (await import(`@/messages/${validLocale}.json`)).default;
+    messages = (await import(`@/messages/${validLocale}/index`)).default;
   } catch (error) {
     console.error(`Failed to load messages for locale ${validLocale}`, error);
-    messages = (await import(`@/messages/${routing.defaultLocale}.json`)).default;
+    messages = (await import(`@/messages/${routing.defaultLocale}/index`)).default;
   }
 
   // const activeEventTheme = getActiveEventTheme(); // Removed to avoid server-side Date usage

@@ -1,0 +1,145 @@
+{
+  "title": "Privacy Policy",
+  "description": "Your privacy matters to us. Learn how we protect and handle your personal information.",
+  "lastUpdated": "Last updated: {date}",
+  "about": {
+    "title": "About This Policy",
+    "description": "This Privacy Policy describes our policies and procedures regarding the collection, use, and disclosure of your information when you use our Service. By using our Service, you acknowledge that you have read and understood this Privacy Policy."
+  },
+  "definitions": {
+    "title": "Key Definitions",
+    "service": {
+      "title": "Service",
+      "description": "Refers to the Chanomhub website accessible at https://chanomhub.com/"
+    },
+    "personalData": {
+      "title": "Personal Data",
+      "description": "Any information relating to an identified or identifiable individual"
+    },
+    "usageData": {
+      "title": "Usage Data",
+      "description": "Data collected automatically through your use of the Service"
+    },
+    "cookies": {
+      "title": "Cookies",
+      "description": "Small data files stored on your device by websites"
+    },
+    "user": {
+      "title": "You/User",
+      "description": "The individual or entity accessing or using the Service"
+    }
+  },
+  "collection": {
+    "title": "Information We Collect",
+    "personal": {
+      "title": "Personal Information",
+      "description": "We may collect personally identifiable information that you voluntarily provide:",
+      "items": {
+        "email": "Email address",
+        "name": "Name (first and last)",
+        "profile": "Profile information from social media",
+        "preferences": "Communication preferences",
+        "other": "Any other information you provide"
+      }
+    },
+    "automatic": {
+      "title": "Automatically Collected Information",
+      "description": "When you use our Service, we may automatically collect:",
+      "items": {
+        "device": "Device information (IP, browser, OS)",
+        "usage": "Usage patterns and interactions",
+        "log": "Log files and analytics data",
+        "location": "Location data (if permitted)",
+        "cookies": "Cookies and tracking technologies"
+      }
+    },
+    "social": {
+      "title": "Third-Party Social Media Integration",
+      "description": "If you choose to connect your account through social media platforms (Google, Facebook, Instagram, Twitter, LinkedIn), we may access information associated with those accounts in accordance with their respective privacy policies and your authorization settings."
+    }
+  },
+  "usage": {
+    "title": "How We Use Your Information",
+    "description": "We may use your information for various legitimate business purposes:",
+    "items": {
+      "provide": "Providing, maintaining, and improving our Service",
+      "manage": "Managing your account and user experience",
+      "process": "Processing transactions and fulfilling contracts",
+      "communicate": "Communicating about services and updates",
+      "analyze": "Analyzing usage patterns to enhance Service",
+      "security": "Ensuring security and preventing fraud",
+      "comply": "Complying with legal obligations",
+      "business": "Business operations and partnerships"
+    }
+  },
+  "sharing": {
+    "title": "Information Sharing and Disclosure",
+    "description": "We may share your information in the following circumstances:",
+    "items": {
+      "providers": {
+        "title": "Service Providers",
+        "description": "With trusted third-party vendors who assist in operating our Service"
+      },
+      "legal": {
+        "title": "Legal Requirements",
+        "description": "When required by law, court order, or government authority"
+      },
+      "transfers": {
+        "title": "Business Transfers",
+        "description": "In connection with mergers, acquisitions, or asset sales"
+      },
+      "consent": {
+        "title": "Consent",
+        "description": "When you have given explicit permission"
+      },
+      "public": {
+        "title": "Public Areas",
+        "description": "Information you choose to share publicly may be visible to other users"
+      },
+      "safety": {
+        "title": "Safety and Security",
+        "description": "To protect rights, property, or safety of users and the public"
+      }
+    }
+  },
+  "cookies": {
+    "title": "Cookies and Tracking Technologies",
+    "description": "We use cookies and similar technologies to enhance your experience:",
+    "items": {
+      "essential": {
+        "title": "Essential Cookies",
+        "description": "Required for basic website functionality and security."
+      },
+      "functional": {
+        "title": "Functional Cookies",
+        "description": "Remember your preferences and settings for a personalized experience."
+      },
+      "analytics": {
+        "title": "Analytics Cookies",
+        "description": "Help us understand how visitors interact with our website."
+      }
+    },
+    "note": {
+      "title": "Note",
+      "description": "You can control cookie settings through your browser preferences. However, disabling certain cookies may affect website functionality."
+    }
+  },
+  "security": {
+    "title": "Data Security",
+    "description": "We implement appropriate technical and organizational measures to protect your personal information. However, no method of transmission over the internet or electronic storage is completely secure."
+  },
+  "retention": {
+    "title": "Data Retention",
+    "description": "We retain your personal information only as long as necessary for the purposes outlined in this policy, to comply with legal obligations, resolve disputes, and enforce our agreements."
+  },
+  "contact": {
+    "title": "Contact Information",
+    "description": "If you have questions, concerns, or requests regarding this Privacy Policy or our data practices, please contact us:",
+    "website": "Website Contact",
+    "response": "We will respond to your inquiries within a reasonable timeframe and in accordance with applicable law."
+  },
+  "compliance": {
+    "title": "Legal Compliance",
+    "description": "This Privacy Policy is designed to comply with various privacy laws and regulations. The specific rights and protections available to you may vary depending on your location and the applicable legal framework."
+  }
+}

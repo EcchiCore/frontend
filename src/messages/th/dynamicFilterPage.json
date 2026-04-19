@@ -1,0 +1,44 @@
+{
+  "home": "หน้าแรก",
+  "title_platforms": "บทความ {slug} | Chanomhub",
+  "title_tag": "แท็ก {slug} | Chanomhub",
+  "title_category": "หมวดหมู่ {slug} | Chanomhub",
+  "description_platforms": "เรียกดูคอลเลกชันบทความเกี่ยวกับ {slug}",
+  "description_tag": "สำรวจบทความที่ติดแท็กด้วย {slug}",
+  "description_category": "สำรวจบทความในหมวดหมู่ {slug}",
+  "rss_title_platforms": "ฟีด RSS สำหรับบทความ {slug}",
+  "rss_title_tag": "ฟีด RSS สำหรับบทความแท็ก {slug}",
+  "rss_feed": "ฟีด RSS",
+  "description": "ค้นพบ {count} บทความใน {slug}",
+  "filter_types": {
+    "platforms": "แพลตฟอร์ม",
+    "tag": "แท็ก",
+    "category": "หมวดหมู่"
+  },
+  "stats": {
+    "articles": "บทความ",
+    "likes": "ถูกใจ",
+    "authors": "ผู้เขียน",
+    "tags": "แท็ก",
+    "categories": "หมวดหมู่",
+    "engines": "เอ็นจิน",
+    "popular_tags": "แท็กยอดนิยม",
+    "top_authors": "ผู้เขียนยอดนิยม",
+    "additional_stats": "สถิติเพิ่มเติม",
+    "total_platforms": "แพลตฟอร์มทั้งหมด",
+    "game_engines": "เอ็นจินเกม",
+    "avg_likes": "ค่าเฉลี่ยถูกใจ",
+    "recent_articles": "บทความล่าสุด",
+    "most_popular": "ยอดนิยมที่สุด"
+  },
+  "author_stats": "{articleCount} บทความ • {favoritesCount} ถูกใจ",
+  "by_author": "โดย {username}",
+  "sort": {
+    "label": "เรียงลำดับ",
+    "latest": "ล่าสุด",
+    "oldest": "เก่าที่สุด",
+    "most_popular": "ยอดนิยมที่สุด"
+  },
+  "no_articles_title": "ไม่พบบทความ",
+  "no_articles": "ไม่พบบทความสำหรับ {filterType} \"{slug}\" ในขณะนี้"
+}

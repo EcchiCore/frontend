@@ -1,0 +1,20 @@
+{
+  "title": "สมัครสมาชิก",
+  "username": "ชื่อผู้ใช้",
+  "email": "อีเมล",
+  "password": "รหัสผ่าน",
+  "confirmPassword": "ยืนยันรหัสผ่าน",
+  "usernamePlaceholder": "ป้อนชื่อผู้ใช้ของคุณ",
+  "emailPlaceholder": "ป้อนอีเมลของคุณ",
+  "passwordPlaceholder": "ป้อนรหัสผ่านของคุณ",
+  "confirmPasswordPlaceholder": "ยืนยันรหัสผ่านของคุณ",
+  "registerButton": "สมัครสมาชิก",
+  "loginLink": "มีบัญชีอยู่แล้ว?",
+  "loginLinkText": "เข้าสู่ระบบที่นี่",
+  "successMessage": "สมัครสมาชิกสำเร็จ! กำลังเปลี่ยนเส้นทาง...",
+  "fillAllFieldsMessage": "กรุณากรอกข้อมูลทุกช่อง",
+  "passwordsDoNotMatchMessage": "รหัสผ่านไม่ตรงกัน",
+  "invalidResponseMessage": "การสมัครสมาชิกล้มเหลว: การตอบสนองไม่ถูกต้อง",
+  "registrationFailedMessage": "การสมัครสมาชิกล้มเหลว",
+  "unexpectedErrorMessage": "การสมัครสมาชิกล้มเหลวเนื่องจากข้อผิดพลาดที่ไม่คาดคิด"
+}

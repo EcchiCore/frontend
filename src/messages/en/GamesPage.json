@@ -1,0 +1,33 @@
+{
+  "title": "Games - ChanomHub",
+  "description": "Browse our collection of adult games and visual novels. Download free games, mods, and translations.",
+  "discovery": {
+    "title": "Games Discovery",
+    "description": "Find and explore amazing games and articles"
+  },
+  "error": {
+    "title": "Unable to Load Games",
+    "description": "There was an error loading the games page. Please try again later.",
+    "retry": "Retry"
+  },
+  "metadata": {
+    "title": "Games - ChanomHub",
+    "description": "Browse our collection of adult games and visual novels. Download free games, mods, and translations."
+  },
+  "debug": {
+    "title": "🐛 Debug Info (Page {0}) - CLIENT SIDE",
+    "urlParams": "URL Search Params",
+    "pageParam": "Page Param",
+    "parsedPage": "Parsed Page",
+    "expectedOffset": "Expected MeiliSearch Offset",
+    "actualOffset": "Actual Offset from Response",
+    "searchQuery": "Search Query",
+    "sequentialCode": "Sequential Code",
+    "pageSize": "Page Size",
+    "totalResults": "Total Results",
+    "resultsCount": "Results Count",
+    "processingTime": "Processing Time",
+    "filters": "Filters",
+    "firstResultId": "First Result ID"
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "author": {
+    "noBio": "ยังไม่มีประวัติ",
+    "follow": "กำลังติดตามผู้เขียน",
+    "following": "ติดตามแล้ว"
+  },
+  "bookmark": {
+    "bookmark": "บุ๊กมาร์กบทความ",
+    "bookmarked": "บุ๊กมาร์กแล้ว"
+  },
+  "status": {
+    "published": "เผยแพร่แล้ว",
+    "draft": "ร่าง",
+    "archived": "เก็บถาวร"
+  },
+  "articleInfo": {
+    "title": "ข้อมูลบทความ",
+    "published": "เผยแพร่",
+    "updated": "อัปเดต",
+    "creator": "ผู้พัฒนา / สตูดิโอ",
+    "engine": "เอ็นจิน",
+    "status": "สถานะ",
+    "version": "แก้ไข"
+  },
+  "downloads": {
+    "title": "ดาวน์โหลดและการแปล",
+    "viewFiles": "ดูไฟล์ ({count})",
+    "viewAll": "ดูทั้งหมด"
+  },
+  "platforms": {
+    "title": "แพลตฟอร์ม"
+  },
+  "tags": {
+    "title": "แท็ก"
+  },
+  "categories": {
+    "title": "หมวดหมู่"
+  },
+  "relatedGames": {
+    "title": "เกมที่เกี่ยวข้อง",
+    "view": "ดูเกมที่เกี่ยวข้อง"
+  }
+}

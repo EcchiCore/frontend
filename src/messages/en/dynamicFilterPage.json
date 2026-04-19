@@ -1,0 +1,44 @@
+{
+  "home": "Home",
+  "title_platforms": "{slug} Articles | Chanomhub",
+  "title_tag": "{slug} Tag | Chanomhub",
+  "title_category": "{slug} Category | Chanomhub",
+  "description_platforms": "Browse our collection of articles about {slug}",
+  "description_tag": "Explore articles tagged with {slug}",
+  "description_category": "Explore articles in the {slug} category",
+  "rss_title_platforms": "RSS Feed for {slug} articles",
+  "rss_title_tag": "RSS Feed for {slug} tag articles",
+  "rss_feed": "RSS Feed",
+  "description": "Discover {count} articles in {slug}",
+  "filter_types": {
+    "platforms": "Platforms",
+    "tag": "Tag",
+    "category": "Category"
+  },
+  "stats": {
+    "articles": "Articles",
+    "likes": "Likes",
+    "authors": "Authors",
+    "tags": "Tags",
+    "categories": "Categories",
+    "engines": "Engines",
+    "popular_tags": "Popular Tags",
+    "top_authors": "Top Authors",
+    "additional_stats": "Additional Stats",
+    "total_platforms": "Total Platforms",
+    "game_engines": "Game Engines",
+    "avg_likes": "Avg Likes",
+    "recent_articles": "Recent Articles",
+    "most_popular": "Most Popular"
+  },
+  "author_stats": "{articleCount} articles • {favoritesCount} likes",
+  "by_author": "by {username}",
+  "sort": {
+    "label": "Sort",
+    "latest": "Latest",
+    "oldest": "Oldest",
+    "most_popular": "Most Popular"
+  },
+  "no_articles_title": "No Articles Found",
+  "no_articles": "No articles found for {filterType} \"{slug}\" at the moment."
+}

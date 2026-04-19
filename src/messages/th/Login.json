@@ -1,0 +1,15 @@
+{
+  "title": "เข้าสู่ระบบ",
+  "email": "อีเมล",
+  "password": "รหัสผ่าน",
+  "emailPlaceholder": "ป้อนอีเมลของคุณ",
+  "passwordPlaceholder": "ป้อนรหัสผ่านของคุณ",
+  "loginButton": "เข้าสู่ระบบ",
+  "registerLink": "สร้างบัญชี",
+  "homeLink": "กลับสู่หน้าแรก",
+  "successMessage": "เข้าสู่ระบบสำเร็จ! กำลังเปลี่ยนเส้นทาง...",
+  "invalidResponseMessage": "การเข้าสู่ระบบล้มเหลว: การตอบสนองไม่ถูกต้อง",
+  "invalidCredentialsMessage": "ข้อมูลประจำตัวไม่ถูกต้อง",
+  "unexpectedErrorMessage": "การเข้าสู่ระบบล้มเหลวเนื่องจากข้อผิดพลาดที่ไม่คาดคิด",
+  "loading": "กำลังเข้าสู่ระบบ..."
+}

@@ -1,0 +1,16 @@
+{
+  "tag": {
+    "channel_title": "บทความที่ติดแท็ก \"{tag}\" | Chanomhub",
+    "channel_description": "บทความล่าสุดที่ติดแท็กด้วย \"{tag}\"",
+    "error": "ไม่สามารถสร้างฟีด RSS ได้"
+  },
+  "platforms": {
+    "channel_title": "บทความ {platform} | Chanomhub",
+    "channel_description": "บทความล่าสุดเกี่ยวกับ {platform}",
+    "error": "ไม่สามารถสร้างฟีด RSS ได้"
+  },
+  "tagFeedTitle": "บทความที่ติดแท็ก \"{tagName}\" | Chanomhub",
+  "tagFeedDescription": "บทความล่าสุดที่ติดแท็กด้วย \"{tagName}\"",
+  "platformFeedTitle": "บทความ {platformName} | Chanomhub",
+  "platformFeedDescription": "บทความล่าสุดเกี่ยวกับ {platformName}"
+}

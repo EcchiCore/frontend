@@ -1,0 +1,17 @@
+{
+  "title": "ดาวน์โหลดไฟล์",
+  "close": "ปิด",
+  "searchPlaceholder": "ค้นหาไฟล์...",
+  "download": "ดาวน์โหลด",
+  "copy": "คัดลอก",
+  "copied": "คัดลอกแล้ว",
+  "copyLink": "คัดลอกลิงก์",
+  "noSearchResults": "ไม่พบไฟล์ที่ตรงกับการค้นหาของคุณ",
+  "tryDifferentSearch": "ลองใช้คำค้นหาอื่น",
+  "noFiles": "ไม่มีไฟล์ให้ดาวน์โหลด",
+  "downloadFiles": "ดาวน์โหลดไฟล์",
+  "translationFiles": "ไฟล์แปลภาษา",
+  "sortByDate": "เรียงตามวันที่",
+  "sortByName": "เรียงตามชื่อ",
+  "translatedBy": "แปลโดย {name} ({language})"
+}

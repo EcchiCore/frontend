@@ -1,0 +1,43 @@
+{
+  "author": {
+    "noBio": "No history yet",
+    "follow": "Following author",
+    "following": "Following"
+  },
+  "bookmark": {
+    "bookmark": "Bookmarked article",
+    "bookmarked": "Bookmarked"
+  },
+  "status": {
+    "published": "Published",
+    "draft": "Draft",
+    "archived": "Archived"
+  },
+  "articleInfo": {
+    "title": "Article information",
+    "published": "Published",
+    "updated": "Updated",
+    "creator": "Creator / Studio",
+    "engine": "Engine",
+    "status": "Status",
+    "version": "Edited"
+  },
+  "downloads": {
+    "title": "Downloads and translations",
+    "viewFiles": "View files ({count})",
+    "viewAll": "View All"
+  },
+  "platforms": {
+    "title": "Platforms"
+  },
+  "tags": {
+    "title": "Tags"
+  },
+  "categories": {
+    "title": "Categories"
+  },
+  "relatedGames": {
+    "title": "Related Games",
+    "view": "View Related Games"
+  }
+}

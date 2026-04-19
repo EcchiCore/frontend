@@ -1,0 +1,12 @@
+{
+  "searchPlaceholder": "Search game name, description...",
+  "search": "Search",
+  "advancedFilters": "Advanced Filters",
+  "category": "Category",
+  "platform": "Platform",
+  "author": "Author (username)",
+  "tag": "Tag",
+  "engine": "Engine",
+  "gameCode": "Game Code",
+  "clearFilters": "Clear All Filters"
+}

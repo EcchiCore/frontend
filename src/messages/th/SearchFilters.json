@@ -1,0 +1,16 @@
+{
+  "gameSearch": "ค้นหาเกม",
+  "searchGame": "ค้นหาเกมที่คุณชื่นชอบ...",
+  "search": "คำค้นหา",
+  "sequentialCode": "รหัสลำดับเกม",
+  "activeFilters": "ตัวกรองที่ใช้งาน",
+  "clearAll": "ล้างทั้งหมด",
+  "allCategories": "ทุกหมวดหมู่",
+  "allTags": "ทุกแท็ก",
+  "allPlatforms": "ทุกแพลตฟอร์ม",
+  "filters": "ตัวกรอง",
+  "all": "ทั้งหมด",
+  "category": "หมวดหมู่",
+  "tag": "แท็ก",
+  "platform": "แพลตฟอร์ม"
+}
