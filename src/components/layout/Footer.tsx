@@ -371,8 +371,8 @@ export default function Footer() {
                                 </a>
                             </li>
                             <li>
-                                <a href="#">
-                                    <span>Support (Closed)</span>
+                                <a href="https://t.me/NightCryptic">
+                                    <span>Support telegram</span>
                                     <span className="arrow">→</span>
                                 </a>
                             </li>
