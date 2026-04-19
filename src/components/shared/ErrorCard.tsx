@@ -3,12 +3,14 @@
 
 import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { useTranslations } from "next-intl";
 
 interface ErrorCardProps {
   locale: string;
 }
 
 export default function ErrorCard({ locale }: ErrorCardProps) {
+  const t = useTranslations("ErrorCard");
   return (
     <div className="min-h-screen bg-background flex items-center justify-center">
       <Card className="w-full max-w-md">
@@ -19,20 +21,17 @@ export default function ErrorCard({ locale }: ErrorCardProps) {
             </svg>
           </div>
           <CardTitle className="text-destructive">
-            {locale === 'th' ? 'เกิดข้อผิดพลาด' : 'Error Occurred'}
+            {t("title")}
           </CardTitle>
           <CardDescription className="text-muted-foreground">
-            {locale === 'th'
-              ? 'เกิดข้อผิดพลาดในการโหลดบทความ กรุณาลองใหม่ภายหลัง'
-              : 'Error loading articles. Please try again later.'
-            }
+            {t("description")}
           </CardDescription>
         </CardHeader>
         <CardFooter className="flex justify-center">
           <Button
             onClick={() => window.location.reload()}
           >
-            {locale === 'th' ? 'ลองใหม่' : 'Try Again'}
+            {t("tryAgain")}
           </Button>
         </CardFooter>
       </Card>

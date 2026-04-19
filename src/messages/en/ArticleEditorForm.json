@@ -1,0 +1,5 @@
+{
+  "paymentGateway": "Payment Gateway (Stripe 3.65% + 10฿ + 7% VAT):",
+  "estimatedRevenue": "Estimated revenue you will receive:",
+  "priceWarning": "We are concerned that the price might be too low for your effort. We recommend 79, 99 or more."
+}

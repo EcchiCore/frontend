@@ -20,6 +20,7 @@ import { getSdk } from '@/lib/sdk';
 import { resolveArticleImageUrl } from '@/lib/articleImageUrl';
 import { NewArticleDTO, UpdateArticleDTO } from '@chanomhub/sdk';
 import RichTextEditor from '@/components/ui/RichTextEditor';
+import { useTranslations } from 'next-intl';
 
 interface ArticleEditorFormProps {
     slug?: string;
@@ -694,6 +695,7 @@ const DownloadManager: React.FC<{
 
 export const ArticleEditorForm = ({ slug = '', initialData, mode, locale = 'en' }: ArticleEditorFormProps) => {
     const router = useRouter();
+    const t = useTranslations('ArticleEditorForm');
 
     const [formData, setFormData] = useState<any>({
         id: (initialData as any)?.id || null,
@@ -1183,22 +1185,22 @@ export const ArticleEditorForm = ({ slug = '', initialData, mode, locale = 'en' 
                                                     <span>-{(formData.price * 0.1).toFixed(2)} THB</span>
                                                 </div>
                                                 <div className="flex justify-between text-muted-foreground">
-                                                    <span>Payment Gateway (Stripe 3.65% + 10฿ + 7% VAT):</span>
+                                                    <span>Payment Gateway (Stripe 3.65% + 10 THB + 7% VAT):</span>
                                                     <span>-{( ((formData.price * 0.0365) + 10) * 1.07 ).toFixed(2)} THB</span>
                                                 </div>
                                                 <div className="pt-1.5 mt-1.5 border-t border-border flex justify-between font-bold text-green-600 dark:text-green-400 text-sm">
-                                                    <span>รายได้ที่คุณจะได้รับ (โดยประมาณ):</span>
+                                                    <span>{t("estimatedRevenue")}:</span>
                                                     <span>{(formData.price - (formData.price * 0.1) - (((formData.price * 0.0365) + 10) * 1.07)).toFixed(2)} THB</span>
                                                 </div>
                                                 <p className="text-[10px] text-muted-foreground italic mt-1">
-                                                    * รายได้สุทธิคำนวณรวมภาษีมูลค่าเพิ่มของค่าธรรมเนียมแล้ว
+                                                    * {t("netRevenueNote")}
                                                 </p>
                                             </div>
                                         )}
 
                                         {formData.price !== undefined && formData.price > 0 && formData.price < 79 && (
                                             <p className="text-xs text-amber-600 mt-2">
-                                                เรารู้สึกเป็นห่วงกับราคาที่อาจจะน้อยไปกับความพยายามของคุณ เราแนะนำเป็น 79, 99 หรือมากกว่านั้น
+                                                {t("priceWarning")}
                                             </p>
                                         )}
                                     </div>

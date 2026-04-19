@@ -1,0 +1,16 @@
+🔍 Checking translations for missing keys...
+✅ Translation check passed! All keys are present.
+🔍 Scanning for hardcoded Thai text (i18n readiness check)...
+
+💡 Tip: Consider moving these hardcoded texts to your i18n JSON files to fully support multiple languages.
+✅ This is just a warning. The build will proceed normally.
+
+▲ Next.js 16.2.1 (Turbopack)
+- Environments: .env
+- Cache Components enabled
+- Experiments (use with caution):
+  · cpus: 1
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 7.8s
+  Running TypeScript ...

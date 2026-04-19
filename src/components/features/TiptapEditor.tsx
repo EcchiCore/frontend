@@ -4,6 +4,7 @@ import React, { useEffect } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
+import { useTranslations } from "next-intl";
 
 interface TiptapEditorProps {
   value: string;
@@ -11,14 +12,15 @@ interface TiptapEditorProps {
 }
 
 const TiptapEditor: React.FC<TiptapEditorProps> = ({ value, onChange }) => {
+  const t = useTranslations("TiptapEditor");
   const editor = useEditor({
     extensions: [
       StarterKit,
       Placeholder.configure({
-        placeholder: "เริ่มเขียนบทความของคุณที่นี่..."
+        placeholder: t("placeholder")
       }),
     ],
-    content: value || "<p></p>", // กำหนดค่าเริ่มต้นให้มี <p></p> แทนค่าว่าง
+    content: value || "<p></p>", // Default to <p></p>
     onUpdate: ({ editor }) => {
       onChange(editor.getHTML());
     },

@@ -1,0 +1,25 @@
+{
+  "failedToLoad": "โหลดแจ้งเตือนล้มเหลว",
+  "newNotification": "มีแจ้งเตือนใหม่",
+  "cannotRead": "ไม่สามารถอ่านได้",
+  "failedToReadAll": "อ่านทั้งหมดล้มเหลว",
+  "failedToDelete": "ลบไม่สำเร็จ",
+  "times": {
+    "justNow": "เมื่อสักครู่",
+    "minutesAgo": "{minutes} นาทีที่แล้ว",
+    "hoursAgo": "{hours} ชม.ที่แล้ว",
+    "daysAgo": "{days} วันที่แล้ว"
+  },
+  "types": {
+    "moderationUpdate": "อัปเดตการตรวจสอบ",
+    "warning": "คำเตือน",
+    "error": "ข้อผิดพลาด",
+    "success": "สำเร็จ",
+    "info": "ข้อมูล"
+  },
+  "title": "แจ้งเตือน",
+  "readAll": "อ่านทั้งหมด",
+  "newCount": "มีแจ้งเตือนใหม่ {unreadCount} รายการ",
+  "noNotifications": "ไม่มีการแจ้งเตือน",
+  "viewAll": "ดูทั้งหมด →"
+}

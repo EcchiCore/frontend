@@ -1,5 +1,6 @@
 // components/mdx/FAQ.tsx
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 export type FAQItem = {
   question: string
@@ -7,11 +8,12 @@ export type FAQItem = {
 }
 
 export const FAQ = ({ questions }: { questions: FAQItem[] }) => {
+  const t = useTranslations("FAQ");
   const [openItem, setOpenItem] = useState(0)
 
   return (
     <div className="not-prose my-8 rounded-xl overflow-hidden border border-gray-200 shadow-sm">
-      <h3 className="text-xl font-semibold bg-blue-600 text-white p-4">คำถามที่พบบ่อย</h3>
+      <h3 className="text-xl font-semibold bg-blue-600 text-white p-4">{t("title")}</h3>
       <div className="divide-y divide-gray-200">
         {questions.map((item, index) => (
           <div key={index} className="bg-white hover:bg-gray-50 transition-colors">

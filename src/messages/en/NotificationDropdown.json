@@ -1,0 +1,25 @@
+{
+  "failedToLoad": "Failed to load notifications",
+  "newNotification": "New notification",
+  "cannotRead": "Cannot read",
+  "failedToReadAll": "Failed to read all",
+  "failedToDelete": "Failed to delete",
+  "times": {
+    "justNow": "Just now",
+    "minutesAgo": "{minutes} minutes ago",
+    "hoursAgo": "{hours} hours ago",
+    "daysAgo": "{days} days ago"
+  },
+  "types": {
+    "moderationUpdate": "Moderation Update",
+    "warning": "Warning",
+    "error": "Error",
+    "success": "Success",
+    "info": "Info"
+  },
+  "title": "Notifications",
+  "readAll": "Read All",
+  "newCount": "{unreadCount} new notifications",
+  "noNotifications": "No notifications",
+  "viewAll": "View all →"
+}

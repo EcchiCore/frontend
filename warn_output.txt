@@ -1,0 +1,5 @@
+🔍 Scanning for hardcoded Thai text (i18n readiness check)...
+
+💡 Tip: Consider moving these hardcoded texts to your i18n JSON files to fully support multiple languages.
+✅ This is just a warning. The build will proceed normally.
+

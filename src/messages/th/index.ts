@@ -23,6 +23,15 @@ import CookieConsent from './CookieConsent.json';
 import ChanoX2 from './ChanoX2.json';
 import ChanoLite from './ChanoLite.json';
 import Admin from './Admin.json';
+import DonationCTA from './DonationCTA.json';
+import DonationSidebarWidget from './DonationSidebarWidget.json';
+import NotificationDropdown from './NotificationDropdown.json';
+import Footer from './Footer.json';
+import ArticleEditorForm from './ArticleEditorForm.json';
+import TiptapEditor from './TiptapEditor.json';
+import ErrorCard from './ErrorCard.json';
+import Switch from './Switch.json';
+import FAQ from './FAQ.json';
 
 export default {
   "DownloadModal": DownloadModal,
@@ -50,4 +59,13 @@ export default {
   "ChanoX2": ChanoX2,
   "ChanoLite": ChanoLite,
   "Admin": Admin,
+  "DonationCTA": DonationCTA,
+  "DonationSidebarWidget": DonationSidebarWidget,
+  "NotificationDropdown": NotificationDropdown,
+  "Footer": Footer,
+  "ArticleEditorForm": ArticleEditorForm,
+  "TiptapEditor": TiptapEditor,
+  "ErrorCard": ErrorCard,
+  "Switch": Switch,
+  "FAQ": FAQ,
 };

@@ -255,7 +255,7 @@ const Navbar = () => {
                   <SheetHeader className="p-6 border-b border-border/50 bg-gradient-to-r from-primary/5 to-transparent">
                     <SheetTitle className="text-lg font-semibold flex items-center gap-2">
                       <div className="w-1 h-6 bg-primary rounded-full"></div>
-                      เมนู
+                      {t("menu")}
                     </SheetTitle>
                   </SheetHeader>
 
@@ -265,7 +265,7 @@ const Navbar = () => {
                       <div>
                         <h3 className="text-sm font-medium text-muted-foreground mb-4 uppercase tracking-wider flex items-center gap-2">
                           <div className="w-1 h-4 bg-primary/60 rounded-full"></div>
-                          หลัก
+                          {t("main")}
                         </h3>
                         <NavbarLinks section="left" onCloseMenu={closeMenu} isMobile />
                       </div>
@@ -274,7 +274,7 @@ const Navbar = () => {
                       <div>
                         <h3 className="text-sm font-medium text-muted-foreground mb-4 uppercase tracking-wider flex items-center gap-2">
                           <div className="w-1 h-4 bg-primary/60 rounded-full"></div>
-                          บัญชี
+                          {t("account")}
                         </h3>
                         <NavbarLinks section="right" onCloseMenu={closeMenu} isMobile />
                       </div>

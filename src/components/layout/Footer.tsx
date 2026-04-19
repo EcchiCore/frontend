@@ -1,7 +1,9 @@
 // Server Component — no client interactivity needed
 import { Sparkles, Heart, Star, Zap } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 export default function Footer() {
+    const t = useTranslations('Footer');
     return (
         <footer className="relative mt-0 border-t border-border/40 bg-background backdrop-blur-xl overflow-hidden">
             {/* Enhanced Ambient Background Effects */}
@@ -34,7 +36,7 @@ export default function Footer() {
                         <div className="flex items-center gap-2">
                             <Star className="w-4 h-4 text-primary animate-pulse" />
                             <h3 className="text-sm font-semibold text-foreground/90 tracking-wide">
-                                ชุมชนเกม H และเกมผู้ใหญ่ 18+
+                                {t("description1")}
                             </h3>
                         </div>
 
@@ -42,10 +44,7 @@ export default function Footer() {
                         <div className="relative group">
                             <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-accent/5 rounded-xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
                             <p className="relative text-sm text-muted-foreground leading-relaxed max-w-md p-4 rounded-xl bg-card/30 backdrop-blur-sm border border-border/20 hover:border-border/40 transition-all">
-                                ChanomHub คือศูนย์รวมเกม H (H-Games) และเกมผู้ใหญ่ (Adult Games) ที่ครบครันที่สุด
-                                เราให้บริการพื้นที่สำหรับดาวน์โหลดเกม H แปลไทย แลกเปลี่ยนบทสรุป รีวิวเกม 18+
-                                และพูดคุยเกี่ยวกับ Visual Novel, RPG Maker และเกมโป๊หลากหลายแนว
-                                อัปเดตเกมใหม่ทุกวัน พร้อมระบบสมาชิกที่ปลอดภัยและเป็นส่วนตัว
+                                {t("description2")} {t("description3")} {t("description4")} {t("description5")}
                             </p>
                         </div>
 
@@ -69,7 +68,7 @@ export default function Footer() {
                                 <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-transparent rounded blur-md"></div>
                                 <h4 className="relative text-sm font-bold text-foreground tracking-wider uppercase flex items-center gap-2">
                                     <span className="w-1 h-4 bg-gradient-to-b from-primary to-accent rounded-full"></span>
-                                    เกี่ยวกับเรา
+                                    {t("aboutUs")}
                                 </h4>
                             </div>
                             <ul className="space-y-3.5 text-sm">
@@ -79,7 +78,7 @@ export default function Footer() {
                                             <span className="absolute w-full h-full rounded-full bg-primary/10 group-hover:bg-primary/20 group-hover:scale-110 transition-all"></span>
                                             <span className="relative w-2 h-2 rounded-full bg-primary/30 group-hover:bg-primary transition-colors"></span>
                                         </span>
-                                        <span className="group-hover:translate-x-0.5 transition-transform">นโยบายความเป็นส่วนตัว</span>
+                                        <span className="group-hover:translate-x-0.5 transition-transform">{t("privacyPolicy")}</span>
                                     </a>
                                 </li>
                                 <li>
@@ -88,7 +87,7 @@ export default function Footer() {
                                             <span className="absolute w-full h-full rounded-full bg-primary/10 group-hover:bg-primary/20 group-hover:scale-110 transition-all"></span>
                                             <span className="relative w-2 h-2 rounded-full bg-primary/30 group-hover:bg-primary transition-colors"></span>
                                         </span>
-                                        <span className="group-hover:translate-x-0.5 transition-transform">เงื่อนไขการใช้งาน</span>
+                                        <span className="group-hover:translate-x-0.5 transition-transform">{t("termsOfService")}</span>
                                     </a>
                                 </li>
                                 <li>
@@ -97,7 +96,7 @@ export default function Footer() {
                                             <span className="absolute w-full h-full rounded-full bg-primary/10 group-hover:bg-primary/20 group-hover:scale-110 transition-all"></span>
                                             <span className="relative w-2 h-2 rounded-full bg-primary/30 group-hover:bg-primary transition-colors"></span>
                                         </span>
-                                        <span className="group-hover:translate-x-0.5 transition-transform">ติดต่อลงโฆษณา</span>
+                                        <span className="group-hover:translate-x-0.5 transition-transform">{t("advertise")}</span>
                                     </a>
                                 </li>
                             </ul>

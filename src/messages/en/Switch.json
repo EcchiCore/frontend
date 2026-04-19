@@ -1,0 +1,7 @@
+{
+  "loggedInAccount": "You already have a logged-in account",
+  "switchWarning": "If you log in/register again, it will switch accounts",
+  "switchAccount": "Switch Account",
+  "cancel": "Cancel",
+  "disconnectWarning": "If you click Switch Account, we will disconnect your current account"
+}

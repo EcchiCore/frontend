@@ -8,6 +8,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/compon
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useSocket } from "@/contexts/SocketContext";
+import { useTranslations } from "next-intl";
 
 interface Notification {
   id: number;
@@ -39,6 +40,7 @@ const POLLING_BACKOFF_FACTOR = 1.5;
 const IDLE_TIMEOUT = 10 * 60 * 1000; // 10 minutes
 
 export default function NotificationDropdown({ isMobile = false }: NotificationDropdownProps) {
+  const t = useTranslations("NotificationDropdown");
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -119,7 +121,7 @@ export default function NotificationDropdown({ isMobile = false }: NotificationD
         setUnreadCount(data?.unreadCount || 0);
       } catch (err) {
         console.error("Fetch notifications failed:", err);
-        if (showLoading) setError("โหลดแจ้งเตือนล้มเหลว");
+        if (showLoading) setError(t("failedToLoad"));
       } finally {
         isFetchingRef.current = false;
         if (showLoading) setLoading(false);
@@ -195,7 +197,7 @@ export default function NotificationDropdown({ isMobile = false }: NotificationD
         id: data.id ?? Date.now(),
         userId: data.userId ?? 0,
         type: data.type ?? "INFO",
-        message: data.message ?? "มีแจ้งเตือนใหม่",
+        message: data.message ?? t("newNotification"),
         isRead: false,
         entityId: data.entityId ?? null,
         entityType: data.entityType ?? null,
@@ -233,7 +235,7 @@ export default function NotificationDropdown({ isMobile = false }: NotificationD
       }
     } catch (err) {
       console.error("Mark as read failed:", err);
-      setError("ไม่สามารถอ่านได้");
+      setError(t("cannotRead"));
     } finally {
       setIsMarkingAsRead(null);
     }
@@ -257,7 +259,7 @@ export default function NotificationDropdown({ isMobile = false }: NotificationD
       }
     } catch (err) {
       console.error("Mark all as read failed:", err);
-      setError("อ่านทั้งหมดล้มเหลว");
+      setError(t("failedToReadAll"));
     } finally {
       setIsMarkingAllAsRead(false);
     }
@@ -276,7 +278,7 @@ export default function NotificationDropdown({ isMobile = false }: NotificationD
         });
       }
     } catch {
-      setError("ลบไม่สำเร็จ");
+      setError(t("failedToDelete"));
     }
   };
 
@@ -288,25 +290,25 @@ export default function NotificationDropdown({ isMobile = false }: NotificationD
     const hours = Math.floor(minutes / 60);
     const days = Math.floor(hours / 24);
 
-    if (minutes < 1) return "เมื่อสักครู่";
-    if (minutes < 60) return `${minutes} นาทีที่แล้ว`;
-    if (hours < 24) return `${hours} ชม.ที่แล้ว`;
-    if (days < 7) return `${days} วันที่แล้ว`;
+    if (minutes < 1) return t("times.justNow");
+    if (minutes < 60) return t("times.minutesAgo", { minutes });
+    if (hours < 24) return t("times.hoursAgo", { hours });
+    if (days < 7) return t("times.daysAgo", { days });
     return new Date(dateStr).toLocaleDateString("th-TH", { month: "short", day: "numeric" });
   };
 
   const getTypeInfo = (type: string) => {
     switch (type) {
       case "MODERATION_UPDATE":
-        return { variant: "secondary" as const, label: "อัปเดตการตรวจสอบ" };
+        return { variant: "secondary" as const, label: t("types.moderationUpdate") };
       case "WARNING":
-        return { variant: "outline" as const, label: "คำเตือน" };
+        return { variant: "outline" as const, label: t("types.warning") };
       case "ERROR":
-        return { variant: "destructive" as const, label: "ข้อผิดพลาด" };
+        return { variant: "destructive" as const, label: t("types.error") };
       case "SUCCESS":
-        return { variant: "secondary" as const, label: "สำเร็จ" };
+        return { variant: "secondary" as const, label: t("types.success") };
       default:
-        return { variant: "default" as const, label: "ข้อมูล" };
+        return { variant: "default" as const, label: t("types.info") };
     }
   };
 
@@ -331,11 +333,11 @@ export default function NotificationDropdown({ isMobile = false }: NotificationD
           {/* Header */}
           <div className="p-4 border-b bg-gradient-to-r from-primary/5">
             <div className="flex items-center justify-between">
-              <h3 className="font-semibold text-lg">แจ้งเตือน</h3>
+              <h3 className="font-semibold text-lg">{t("title")}</h3>
               <div className="flex items-center gap-1">
                 {unreadCount > 0 && (
                   <Button variant="ghost" size="sm" onClick={markAllAsRead} disabled={isMarkingAllAsRead}>
-                    {isMarkingAllAsRead ? <RefreshCw className="h-3 w-3 animate-spin" /> : "อ่านทั้งหมด"}
+                    {isMarkingAllAsRead ? <RefreshCw className="h-3 w-3 animate-spin" /> : t("readAll")}
                   </Button>
                 )}
                 <Button
@@ -349,7 +351,7 @@ export default function NotificationDropdown({ isMobile = false }: NotificationD
               </div>
             </div>
             {unreadCount > 0 && (
-              <p className="text-xs text-muted-foreground mt-1">มีแจ้งเตือนใหม่ {unreadCount} รายการ</p>
+              <p className="text-xs text-muted-foreground mt-1">{t("newCount", { unreadCount })}</p>
             )}
           </div>
 
@@ -372,7 +374,7 @@ export default function NotificationDropdown({ isMobile = false }: NotificationD
             ) : notifications.length === 0 ? (
               <div className="p-8 text-center text-muted-foreground">
                 <Bell className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                <p>ไม่มีการแจ้งเตือน</p>
+                <p>{t("noNotifications")}</p>
               </div>
             ) : (
               notifications.map((n) => {
@@ -424,7 +426,7 @@ export default function NotificationDropdown({ isMobile = false }: NotificationD
           {notifications.length > 0 && (
             <div className="p-3 border-t text-center">
               <Button variant="ghost" size="sm" onClick={() => (window.location.href = "/notifications")}>
-                ดูทั้งหมด →
+                {t("viewAll")}
               </Button>
             </div>
           )}
