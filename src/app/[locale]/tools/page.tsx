@@ -5,11 +5,15 @@ import { client } from '@/lib/sanity';
 
 const inter = Inter({ subsets: ['latin'] });
 
-// Metadata สำหรับ SEO
-export async function generateMetadata() {
+import { getTranslations } from 'next-intl/server';
+import { locales } from '@/app/[locale]/lib/navigation';
+
+export async function generateMetadata({ params }: { params: { locale?: string } }) {
+  const locale = (params?.locale || 'en') as (typeof locales)[number];
+  const t = await getTranslations({ locale, namespace: 'Tools' });
   return {
-    title: 'เครื่องมือสุดเจ๋งของเรา',
-    description: 'ค้นพบเครื่องมือที่ช่วยจัดการเกม แปลภาษา และใช้งานได้ทุกแพลตฟอร์ม',
+    title: t('title') + ' | Chanomhub',
+    description: t('description'),
     keywords: ['Chanomhub', 'เครื่องมือ', 'โปรแกรม', 'T++', 'Chanomhub-Desktop', 'Chanomhub-Multiplatform', 'nst'],
   };
 }

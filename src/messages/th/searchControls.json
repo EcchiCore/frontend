@@ -8,5 +8,12 @@
   "tag": "แท็ก",
   "engine": "เอนจิ้น",
   "gameCode": "รหัสเกม",
-  "clearFilters": "ล้างตัวกรองทั้งหมด"
+  "clearFilters": "ล้างตัวกรองทั้งหมด",
+  "matchingTags": "แท็กที่ตรงกัน",
+  "searchFor": "ค้นหา \"{query}\"",
+  "moreTags": "+{count} แท็กทั้งหมด",
+  "selectGameTags": "เลือกแท็กเกม ({count})",
+  "searchTagsPlaceholder": "ค้นหาแท็ก...",
+  "noTagsFound": "ไม่พบแท็กที่ตรงกับ \"{query}\"",
+  "all": "ทั้งหมด"
 }

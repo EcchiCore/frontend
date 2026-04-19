@@ -2,6 +2,7 @@
 "use client";
 
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 
 // Platform color mapping similar to GameCard
 const getPlatformColor = (platform: string) => {
@@ -32,6 +33,7 @@ interface CategoriesCardProps {
 }
 
 export default function CategoriesCard({ platforms }: CategoriesCardProps) {
+  const t = useTranslations("CategoriesCard");
   // Show top 10 platforms by article count
   const topPlatforms = platforms.slice(0, 10);
 
@@ -40,9 +42,9 @@ export default function CategoriesCard({ platforms }: CategoriesCardProps) {
       <div className="border border-border rounded p-2 bg-card">
         <div className="text-xs font-semibold mb-2 px-1 flex items-center space-x-2">
           <div className="w-0.5 h-4 bg-primary"></div>
-          <span>แพลตฟอร์ม</span>
+          <span>{t("platforms")}</span>
         </div>
-        <div className="text-xs text-muted-foreground px-1">กำลังโหลด...</div>
+        <div className="text-xs text-muted-foreground px-1">{t("loading")}</div>
       </div>
     );
   }
@@ -51,7 +53,7 @@ export default function CategoriesCard({ platforms }: CategoriesCardProps) {
     <div className="border border-border rounded p-2 bg-card">
       <div className="text-xs font-semibold mb-2 px-1 flex items-center space-x-2">
         <div className="w-0.5 h-4 bg-primary"></div>
-        <span>แพลตฟอร์ม</span>
+        <span>{t("platforms")}</span>
       </div>
       <div className="space-y-0.5">
         {topPlatforms.map((platform) => {

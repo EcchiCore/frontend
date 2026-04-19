@@ -1,0 +1,16 @@
+{
+  "title": "เครื่องมือสุดเจ๋งของเรา",
+  "description": "ค้นพบเครื่องมือที่ช่วยให้คุณจัดการเกม แปลภาษา และใช้งานได้ทุกแพลตฟอร์ม!",
+  "keywords": ["Chanomhub", "เครื่องมือ", "โปรแกรม", "T++", "Chanomhub-Desktop", "Chanomhub-Multiplatform", "nst"],
+  "newest": "ใหม่ล่าสุด",
+  "ours": "ของเรา",
+  "selectVersion": "เลือกเวอร์ชัน:",
+  "newestSuffix": " (ใหม่ล่าสุด)",
+  "updateDetails": "รายละเอียดการอัปเดต",
+  "download": "ดาวน์โหลด",
+  "hideVideo": "ซ่อนคลิป",
+  "watchPreview": "ดูคลิปตัวอย่าง",
+  "noTools": "ยังไม่มีเครื่องมือให้แสดงในขณะนี้",
+  "toolsForComputer": "เครื่องมือสำหรับคอมพิวเตอร์",
+  "toolsForMobile": "เครื่องมือสำหรับมือถือ"
+}

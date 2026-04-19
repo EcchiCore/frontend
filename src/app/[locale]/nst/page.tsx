@@ -25,16 +25,21 @@ import {
 } from "@/components/ui/collapsible";
 
 import Image from "next/image";
-import { Metadata } from 'next';
+import { getTranslations } from 'next-intl/server';
+import { locales } from '@/app/[locale]/lib/navigation';
 import { TriangleAlert, Download, Calendar, FileArchive, ChevronDown, Tag } from 'lucide-react';
 
-export const metadata: Metadata = {
-  title: 'NST: Game Translator for Linux | Chanomhub',
-  description: 'ดาวน์โหลด NST โปรแกรมแปลเกมสำหรับ Linux ที่เขียนด้วย C++ เพื่อประสิทธิภาพสูงสุด แปลเกมที่คุณชื่นชอบได้ง่ายๆ และทลายกำแพงภาษาในโลกของเกม',
-  icons: {
-    icon: 'https://cdn.chanomhub.com/icon.png',
-  },
-};
+export async function generateMetadata({ params }: { params: { locale?: string } }) {
+  const locale = (params?.locale || 'en') as (typeof locales)[number];
+  const t = await getTranslations({ locale, namespace: 'NstPage' });
+  return {
+    title: t('title'),
+    description: t('description'),
+    icons: {
+      icon: 'https://cdn.chanomhub.com/icon.png',
+    },
+  };
+}
 
 // SVG Icon Components
 const LinuxIcon = (props: React.SVGProps<SVGSVGElement>) => (
@@ -130,7 +135,7 @@ async function getAllReleases(): Promise<GitHubRelease[]> {
 }
 
 // Release Card Component
-function ReleaseCard({ release, isLatest = false }: { release: GitHubRelease; isLatest?: boolean }) {
+function ReleaseCard({ release, isLatest = false, t }: { release: GitHubRelease; isLatest?: boolean; t: any }) {
   const linuxAsset = release.assets.find(a =>
     (a.name.toLowerCase().includes('linux') || a.name.toLowerCase().includes('x86_64')) &&
     (a.name.endsWith('.tar.gz') || a.name.endsWith('.tar.xz') || a.name.endsWith('.AppImage'))
@@ -152,7 +157,7 @@ function ReleaseCard({ release, isLatest = false }: { release: GitHubRelease; is
               <CardTitle className="text-xl">{release.name || release.tag_name}</CardTitle>
               {isLatest && (
                 <span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary ring-1 ring-inset ring-primary/20">
-                  ล่าสุด
+                  {t('latest')}
                 </span>
               )}
               {release.prerelease && (
@@ -172,7 +177,7 @@ function ReleaseCard({ release, isLatest = false }: { release: GitHubRelease; is
           {totalDownloads > 0 && (
             <div className="text-right ml-4">
               <div className="text-2xl font-bold text-primary">{totalDownloads.toLocaleString()}</div>
-              <div className="text-xs text-muted-foreground">ดาวน์โหลด</div>
+              <div className="text-xs text-muted-foreground">{t('downloads')}</div>
             </div>
           )}
         </div>
@@ -191,7 +196,7 @@ function ReleaseCard({ release, isLatest = false }: { release: GitHubRelease; is
               <div className="mt-1.5 text-center space-y-0.5">
                 <p className="text-xs text-muted-foreground">{formatFileSize(linuxAsset.size)}</p>
                 <p className="text-xs text-muted-foreground">
-                  {linuxAsset.download_count.toLocaleString()} ครั้ง
+                  {linuxAsset.download_count.toLocaleString()} {t('times')}
                 </p>
               </div>
             </div>
@@ -213,7 +218,7 @@ function ReleaseCard({ release, isLatest = false }: { release: GitHubRelease; is
               <div className="mt-1.5 text-center space-y-0.5">
                 <p className="text-xs text-muted-foreground">{formatFileSize(windowsAsset.size)}</p>
                 <p className="text-xs text-muted-foreground">
-                  {windowsAsset.download_count.toLocaleString()} ครั้ง
+                  {windowsAsset.download_count.toLocaleString()} {t('times')}
                 </p>
               </div>
             </div>
@@ -249,7 +254,7 @@ function ReleaseCard({ release, isLatest = false }: { release: GitHubRelease; is
           <Collapsible>
             <CollapsibleTrigger asChild>
               <Button variant="ghost" size="sm" className="w-full justify-between">
-                <span>ไฟล์ทั้งหมด ({release.assets.length})</span>
+                <span>{t('allFiles')} ({release.assets.length})</span>
                 <ChevronDown className="h-4 w-4" />
               </Button>
             </CollapsibleTrigger>
@@ -262,7 +267,7 @@ function ReleaseCard({ release, isLatest = false }: { release: GitHubRelease; is
                       <div className="flex-1 min-w-0">
                         <p className="font-medium text-xs truncate">{asset.name}</p>
                         <p className="text-xs text-muted-foreground">
-                          {formatFileSize(asset.size)} • {asset.download_count.toLocaleString()} ครั้ง
+                          {formatFileSize(asset.size)} • {asset.download_count.toLocaleString()} {t('times')}
                         </p>
                       </div>
                     </div>
@@ -281,7 +286,7 @@ function ReleaseCard({ release, isLatest = false }: { release: GitHubRelease; is
         <div className="pt-2">
           <Button asChild variant="link" size="sm" className="w-full text-xs">
             <a href={release.html_url} target="_blank" rel="noopener noreferrer">
-              ดูรายละเอียดบน GitHub →
+              {t('viewDetails')}
             </a>
           </Button>
         </div>
@@ -291,6 +296,7 @@ function ReleaseCard({ release, isLatest = false }: { release: GitHubRelease; is
 }
 
 export default async function NstPromotionPage() {
+  const t = await getTranslations('NstPage');
   const allReleases = await getAllReleases();
   const latestRelease = allReleases[0] || null;
   const olderReleases = allReleases.slice(1);
@@ -302,23 +308,23 @@ export default async function NstPromotionPage() {
 
   const features = [
     {
-      name: "สร้างเพื่อ Linux",
-      description: "ออกแบบและพัฒนามาเพื่อทำงานบน Linux ได้อย่างราบรื่น",
+      name: t('builtForLinux'),
+      description: t('builtForLinuxDesc'),
       icon: LinuxIcon,
     },
     {
-      name: "ประสิทธิภาพสูงด้วย C++",
-      description: "เขียนด้วย C++ ทั้งหมด มั่นใจในความเร็วและทรัพยากรที่ต่ำ",
+      name: t('highPerformance'),
+      description: t('highPerformanceDesc'),
       icon: ZapIcon,
     },
     {
-      name: "แปลแบบ Real-time (คาดการณ์)",
-      description: "แสดงคำแปลทันที (รอการยืนยันฟีเจอร์)",
+      name: t('realTimeTranslation'),
+      description: t('realTimeTranslationDesc'),
       icon: ClockIcon,
     },
     {
-      name: "ฟรีและใช้งานง่าย",
-      description: "ดาวน์โหลดและเริ่มใช้งานได้ทันที ไม่มีค่าใช้จ่าย",
+      name: t('freeAndEasy'),
+      description: t('freeAndEasyDesc'),
       icon: GiftIcon,
     },
   ];
@@ -338,11 +344,11 @@ export default async function NstPromotionPage() {
             <h1 className="text-3xl font-bold">NST: Game Translator for Linux</h1>
           </div>
           <p className="text-muted-foreground">
-            โปรแกรมแปลเกมบน Linux ที่เขียนด้วย C++ เพื่อประสิทธิภาพสูงสุด
+            {t('subtitle')}
           </p>
           {totalDownloads > 0 && (
             <p className="text-sm text-muted-foreground mt-2">
-              ดาวน์โหลดทั้งหมด: <span className="font-bold text-primary">{totalDownloads.toLocaleString()}</span> ครั้ง
+              {t('totalDownloads')}: <span className="font-bold text-primary">{totalDownloads.toLocaleString()}</span> {t('times')}
             </p>
           )}
         </header>
@@ -352,9 +358,9 @@ export default async function NstPromotionPage() {
             {/* Screenshot */}
             <Card>
               <CardHeader>
-                <CardTitle>ภาพรวม</CardTitle>
+                <CardTitle>{t('overview')}</CardTitle>
                 <CardDescription>
-                  ภาพหน้าจอของแอปพลิเคชัน NST ขณะทำงาน
+                  {t('overviewDesc')}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -371,26 +377,26 @@ export default async function NstPromotionPage() {
             {/* Releases Section */}
             <Card>
               <CardHeader>
-                <CardTitle>เวอร์ชันทั้งหมด</CardTitle>
+                <CardTitle>{t('allVersions')}</CardTitle>
                 <CardDescription>
-                  ดาวน์โหลด NST เวอร์ชันต่างๆ พร้อม Release Notes
+                  {t('allVersionsDesc')}
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <Tabs defaultValue="latest" className="w-full">
                   <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="latest">เวอร์ชันล่าสุด</TabsTrigger>
-                    <TabsTrigger value="older">เวอร์ชันเก่า ({olderReleases.length})</TabsTrigger>
+                    <TabsTrigger value="latest">{t('latestVersion')}</TabsTrigger>
+                    <TabsTrigger value="older">{t('olderVersions')} ({olderReleases.length})</TabsTrigger>
                   </TabsList>
 
                   <TabsContent value="latest" className="mt-4">
                     {latestRelease ? (
-                      <ReleaseCard release={latestRelease} isLatest={true} />
+                      <ReleaseCard release={latestRelease} isLatest={true} t={t} />
                     ) : (
                       <Alert>
-                        <AlertTitle>ไม่พบข้อมูล</AlertTitle>
+                        <AlertTitle>{t('noDataFound')}</AlertTitle>
                         <AlertDescription>
-                          ไม่สามารถโหลดข้อมูล Release ได้ กรุณาลองใหม่อีกครั้ง
+                          {t('unableToLoad')}
                         </AlertDescription>
                       </Alert>
                     )}
@@ -399,13 +405,13 @@ export default async function NstPromotionPage() {
                   <TabsContent value="older" className="mt-4 space-y-4">
                     {olderReleases.length > 0 ? (
                       olderReleases.map((release) => (
-                        <ReleaseCard key={release.id} release={release} />
+                        <ReleaseCard key={release.id} release={release} t={t} />
                       ))
                     ) : (
                       <Alert>
-                        <AlertTitle>ยังไม่มีเวอร์ชันเก่า</AlertTitle>
+                        <AlertTitle>{t('noOlderVersions')}</AlertTitle>
                         <AlertDescription>
-                          ขณะนี้มีเฉพาะเวอร์ชันล่าสุดเท่านั้น
+                          {t('onlyLatestAvailable')}
                         </AlertDescription>
                       </Alert>
                     )}
@@ -418,13 +424,13 @@ export default async function NstPromotionPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <span>เวอร์ชัน Legacy (v0.3 - Rust)</span>
+                  <span>{t('legacyVersion')}</span>
                   <span className="inline-flex items-center rounded-full bg-orange-500/10 px-2.5 py-0.5 text-xs font-medium text-orange-500 ring-1 ring-inset ring-orange-500/20">
                     Rust
                   </span>
                 </CardTitle>
                 <CardDescription>
-                  เวอร์ชันเดิมที่เขียนด้วย Rust ก่อนที่จะ Rewrite ใหม่เป็น C++
+                  {t('legacyVersionDesc')}
                 </CardDescription>
               </CardHeader>
               <CardContent className="grid grid-cols-2 gap-4">
@@ -444,9 +450,9 @@ export default async function NstPromotionPage() {
               <CardFooter>
                 <Alert variant="destructive">
                   <TriangleAlert className="h-4 w-4" />
-                  <AlertTitle>คำเตือน</AlertTitle>
+                  <AlertTitle>{t('warning')}</AlertTitle>
                   <AlertDescription>
-                    เวอร์ชัน Rust นี้ไม่ได้รับการอัปเดตอีกต่อไป โปรเจกต์ได้ถูก Rewrite ใหม่ด้วย C++ แนะนำให้ใช้เวอร์ชันใหม่จาก GitHub แทน
+                    {t('warningDesc')}
                   </AlertDescription>
                 </Alert>
               </CardFooter>
@@ -457,9 +463,9 @@ export default async function NstPromotionPage() {
           <div className="space-y-8">
             <Card>
               <CardHeader className="text-center">
-                <CardTitle>ฟีเจอร์เด่น</CardTitle>
+                <CardTitle>{t('keyFeatures')}</CardTitle>
                 <CardDescription>
-                  สร้างมาให้เล็ก ใช้งานง่าย และมีประสิทธิภาพ
+                  {t('keyFeaturesDesc')}
                 </CardDescription>
               </CardHeader>
               <CardContent className="grid grid-cols-2 gap-x-6 gap-y-8">
@@ -479,7 +485,7 @@ export default async function NstPromotionPage() {
 
             <Card>
               <CardHeader>
-                <CardTitle>ลิงก์ที่เกี่ยวข้อง</CardTitle>
+                <CardTitle>{t('relatedLinks')}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
                 <Button asChild variant="outline" className="w-full justify-start">
@@ -493,7 +499,7 @@ export default async function NstPromotionPage() {
                 <Button asChild variant="outline" className="w-full justify-start">
                   <a href="https://github.com/NST-Ghost/NST-Ghost/issues" target="_blank" rel="noopener noreferrer">
                     <TriangleAlert className="mr-2 h-4 w-4" />
-                    รายงานปัญหา / แนะนำ
+                    {t('reportIssue')}
                   </a>
                 </Button>
               </CardContent>

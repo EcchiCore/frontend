@@ -6,9 +6,15 @@ import SearchControlsWrapper from "./components/SearchControlsWrapper"
 import DonationSidebarWidget from "@/components/DonationSidebarWidget"
 import DonationCTA from "@/components/DonationCTA"
 
-export const metadata = {
-  title: "เกมคลับ",
-  description: "ค้นหาและสำรวจเกมที่คุณชื่นชอบ",
+import { getTranslations } from "next-intl/server"
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+  const resolvedParams = await params;
+  const t = await getTranslations({ locale: resolvedParams.locale, namespace: "GamesPage" })
+  return {
+    title: t("clubTitle"),
+    description: t("clubDescription"),
+  }
 }
 
 type PageProps = {
@@ -16,11 +22,12 @@ type PageProps = {
 }
 
 export default async function GamesPage({ searchParams }: PageProps) {
+  const t = await getTranslations("GamesPage")
   return (
     <>
       <div className="min-h-screen bg-background">
         <div className="container mx-auto px-4 py-6">
-          <h1 className="sr-only">เกมคลับ - ค้นหาและสำรวจเกมที่คุณชื่นชอบ</h1>
+          <h1 className="sr-only">{t("clubH1")}</h1>
           <DonationCTA />
 
           {/* Search bar — visible on ALL breakpoints */}

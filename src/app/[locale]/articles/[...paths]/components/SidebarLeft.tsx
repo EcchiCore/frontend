@@ -8,11 +8,13 @@ import { Separator } from "@/components/ui/separator";
 import { MessageCircle, Trophy, Medal, Award } from "lucide-react";
 import { SidebarLeftProps } from "./Interfaces";
 import { getImageUrl } from "@/lib/imageUrl";
+import { useTranslations } from "next-intl";
 
 const SidebarLeft: React.FC<SidebarLeftProps> = ({
   article,
   topCommenters,
 }) => {
+  const t = useTranslations("ArticleContent");
 
   // Get optimized image URL via imgproxy
   const mainImageUrl = getImageUrl(
@@ -60,7 +62,7 @@ const SidebarLeft: React.FC<SidebarLeftProps> = ({
                 <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 <Image
                   src={mainImageUrl}
-                  alt="ภาพหลักของบทความ"
+                  alt={t('mainArticleImage')}
                   fill
                   className="object-cover transition-transform duration-500 group-hover:scale-105"
                   sizes="(max-width: 768px) 100vw, 300px"
@@ -125,7 +127,7 @@ const SidebarLeft: React.FC<SidebarLeftProps> = ({
                       <MessageCircle className="w-4 h-4 text-white" />
                     </div>
                     <h3 className="text-lg font-semibold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                      ผู้แสดงความคิดเห็นสูงสุด
+                      {t('topCommenters')}
                     </h3>
                   </div>
 
@@ -159,7 +161,7 @@ const SidebarLeft: React.FC<SidebarLeftProps> = ({
                             <div className="flex items-center gap-2 mt-1">
                               <Badge variant="secondary" className="text-xs px-2 py-0.5">
                                 <MessageCircle className="w-3 h-3 mr-1" />
-                                {commenter.count} ความคิดเห็น
+                                {t('commentsCount', { count: commenter.count })}
                               </Badge>
                             </div>
                           </div>

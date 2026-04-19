@@ -5,25 +5,13 @@ import Link from 'next/link';
 import Image from 'next/image';
 import type { ArticleListItem } from '@chanomhub/sdk';
 import imageLoader from '@/lib/imageLoader';
+import { useFormatter, useTranslations } from 'next-intl';
 
 interface ArticleShelfProps {
   title: string;
   posts: ArticleListItem[];
   loading?: boolean;
   href?: string;
-}
-
-function getRelativeTime(dateString: string): string {
-  const now = new Date();
-  const past = new Date(dateString);
-  const diffMs = now.getTime() - past.getTime();
-  const diffMins = Math.floor(diffMs / 60000);
-  const diffHours = Math.floor(diffMins / 60);
-  const diffDays = Math.floor(diffHours / 24);
-  if (diffMins < 60) return `${diffMins}น.`;
-  if (diffHours < 24) return `${diffHours}ชม.`;
-  if (diffDays < 7) return `${diffDays}วัน`;
-  return new Date(dateString).toLocaleDateString('th-TH', { day: 'numeric', month: 'short' });
 }
 
 const gradients = [
@@ -38,10 +26,11 @@ function ArticleCard({ post, index }: { post: ArticleListItem; index: number }) 
   const [imageError, setImageError] = useState(false);
   const [timeString, setTimeString] = useState('');
   const src = post.coverImage || post.mainImage || null;
+  const format = useFormatter();
 
   useEffect(() => {
-    setTimeString(getRelativeTime(post.createdAt));
-  }, [post.createdAt]);
+    setTimeString(format.relativeTime(new Date(post.createdAt)));
+  }, [post.createdAt, format]);
 
   return (
     <Link
@@ -108,6 +97,7 @@ function SkeletonCard() {
 }
 
 export default function ArticleShelf({ title, posts, loading, href }: ArticleShelfProps) {
+  const t = useTranslations('Shelf');
   return (
     <section className="mb-8">
       {/* Header */}
@@ -118,7 +108,7 @@ export default function ArticleShelf({ title, posts, loading, href }: ArticleShe
         </div>
         {href && (
           <Link href={href} className="text-[11px] font-semibold text-primary hover:opacity-80 transition-opacity flex items-center gap-1">
-            ดูทั้งหมด <span>→</span>
+            {t('viewAll')} <span>→</span>
           </Link>
         )}
       </div>

@@ -21,8 +21,10 @@ import {
 } from '@/components/ui/dialog';
 import { Loader2, Plus, Pencil, Trash2, ExternalLink, Megaphone } from 'lucide-react';
 import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 
 export function SponsoredArticlesTab() {
+    const t = useTranslations('SponsoredArticlesTab');
     const [items, setItems] = useState<SponsoredArticle[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -69,14 +71,14 @@ export function SponsoredArticlesTab() {
 
     const handleCreate = async () => {
         if (!createForm.articleId) {
-            toast.error('กรุณาระบุ Article ID');
+            toast.error(t('requireArticleId'));
             return;
         }
         try {
             setCreating(true);
             const sdk = await getSdk();
             await sdk.sponsoredArticles.create(createForm);
-            toast.success('สร้าง Sponsored Article สำเร็จ');
+            toast.success(t('createSuccess'));
             setCreateOpen(false);
             setCreateForm({
                 articleId: 0,
@@ -88,7 +90,7 @@ export function SponsoredArticlesTab() {
             });
             fetchItems();
         } catch (err: any) {
-            toast.error(err?.message || 'เกิดข้อผิดพลาดในการสร้าง');
+            toast.error(err?.message || t('createError'));
         } finally {
             setCreating(false);
         }
@@ -100,27 +102,27 @@ export function SponsoredArticlesTab() {
             setEditing(true);
             const sdk = await getSdk();
             await sdk.sponsoredArticles.update(editTarget.id, editForm);
-            toast.success('อัพเดท Sponsored Article สำเร็จ');
+            toast.success(t('updateSuccess'));
             setEditOpen(false);
             setEditTarget(null);
             fetchItems();
         } catch (err: any) {
-            toast.error(err?.message || 'เกิดข้อผิดพลาดในการอัพเดท');
+            toast.error(err?.message || t('updateError'));
         } finally {
             setEditing(false);
         }
     };
 
     const handleDelete = async (id: number) => {
-        if (!confirm('คุณต้องการลบ Sponsored Article นี้หรือไม่?')) return;
+        if (!confirm(t('confirmDelete'))) return;
         try {
             setDeleting(id);
             const sdk = await getSdk();
             await sdk.sponsoredArticles.delete(id);
-            toast.success('ลบ Sponsored Article สำเร็จ');
+            toast.success(t('deleteSuccess'));
             fetchItems();
         } catch (err: any) {
-            toast.error(err?.message || 'เกิดข้อผิดพลาดในการลบ');
+            toast.error(err?.message || 'Error occurred while deleting');
         } finally {
             setDeleting(null);
         }
@@ -142,10 +144,10 @@ export function SponsoredArticlesTab() {
         try {
             const sdk = await getSdk();
             await sdk.sponsoredArticles.update(item.id, { isActive: !item.isActive });
-            toast.success(`${!item.isActive ? 'เปิด' : 'ปิด'}ใช้งาน Sponsored Article`);
+            toast.success(`${!item.isActive ? 'Enabled' : 'Disabled'} ${t('toggleActive')}`);
             fetchItems();
         } catch (err: any) {
-            toast.error(err?.message || 'เกิดข้อผิดพลาด');
+            toast.error(err?.message || 'An error occurred');
         }
     };
 
@@ -158,7 +160,7 @@ export function SponsoredArticlesTab() {
                             <Megaphone className="h-5 w-5 text-amber-500" />
                             Sponsored Articles
                         </CardTitle>
-                        <CardDescription>จัดการบทความ Sponsored ที่แสดงบนหน้าแรก</CardDescription>
+                        <CardDescription>{t('manageDesc')}</CardDescription>
                     </div>
 
                     {/* Create Button */}
@@ -166,13 +168,13 @@ export function SponsoredArticlesTab() {
                         <DialogTrigger asChild>
                             <Button size="sm">
                                 <Plus className="h-4 w-4 mr-1" />
-                                เพิ่มใหม่
+                                {t('createNew')}
                             </Button>
                         </DialogTrigger>
                         <DialogContent>
                             <DialogHeader>
-                                <DialogTitle>สร้าง Sponsored Article</DialogTitle>
-                                <DialogDescription>เลือกบทความที่ต้องการ Sponsor แล้วตั้งค่า</DialogDescription>
+                                <DialogTitle>{t('createModalTitle')}</DialogTitle>
+                                <DialogDescription>{t('createModalDesc')}</DialogDescription>
                             </DialogHeader>
                             <div className="space-y-4 py-4">
                                 <div className="space-y-2">
@@ -180,7 +182,7 @@ export function SponsoredArticlesTab() {
                                     <Input
                                         id="articleId"
                                         type="number"
-                                        placeholder="ระบุ Article ID"
+                                        placeholder={t('placeholderArticleId')}
                                         value={createForm.articleId || ''}
                                         onChange={(e) => setCreateForm(prev => ({ ...prev, articleId: parseInt(e.target.value) || 0 }))}
                                     />
@@ -194,10 +196,10 @@ export function SponsoredArticlesTab() {
                                         value={createForm.priority ?? 0}
                                         onChange={(e) => setCreateForm(prev => ({ ...prev, priority: parseInt(e.target.value) || 0 }))}
                                     />
-                                    <p className="text-xs text-muted-foreground">ยิ่งตัวเลขสูง ยิ่งแสดงก่อน</p>
+                                    <p className="text-xs text-muted-foreground">{t('priorityDesc')}</p>
                                 </div>
                                 <div className="space-y-2">
-                                    <Label htmlFor="coverImage">Cover Image URL (ไม่บังคับ)</Label>
+                                    <Label htmlFor="coverImage">{t('coverImageOptional')}</Label>
                                     <Input
                                         id="coverImage"
                                         type="text"
@@ -205,11 +207,11 @@ export function SponsoredArticlesTab() {
                                         value={createForm.coverImage || ''}
                                         onChange={(e) => setCreateForm(prev => ({ ...prev, coverImage: e.target.value || null }))}
                                     />
-                                    <p className="text-xs text-muted-foreground">ถ้าไม่ระบุจะใช้ cover image ของบทความ</p>
+                                    <p className="text-xs text-muted-foreground">{t('coverImageDesc')}</p>
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-2">
-                                        <Label htmlFor="startDate">วันเริ่มต้น</Label>
+                                        <Label htmlFor="startDate">{t('startDate')}</Label>
                                         <Input
                                             id="startDate"
                                             type="date"
@@ -218,7 +220,7 @@ export function SponsoredArticlesTab() {
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <Label htmlFor="endDate">วันสิ้นสุด (ไม่บังคับ)</Label>
+                                        <Label htmlFor="endDate">{t('endDateOptional')}</Label>
                                         <Input
                                             id="endDate"
                                             type="date"
@@ -233,14 +235,14 @@ export function SponsoredArticlesTab() {
                                         checked={createForm.isActive ?? true}
                                         onCheckedChange={(checked) => setCreateForm(prev => ({ ...prev, isActive: checked }))}
                                     />
-                                    <Label htmlFor="isActive">เปิดใช้งานทันที</Label>
+                                    <Label htmlFor="isActive">{t('activeImmediately')}</Label>
                                 </div>
                             </div>
                             <DialogFooter>
-                                <Button variant="outline" onClick={() => setCreateOpen(false)}>ยกเลิก</Button>
+                                <Button variant="outline" onClick={() => setCreateOpen(false)}>{t('cancel')}</Button>
                                 <Button onClick={handleCreate} disabled={creating}>
                                     {creating && <Loader2 className="h-4 w-4 mr-1 animate-spin" />}
-                                    สร้าง
+                                    {t('create')}
                                 </Button>
                             </DialogFooter>
                         </DialogContent>
@@ -256,13 +258,13 @@ export function SponsoredArticlesTab() {
                 ) : error ? (
                     <div className="text-center p-8 space-y-2">
                         <p className="text-red-500">{error}</p>
-                        <Button variant="outline" size="sm" onClick={fetchItems}>ลองใหม่</Button>
+                        <Button variant="outline" size="sm" onClick={fetchItems}>{t('tryAgain')}</Button>
                     </div>
                 ) : items.length === 0 ? (
                     <div className="text-center p-12 space-y-2">
                         <Megaphone className="h-12 w-12 text-muted-foreground mx-auto" />
-                        <p className="text-muted-foreground">ยังไม่มี Sponsored Article</p>
-                        <p className="text-xs text-muted-foreground">คลิก "เพิ่มใหม่" เพื่อเริ่มต้น</p>
+                        <p className="text-muted-foreground">{t('noArticles')}</p>
+                        <p className="text-xs text-muted-foreground">{t('clickToCreate')}</p>
                     </div>
                 ) : (
                     <Table>
@@ -270,9 +272,9 @@ export function SponsoredArticlesTab() {
                             <TableRow>
                                 <TableHead>Article</TableHead>
                                 <TableHead className="w-20 text-center">Priority</TableHead>
-                                <TableHead className="w-24 text-center">สถานะ</TableHead>
-                                <TableHead className="w-28">เริ่มต้น</TableHead>
-                                <TableHead className="w-28">สิ้นสุด</TableHead>
+                                <TableHead className="w-24 text-center">{t('status')}</TableHead>
+                                <TableHead className="w-28">{t('startDateHeader')}</TableHead>
+                                <TableHead className="w-28">{t('endDateHeader')}</TableHead>
                                 <TableHead className="w-32 text-right">Actions</TableHead>
                             </TableRow>
                         </TableHeader>
@@ -289,7 +291,7 @@ export function SponsoredArticlesTab() {
                                                 </div>
                                                 {isExpired && (
                                                     <Badge variant="destructive" className="h-5 px-1.5 text-[10px] uppercase">
-                                                        หมดอายุ
+                                                        {t('expired')}
                                                     </Badge>
                                                 )}
                                             </div>
@@ -312,7 +314,7 @@ export function SponsoredArticlesTab() {
                                                 {item.article?.author && (
                                                     <>
                                                         <span>•</span>
-                                                        <span>โดย {item.article.author.name}</span>
+                                                        <span>{t('byAuthor', { name: item.article.author.name })}</span>
                                                     </>
                                                 )}
                                             </div>
@@ -328,14 +330,14 @@ export function SponsoredArticlesTab() {
                                         {item.startDate ? new Date(item.startDate).toLocaleDateString('th-TH') : '-'}
                                     </TableCell>
                                     <TableCell className="text-xs">
-                                        {item.endDate ? new Date(item.endDate).toLocaleDateString('th-TH') : 'ไม่กำหนด'}
+                                        {item.endDate ? new Date(item.endDate).toLocaleDateString('th-TH') : t('notSet')}
                                     </TableCell>
                                     <TableCell className="text-right space-x-1">
                                         <Button
                                             variant="ghost"
                                             size="icon"
                                             onClick={() => window.open(`/articles/${item.article?.slug}?id=${item.articleId}`, '_blank')}
-                                            title="ดูบทความ"
+                                            title={t('viewArticle')}
                                         >
                                             <ExternalLink className="h-4 w-4" />
                                         </Button>
@@ -343,7 +345,7 @@ export function SponsoredArticlesTab() {
                                             variant="ghost"
                                             size="icon"
                                             onClick={() => openEditDialog(item)}
-                                            title="แก้ไข"
+                                            title={t('edit')}
                                         >
                                             <Pencil className="h-4 w-4" />
                                         </Button>
@@ -352,7 +354,7 @@ export function SponsoredArticlesTab() {
                                             size="icon"
                                             onClick={() => handleDelete(item.id)}
                                             disabled={deleting === item.id}
-                                            title="ลบ"
+                                            title={t('delete')}
                                         >
                                             {deleting === item.id ? (
                                                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -373,7 +375,7 @@ export function SponsoredArticlesTab() {
             <Dialog open={editOpen} onOpenChange={setEditOpen}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>แก้ไข Sponsored Article</DialogTitle>
+                        <DialogTitle>{t('editModalTitle')}</DialogTitle>
                         <DialogDescription>
                             {editTarget?.article?.title || `Article #${editTarget?.articleId}`}
                         </DialogDescription>
@@ -400,7 +402,7 @@ export function SponsoredArticlesTab() {
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
-                                <Label htmlFor="edit-startDate">วันเริ่มต้น</Label>
+                                <Label htmlFor="edit-startDate">{t('startDate')}</Label>
                                 <Input
                                     id="edit-startDate"
                                     type="date"
@@ -409,7 +411,7 @@ export function SponsoredArticlesTab() {
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="edit-endDate">วันสิ้นสุด</Label>
+                                <Label htmlFor="edit-endDate">{t('endDate')}</Label>
                                 <Input
                                     id="edit-endDate"
                                     type="date"
@@ -424,14 +426,14 @@ export function SponsoredArticlesTab() {
                                 checked={editForm.isActive ?? true}
                                 onCheckedChange={(checked) => setEditForm(prev => ({ ...prev, isActive: checked }))}
                             />
-                            <Label htmlFor="edit-isActive">เปิดใช้งาน</Label>
+                            <Label htmlFor="edit-isActive">{t('isActive')}</Label>
                         </div>
                     </div>
                     <DialogFooter>
-                        <Button variant="outline" onClick={() => setEditOpen(false)}>ยกเลิก</Button>
+                        <Button variant="outline" onClick={() => setEditOpen(false)}>{t('cancel')}</Button>
                         <Button onClick={handleEdit} disabled={editing}>
                             {editing && <Loader2 className="h-4 w-4 mr-1 animate-spin" />}
-                            บันทึก
+                            {t('save')}
                         </Button>
                     </DialogFooter>
                 </DialogContent>

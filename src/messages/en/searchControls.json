@@ -8,5 +8,12 @@
   "tag": "Tag",
   "engine": "Engine",
   "gameCode": "Game Code",
-  "clearFilters": "Clear All Filters"
+  "clearFilters": "Clear All Filters",
+  "matchingTags": "Matching Tags",
+  "searchFor": "Search for \"{query}\"",
+  "moreTags": "+{count} All Tags",
+  "selectGameTags": "Select Game Tags ({count})",
+  "searchTagsPlaceholder": "Search tags...",
+  "noTagsFound": "No tags matching \"{query}\"",
+  "all": "All"
 }

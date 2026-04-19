@@ -35,6 +35,8 @@ interface ArticleInfoSidebarProps extends SidebarRightProps {
   article: Article;
 }
 
+import { useTranslations } from "next-intl";
+
 const ArticleInfoSidebar: React.FC<ArticleInfoSidebarProps> = ({
   article,
   isCurrentUserAuthor,
@@ -46,8 +48,7 @@ const ArticleInfoSidebar: React.FC<ArticleInfoSidebarProps> = ({
   handlePurchase,
   isPurchasing,
 }) => {
-  // The t variable is not used in this component, so useTranslations is commented out.
-  // const t = useTranslations("sidebar");
+  const t = useTranslations("ArticleContent");
 
   const getStatusText = (status: string) => {
     switch (status) {
@@ -142,7 +143,7 @@ const ArticleInfoSidebar: React.FC<ArticleInfoSidebarProps> = ({
             {article.isPaid && !article.isUnlocked ? (
               <div className="space-y-3">
                 <p className="text-xs text-amber-600 font-medium bg-amber-50 dark:bg-amber-500/10 p-2 rounded border border-amber-200 dark:border-amber-500/20">
-                  ต้องซื้อบทความนี้ก่อนจึงจะสามารถเข้าถึงไฟล์ดาวน์โหลดได้
+                  {t('needPurchaseToDownload')}
                 </p>
                 <Button 
                   variant="default"
@@ -409,7 +410,7 @@ const ArticleInfoSidebar: React.FC<ArticleInfoSidebarProps> = ({
             {article.isPaid && !article.isUnlocked ? (
               <div className="space-y-3">
                 <p className="text-xs text-amber-600 font-medium bg-amber-50 dark:bg-amber-500/10 p-2 rounded border border-amber-200 dark:border-amber-500/20">
-                  ต้องซื้อบทความนี้ก่อนจึงจะสามารถเข้าถึงไฟล์ดาวน์โหลดได้
+                  {t('needPurchaseToDownload')}
                 </p>
                 <Button 
                   variant="default"

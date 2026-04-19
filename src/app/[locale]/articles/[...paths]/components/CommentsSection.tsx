@@ -4,6 +4,7 @@ import { CommentsSectionProps } from "./Interfaces";
 import { Trash } from "lucide-react";
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { useTranslations } from 'next-intl';
 
 const CommentsSection: React.FC<CommentsSectionProps> = ({
                                                            isAuthenticated,
@@ -16,6 +17,7 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({
                                                            isLoading,
                                                          }) => {
   const commentInputRef = useRef<HTMLTextAreaElement>(null);
+  const t = useTranslations('ArticleContent');
 
   const formatDate = (date: string) =>
     new Date(date).toLocaleDateString("th-TH", {
@@ -26,11 +28,11 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({
   
   return (
   <div className="mt-8 border-t border-border pt-6">
-    <h2 className="text-xl font-semibold mb-2 text-foreground">ความคิดเห็น</h2>
+    <h2 className="text-xl font-semibold mb-2 text-foreground">{t('commentsTitle')}</h2>
 
     {isLoading ? (
       <div className="text-center py-8 text-muted-foreground">
-        กำลังโหลดความคิดเห็น...
+        {t('loadingComments')}
       </div>
     ) : (
       <>
@@ -43,20 +45,20 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({
                 rows={3}
                 value={newComment}
                 onChange={(e) => setNewComment(e.target.value)}
-                placeholder="เขียนความคิดเห็นของคุณ..."
+                placeholder={t('writeComment')}
               />
               <Button
                 onClick={handleAddComment}
                 disabled={!newComment.trim()}
               >
-                ส่ง
+                {t('submitComment')}
               </Button>
             </div>
           </div>
         )}
 
         <p className="text-sm text-muted-foreground mb-6">
-          ทั้งหมด {comments?.length || 0} ความคิดเห็น
+          {t('totalComments', { count: comments?.length || 0 })}
         </p>
 
         <div className="space-y-4">
@@ -91,7 +93,7 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({
               </div>
             ))
           ) : (
-            <p className="text-center text-muted-foreground py-8">ยังไม่มีความคิดเห็น</p>
+            <p className="text-center text-muted-foreground py-8">{t('noComments')}</p>
           )}
         </div>
       </>

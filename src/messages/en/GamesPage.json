@@ -14,6 +14,9 @@
     "title": "Games - ChanomHub",
     "description": "Browse our collection of adult games and visual novels. Download free games, mods, and translations."
   },
+  "clubTitle": "Games Club",
+  "clubDescription": "Find and explore your favorite games",
+  "clubH1": "Games Club - Find and explore your favorite games",
   "debug": {
     "title": "🐛 Debug Info (Page {0}) - CLIENT SIDE",
     "urlParams": "URL Search Params",

@@ -69,7 +69,7 @@ const ArticleBody: React.FC<ArticleBodyProps> = ({
             <CardContent className="p-0 relative w-full h-full">
               <Image
                 src={getImageUrl(selectedImage, 'gallery') || selectedImage}
-                alt="ภาพที่เลือก"
+                alt={t("selectedImageAlt")}
                 fill
                 className="object-contain rounded-xl cursor-pointer transition-transform duration-300 hover:scale-105"
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 600px"

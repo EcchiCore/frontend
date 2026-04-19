@@ -1,10 +1,10 @@
 "use client";
 
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 
-const pills = [
-  { icon: '🎮', label: 'ทั้งหมด',    href: '/games',                              param: '' },
+const getPills = (t: any) => [
+  { icon: '🎮', label: t('all'),    href: '/games',                              param: '' },
   { icon: '💻', label: 'Windows',    href: '/games?platform=windows',             param: 'windows' },
   { icon: '🤖', label: 'Android',    href: '/games?platform=android',             param: 'android' },
   { icon: '🍎', label: 'macOS',      href: '/games?platform=macos',               param: 'macos' },
@@ -19,6 +19,8 @@ const pills = [
 ];
 
 export default function CategoryPills() {
+  const t = useTranslations('CategoryPills');
+  const pills = getPills(t);
   return (
     <div className="flex gap-2 overflow-x-auto pb-1 mb-5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
       {pills.map((pill) => (

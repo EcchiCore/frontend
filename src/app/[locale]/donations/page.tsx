@@ -4,16 +4,18 @@ import { locales } from "@/app/[locale]/lib/navigation";
 import { Heart, Trophy, CreditCard, Sparkles, Star, Zap } from "lucide-react";
 
 export async function generateMetadata({ params }: { params: { locale?: string } }) {
-  const locale = (params?.locale || "th") as (typeof locales)[number];
+  const locale = (params?.locale || "en") as (typeof locales)[number];
+  const t = await getTranslations({ locale, namespace: 'DonationsPage' });
   return generatePageMetadata({
     locale,
-    title: "สนับสนุนเรา | ChanomHub",
-    description: "ร่วมสนับสนุน ChanomHub เพื่อช่วยให้เราพัฒนาชุมชนและเซิร์ฟเวอร์ต่อไป",
+    title: `${t('title')} | ChanomHub`,
+    description: t('description'),
     contentPath: "donations",
   });
 }
 
 export default async function DonationsPage() {
+  const t = await getTranslations('DonationsPage');
   return (
     <>
       <style>{`
@@ -449,12 +451,12 @@ export default async function DonationsPage() {
             <div className="cta-inner">
               <div className="cta-eyebrow">
                 <Zap size={13} />
-                ร่วมเป็นส่วนหนึ่งของเรา
+                {t('beAPart')}
               </div>
-              <h2 className="cta-title">ต้องการสนับสนุนเราตอนนี้?</h2>
+              <h2 className="cta-title">{t('wantToSupport')}</h2>
               <p className="cta-desc">
-                คลิกปุ่มด้านล่างเพื่อไปยังหน้าชำระเงินของ EasyDonate<br />
-                ทุกการสนับสนุนมีความหมายสำหรับเรา 🙏
+                {t('clickButton')}<br />
+                {t('everySupport')}
               </p>
 
               <a
@@ -464,12 +466,12 @@ export default async function DonationsPage() {
                 className="cta-btn"
               >
                 <Heart size={17} fill="currentColor" />
-                ไปที่หน้าโดเนท
+                {t('goToDonation')}
               </a>
 
               <div className="cta-note">
                 <Star size={12} fill="currentColor" style={{ color: '#f59e0b' }} />
-                ปลอดภัย · ผ่าน EasyDonate · ทุกช่องทางชำระเงิน
+                {t('secure')}
               </div>
             </div>
           </div>
@@ -480,7 +482,7 @@ export default async function DonationsPage() {
             <section className="hero">
               <div className="hero-badge">
                 <Sparkles size={13} />
-                ร่วมสนับสนุนชุมชน ChanomHub
+                {t('supportCommunity')}
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '28px' }}>
@@ -492,11 +494,10 @@ export default async function DonationsPage() {
               </div>
 
               <h1 className="hero-title">
-                สนับสนุน Chanom<span className="brand">Hub</span>
+                {t('support')}<span className="brand">Hub</span>
               </h1>
               <p className="hero-desc">
-                การสนับสนุนของคุณช่วยให้เราสามารถรักษาเซิร์ฟเวอร์ พัฒนาฟีเจอร์ใหม่ๆ
-                และสร้างชุมชนที่ดีขึ้นสำหรับทุกคน ขอบคุณที่ร่วมเป็นส่วนหนึ่งของเรา
+                {t('supportDesc')}
               </p>
             </section>
 
@@ -506,24 +507,24 @@ export default async function DonationsPage() {
                 <div className="card-icon-wrap gold">
                   <CreditCard size={22} />
                 </div>
-                <div className="card-title">ช่องทางสะดวก</div>
-                <div className="card-desc">รองรับ TrueMoney, PromptPay และโอนเงินผ่านธนาคารทุกแห่ง</div>
+                <div className="card-title">{t('convenient')}</div>
+                <div className="card-desc">{t('convenientDesc')}</div>
               </div>
 
               <div className="feature-card">
                 <div className="card-icon-wrap orange">
                   <Trophy size={22} />
                 </div>
-                <div className="card-title">ขึ้นบอร์ดจัดอันดับ</div>
-                <div className="card-desc">ชื่อของคุณจะปรากฏบนบอร์ดผู้สนับสนุนในหน้านี้และหน้าแรก</div>
+                <div className="card-title">{t('ranking')}</div>
+                <div className="card-desc">{t('rankingDesc')}</div>
               </div>
 
               <div className="feature-card">
                 <div className="card-icon-wrap rose">
                   <Heart size={22} />
                 </div>
-                <div className="card-title">สนับสนุนชุมชน</div>
-                <div className="card-desc">ทุกบาทนำไปใช้เพื่อค่าเช่าเซิร์ฟเวอร์และการพัฒนาเว็บไซต์</div>
+                <div className="card-title">{t('supportCommunityCard')}</div>
+                <div className="card-desc">{t('supportCommunityCardDesc')}</div>
               </div>
             </div>
 
@@ -534,8 +535,8 @@ export default async function DonationsPage() {
                   <Trophy size={18} />
                 </div>
                 <div>
-                  <div className="leaderboard-title">อันดับผู้สนับสนุนสูงสุด</div>
-                  <div className="leaderboard-subtitle">ขอบคุณทุกท่านที่ร่วมสนับสนุน</div>
+                  <div className="leaderboard-title">{t('topSupporters')}</div>
+                  <div className="leaderboard-subtitle">{t('thankYou')}</div>
                 </div>
                 <div className="live-dot">
                   <span />

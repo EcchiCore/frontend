@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { useTranslations } from 'next-intl';
 import { Palette, Globe, Monitor } from 'lucide-react';
 
 interface Preferences {
@@ -18,6 +19,8 @@ const WebsiteSettings: React.FC<WebsiteSettingsProps> = ({
                                                            preferences,
                                                            handlePreferenceChange
                                                          }) => {
+  const t = useTranslations('WebsiteSettings');
+
   const getContrastColor = (hexColor: string) => {
     const r = parseInt(hexColor.slice(1, 3), 16);
     const g = parseInt(hexColor.slice(3, 5), 16);
@@ -32,13 +35,13 @@ const WebsiteSettings: React.FC<WebsiteSettingsProps> = ({
       <div className="space-y-4">
         <div className="flex items-center gap-3">
           <Palette className="text-primary" size={24} />
-          <h3 className="text-xl font-semibold">ตั้งค่าสีและรูปแบบ</h3>
+          <h3 className="text-xl font-semibold">{t('colorAndTheme')}</h3>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label className="label">
-              <span className="label-text text-base font-medium">สีพื้นหลัง</span>
+              <span className="label-text text-base font-medium">{t('backgroundColor')}</span>
             </label>
             <div className="flex gap-4 items-center">
               <input
@@ -53,11 +56,11 @@ const WebsiteSettings: React.FC<WebsiteSettingsProps> = ({
                      style={{ backgroundColor: preferences.bgColor }}>
                   <span className="text-sm font-medium"
                         style={{ color: getContrastColor(preferences.bgColor) }}>
-                    ตัวอย่างสีพื้นหลัง
+                    {t('bgColorPreview')}
                   </span>
                 </div>
                 <span className="text-xs text-base-content/70">
-                  ค่าสีปัจจุบัน: {preferences.bgColor}
+                  {t('currentBgColor', { color: preferences.bgColor })}
                 </span>
               </div>
             </div>
@@ -65,7 +68,7 @@ const WebsiteSettings: React.FC<WebsiteSettingsProps> = ({
 
           <div>
             <label className="label">
-              <span className="label-text text-base font-medium">รูปแบบการแสดงผล</span>
+              <span className="label-text text-base font-medium">{t('displayTheme')}</span>
             </label>
             <div className="grid grid-cols-2 gap-4">
               <label className="card bg-base-100 border border-base-300 rounded-lg p-4 cursor-pointer hover:border-primary transition-colors">
@@ -81,7 +84,7 @@ const WebsiteSettings: React.FC<WebsiteSettingsProps> = ({
                   <div className="w-16 h-16 rounded-lg bg-base-100 border border-base-300 flex items-center justify-center">
                     <span className="text-base-content">☀️</span>
                   </div>
-                  <span className="text-sm font-medium">โหมดสว่าง</span>
+                  <span className="text-sm font-medium">{t('lightMode')}</span>
                 </div>
               </label>
 
@@ -98,7 +101,7 @@ const WebsiteSettings: React.FC<WebsiteSettingsProps> = ({
                   <div className="w-16 h-16 rounded-lg bg-neutral border border-neutral-focus flex items-center justify-center">
                     <span className="text-neutral-content">🌙</span>
                   </div>
-                  <span className="text-sm font-medium text-neutral-content">โหมดมืด</span>
+                  <span className="text-sm font-medium text-neutral-content">{t('darkMode')}</span>
                 </div>
               </label>
             </div>
@@ -110,7 +113,7 @@ const WebsiteSettings: React.FC<WebsiteSettingsProps> = ({
       <div className="space-y-4">
         <div className="flex items-center gap-3">
           <Globe className="text-primary" size={24} />
-          <h3 className="text-xl font-semibold">ตั้งค่าภาษา</h3>
+          <h3 className="text-xl font-semibold">{t('languageSettings')}</h3>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
@@ -120,14 +123,14 @@ const WebsiteSettings: React.FC<WebsiteSettingsProps> = ({
               onChange={handlePreferenceChange}
               className="select select-bordered w-full focus:outline-none focus:ring-2 focus:ring-primary/30"
             >
-              <option value="th">ไทย</option>
+              <option value="th">{t('thai')}</option>
               <option value="en">English</option>
               <option value="zh">中文</option>
               <option value="ja">日本語</option>
               <option value="ko">한국어</option>
             </select>
             <p className="text-sm text-base-content/70 mt-2">
-              เลือกภาษาที่ต้องการใช้งานบนเว็บไซต์
+              {t('selectLanguageDesc')}
             </p>
           </div>
         </div>
@@ -137,26 +140,26 @@ const WebsiteSettings: React.FC<WebsiteSettingsProps> = ({
       <div className="space-y-4">
         <div className="flex items-center gap-3">
           <Monitor className="text-primary" size={24} />
-          <h3 className="text-xl font-semibold">การแจ้งเตือน</h3>
+          <h3 className="text-xl font-semibold">{t('notifications')}</h3>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-4">
             <div className="form-control">
               <label className="label cursor-pointer justify-start gap-4">
                 <input type="checkbox" className="toggle toggle-primary" />
-                <span className="label-text text-base font-medium">แจ้งเตือนทาง Email</span>
+                <span className="label-text text-base font-medium">{t('emailNotifs')}</span>
               </label>
             </div>
             <div className="form-control">
               <label className="label cursor-pointer justify-start gap-4">
                 <input type="checkbox" className="toggle toggle-primary" />
-                <span className="label-text text-base font-medium">แจ้งเตือนในเว็บไซต์</span>
+                <span className="label-text text-base font-medium">{t('websiteNotifs')}</span>
               </label>
             </div>
             <div className="form-control">
               <label className="label cursor-pointer justify-start gap-4">
                 <input type="checkbox" className="toggle toggle-primary" />
-                <span className="label-text text-base font-medium">กิจกรรมใหม่</span>
+                <span className="label-text text-base font-medium">{t('newActivity')}</span>
               </label>
             </div>
           </div>

@@ -8,6 +8,7 @@ import UserPageClient from "./UserPageClient";
 import BackgroundImage from "./BackgroundImage";
 import LogoutButton from "./LogoutButton";
 import { getSdk } from "@/lib/sdk";
+import { getTranslations } from "next-intl/server";
 
 interface SocialMediaLink {
   platform: string;
@@ -27,17 +28,18 @@ interface UserData {
 }
 
 async function getUserData(): Promise<{ userData: UserData | null; error: string | null }> {
+  const cookieStore = await cookies();
+  const token = cookieStore.get("token")?.value;
+
+  if (!token) return { userData: null, error: "Not authenticated" };
+
   try {
     const sdk = await getSdk();
-    const cookieStore = await cookies();
-    const token = cookieStore.get("token")?.value;
-
-    if (!token) return { userData: null, error: "Not authenticated" };
 
     const user = await sdk.users.getCurrentUser();
 
     if (!user) {
-      throw new Error("ไม่สามารถรับข้อมูลผู้ใช้ได้");
+      throw new Error("cannotFetch");
     }
 
     // Map SDK User to our internal UserData interface
@@ -55,13 +57,14 @@ async function getUserData(): Promise<{ userData: UserData | null; error: string
     console.error("Error fetching user data:", err);
     return {
       userData: null,
-      error: err instanceof Error ? err.message : "เกิดข้อผิดพลาดในการรับข้อมูลผู้ใช้",
+      error: err instanceof Error ? err.message : "errorFetching",
     };
   }
 }
 
 export default async function UserPage() {
   const { userData, error } = await getUserData();
+  const t = await getTranslations('ProfilePage');
 
   if (error === "Not authenticated") {
     redirect("/login");
@@ -83,8 +86,8 @@ export default async function UserPage() {
           <div className="text-center">
             <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-2xl">
               <div className="text-red-400">
-                <span className="font-bold">เกิดข้อผิดพลาด: </span>
-                <span>{error || "ไม่พบข้อมูลผู้ใช้"}</span>
+                <span className="font-bold">{t('error')}: </span>
+                <span>{error ? t(error as any) || error : t('userNotFound')}</span>
               </div>
             </div>
             <LogoutButton />
@@ -176,10 +179,10 @@ export default async function UserPage() {
 
                 {/* Bio Section */}
                 <div className="mt-10">
-                  <h3 className="text-sm font-bold text-slate-500 uppercase tracking-[0.2em] mb-4">About Me</h3>
+                  <h3 className="text-sm font-bold text-slate-500 uppercase tracking-[0.2em] mb-4">{t('aboutMe')}</h3>
                   <div className="p-6 bg-white/5 border border-white/5 rounded-2xl backdrop-blur-sm">
                     <p className="text-slate-200 leading-relaxed italic text-lg">
-                      {userData.bio || "No bio yet. Tell us something about yourself!"}
+                      {userData.bio || t('noBio')}
                     </p>
                   </div>
                 </div>
@@ -187,7 +190,7 @@ export default async function UserPage() {
                 {/* Ranks/Roles */}
                 {userData.ranks && userData.ranks.length > 0 && (
                   <div className="mt-8">
-                    <h3 className="text-sm font-bold text-slate-500 uppercase tracking-[0.2em] mb-4">Roles</h3>
+                    <h3 className="text-sm font-bold text-slate-500 uppercase tracking-[0.2em] mb-4">{t('roles')}</h3>
                     <div className="flex flex-wrap gap-2">
                       {userData.ranks.map((rank) => (
                         <div 
@@ -205,7 +208,7 @@ export default async function UserPage() {
                 {/* Social Links */}
                 {userData.socialMediaLinks && userData.socialMediaLinks.length > 0 && (
                   <div className="mt-8">
-                    <h3 className="text-sm font-bold text-slate-500 uppercase tracking-[0.2em] mb-4">Connections</h3>
+                    <h3 className="text-sm font-bold text-slate-500 uppercase tracking-[0.2em] mb-4">{t('connections')}</h3>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       {userData.socialMediaLinks.map((link, idx) => (
                         <a 

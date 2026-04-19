@@ -3,20 +3,14 @@ import Link from "next/link"
 import { Heart, Clock } from "lucide-react"
 import Image from "next/image"
 import { Badge } from "@/components/ui/badge"
+import { useFormatter } from "next-intl"
 import GameCardImage from "./GameCardImage"
 
 export default function GameCard({ article }: { article: Article }) {
+  const format = useFormatter()
+
   const getTimeAgo = (dateString: string) => {
-    const now = new Date()
-    const created = new Date(dateString)
-    const hours = Math.floor((now.getTime() - created.getTime()) / (1000 * 60 * 60))
-    if (hours < 1) return "ใหม่"
-    if (hours < 24) return `${hours} ชม.`
-    const days = Math.floor(hours / 24)
-    if (days < 7) return `${days} วัน`
-    const weeks = Math.floor(days / 7)
-    if (weeks < 4) return `${weeks} สัปดาห์`
-    return `${Math.floor(days / 30)} เดือน`
+    return format.relativeTime(new Date(dateString))
   }
 
   return (

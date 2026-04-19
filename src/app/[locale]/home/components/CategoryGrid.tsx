@@ -1,10 +1,11 @@
 "use client";
 
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 
-const categoryGroups = [
+const getCategoryGroups = (t: any) => [
   {
-    id: "platforms", name: "แพลตฟอร์ม", icon: "💻",
+    id: "platforms", name: t("platforms"), icon: "💻",
     subcategories: [
       { name: "Windows", count: 1234, slug: "windows" },
       { name: "Android", count: 892, slug: "android" },
@@ -15,7 +16,7 @@ const categoryGroups = [
     ]
   },
   {
-    id: "genres", name: "ประเภท", icon: "🎮",
+    id: "genres", name: t("genres"), icon: "🎮",
     subcategories: [
       { name: "RPG", count: 567, slug: "rpg" },
       { name: "Visual Novel", count: 892, slug: "visual-novel" },
@@ -26,7 +27,7 @@ const categoryGroups = [
     ]
   },
   {
-    id: "tags", name: "แท็กยอดนิยม", icon: "🏷️",
+    id: "tags", name: t("popularTags"), icon: "🏷️",
     subcategories: [
       { name: "Anime", count: 923, slug: "anime" },
       { name: "3D", count: 789, slug: "3d" },
@@ -37,19 +38,22 @@ const categoryGroups = [
     ]
   },
   {
-    id: "content", name: "เนื้อหา", icon: "📋",
+    id: "content", name: t("content"), icon: "📋",
     subcategories: [
-      { name: "เกม", count: 2345, slug: "games" },
-      { name: "มอด", count: 456, slug: "mods" },
-      { name: "แพตช์", count: 234, slug: "patches" },
-      { name: "เซฟไฟล์", count: 189, slug: "saves" },
-      { name: "คู่มือ", count: 123, slug: "guides" },
-      { name: "รีวิว", count: 98, slug: "reviews" },
+      { name: t("games"), count: 2345, slug: "games" },
+      { name: t("mods"), count: 456, slug: "mods" },
+      { name: t("patches"), count: 234, slug: "patches" },
+      { name: t("saveFiles"), count: 189, slug: "saves" },
+      { name: t("guides"), count: 123, slug: "guides" },
+      { name: t("reviews"), count: 98, slug: "reviews" },
     ]
   },
 ];
 
 export default function CategoryGrid() {
+  const t = useTranslations("CategoryGrid");
+  const categoryGroups = getCategoryGroups(t);
+
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 mb-4">
       {categoryGroups.map((group) => (

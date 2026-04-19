@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Article } from "@/types/article";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { useTranslations } from "next-intl";
 
 interface ArticleModsSectionProps {
     mods: NonNullable<Article["mods"]>;
@@ -24,6 +25,7 @@ const ArticleModsSection: React.FC<ArticleModsSectionProps> = ({
     isAuthenticated = false,
     articleSlug
 }) => {
+    const t = useTranslations("ArticleContent");
 
     // MOCK DATA for demonstration if empty
     const mockMods = [
@@ -58,7 +60,7 @@ const ArticleModsSection: React.FC<ArticleModsSectionProps> = ({
             <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
                     <Box className="w-6 h-6 text-primary" />
-                    <h2 className="text-2xl font-bold">มอดจากชุมชน</h2>
+                    <h2 className="text-2xl font-bold">{t('communityMods')}</h2>
                     <Badge variant="secondary" className="ml-2">
                         {displayMods.length}
                     </Badge>
@@ -68,20 +70,20 @@ const ArticleModsSection: React.FC<ArticleModsSectionProps> = ({
                     <Button size="sm" variant="outline" className="gap-2" asChild>
                         <Link href={`/articles/${articleSlug}/mods`}>
                             <Box className="w-4 h-4" />
-                            ดูทั้งหมด
+                            {t('viewAll')}
                         </Link>
                     </Button>
                     {isAuthenticated ? (
                         <Button size="sm" variant="outline" className="gap-2" asChild>
                             <Link href={`/upload/mod?target=${articleSlug}`}>
                                 <Plus className="w-4 h-4" />
-                                ส่งมอด
+                                {t('submitMod')}
                             </Link>
                         </Button>
                     ) : (
-                        <Button size="sm" variant="outline" className="gap-2" onClick={() => alert("กรุณาเข้าสู่ระบบเพื่อส่งมอด")}>
+                        <Button size="sm" variant="outline" className="gap-2" onClick={() => alert(t('loginToSubmitMod'))}>
                             <Plus className="w-4 h-4" />
-                            ส่งมอด
+                            {t('submitMod')}
                         </Button>
                     )}
 
@@ -91,9 +93,9 @@ const ArticleModsSection: React.FC<ArticleModsSectionProps> = ({
             {!hasRealMods && (
                 <Alert className="mb-6 bg-muted/50 border-dashed">
                     <Box className="h-4 w-4" />
-                    <AlertTitle>ยังไม่มีมอดที่ถูกส่งเข้ามา</AlertTitle>
+                    <AlertTitle>{t('noModsSubmitted')}</AlertTitle>
                     <AlertDescription className="text-muted-foreground">
-                        มอดด้านล่างเป็นเพียงตัวอย่าง เป็นคนแรกที่ส่งมอดสำหรับบทความนี้เลย!
+                        {t('beFirstToSubmitMod')}
                     </AlertDescription>
                 </Alert>
             )}
@@ -160,7 +162,7 @@ const ArticleModsSection: React.FC<ArticleModsSectionProps> = ({
                                     <Button size="sm" className="gap-2 shrink-0 ml-2" asChild>
                                         <a href={mod.downloadLink} target="_blank" rel="noopener noreferrer">
                                             <Download className="w-4 h-4" />
-                                            ติดตั้ง
+                                            {t('install')}
                                         </a>
                                     </Button>
                                 </div>
@@ -175,13 +177,13 @@ const ArticleModsSection: React.FC<ArticleModsSectionProps> = ({
                         <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center mb-3">
                             <Upload className="w-6 h-6 text-muted-foreground" />
                         </div>
-                        <h3 className="font-semibold mb-1">สร้างมอดใหม่?</h3>
+                        <h3 className="font-semibold mb-1">{t('createNewModTitle')}</h3>
                         <p className="text-sm text-muted-foreground mb-4 max-w-[200px]">
-                            แบ่งปันมอดของคุณกับชุมชน
+                            {t('shareYourMod')}
                         </p>
                         <Button variant="outline" size="sm" asChild>
                             <Link href={`/upload/mod?target=${articleSlug}`}>
-                                เริ่มอัปโหลด
+                                {t('startUpload')}
                             </Link>
                         </Button>
                     </Card>

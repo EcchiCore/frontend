@@ -1,0 +1,8 @@
+{
+  "foundItems": "Found <items>{total}</items> items",
+  "noItems": "No items found",
+  "noItemsDesc": "No items match your search criteria. Try adjusting the filters or searching again.",
+  "sortLatest": "Latest",
+  "sortPopular": "Popular",
+  "sortBy": "Sort by"
+}

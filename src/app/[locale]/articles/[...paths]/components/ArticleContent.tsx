@@ -291,7 +291,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
                           <a key={index} href={source.url} target="_blank" rel="noopener noreferrer" className="block w-full sm:w-auto flex-1">
                             <Button variant="outline" className="w-full flex items-center justify-center gap-2 h-12 border-primary/20 hover:border-primary/50 hover:bg-primary/5 transition-all rounded-xl">
                               <ExternalLink className="w-4 h-4 text-primary" />
-                              <span className="font-semibold">โหลดต้นฉบับ {source.name ? `(${source.name})` : ""}</span>
+                              <span className="font-semibold">{t('loadOriginal', { source: source.name ? `(${source.name})` : "" })}</span>
                             </Button>
                           </a>
                         ))}
@@ -322,11 +322,11 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
                       </div>
 
                       <div className="space-y-2">
-                        <h3 className="text-2xl font-bold">บทความนี้สำหรับสมาชิก Premium</h3>
+                        <h3 className="text-2xl font-bold">{t('premiumContentTitle')}</h3>
                         <p className="text-muted-foreground max-w-md text-lg">
                           {Number(article.price || 0) > 0
-                            ? `ปลดล็อกเพื่ออ่านเนื้อหาทั้งหมดในราคา ${article.price} CC (เหรียญชานม)`
-                            : 'ปลดล็อกเพื่ออ่านเนื้อหาทั้งหมด'}
+                            ? t('unlockToReadWithPrice', { price: article.price || 0 })
+                            : t('unlockToRead')}
                         </p>
                       </div>
 
@@ -349,7 +349,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
                   {article.isPaid && article.isUnlocked && (
                     <div className="flex items-center gap-3 mb-12 p-5 rounded-2xl bg-green-500/10 text-green-600 border border-green-500/20 shadow-sm">
                       <Unlock className="w-6 h-6" />
-                      <span className="font-bold text-lg">คุณได้รับสิทธิ์เข้าถึงเนื้อหานี้แล้ว</span>
+                      <span className="font-bold text-lg">{t('accessGranted')}</span>
                     </div>
                   )}
 
@@ -376,8 +376,8 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
                       <MessageCircle className="w-6 h-6 text-white" />
                     </div>
                     <div>
-                      <h3 className="text-2xl font-bold">ผู้แสดงความคิดเห็นสูงสุด</h3>
-                      <p className="text-sm text-muted-foreground">สมาชิกที่ร่วมพูดคุยในกระทู้นี้มากที่สุด</p>
+                      <h3 className="text-2xl font-bold">{t('topCommenters')}</h3>
+                      <p className="text-sm text-muted-foreground">{t('topCommentersDesc')}</p>
                     </div>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -401,7 +401,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
                             {commenter.username}
                           </p>
                           <p className="text-sm text-muted-foreground">
-                            {commenter.count} ความคิดเห็น
+                            {t('commentsCount', { count: commenter.count })}
                           </p>
                         </div>
                       </div>

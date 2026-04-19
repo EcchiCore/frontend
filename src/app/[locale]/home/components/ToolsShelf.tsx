@@ -1,7 +1,9 @@
 import Link from 'next/link';
 import { ArrowRight, Zap, Ghost, Layers } from 'lucide-react';
 
-const tools = [
+import { useTranslations } from 'next-intl';
+
+const getTools = (t: any) => [
   {
     href: '/chanox2',
     cardClass: 'border-indigo-500/25 from-indigo-950 via-purple-950 to-slate-950 hover:border-indigo-500/50',
@@ -10,7 +12,7 @@ const tools = [
     tagClass: 'text-indigo-400 bg-indigo-500/15 border-indigo-500/20',
     tag: 'DESKTOP',
     name: 'ChanoX2',
-    desc: 'จัดการเกม H รองรับ Linux, macOS, Windows',
+    desc: t('chanox2Desc'),
     linkClass: 'text-indigo-400',
     linkText: 'Learn more',
     hoverColor: 'group-hover:text-indigo-300',
@@ -23,7 +25,7 @@ const tools = [
     tagClass: 'text-emerald-400 bg-emerald-500/15 border-emerald-500/20',
     tag: 'MOBILE',
     name: 'ChanoLite',
-    desc: 'จัดการเกม H รองรับ iOS, Android',
+    desc: t('chanoliteDesc'),
     linkClass: 'text-emerald-400',
     linkText: 'Get it free',
     hoverColor: 'group-hover:text-emerald-300',
@@ -36,7 +38,7 @@ const tools = [
     tagClass: 'text-orange-400 bg-orange-500/15 border-orange-500/20',
     tag: 'TRANSLATE',
     name: 'NST Ghost',
-    desc: 'โปรแกรมแปลเกมครบวงจรพัฒนาโดย Chanomhub',
+    desc: t('nstDesc'),
     linkClass: 'text-orange-400',
     linkText: 'Download',
     hoverColor: 'group-hover:text-orange-300',
@@ -44,11 +46,14 @@ const tools = [
 ];
 
 export default function ToolsShelf() {
+  const t = useTranslations('ToolsShelf');
+  const tools = getTools(t);
+
   return (
     <section className="mb-6">
       <div className="flex items-center gap-2 mb-3 px-0.5">
         <div className="w-0.5 h-4 bg-primary rounded-full" />
-        <h2 className="text-sm font-bold text-foreground">เครื่องมือจากทีมงาน</h2>
+        <h2 className="text-sm font-bold text-foreground">{t('toolsFromStaff')}</h2>
       </div>
 
       <div className="flex gap-2.5 overflow-x-auto pb-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">

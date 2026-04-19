@@ -1,0 +1,14 @@
+{
+  "username": "ชื่อผู้ใช้",
+  "usernamePlaceholder": "ชื่อที่ต้องการให้ผู้อื่นเห็น",
+  "email": "อีเมล",
+  "emailPlaceholder": "email@example.com",
+  "bio": "ประวัติโดยย่อ",
+  "bioPlaceholder": "เล่าเกี่ยวกับตัวคุณ...",
+  "avatarUrl": "URL รูปภาพโปรไฟล์",
+  "avatarUrlPlaceholder": "https://example.com/your-image.jpg",
+  "previewProfile": "ดูตัวอย่างโปรไฟล์",
+  "defaultUsername": "ชื่อผู้ใช้",
+  "defaultEmail": "อีเมล",
+  "defaultBio": "ยังไม่มีประวัติโดยย่อ"
+}

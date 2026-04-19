@@ -5,6 +5,7 @@ import Cookies from 'js-cookie';
 import { createAuthenticatedClient, createChanomhubClient } from '@chanomhub/sdk';
 import { Article } from '@/types/article';
 import { AlertState } from '../Interfaces';
+import { useTranslations } from 'next-intl';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -13,6 +14,7 @@ export function useArticleInteractions(article: Article, slug: string) {
   const [favoritesCount, setFavoritesCount] = useState(article.favoritesCount);
   const [isFollowing, setIsFollowing] = useState(article.author.following ?? false);
   const [alert, setAlert] = useState<AlertState>({ open: false, message: '', severity: 'success' });
+  const t = useTranslations('ArticleContent');
 
   // Get authenticated SDK client
   const getAuthenticatedSdk = useCallback(() => {
@@ -84,7 +86,7 @@ export function useArticleInteractions(article: Article, slug: string) {
 
   const handleFavorite = useCallback(async () => {
     const sdk = getAuthenticatedSdk();
-    if (!sdk) return showAlert('กรุณาเข้าสู่ระบบเพื่อบันทึกบทความนี้', 'error');
+    if (!sdk) return showAlert(t('loginToSave'), 'error');
 
     const prevState = { isFavorited, favoritesCount };
     setIsFavorited(!isFavorited);
@@ -99,13 +101,13 @@ export function useArticleInteractions(article: Article, slug: string) {
     } catch {
       setIsFavorited(prevState.isFavorited);
       setFavoritesCount(prevState.favoritesCount);
-      showAlert('ไม่สามารถอัปเดตสถานะรายการโปรด', 'error');
+      showAlert(t('unableToUpdateFavorite'), 'error');
     }
-  }, [isFavorited, favoritesCount, slug, showAlert, getAuthenticatedSdk]);
+  }, [isFavorited, favoritesCount, slug, showAlert, getAuthenticatedSdk, t]);
 
   const handleFollow = useCallback(async () => {
     const sdk = getAuthenticatedSdk();
-    if (!sdk) return showAlert('กรุณาเข้าสู่ระบบเพื่อติดตามผู้เขียน', 'error');
+    if (!sdk) return showAlert(t('loginToFollow'), 'error');
 
     try {
       const profile = isFollowing
@@ -115,16 +117,16 @@ export function useArticleInteractions(article: Article, slug: string) {
       if (profile) {
         setIsFollowing(profile.following);
         showAlert(
-          profile.following ? 'ติดตามผู้เขียนแล้ว' : 'เลิกติดตามผู้เขียน',
+          profile.following ? t('followedAuthor') : t('unfollowedAuthor'),
           'success'
         );
       } else {
-        showAlert('ไม่สามารถอัปเดตสถานะการติดตาม', 'error');
+        showAlert(t('unableToUpdateFollow'), 'error');
       }
     } catch {
-      showAlert('เกิดข้อผิดพลาดในการเชื่อมต่อ', 'error');
+      showAlert(t('connectionError'), 'error');
     }
-  }, [isFollowing, article.author.name, showAlert, getAuthenticatedSdk]);
+  }, [isFollowing, article.author.name, showAlert, getAuthenticatedSdk, t]);
 
   const handleShare = useCallback(async () => {
     const shareData = {
@@ -138,11 +140,11 @@ export function useArticleInteractions(article: Article, slug: string) {
       } else {
         await navigator.clipboard.writeText(window.location.href);
       }
-      showAlert('คัดลอก URL บทความไปยังคลิปบอร์ดแล้ว', 'success');
+      showAlert(t('copiedArticleUrl'), 'success');
     } catch {
-      showAlert('ไม่สามารถแชร์หรือคัดลอกลิงก์ได้', 'error');
+      showAlert(t('unableToShareOrCopy'), 'error');
     }
-  }, [article.title, article.description, showAlert]);
+  }, [article.title, article.description, showAlert, t]);
 
   return {
     isFavorited,

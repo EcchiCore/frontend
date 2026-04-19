@@ -5,25 +5,13 @@ import Link from 'next/link';
 import Image from 'next/image';
 import type { ArticleListItem } from '@chanomhub/sdk';
 import imageLoader from '@/lib/imageLoader';
+import { useFormatter, useTranslations } from 'next-intl';
 
 interface GameShelfProps {
   title: string;
   posts: ArticleListItem[];
   loading?: boolean;
   href?: string;
-}
-
-function getRelativeTime(dateString: string): string {
-  const now = new Date();
-  const past = new Date(dateString);
-  const diffMs = now.getTime() - past.getTime();
-  const diffMins = Math.floor(diffMs / 60000);
-  const diffHours = Math.floor(diffMins / 60);
-  const diffDays = Math.floor(diffHours / 24);
-  if (diffMins < 60) return `${diffMins}น.`;
-  if (diffHours < 24) return `${diffHours}ชม.`;
-  if (diffDays < 7) return `${diffDays}วัน`;
-  return new Date(dateString).toLocaleDateString('th-TH', { day: 'numeric', month: 'short' });
 }
 
 function getCardBadge(post: ArticleListItem): { label: string; color: string } | null {
@@ -51,10 +39,11 @@ function GameCard({ post, index }: { post: ArticleListItem; index: number }) {
   const [timeString, setTimeString] = useState('');
   const src = post.coverImage || post.mainImage || null;
   const badge = getCardBadge(post);
+  const format = useFormatter();
 
   useEffect(() => {
-    setTimeString(getRelativeTime(post.createdAt));
-  }, [post.createdAt]);
+    setTimeString(format.relativeTime(new Date(post.createdAt)));
+  }, [post.createdAt, format]);
 
   return (
     <Link
@@ -127,6 +116,7 @@ function SkeletonCard() {
 
 export default function GameShelf({ title, posts, loading, href }: GameShelfProps) {
   const items = loading ? Array.from({ length: 24 }) : posts;
+  const t = useTranslations('Shelf');
 
   return (
     <section className="mb-8">
@@ -138,7 +128,7 @@ export default function GameShelf({ title, posts, loading, href }: GameShelfProp
         </div>
         {href && (
           <Link href={href} className="text-[11px] font-semibold text-primary hover:opacity-80 transition-opacity flex items-center gap-1">
-            ดูทั้งหมด <span>→</span>
+            {t('viewAll')} <span>→</span>
           </Link>
         )}
       </div>

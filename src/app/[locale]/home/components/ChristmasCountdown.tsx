@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
 
 export default function ChristmasCountdown() {
     const [timeLeft, setTimeLeft] = useState({
@@ -9,6 +10,7 @@ export default function ChristmasCountdown() {
         minutes: 0,
         seconds: 0,
     });
+    const t = useTranslations('ChristmasCountdown');
 
     useEffect(() => {
         const calculateTimeLeft = () => {
@@ -50,22 +52,22 @@ export default function ChristmasCountdown() {
             <div className="flex items-center gap-1 font-mono font-semibold">
                 <div className="flex flex-col items-center">
                     <span className="text-primary">{timeLeft.days}</span>
-                    <span className="text-[10px] text-muted-foreground hidden sm:inline">วัน</span>
+                    <span className="text-[10px] text-muted-foreground hidden sm:inline">{t('days')}</span>
                 </div>
                 <span className="text-muted-foreground">:</span>
                 <div className="flex flex-col items-center">
                     <span className="text-primary">{String(timeLeft.hours).padStart(2, '0')}</span>
-                    <span className="text-[10px] text-muted-foreground hidden sm:inline">ชม.</span>
+                    <span className="text-[10px] text-muted-foreground hidden sm:inline">{t('hours')}</span>
                 </div>
                 <span className="text-muted-foreground">:</span>
                 <div className="flex flex-col items-center">
                     <span className="text-primary">{String(timeLeft.minutes).padStart(2, '0')}</span>
-                    <span className="text-[10px] text-muted-foreground hidden sm:inline">นาที</span>
+                    <span className="text-[10px] text-muted-foreground hidden sm:inline">{t('minutes')}</span>
                 </div>
                 <span className="text-muted-foreground">:</span>
                 <div className="flex flex-col items-center">
                     <span className="text-primary">{String(timeLeft.seconds).padStart(2, '0')}</span>
-                    <span className="text-[10px] text-muted-foreground hidden sm:inline">วิ</span>
+                    <span className="text-[10px] text-muted-foreground hidden sm:inline">{t('seconds')}</span>
                 </div>
             </div>
             <span className="hidden sm:inline">🎅</span>

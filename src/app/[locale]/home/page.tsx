@@ -69,25 +69,23 @@ const getCachedHomeData = (token?: string) =>
   singleFlight(`home-data-${token ? 'auth' : 'guest'}`, () => _getCachedHomeData(token));
 
 async function getAuthToken() {
-  try {
-    const { cookies } = await import('next/headers');
-    const cookieStore = await cookies();
-    return cookieStore.get('token')?.value;
-  } catch {
-    return undefined;
-  }
+  const { cookies } = await import('next/headers');
+  const cookieStore = await cookies();
+  return cookieStore.get('token')?.value;
 }
 
-const stats = [
-  { label: 'สมาชิก',  val: '45,231', color: '' },
-  { label: 'ออนไลน์', val: '892',    color: 'text-green-500' },
-  { label: 'กระทู้',  val: '123k',   color: '' },
-  { label: 'วันนี้',  val: '234',    color: 'text-primary' },
+const getStats = (t: any) => [
+  { label: t('statsMembers'),  val: '45,231', color: '' },
+  { label: t('statsOnline'), val: '892',    color: 'text-green-500' },
+  { label: t('statsPosts'),  val: '123k',   color: '' },
+  { label: t('statsToday'),  val: '234',    color: 'text-primary' },
 ];
 
 export default async function HomePage({ params }: { params: { locale: string } }) {
   const token = await getAuthToken();
   const homeData = await getCachedHomeData(token);
+  const t = await getTranslations('homePage.HomePage');
+  const stats = getStats(t);
 
   return (
     <div className="min-h-screen bg-background">
@@ -123,14 +121,14 @@ export default async function HomePage({ params }: { params: { locale: string } 
 
           {/* Shelf: แนะนำ */}
           <GameShelf
-            title="แนะนำสำหรับคุณ"
+            title={t('recommendedForYou')}
             posts={homeData.featured}
             href="/games"
           />
 
           {/* Shelf: กระทู้ล่าสุด */}
           <ArticleShelf
-            title="กระทู้ล่าสุด"
+            title={t('latestPosts')}
             posts={homeData.latest}
             href="/articles"
           />
@@ -140,14 +138,14 @@ export default async function HomePage({ params }: { params: { locale: string } 
 
           {/* Shelf: Windows */}
           <GameShelf
-            title="🪟 ยอดนิยมบน Windows"
+            title={t('popularWindows')}
             posts={homeData.windows}
             href="/games?platform=windows"
           />
 
           {/* Shelf: Android */}
           <GameShelf
-            title="📱 ยอดนิยมบน Android"
+            title={t('popularAndroid')}
             posts={homeData.android}
             href="/games?platform=android"
           />

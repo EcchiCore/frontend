@@ -1,8 +1,11 @@
 'use client';
 
 import { useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 
 export default function ChatPage() {
+  const t = useTranslations('ContactPage');
+
   useEffect(() => {
     // โหลดสคริปต์ tawk.to เมื่อ component mount
     const script = document.createElement('script');
@@ -24,10 +27,10 @@ export default function ChatPage() {
         {/* Header */}
         <div className="card-body">
           <h1 className="text-3xl font-bold text-center text-primary">
-            ยินดีต้อนรับสู่แชทของเรา
+            {t('welcome')}
           </h1>
           <p className="text-center text-base-content mt-2">
-            ติดต่อเราผ่านแชทสดได้ทันที ทีมงานพร้อมช่วยเหลือคุณ!
+            {t('description')}
           </p>
         </div>
 
@@ -59,7 +62,7 @@ export default function ChatPage() {
               className="btn btn-primary btn-wide"
               onClick={() => window.Tawk_API?.toggle()} // เปิด/ปิดแชทเมื่อกดปุ่ม
             >
-              เริ่มแชททันที
+              {t('startChat')}
             </button>
 
 

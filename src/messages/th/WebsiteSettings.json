@@ -1,0 +1,16 @@
+{
+  "colorAndTheme": "ตั้งค่าสีและรูปแบบ",
+  "backgroundColor": "สีพื้นหลัง",
+  "bgColorPreview": "ตัวอย่างสีพื้นหลัง",
+  "currentBgColor": "ค่าสีปัจจุบัน: {color}",
+  "displayTheme": "รูปแบบการแสดงผล",
+  "lightMode": "โหมดสว่าง",
+  "darkMode": "โหมดมืด",
+  "languageSettings": "ตั้งค่าภาษา",
+  "thai": "ไทย",
+  "selectLanguageDesc": "เลือกภาษาที่ต้องการใช้งานบนเว็บไซต์",
+  "notifications": "การแจ้งเตือน",
+  "emailNotifs": "แจ้งเตือนทาง Email",
+  "websiteNotifs": "แจ้งเตือนในเว็บไซต์",
+  "newActivity": "กิจกรรมใหม่"
+}

@@ -59,5 +59,61 @@
       "name": "VIP Room",
       "description": "For VIP members"
     }
+  },
+  "CategoriesCard": {
+    "platforms": "Platforms",
+    "loading": "Loading..."
+  },
+  "CategoryGrid": {
+    "platforms": "Platforms",
+    "genres": "Genres",
+    "popularTags": "Popular Tags",
+    "content": "Content",
+    "games": "Games",
+    "mods": "Mods",
+    "patches": "Patches",
+    "saveFiles": "Save Files",
+    "guides": "Guides",
+    "reviews": "Reviews"
+  },
+  "PromotionsWidget": {
+    "recommendedByStaff": "Recommended by Staff",
+    "chanox2Desc": "H-Game manager for Linux, macOS, Windows",
+    "chanoliteDesc": "H-Game manager for iOS, Android",
+    "nstDesc": "All-in-one game translator by Chanomhub"
+  },
+  "HomeCarousel": {
+    "featuredPostsToday": "Featured Posts Today"
+  },
+  "ToolsShelf": {
+    "toolsFromStaff": "Tools from Staff",
+    "chanox2Desc": "H-Game manager for Linux, macOS, Windows",
+    "chanoliteDesc": "H-Game manager for iOS, Android",
+    "nstDesc": "All-in-one game translator by Chanomhub"
+  },
+  "Shelf": {
+    "viewAll": "View all"
+  },
+  "CategoryPills": {
+    "all": "All"
+  },
+  "ChristmasCountdown": {
+    "days": "Days",
+    "hours": "Hrs",
+    "minutes": "Min",
+    "seconds": "Sec"
+  },
+  "FeaturedPosts": {
+    "noPosts": "No posts"
+  },
+  "HomePage": {
+    "statsMembers": "Members",
+    "statsOnline": "Online",
+    "statsPosts": "Posts",
+    "statsToday": "Today",
+    "recommendedForYou": "Recommended for you",
+    "latestPosts": "Latest Posts",
+    "popularWindows": "🪟 Popular on Windows",
+    "popularAndroid": "📱 Popular on Android"
   }
 }

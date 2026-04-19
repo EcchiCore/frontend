@@ -1,0 +1,16 @@
+{
+  "colorAndTheme": "Color and Theme",
+  "backgroundColor": "Background Color",
+  "bgColorPreview": "Background Color Preview",
+  "currentBgColor": "Current Color: {color}",
+  "displayTheme": "Display Theme",
+  "lightMode": "Light Mode",
+  "darkMode": "Dark Mode",
+  "languageSettings": "Language Settings",
+  "thai": "ไทย",
+  "selectLanguageDesc": "Select the language you want to use on the website",
+  "notifications": "Notifications",
+  "emailNotifs": "Email Notifications",
+  "websiteNotifs": "Website Notifications",
+  "newActivity": "New Activity"
+}

@@ -3,6 +3,7 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 import useSWR, { mutate } from 'swr';
 import Cookies from 'js-cookie';
 import { Comment } from '../Interfaces';
+import { useTranslations } from 'next-intl';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -21,6 +22,7 @@ export function useArticleComments(slug: string, showAlert: (message: string, se
   const [newComment, setNewComment] = useState('');
   const [topCommenters, setTopCommenters] = useState<{ username: string; count: number }[]>([]);
   const hasShownCommentsErrorRef = useRef(false);
+  const t = useTranslations('ArticleContent');
 
   const { data: commentsData, error: commentsError, isLoading } = useSWR(
     `${API_BASE_URL}/api/articles/${slug}/comments`,
@@ -79,17 +81,17 @@ export function useArticleComments(slug: string, showAlert: (message: string, se
     if (commentsError) {
       if (!hasShownCommentsErrorRef.current) {
         hasShownCommentsErrorRef.current = true;
-        showAlert('ไม่สามารถโหลดความคิดเห็นได้', 'error');
+        showAlert(t('unableToLoadComments'), 'error');
       }
     } else {
       hasShownCommentsErrorRef.current = false;
     }
-  }, [commentsData, commentsError, showAlert, areCommentsEqual, buildTopCommenters]);
+  }, [commentsData, commentsError, showAlert, areCommentsEqual, buildTopCommenters, t]);
 
   const handleAddComment = useCallback(async () => {
     const token = Cookies.get('token');
     if (!token || !newComment.trim())
-      return showAlert('กรุณาเข้าสู่ระบบหรือกรอกความคิดเห็น', 'error');
+      return showAlert(t('loginOrEnterComment'), 'error');
 
     try {
       const response = await fetch(
@@ -106,20 +108,20 @@ export function useArticleComments(slug: string, showAlert: (message: string, se
         const createdComment = newCommentData.data || newCommentData.comment || newCommentData;
         setComments((prev) => [createdComment, ...prev]);
         setNewComment('');
-        showAlert('เพิ่มความคิดเห็นสำเร็จ', 'success');
+        showAlert(t('addCommentSuccess'), 'success');
         mutate(`${API_BASE_URL}/api/articles/${slug}/comments`);
       } else {
-        showAlert('ไม่สามารถเพิ่มความคิดเห็น', 'error');
+        showAlert(t('unableToAddComment'), 'error');
       }
     } catch {
-      showAlert('เกิดข้อผิดพลาดในการเชื่อมต่อ', 'error');
+      showAlert(t('connectionError'), 'error');
     }
-  }, [newComment, comments, slug, showAlert]);
+  }, [newComment, comments, slug, showAlert, t]);
 
   const handleDeleteComment = useCallback(
     async (commentId: number) => {
       const token = Cookies.get('token');
-      if (!token) return showAlert('กรุณาเข้าสู่ระบบเพื่อลบความคิดเห็น', 'error');
+      if (!token) return showAlert(t('loginToDeleteComment'), 'error');
 
       try {
         const response = await fetch(
@@ -131,16 +133,16 @@ export function useArticleComments(slug: string, showAlert: (message: string, se
         );
         if (response.ok) {
           setComments(comments.filter((comment) => comment.id !== commentId));
-          showAlert('ลบความคิดเห็นสำเร็จ', 'success');
+          showAlert(t('deleteCommentSuccess'), 'success');
           mutate(`${API_BASE_URL}/api/articles/${slug}/comments`);
         } else {
-          showAlert('ไม่สามารถลบความคิดเห็น', 'error');
+          showAlert(t('unableToDeleteComment'), 'error');
         }
       } catch {
-        showAlert('เกิดข้อผิดพลาดในการเชื่อมต่อ', 'error');
+        showAlert(t('connectionError'), 'error');
       }
     },
-    [comments, slug, showAlert]
+    [comments, slug, showAlert, t]
   );
 
   return {

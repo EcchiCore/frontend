@@ -165,12 +165,12 @@ export default function SidebarFiltersClient({ tags, categories, platforms, engi
                   <DialogTrigger asChild>
                     <button className="rounded-md px-2 py-1 text-xs border border-border/50 text-muted-foreground hover:bg-accent hover:text-foreground transition-colors font-medium flex items-center gap-1">
                       <Filter className="w-3 h-3" />
-                      +{tags.length - 15} แท็กทั้งหมด
+                      {tSearch("moreTags", { count: tags.length - 15 })}
                     </button>
                   </DialogTrigger>
                   <DialogContent className="max-w-md max-h-[85vh] flex flex-col p-0 text-foreground">
                     <DialogHeader className="p-4 border-b border-border/40 pb-4">
-                      <DialogTitle>เลือกแท็กเกม ({tags.length})</DialogTitle>
+                      <DialogTitle>{tSearch("selectGameTags", { count: tags.length })}</DialogTitle>
                     </DialogHeader>
 
                     <div className="p-4 border-b border-border/40">
@@ -179,7 +179,7 @@ export default function SidebarFiltersClient({ tags, categories, platforms, engi
                         <Input
                           value={tagSearchQuery}
                           onChange={(e) => setTagSearchQuery(e.target.value)}
-                          placeholder="ค้นหาแท็ก..."
+                          placeholder={tSearch("searchTagsPlaceholder")}
                           className="pl-9 bg-accent/50 border-transparent focus-visible:border-primary"
                           autoFocus
                         />
@@ -226,7 +226,7 @@ export default function SidebarFiltersClient({ tags, categories, platforms, engi
                         </div>
                       ) : (
                         <div className="text-center py-12 text-muted-foreground">
-                          ไม่พบแท็กที่ตรงกับ &quot;{tagSearchQuery}&quot;
+                          {tSearch("noTagsFound", { query: tagSearchQuery })}
                         </div>
                       )}
                     </div>
@@ -249,7 +249,7 @@ export default function SidebarFiltersClient({ tags, categories, platforms, engi
                   : "text-muted-foreground hover:bg-accent hover:text-foreground"
               )}
             >
-              ทั้งหมด
+              {tSearch("all")}
             </button>
             {categories.map((cat) => (
               <button

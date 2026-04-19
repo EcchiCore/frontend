@@ -178,7 +178,7 @@ export default function SearchControls({ tags }: Props) {
             <div className="absolute top-full left-0 right-0 mt-1 bg-popover border border-border/50 rounded-lg shadow-lg z-50 overflow-hidden">
               <div className="px-3 py-1.5 border-b border-border/30">
                 <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                  แท็กที่ตรงกัน
+                  {tSearch('matchingTags')}
                 </span>
               </div>
               {suggestions.map((tag, i) => (
@@ -218,7 +218,7 @@ export default function SearchControls({ tags }: Props) {
                   )}
                 >
                   <Search className="w-3.5 h-3.5 shrink-0" />
-                  <span>ค้นหา &ldquo;{searchText.trim()}&rdquo;</span>
+                  <span>{tSearch('searchFor', { query: searchText.trim() })}</span>
                 </button>
               )}
             </div>

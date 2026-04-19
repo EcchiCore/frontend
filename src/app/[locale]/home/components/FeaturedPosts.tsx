@@ -5,23 +5,11 @@ import Link from 'next/link';
 import Image from 'next/image';
 import type { ArticleListItem } from '@chanomhub/sdk';
 import imageLoader from '@/lib/imageLoader';
+import { useFormatter, useTranslations } from 'next-intl';
 
 interface FeaturedPostsProps {
   posts: ArticleListItem[];
   loading: boolean;
-}
-
-function getRelativeTime(dateString: string): string {
-  const now = new Date();
-  const past = new Date(dateString);
-  const diffMs = now.getTime() - past.getTime();
-  const diffMins = Math.floor(diffMs / 60000);
-  const diffHours = Math.floor(diffMins / 60);
-  const diffDays = Math.floor(diffHours / 24);
-  if (diffMins < 60) return `${diffMins}น.`;
-  if (diffHours < 24) return `${diffHours}ชม.`;
-  if (diffDays < 7) return `${diffDays}วัน`;
-  return new Date(dateString).toLocaleDateString('th-TH', { day: 'numeric', month: 'short' });
 }
 
 function getCardBadge(post: ArticleListItem): { label: string; color: string } | null {
@@ -50,10 +38,11 @@ function GameCard({ post, index }: { post: ArticleListItem; index: number }) {
   const src = post.coverImage || post.mainImage || null;
   const badge = getCardBadge(post);
   const fallback = gradients[index % gradients.length];
+  const format = useFormatter();
 
   useEffect(() => {
-    setTimeString(getRelativeTime(post.createdAt));
-  }, [post.createdAt]);
+    setTimeString(format.relativeTime(new Date(post.createdAt)));
+  }, [post.createdAt, format]);
 
   return (
     <Link
@@ -134,6 +123,7 @@ function SkeletonCard() {
 }
 
 export default function FeaturedPosts({ posts, loading }: FeaturedPostsProps) {
+  const t = useTranslations('FeaturedPosts');
   if (loading) {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 mb-4">
@@ -144,7 +134,7 @@ export default function FeaturedPosts({ posts, loading }: FeaturedPostsProps) {
   if (!posts || posts.length === 0) {
     return (
       <div className="text-center text-xs text-muted-foreground py-12 border border-dashed border-border rounded-xl">
-        ไม่มีกระทู้
+        {t('noPosts')}
       </div>
     );
   }

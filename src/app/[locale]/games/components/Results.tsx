@@ -6,6 +6,7 @@ import Link from "next/link"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { unstable_cache } from "next/cache"
 import { singleFlight } from "@/lib/cache/singleFlight"
+import { getTranslations } from "next-intl/server"
 
 const _getCachedGameResults = unstable_cache(
   async (
@@ -48,6 +49,7 @@ export default async function Results({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>
 }) {
+  const t = await getTranslations("gameResults")
   const params = await searchParams
 
   const limit = Number(params.pageSize ?? 30)
@@ -74,7 +76,10 @@ export default async function Results({
       {/* Top bar */}
       <div className="flex items-center justify-between gap-3 bg-card border border-border/50 rounded-xl px-4 py-2.5">
         <span className="text-sm text-muted-foreground">
-          พบ <span className="font-semibold text-foreground">{total.toLocaleString()}</span> รายการ
+          {t.rich('foundItems', {
+            total: total.toLocaleString(),
+            items: (chunks) => <span className="font-semibold text-foreground">{chunks}</span>
+          })}
         </span>
         <SortBar current={sort} searchParams={params} />
       </div>
@@ -89,9 +94,9 @@ export default async function Results({
       ) : (
         <div className="flex flex-col items-center justify-center py-24 bg-card border border-border/50 rounded-xl">
           <div className="text-6xl mb-4 opacity-20">🎮</div>
-          <h3 className="text-xl font-bold text-foreground mb-2">ไม่พบรายการ</h3>
+          <h3 className="text-xl font-bold text-foreground mb-2">{t('noItems')}</h3>
           <p className="text-muted-foreground text-center max-w-md">
-            ไม่พบรายการที่ตรงกับเงื่อนไขการค้นหา ลองปรับเงื่อนไขหรือค้นหาใหม่อีกครั้ง
+            {t('noItemsDesc')}
           </p>
         </div>
       )}
@@ -101,16 +106,18 @@ export default async function Results({
   )
 }
 
-function SortBar({
+async function SortBar({
   current,
   searchParams,
 }: {
   current: string
   searchParams: Record<string, string | string[] | undefined>
 }) {
+  const t = await getTranslations("gameResults")
+
   const options = [
-    { label: "ล่าสุด", value: "latest" },
-    { label: "ยอดนิยม", value: "popular" },
+    { label: t("sortLatest"), value: "latest" },
+    { label: t("sortPopular"), value: "popular" },
     { label: "A–Z", value: "az" },
   ]
 
@@ -127,7 +134,7 @@ function SortBar({
 
   return (
     <div className="flex items-center gap-1">
-      <span className="text-xs text-muted-foreground mr-1">เรียงโดย</span>
+      <span className="text-xs text-muted-foreground mr-1">{t("sortBy")}</span>
       {options.map((o) => (
         <Link
           key={o.value}

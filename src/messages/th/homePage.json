@@ -59,5 +59,61 @@
       "name": "ห้องวีไอพี",
       "description": "สำหรับสมาชิกวีไอพี"
     }
+  },
+  "CategoriesCard": {
+    "platforms": "แพลตฟอร์ม",
+    "loading": "กำลังโหลด..."
+  },
+  "CategoryGrid": {
+    "platforms": "แพลตฟอร์ม",
+    "genres": "ประเภท",
+    "popularTags": "แท็กยอดนิยม",
+    "content": "เนื้อหา",
+    "games": "เกม",
+    "mods": "มอด",
+    "patches": "แพตช์",
+    "saveFiles": "เซฟไฟล์",
+    "guides": "คู่มือ",
+    "reviews": "รีวิว"
+  },
+  "PromotionsWidget": {
+    "recommendedByStaff": "แนะนำจากทีมงาน",
+    "chanox2Desc": "จัดการเกม H รองรับ Linux, macOS, Windows",
+    "chanoliteDesc": "จัดการเกม H รองรับ iOS, Android",
+    "nstDesc": "โปรแกรมแปลเกมครบวงจรพัฒนาโดย Chanomhub"
+  },
+  "HomeCarousel": {
+    "featuredPostsToday": "กระทู้เด่นประจำวัน"
+  },
+  "ToolsShelf": {
+    "toolsFromStaff": "เครื่องมือจากทีมงาน",
+    "chanox2Desc": "จัดการเกม H รองรับ Linux, macOS, Windows",
+    "chanoliteDesc": "จัดการเกม H รองรับ iOS, Android",
+    "nstDesc": "โปรแกรมแปลเกมครบวงจรพัฒนาโดย Chanomhub"
+  },
+  "Shelf": {
+    "viewAll": "ดูทั้งหมด"
+  },
+  "CategoryPills": {
+    "all": "ทั้งหมด"
+  },
+  "ChristmasCountdown": {
+    "days": "วัน",
+    "hours": "ชม.",
+    "minutes": "นาที",
+    "seconds": "วิ"
+  },
+  "FeaturedPosts": {
+    "noPosts": "ไม่มีกระทู้"
+  },
+  "HomePage": {
+    "statsMembers": "สมาชิก",
+    "statsOnline": "ออนไลน์",
+    "statsPosts": "กระทู้",
+    "statsToday": "วันนี้",
+    "recommendedForYou": "แนะนำสำหรับคุณ",
+    "latestPosts": "กระทู้ล่าสุด",
+    "popularWindows": "🪟 ยอดนิยมบน Windows",
+    "popularAndroid": "📱 ยอดนิยมบน Android"
   }
 }

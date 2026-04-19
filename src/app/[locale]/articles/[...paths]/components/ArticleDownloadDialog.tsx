@@ -40,7 +40,7 @@ const ArticleDownloadDialog: React.FC<ArticleDownloadDialogProps> = ({
 
     // Detect pseudo-download URLs that point back to the article (e.g. ?purchase=true)
     if (url.includes('purchase=true') || (url.includes('/articles/') && !url.startsWith('http'))) {
-      showAlert('กรุณาซื้อบทความก่อนเพื่อเข้าถึงไฟล์ดาวน์โหลด', 'error');
+      showAlert(t('needPurchaseToDownload'), 'error');
       return;
     }
 

@@ -1,0 +1,14 @@
+{
+  "username": "Username",
+  "usernamePlaceholder": "Name you want others to see",
+  "email": "Email",
+  "emailPlaceholder": "email@example.com",
+  "bio": "Bio",
+  "bioPlaceholder": "Tell us about yourself...",
+  "avatarUrl": "Profile Image URL",
+  "avatarUrlPlaceholder": "https://example.com/your-image.jpg",
+  "previewProfile": "Preview Profile",
+  "defaultUsername": "Username",
+  "defaultEmail": "Email",
+  "defaultBio": "No bio yet"
+}

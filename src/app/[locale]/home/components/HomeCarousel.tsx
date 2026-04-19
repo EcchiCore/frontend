@@ -5,6 +5,7 @@ import Image from 'next/image';
 import imageLoader from '@/lib/imageLoader';
 import { useState } from 'react';
 import type { ArticleListItem } from '@chanomhub/sdk';
+import { useTranslations } from 'next-intl';
 
 interface HomeCarouselProps {
   articles: ArticleListItem[];
@@ -18,6 +19,7 @@ const fallbacks = [
 ];
 
 export default function HomeCarousel({ articles, loading }: HomeCarouselProps) {
+  const t = useTranslations('HomeCarousel');
   const [imageErrors, setImageErrors] = useState<{ [key: number]: boolean }>({});
   const handleImageError = (id: number) =>
     setImageErrors(prev => ({ ...prev, [id]: true }));
@@ -37,7 +39,7 @@ export default function HomeCarousel({ articles, loading }: HomeCarouselProps) {
     <section className="container mx-auto px-3 py-3 max-w-5xl">
       <div className="flex items-center gap-2 mb-2 px-0.5">
         <div className="w-0.5 h-5 bg-primary rounded-full" />
-        <h3 className="text-sm font-bold text-foreground">กระทู้เด่นประจำวัน</h3>
+        <h3 className="text-sm font-bold text-foreground">{t('featuredPostsToday')}</h3>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:h-[260px]">

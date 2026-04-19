@@ -4,6 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 interface ArticleCommunityTabsProps {
     slug: string;
@@ -22,26 +23,27 @@ const ArticleCommunityTabs: React.FC<ArticleCommunityTabsProps> = ({
     const isWorkshop = pathname.includes('/mods');
     const isDiscussions = pathname.includes('/discussions');
     const isOverview = !isWorkshop && !isDiscussions;
+    const t = useTranslations("ArticleContent");
 
     const tabs = [
         {
-            label: "หน้าเกม", // Game Page (was All)
+            label: t('tabGamePage'), // Game Page (was All)
             href: `/articles/${slug}`,
             isActive: isOverview,
         },
         {
-            label: "แชร์ภาพ", // Share Images (New)
+            label: t('tabShareImages'), // Share Images (New)
             href: `#`,
             isActive: false,
         },
         {
-            label: "พูดคุย", // Discussions
+            label: t('tabDiscussions'), // Discussions
             href: `/articles/${slug}/discussions`, // Dedicated page
             count: commentCount,
             isActive: isDiscussions,
         },
         {
-            label: "มอด", // Mods (was Workshop)
+            label: t('tabMods'), // Mods (was Workshop)
             href: `/articles/${slug}/mods`,
             isActive: isWorkshop,
         },

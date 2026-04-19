@@ -13,8 +13,10 @@ import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useSearchParams } from 'next/navigation';
 import Cookies from 'js-cookie';
+import { useTranslations } from 'next-intl';
 
 export function DeveloperSettingsTab() {
+  const t = useTranslations('DeveloperSettingsTab');
   const searchParams = useSearchParams();
   const rawToken = searchParams.get('token');
   const urlToken = rawToken === 'undefined' ? null : rawToken;
@@ -460,7 +462,7 @@ export function DeveloperSettingsTab() {
             <Alert className="bg-blue-500/5 border-blue-500/20 text-blue-700 dark:text-blue-400">
               <AlertCircle className="h-4 w-4" />
               <AlertDescription className="text-[10px] leading-relaxed">
-                การเชื่อมต่อ Patreon จะทำให้ผู้ใช้ที่สมัครสมาชิก (Patreon Member) ของคุณสามารถเข้าถึงลิงก์ดาวน์โหลดแบบ "ปิด" (Closed Link) ในบทความที่คุณเป็นเจ้าของได้ทันที ระบบจะตรวจสอบสถานะสมาชิกแบบ Real-time ทุกครั้งที่มีการเข้าชม
+                {t('patreonIntegrationDesc')}
               </AlertDescription>
             </Alert>
           </CardContent>

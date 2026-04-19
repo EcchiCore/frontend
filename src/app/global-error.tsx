@@ -51,7 +51,7 @@ export default function GlobalError({
           marginBottom: '16px',
           color: '#dc2626'
         }}>
-          เกิดข้อผิดพลาด
+          An error occurred
         </h1>
 
         <p style={{
@@ -59,7 +59,7 @@ export default function GlobalError({
           marginBottom: '24px',
           lineHeight: '1.5'
         }}>
-          ขออภัย เกิดข้อผิดพลาดที่ไม่คาดคิด กรุณาลองใหม่อีกครั้ง หากปัญหายังคงอยู่ กรุณาติดต่อทีมสนับสนุน
+          Sorry, an unexpected error occurred. Please try again. If the problem persists, please contact the support team.
         </p>
 
         <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
@@ -79,7 +79,7 @@ export default function GlobalError({
             onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#2563eb'}
             onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#3b82f6'}
           >
-            ลองใหม่
+            Try again
           </button>
 
           <button
@@ -98,7 +98,7 @@ export default function GlobalError({
             onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#4b5563'}
             onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#6b7280'}
           >
-            กลับหน้าหลัก
+            Go back to home page
           </button>
         </div>
 

@@ -7,6 +7,7 @@ import {
   Check,
 } from "lucide-react";
 import { Button } from '@/components/ui/button';
+import { useTranslations } from 'next-intl';
 
 interface InteractionBarProps {
   isCurrentUserAuthor: boolean;
@@ -28,7 +29,10 @@ const InteractionBar: React.FC<InteractionBarProps> = ({
                                                          handleFavorite,
                                                          handleShare,
                                                          isDarkBackground,
-                                                       }) => (
+                                                       }) => {
+  const t = useTranslations('ArticleContent');
+
+  return (
   <div className={`mt-6 pt-6 ${isDarkBackground ? 'border-t border-gray-700' : 'border-t border-gray-200'}`}>
     <div className="flex flex-col md:flex-row items-center justify-between gap-4">
       {!isCurrentUserAuthor && (
@@ -40,12 +44,12 @@ const InteractionBar: React.FC<InteractionBarProps> = ({
           {isFollowing ? (
             <>
               <Check className="w-4 h-4" />
-              <span>กำลังติดตาม</span>
+              <span>{t('following')}</span>
             </>
           ) : (
             <>
               <UserPlus className="w-4 h-4" />
-              <span>ติดตาม</span>
+              <span>{t('follow')}</span>
             </>
           )}
         </Button>
@@ -58,7 +62,7 @@ const InteractionBar: React.FC<InteractionBarProps> = ({
           className="flex items-center gap-2"
         >
           <Heart className="w-4 h-4" fill={isFavorited ? "currentColor" : "none"} />
-          <span>{favoritesCount > 0 ? favoritesCount : 'ถูกใจ'}</span>
+          <span>{favoritesCount > 0 ? favoritesCount : t('liked')}</span>
         </Button>
 
         <Button onClick={handleShare} variant="outline">
@@ -68,6 +72,7 @@ const InteractionBar: React.FC<InteractionBarProps> = ({
       </div>
     </div>
   </div>
-);
+  );
+};
 
 export default InteractionBar;

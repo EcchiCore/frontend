@@ -1,5 +1,6 @@
 'use client';
 
+import React, { useState, useMemo } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import {
   Download,
@@ -27,9 +28,9 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Badge } from '@/components/ui/badge';
-import { JSX, useMemo, useState } from 'react';
 import { Tool } from '@/types/tool';
 import { Button } from '@/components/ui/button';
+import { useTranslations } from 'next-intl';
 
 // Helper function to get YouTube embed URL
 const getYoutubeEmbedUrl = (url: string) => {
@@ -52,7 +53,7 @@ const getYoutubeEmbedUrl = (url: string) => {
 };
 
 // Expanded icon mapping with more options and colors
-const iconMap: { [key: string]: { icon: JSX.Element; color: string } } = {
+const iconMap: { [key: string]: { icon: React.ReactNode; color: string } } = {
   Globe: { icon: <Globe className="h-8 w-8" />, color: 'text-blue-500' },
   Download: { icon: <Download className="h-8 w-8" />, color: 'text-green-500' },
   Smartphone: { icon: <Smartphone className="h-8 w-8" />, color: 'text-purple-500' },
@@ -87,6 +88,7 @@ function ToolCard({ tool, index }: { tool: Tool; index: number }) {
   const [showVideo, setShowVideo] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [selectedVersionIndex, setSelectedVersionIndex] = useState(0);
+  const t = useTranslations('Tools');
 
   const selectedVersion = tool.versions?.[selectedVersionIndex];
   const youtubeEmbedUrl = selectedVersion?.exampleClip ? getYoutubeEmbedUrl(selectedVersion.exampleClip) : null;
@@ -137,13 +139,13 @@ function ToolCard({ tool, index }: { tool: Tool; index: number }) {
               </Badge>
               {selectedVersionIndex === 0 && (
                 <Badge variant="secondary" className="bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0 shadow-sm">
-                  ใหม่ล่าสุด
+                  {t('newest')}
                 </Badge>
               )}
               {tool.isOfficial && (
                 <Badge variant="secondary" className="bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0 shadow-sm">
                   <Star className="h-3 w-3 mr-1 fill-white" />
-                  ของเรา
+                  {t('ours')}
                 </Badge>
               )}
             </div>
@@ -159,7 +161,7 @@ function ToolCard({ tool, index }: { tool: Tool; index: number }) {
           {tool.versions && tool.versions.length > 1 && (
             <div className="mb-6">
               <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2 block">
-                เลือกเวอร์ชัน:
+                {t('selectVersion')}
               </label>
               <select
                 value={selectedVersionIndex}
@@ -172,7 +174,7 @@ function ToolCard({ tool, index }: { tool: Tool; index: number }) {
                 {tool.versions.map((version, idx) => (
                   <option key={version._key || idx} value={idx}>
                     {version.versionNumber}
-                    {idx === 0 && ' (ใหม่ล่าสุด)'}
+                    {idx === 0 && t('newestSuffix')}
                     {version.releaseDate && ` - ${new Date(version.releaseDate).toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric' })}`}
                   </option>
                 ))}
@@ -185,7 +187,7 @@ function ToolCard({ tool, index }: { tool: Tool; index: number }) {
             <div className="mb-6 p-4 rounded-xl bg-gradient-to-br  dark:from-gray-800 dark:to-gray-850 border border-blue-200 dark:border-gray-700">
               <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
                 <Calendar className="h-4 w-4 text-blue-500" />
-                รายละเอียดการอัปเดต
+                {t('updateDetails')}
               </h4>
               <p className="text-xs text-gray-600 dark:text-gray-400 line-clamp-3 whitespace-pre-line">
                 {selectedVersion.changelog}
@@ -240,7 +242,7 @@ function ToolCard({ tool, index }: { tool: Tool; index: number }) {
               whileTap={{ scale: 0.98 }}
             >
               <Download className="h-5 w-5" />
-              ดาวน์โหลด
+              {t('download')}
             </motion.a>
             {youtubeEmbedUrl && (
               <motion.div
@@ -254,7 +256,7 @@ function ToolCard({ tool, index }: { tool: Tool; index: number }) {
                   onClick={() => setShowVideo(!showVideo)}
                 >
                   <Video className="h-5 w-5 mr-2" />
-                  {showVideo ? 'ซ่อนคลิป' : 'ดูคลิปตัวอย่าง'}
+                  {showVideo ? t('hideVideo') : t('watchPreview')}
                 </Button>
               </motion.div>
             )}
@@ -269,6 +271,7 @@ const computerPlatforms = ['Windows', 'macOS', 'Linux'];
 const mobilePlatforms = ['Android', 'iOS'];
 
 export function ToolsClient({ tools }: { tools: Tool[] }) {
+  const t = useTranslations('Tools');
   const computerTools = useMemo(() =>
     tools.filter(tool => tool.os?.some(os => computerPlatforms.includes(os)))
     , [tools]);
@@ -291,7 +294,7 @@ export function ToolsClient({ tools }: { tools: Tool[] }) {
           transition={{ duration: 0.5, delay: 0.2 }}
         >
           <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-6">
-            เครื่องมือสุดเจ๋งของเรา
+            {t('title')}
           </h1>
         </motion.div>
         <motion.p
@@ -300,7 +303,7 @@ export function ToolsClient({ tools }: { tools: Tool[] }) {
           transition={{ duration: 0.5, delay: 0.4 }}
           className="text-lg md:text-xl leading-relaxed text-gray-700 dark:text-gray-300 max-w-3xl mx-auto"
         >
-          ค้นพบเครื่องมือที่ช่วยให้คุณจัดการเกม แปลภาษา และใช้งานได้ทุกแพลตฟอร์ม!
+          {t('description')}
         </motion.p>
       </motion.div>
 
@@ -311,7 +314,7 @@ export function ToolsClient({ tools }: { tools: Tool[] }) {
           className="text-center text-gray-500 dark:text-gray-400 mb-8 py-20"
         >
           <div className="text-6xl mb-4">🔧</div>
-          <p className="text-xl">ยังไม่มีเครื่องมือให้แสดงในขณะนี้</p>
+          <p className="text-xl">{t('noTools')}</p>
         </motion.div>
       )}
 
@@ -325,7 +328,7 @@ export function ToolsClient({ tools }: { tools: Tool[] }) {
           <div className="flex items-center gap-3 mb-8">
             <div className="h-1 w-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full" />
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">
-              เครื่องมือสำหรับคอมพิวเตอร์
+              {t('toolsForComputer')}
             </h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -345,7 +348,7 @@ export function ToolsClient({ tools }: { tools: Tool[] }) {
           <div className="flex items-center gap-3 mb-8">
             <div className="h-1 w-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full" />
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">
-              เครื่องมือสำหรับมือถือ
+              {t('toolsForMobile')}
             </h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
