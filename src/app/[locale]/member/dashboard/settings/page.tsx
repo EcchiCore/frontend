@@ -632,8 +632,8 @@ const SettingsPage: React.FC = () => {
                               <TableCell>
                                 <div className="flex gap-1">
                                   {token.ranks.map(rank => (
-                                    <Badge key={rank} variant="outline" className="text-[10px]">
-                                      {rank}
+                                    <Badge key={rank.id} variant="outline" className="text-[10px]">
+                                      {rank.rank}
                                     </Badge>
                                   ))}
                                 </div>
