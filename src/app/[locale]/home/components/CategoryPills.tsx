@@ -19,7 +19,7 @@ const getPills = (t: any) => [
 ];
 
 export default function CategoryPills() {
-  const t = useTranslations('CategoryPills');
+  const t = useTranslations('homePage.CategoryPills');
   const pills = getPills(t);
   return (
     <div className="flex gap-2 overflow-x-auto pb-1 mb-5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">

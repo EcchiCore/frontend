@@ -10,7 +10,7 @@ export default function GameCard({ article }: { article: Article }) {
   const format = useFormatter()
 
   const getTimeAgo = (dateString: string) => {
-    return format.relativeTime(new Date(dateString))
+    return format.relativeTime(new Date(dateString), { now: new Date() })
   }
 
   return (

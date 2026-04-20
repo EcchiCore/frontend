@@ -17,19 +17,22 @@ export default function myImageLoader({
   width: number
   quality?: number
 }) {
-  // URLs with /cdn-cgi/image/ are already optimized by Cloudflare - return as-is
+  // URLs with /cdn-cgi/image/ are already optimized by Cloudflare
   if (src.includes('/cdn-cgi/image/')) {
-    return src;
+    const separator = src.includes('?') ? '&' : '?';
+    return `${src}${separator}w=${width}`;
   }
 
-  // URLs already processed by imgproxy - return as-is
+  // URLs already processed by imgproxy
   if (src.includes('/insecure/') || src.includes('imgproxy.chanomhub.com')) {
-    return src;
+    const separator = src.includes('?') ? '&' : '?';
+    return `${src}${separator}w=${width}`;
   }
 
-  // If it's already a full URL, return as-is
+  // If it's already a full URL, return as-is but with width param to satisfy Next.js
   if (src.startsWith('http://') || src.startsWith('https://')) {
-    return src;
+    const separator = src.includes('?') ? '&' : '?';
+    return `${src}${separator}w=${width}`;
   }
 
   // Build imgproxy options based on requested width and quality

@@ -46,7 +46,7 @@ const getTools = (t: any) => [
 ];
 
 export default function ToolsShelf() {
-  const t = useTranslations('ToolsShelf');
+  const t = useTranslations('homePage.ToolsShelf');
   const tools = getTools(t);
 
   return (

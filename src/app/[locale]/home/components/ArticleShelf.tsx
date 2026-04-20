@@ -29,7 +29,7 @@ function ArticleCard({ post, index }: { post: ArticleListItem; index: number }) 
   const format = useFormatter();
 
   useEffect(() => {
-    setTimeString(format.relativeTime(new Date(post.createdAt)));
+    setTimeString(format.relativeTime(new Date(post.createdAt), { now: new Date() }));
   }, [post.createdAt, format]);
 
   return (
@@ -97,7 +97,7 @@ function SkeletonCard() {
 }
 
 export default function ArticleShelf({ title, posts, loading, href }: ArticleShelfProps) {
-  const t = useTranslations('Shelf');
+  const t = useTranslations('homePage.Shelf');
   return (
     <section className="mb-8">
       {/* Header */}

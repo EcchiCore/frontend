@@ -42,7 +42,7 @@ function GameCard({ post, index }: { post: ArticleListItem; index: number }) {
   const format = useFormatter();
 
   useEffect(() => {
-    setTimeString(format.relativeTime(new Date(post.createdAt)));
+    setTimeString(format.relativeTime(new Date(post.createdAt), { now: new Date() }));
   }, [post.createdAt, format]);
 
   return (
@@ -116,7 +116,7 @@ function SkeletonCard() {
 
 export default function GameShelf({ title, posts, loading, href }: GameShelfProps) {
   const items = loading ? Array.from({ length: 24 }) : posts;
-  const t = useTranslations('Shelf');
+  const t = useTranslations('homePage.Shelf');
 
   return (
     <section className="mb-8">

@@ -19,7 +19,7 @@ const fallbacks = [
 ];
 
 export default function HomeCarousel({ articles, loading }: HomeCarouselProps) {
-  const t = useTranslations('HomeCarousel');
+  const t = useTranslations('homePage.HomeCarousel');
   const [imageErrors, setImageErrors] = useState<{ [key: number]: boolean }>({});
   const handleImageError = (id: number) =>
     setImageErrors(prev => ({ ...prev, [id]: true }));

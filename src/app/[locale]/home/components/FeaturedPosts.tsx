@@ -41,7 +41,7 @@ function GameCard({ post, index }: { post: ArticleListItem; index: number }) {
   const format = useFormatter();
 
   useEffect(() => {
-    setTimeString(format.relativeTime(new Date(post.createdAt)));
+    setTimeString(format.relativeTime(new Date(post.createdAt), { now: new Date() }));
   }, [post.createdAt, format]);
 
   return (
