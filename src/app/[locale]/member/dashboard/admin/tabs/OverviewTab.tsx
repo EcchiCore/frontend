@@ -4,7 +4,10 @@ import { getSdk } from '@/lib/sdk';
 import { Megaphone, Users, DollarSign, Loader2 } from 'lucide-react';
 import useSWR from 'swr';
 
+import { useFormatter } from 'next-intl';
+
 export function OverviewTab() {
+    const format = useFormatter();
     const { data: stats, error, isLoading } = useSWR('admin-overview-stats', async () => {
         const sdk = await getSdk();
         const sponsored = await sdk.sponsoredArticles.getAll({ all: true }).catch(() => []);
@@ -52,7 +55,9 @@ export function OverviewTab() {
                             <DollarSign className="h-4 w-4 text-muted-foreground" />
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold">฿{displayStats.totalRevenue.toFixed(2)}</div>
+                            <div className="text-2xl font-bold">
+                                {format.number(displayStats.totalRevenue, { style: 'currency', currency: 'THB' })}
+                            </div>
                             <p className="text-xs text-muted-foreground">+0% from last month</p>
                         </CardContent>
                     </Card>

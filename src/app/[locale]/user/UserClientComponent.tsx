@@ -61,22 +61,23 @@ const UserClientComponent = () => {
 
   return (
     <div className="flex items-center justify-center h-screen bg-gray-100 px-4">
-<div className="bg-white shadow-lg rounded-lg p-6 max-w-sm w-full text-center">
-  <h2 className="text-2xl font-bold text-gray-800 mb-4">
-    {t('welcome', { username: userData.username })}
-  </h2>
-  <p className="text-gray-600 mb-2">{t('email')} {userData.email}</p>
-  <p className="text-gray-500 text-sm">
-    {t('accountCreated')} {new Date(userData.createdAt).toLocaleDateString()}
-  </p>
-  <p className="text-gray-500 text-sm">
-    {t('lastUpdated')} {new Date(userData.updatedAt).toLocaleDateString()}
-  </p>
-  <p className="text-red-500 font-medium mt-4">
-    {t('notComplete')}
-  </p>
-</div>
-</div>
-);
+      <div className="bg-white shadow-lg rounded-lg p-6 max-w-sm w-full text-center">
+        <h2 className="text-2xl font-bold text-gray-800 mb-4">
+          {t('welcome', { username: userData.username })}
+        </h2>
+        <p className="text-gray-600 mb-2">{t('email')} {userData.email}</p>
+        <p className="text-gray-500 text-sm">
+          {t('accountCreated')} {new Date(userData.createdAt).toLocaleDateString()}
+        </p>
+        <p className="text-gray-500 text-sm">
+          {t('lastUpdated')} {new Date(userData.updatedAt).toLocaleDateString()}
+        </p>
+        <p className="text-red-500 font-medium mt-4">
+          {t('notComplete')}
+        </p>
+      </div>
+    </div>
+  );
+};
 
 export default UserClientComponent;
