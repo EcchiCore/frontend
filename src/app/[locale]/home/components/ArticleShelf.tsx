@@ -2,7 +2,6 @@
 
 import { Link } from "@/i18n/navigation";
 import React, { useState, useEffect } from 'react';
-
 import Image from 'next/image';
 import type { ArticleListItem } from '@chanomhub/sdk';
 import imageLoader from '@/lib/imageLoader';
@@ -25,8 +24,8 @@ const gradients = [
 
 function ArticleCard({ post, index }: { post: ArticleListItem; index: number }) {
   const [imageError, setImageError] = useState(false);
-  const [timeString, setTimeString] = useState('');
   const src = post.coverImage || post.mainImage || null;
+  const [timeString, setTimeString] = useState<string>('');
   const format = useFormatter();
 
   useEffect(() => {
@@ -76,7 +75,7 @@ function ArticleCard({ post, index }: { post: ArticleListItem; index: number }) 
         <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
           <span className="truncate">👤 {post.author?.name}</span>
           <span className="flex-shrink-0">👁 {(post.viewsCount || 0).toLocaleString()}</span>
-          <span className="ml-auto flex-shrink-0">{timeString}</span>
+          <span className="ml-auto flex-shrink-0" suppressHydrationWarning>{timeString}</span>
         </div>
       </div>
     </Link>

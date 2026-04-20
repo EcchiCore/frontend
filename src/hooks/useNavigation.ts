@@ -1,26 +1,25 @@
-// dashboard/hooks/useNavigation.ts
-import { useState, useEffect, useCallback } from 'react';
+import { useSyncExternalStore, useCallback, useState, useEffect } from 'react';
 import { PageType } from '@/types/dashboard';
 
+const getHashSnapshot = () => window.location.hash.replace('#', '') as PageType;
+
 export const useNavigation = () => {
-  const [currentPage, setCurrentPage] = useState<PageType>('profile');
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  const handleHashChange = useCallback(() => {
-    const hash = window.location.hash.replace('#', '') as PageType;
-    const validPages: PageType[] = ['profile', 'articles', 'moderation', 'settings'];
+  const hash = useSyncExternalStore(
+    (callback) => {
+      window.addEventListener('hashchange', callback);
+      return () => window.removeEventListener('hashchange', callback);
+    },
+    getHashSnapshot,
+    () => 'profile' as PageType
+  );
 
-    if (validPages.includes(hash)) {
-      setCurrentPage(hash);
-    } else {
-      setCurrentPage('profile');
-    }
-  }, []);
+  const validPages: PageType[] = ['profile', 'articles', 'moderation', 'settings'];
+  const currentPage = validPages.includes(hash) ? hash : 'profile';
 
   const navigateTo = useCallback((page: PageType) => {
-    setCurrentPage(page);
     window.location.hash = page;
-    // Close mobile menu when navigating
     setMobileOpen(false);
   }, []);
 
@@ -28,21 +27,13 @@ export const useNavigation = () => {
     setMobileOpen(prev => !prev);
   }, []);
 
-  // Listen for hash changes
-  useEffect(() => {
-    handleHashChange();
-    window.addEventListener('hashchange', handleHashChange);
-    return () => window.removeEventListener('hashchange', handleHashChange);
-  }, [handleHashChange]);
-
-  // Close mobile menu when clicking outside (on larger screens)
+  // Close mobile menu when resize (Still need this as a side effect if we don't use matchMedia)
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= 1024) {
         setMobileOpen(false);
       }
     };
-
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);

@@ -11,17 +11,19 @@ interface ThemeSettingsFormProps {
 }
 
 export default function ThemeSettingsForm({ setError, setSuccessMessage }: ThemeSettingsFormProps) {
-  const [theme, setTheme] = useState<'light' | 'dark' | 'system'>('system');
-  const [fontSize, setFontSize] = useState<'small' | 'medium' | 'large'>('medium');
-  const [isSaving, setIsSaving] = useState(false);
-
-  useEffect(() => {
-    // Load settings from localStorage on mount
+  const [theme, setTheme] = useState<'light' | 'dark' | 'system'>(() => {
     if (typeof window !== 'undefined') {
-      setTheme((localStorage.getItem('theme') as 'light' | 'dark' | 'system') || 'system');
-      setFontSize((localStorage.getItem('fontSize') as 'small' | 'medium' | 'large') || 'medium');
+      return (localStorage.getItem('theme') as 'light' | 'dark' | 'system') || 'system';
     }
-  }, []);
+    return 'system';
+  });
+  const [fontSize, setFontSize] = useState<'small' | 'medium' | 'large'>(() => {
+    if (typeof window !== 'undefined') {
+      return (localStorage.getItem('fontSize') as 'small' | 'medium' | 'large') || 'medium';
+    }
+    return 'medium';
+  });
+  const [isSaving, setIsSaving] = useState(false);
 
   const handleSave = () => {
     setIsSaving(true);

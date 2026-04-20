@@ -99,7 +99,6 @@ const EntityIcon = ({ type }: { type: EntityType }) => {
 
 export default function ModerationDashboard() {
   const [requests, setRequests] = useState<ModerationRequest[]>([]);
-  const [filteredRequests, setFilteredRequests] = useState<ModerationRequest[]>([]);
   const [activeFilter, setActiveFilter] = useState<EntityType | "ALL">("ALL");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedRequest, setSelectedRequest] = useState<ModerationRequest | null>(null);
@@ -108,6 +107,40 @@ export default function ModerationDashboard() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
   const [userRole, setUserRole] = useState<"MODERATOR" | "ADMIN" | null>(null);
+
+  // Filter and search functionality (Derived State)
+  const filteredRequests = React.useMemo(() => {
+    let filtered = requests;
+
+    // Filter by type
+    if (activeFilter !== "ALL") {
+      filtered = filtered.filter(req => req.entityType === activeFilter);
+    }
+
+    // Filter by search term
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase();
+      filtered = filtered.filter(req =>
+        req.entityDetails.title?.toLowerCase().includes(term) ||
+        req.entityDetails.name?.toLowerCase().includes(term) ||
+        req.entityDetails.content?.toLowerCase().includes(term) ||
+        req.requester.name.toLowerCase().includes(term) ||
+        req.requestNote.toLowerCase().includes(term)
+      );
+    }
+
+    return filtered;
+  }, [requests, activeFilter, searchTerm]);
+
+  const handleFilterChange = (filter: EntityType | "ALL") => {
+    setActiveFilter(filter);
+    setCurrentPage(1);
+  };
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+    setCurrentPage(1);
+  };
 
   // API states
   const [loading, setLoading] = useState(false);
@@ -253,34 +286,6 @@ export default function ModerationDashboard() {
       setUserRole("MODERATOR");
     }
   }, []);
-
-  // Filter and search functionality
-  const filterRequests = useCallback(() => {
-    let filtered = requests;
-
-    // Filter by type
-    if (activeFilter !== "ALL") {
-      filtered = filtered.filter(req => req.entityType === activeFilter);
-    }
-
-    // Filter by search term
-    if (searchTerm) {
-      filtered = filtered.filter(req =>
-        req.entityDetails.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        req.entityDetails.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        req.entityDetails.content?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        req.requester.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        req.requestNote.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-
-    setFilteredRequests(filtered);
-    setCurrentPage(1);
-  }, [requests, activeFilter, searchTerm]);
-
-  useEffect(() => {
-    filterRequests();
-  }, [filterRequests]);
 
   // Initialize data
   useEffect(() => {
@@ -503,7 +508,7 @@ export default function ModerationDashboard() {
                     placeholder="Search requests..."
                     className="input input-bordered flex-1"
                     value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
+                    onChange={handleSearchChange}
                   />
                 </div>
               </div>
@@ -512,27 +517,27 @@ export default function ModerationDashboard() {
               <div className="flex flex-wrap gap-2">
                 <button
                   className={`btn btn-sm ${activeFilter === "ALL" ? "btn-primary" : "btn-outline"}`}
-                  onClick={() => setActiveFilter("ALL")}
+                  onClick={() => handleFilterChange("ALL")}
                 >
                   All ({requests.length})
                 </button>
                 <button
                   className={`btn btn-sm ${activeFilter === "ARTICLE" ? "btn-primary" : "btn-outline"}`}
-                  onClick={() => setActiveFilter("ARTICLE")}
+                  onClick={() => handleFilterChange("ARTICLE")}
                 >
                   <FileText className="w-4 h-4 mr-1" />
                   Articles ({stats.articleRequests})
                 </button>
                 <button
                   className={`btn btn-sm ${activeFilter === "DOWNLOAD_LINK" ? "btn-primary" : "btn-outline"}`}
-                  onClick={() => setActiveFilter("DOWNLOAD_LINK")}
+                  onClick={() => handleFilterChange("DOWNLOAD_LINK")}
                 >
                   <Link className="w-4 h-4 mr-1" />
                   Links ({stats.downloadLinkRequests})
                 </button>
                 <button
                   className={`btn btn-sm ${activeFilter === "COMMENT" ? "btn-primary" : "btn-outline"}`}
-                  onClick={() => setActiveFilter("COMMENT")}
+                  onClick={() => handleFilterChange("COMMENT")}
                 >
                   <MessageCircle className="w-4 h-4 mr-1" />
                   Comments ({stats.commentRequests})

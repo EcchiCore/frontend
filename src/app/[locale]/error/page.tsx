@@ -1,7 +1,8 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter } from "@/i18n/navigation";
-import { AlertCircle, Home, RefreshCcw } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import { AlertCircle, Home, RefreshCcw, Loader2 } from "lucide-react";
 
 const translations = {
   error: "An error occurred",
@@ -20,23 +21,20 @@ const translations = {
 
 type StatusCodes = keyof typeof translations.status;
 
-export default function ErrorPage() {
-  const [errorMessage, setErrorMessage] = useState("");
-  const [redirectMessage, setRedirectMessage] = useState("");
+function ErrorPageContent() {
   const [countdown, setCountdown] = useState(3);
   const [mounted, setMounted] = useState(false);
   const router = useRouter();
+  const sp = useSearchParams();
   
-  const statusCode = typeof window !== 'undefined' 
-    ? new URLSearchParams(window.location.search).get('statusCode') 
-    : null;
+  const statusCode = sp.get('statusCode');
+  const code = Number(statusCode) as StatusCodes;
+  const errorMessage = translations.status[code] || translations.status[404];
+  const redirectMessage = translations.redirecting;
 
   useEffect(() => {
-    const code = Number(statusCode) as StatusCodes;
-    setErrorMessage(translations.status[code] || translations.status[404]);
-    setRedirectMessage(translations.redirecting);
     setMounted(true);
-  }, [statusCode]);
+  }, []);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -141,5 +139,17 @@ export default function ErrorPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ErrorPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="w-10 h-10 animate-spin text-primary" />
+      </div>
+    }>
+      <ErrorPageContent />
+    </Suspense>
   );
 }

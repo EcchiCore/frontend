@@ -39,11 +39,11 @@ export const MediaGallery = () => {
             game: formData.slug || 'temp'
           });
           
-          if (!result || (!result.url && !(result as any).full_url)) {
+          if (!result || !result.url) {
             throw new Error('Upload failed');
           }
           
-          return (result as any).full_url || result.url;
+          return result.url;
         } catch (err) {
           console.error(`Failed to upload ${file.name}:`, err);
           return null;

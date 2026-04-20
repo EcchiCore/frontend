@@ -1,200 +1,427 @@
-// Server Component — no client interactivity needed
-import { Sparkles, Heart, Star, Zap } from 'lucide-react';
+'use client';
+
+import { useEffect, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 
 export default function Footer() {
+    const yearRef = useRef<HTMLSpanElement>(null);
     const t = useTranslations('Footer');
+
+    useEffect(() => {
+        if (yearRef.current) {
+            yearRef.current.textContent = String(new Date().getFullYear());
+        }
+    }, []);
+
     return (
-        <footer className="relative mt-0 border-t border-border/40 bg-background backdrop-blur-xl overflow-hidden">
-            {/* Enhanced Ambient Background Effects */}
-            <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-primary/60 to-transparent animate-pulse"></div>
+        <>
+            <style>{`
+                @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;1,9..40,300&display=swap');
 
-            {/* Floating orbs with animation */}
-            <div className="absolute -top-[150px] left-1/4 w-[600px] h-[600px] bg-primary/10 rounded-full blur-[140px] pointer-events-none animate-pulse"></div>
-            <div className="absolute top-1/2 right-0 w-[500px] h-[500px] bg-accent/10 rounded-full blur-[120px] pointer-events-none animate-pulse" style={{ animationDelay: '1s' }}></div>
-            <div className="absolute bottom-0 left-1/2 w-[400px] h-[400px] bg-secondary/5 rounded-full blur-[100px] pointer-events-none animate-pulse" style={{ animationDelay: '2s' }}></div>
+                .ch-footer {
+                    --red: #C8102E;
+                    --red-dim: #7a0a1b;
+                    --cream: #F2EDE6;
+                    --ink: #0e0d0b;
+                    --muted: rgba(242,237,230,0.38);
+                    --border: rgba(242,237,230,0.12);
+                    background: var(--ink);
+                    color: var(--cream);
+                    font-family: 'DM Sans', sans-serif;
+                    position: relative;
+                    overflow: hidden;
+                }
 
-            {/* Gradient overlay for depth */}
-            <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent pointer-events-none"></div>
+                .ch-footer__slash {
+                    position: absolute;
+                    top: -60px;
+                    right: -40px;
+                    width: 420px;
+                    height: 420px;
+                    border: 1px solid var(--border);
+                    border-radius: 50%;
+                    pointer-events: none;
+                }
+                .ch-footer__slash::before {
+                    content: '';
+                    position: absolute;
+                    inset: 40px;
+                    border: 1px solid var(--border);
+                    border-radius: 50%;
+                }
 
-            <div className="container mx-auto px-4 py-16 relative z-10">
-                <div className="grid grid-cols-1 md:grid-cols-12 gap-12">
-                    {/* Enhanced Brand Section */}
-                    <div className="col-span-1 md:col-span-5 space-y-6">
-                        {/* Logo with glow effect */}
-                        <div className="inline-flex items-center gap-3 group cursor-pointer">
-                            <div className="relative">
-                                <div className="absolute inset-0 bg-gradient-to-r from-primary to-accent rounded-lg blur-xl opacity-50 group-hover:opacity-75 transition-opacity"></div>
-                                <h2 className="relative text-3xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent animate-gradient bg-[length:200%_auto]">
-                                    ChanomHub
-                                </h2>
-                            </div>
-                            <Sparkles className="w-5 h-5 text-accent animate-pulse" />
-                        </div>
+                .ch-footer__top {
+                    border-bottom: 1px solid var(--border);
+                    padding: 3rem 2.5rem 0;
+                    display: grid;
+                    grid-template-columns: 1fr 1fr 1fr;
+                    gap: 0;
+                }
 
-                        {/* Subtitle with icon */}
-                        <div className="flex items-center gap-2">
-                            <Star className="w-4 h-4 text-primary animate-pulse" />
-                            <h3 className="text-sm font-semibold text-foreground/90 tracking-wide">
-                                {t("description1")}
-                            </h3>
-                        </div>
+                @media (max-width: 768px) {
+                    .ch-footer__top {
+                        grid-template-columns: 1fr;
+                        padding: 2rem 1.5rem 0;
+                    }
+                }
 
-                        {/* Enhanced description with backdrop */}
-                        <div className="relative group">
-                            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-accent/5 rounded-xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                            <p className="relative text-sm text-muted-foreground leading-relaxed max-w-md p-4 rounded-xl bg-card/30 backdrop-blur-sm border border-border/20 hover:border-border/40 transition-all">
-                                {t("description2")} {t("description3")} {t("description4")} {t("description5")}
-                            </p>
-                        </div>
+                .ch-footer__brand {
+                    border-right: 1px solid var(--border);
+                    padding-right: 2.5rem;
+                    padding-bottom: 3rem;
+                }
 
-                        {/* Stats or badges */}
-                        <div className="flex items-center gap-4 pt-2">
-                            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 backdrop-blur-sm">
-                                <Heart className="w-3.5 h-3.5 text-primary animate-pulse" />
-                                <span className="text-xs font-medium text-primary">Active Community</span>
-                            </div>
-                            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-accent/10 border border-accent/20 backdrop-blur-sm">
-                                <Zap className="w-3.5 h-3.5 text-accent" />
-                                <span className="text-xs font-medium text-accent">Daily Updates</span>
-                            </div>
+                @media (max-width: 768px) {
+                    .ch-footer__brand {
+                        border-right: none;
+                        border-bottom: 1px solid var(--border);
+                        padding-right: 0;
+                        padding-bottom: 2rem;
+                        margin-bottom: 2rem;
+                    }
+                }
+
+                .ch-footer__logo {
+                    font-family: 'Bebas Neue', sans-serif;
+                    font-size: clamp(3rem, 6vw, 5rem);
+                    line-height: 0.9;
+                    letter-spacing: 0.02em;
+                    color: var(--cream);
+                    display: block;
+                    margin-bottom: 1rem;
+                }
+
+                .ch-footer__logo span {
+                    color: var(--red);
+                }
+
+                .ch-footer__tagline {
+                    font-size: 0.75rem;
+                    letter-spacing: 0.16em;
+                    text-transform: uppercase;
+                    color: var(--muted);
+                    font-weight: 300;
+                    margin-bottom: 1.75rem;
+                }
+
+                .ch-footer__desc {
+                    font-size: 0.8125rem;
+                    line-height: 1.7;
+                    color: var(--muted);
+                    font-weight: 300;
+                    font-style: italic;
+                    max-width: 28ch;
+                }
+
+                .ch-footer__badge-row {
+                    display: flex;
+                    gap: 0.5rem;
+                    margin-top: 1.75rem;
+                    flex-wrap: wrap;
+                }
+
+                .ch-footer__badge {
+                    font-size: 0.65rem;
+                    letter-spacing: 0.12em;
+                    text-transform: uppercase;
+                    padding: 0.3rem 0.65rem;
+                    border: 1px solid var(--border);
+                    color: var(--muted);
+                    font-weight: 300;
+                }
+
+                .ch-footer__badge--live {
+                    border-color: var(--red-dim);
+                    color: var(--red);
+                    display: flex;
+                    align-items: center;
+                    gap: 0.4rem;
+                }
+
+                .ch-footer__badge--live::before {
+                    content: '';
+                    width: 5px;
+                    height: 5px;
+                    border-radius: 50%;
+                    background: var(--red);
+                    animation: pulse 2s ease-in-out infinite;
+                }
+
+                @keyframes pulse {
+                    0%, 100% { opacity: 1; }
+                    50% { opacity: 0.3; }
+                }
+
+                .ch-footer__nav-col {
+                    padding: 0 2.5rem 3rem;
+                    border-right: 1px solid var(--border);
+                }
+
+                .ch-footer__nav-col:last-child {
+                    border-right: none;
+                    padding-right: 0;
+                }
+
+                @media (max-width: 768px) {
+                    .ch-footer__nav-col {
+                        border-right: none;
+                        border-bottom: 1px solid var(--border);
+                        padding: 1.5rem 0;
+                    }
+                    .ch-footer__nav-col:last-child {
+                        border-bottom: none;
+                    }
+                }
+
+                .ch-footer__nav-label {
+                    font-size: 0.65rem;
+                    letter-spacing: 0.2em;
+                    text-transform: uppercase;
+                    color: var(--red);
+                    font-weight: 400;
+                    margin-bottom: 1.5rem;
+                    display: flex;
+                    align-items: center;
+                    gap: 0.6rem;
+                }
+
+                .ch-footer__nav-label::before {
+                    content: '';
+                    width: 18px;
+                    height: 1px;
+                    background: var(--red);
+                    display: block;
+                }
+
+                .ch-footer__nav-list {
+                    list-style: none;
+                    padding: 0;
+                    margin: 0;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 0;
+                }
+
+                .ch-footer__nav-list li {
+                    border-bottom: 1px solid var(--border);
+                }
+
+                .ch-footer__nav-list li:last-child {
+                    border-bottom: none;
+                }
+
+                .ch-footer__nav-list a {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    padding: 0.75rem 0;
+                    font-size: 0.875rem;
+                    color: var(--cream);
+                    text-decoration: none;
+                    font-weight: 300;
+                    transition: color 0.2s, padding-left 0.2s;
+                    letter-spacing: 0.01em;
+                }
+
+                .ch-footer__nav-list a:hover {
+                    color: var(--red);
+                    padding-left: 0.4rem;
+                }
+
+                .ch-footer__nav-list a .arrow {
+                    font-size: 0.7rem;
+                    opacity: 0;
+                    transform: translateX(-4px);
+                    transition: opacity 0.2s, transform 0.2s;
+                    color: var(--red);
+                }
+
+                .ch-footer__nav-list a:hover .arrow {
+                    opacity: 1;
+                    transform: translateX(0);
+                }
+
+                .ch-footer__nav-list a .ext-icon {
+                    font-size: 0.65rem;
+                    opacity: 0.4;
+                    color: var(--cream);
+                }
+
+                .ch-footer__bottom {
+                    padding: 1.25rem 2.5rem;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    gap: 1rem;
+                    flex-wrap: wrap;
+                }
+
+                @media (max-width: 768px) {
+                    .ch-footer__bottom {
+                        padding: 1.25rem 1.5rem;
+                        flex-direction: column;
+                        align-items: flex-start;
+                        gap: 0.75rem;
+                    }
+                }
+
+                .ch-footer__copy {
+                    font-size: 0.72rem;
+                    color: var(--muted);
+                    font-weight: 300;
+                    letter-spacing: 0.04em;
+                }
+
+                .ch-footer__copy strong {
+                    font-weight: 400;
+                    color: var(--cream);
+                }
+
+                .ch-footer__right {
+                    display: flex;
+                    align-items: center;
+                    gap: 1.5rem;
+                }
+
+                .ch-footer__age-gate {
+                    font-family: 'Bebas Neue', sans-serif;
+                    font-size: 1.1rem;
+                    letter-spacing: 0.08em;
+                    color: var(--red);
+                    border: 1px solid var(--red-dim);
+                    padding: 0.15rem 0.55rem;
+                    line-height: 1;
+                }
+
+                .ch-footer__dmca {
+                    opacity: 0.45;
+                    transition: opacity 0.2s;
+                    display: block;
+                }
+
+                .ch-footer__dmca:hover {
+                    opacity: 0.85;
+                }
+
+                .ch-footer__dmca img {
+                    height: 28px;
+                    width: auto;
+                    display: block;
+                    filter: grayscale(1) brightness(1.8);
+                }
+            `}</style>
+
+            <footer className="ch-footer">
+                <div className="ch-footer__slash" aria-hidden="true" />
+
+                <div className="ch-footer__top">
+                    {/* Brand */}
+                    <div className="ch-footer__brand">
+                        <span className="ch-footer__logo">
+                            Chanom<span>Hub</span>
+                        </span>
+                        <p className="ch-footer__tagline">H-Games &amp; Adult Gaming Community</p>
+                        <p className="ch-footer__desc">
+                            {t("desc")}
+                        </p>
+                        <div className="ch-footer__badge-row">
+                            <span className="ch-footer__badge ch-footer__badge--live">Daily Updates</span>
+                            <span className="ch-footer__badge">18+</span>
+                            <span className="ch-footer__badge">Members Only</span>
                         </div>
                     </div>
 
-                    {/* Enhanced Navigation Section */}
-                    <div className="col-span-1 md:col-span-7 flex flex-col md:flex-row justify-end gap-12 md:gap-16">
-                        <div className="space-y-5">
-                            <div className="relative inline-block">
-                                <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-transparent rounded blur-md"></div>
-                                <h4 className="relative text-sm font-bold text-foreground tracking-wider uppercase flex items-center gap-2">
-                                    <span className="w-1 h-4 bg-gradient-to-b from-primary to-accent rounded-full"></span>
-                                    {t("aboutUs")}
-                                </h4>
-                            </div>
-                            <ul className="space-y-3.5 text-sm">
-                                <li>
-                                    <a href="#" className="group flex items-center gap-3 text-muted-foreground hover:text-primary transition-all">
-                                        <span className="relative flex items-center justify-center w-6 h-6">
-                                            <span className="absolute w-full h-full rounded-full bg-primary/10 group-hover:bg-primary/20 group-hover:scale-110 transition-all"></span>
-                                            <span className="relative w-2 h-2 rounded-full bg-primary/30 group-hover:bg-primary transition-colors"></span>
-                                        </span>
-                                        <span className="group-hover:translate-x-0.5 transition-transform">{t("privacyPolicy")}</span>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="#" className="group flex items-center gap-3 text-muted-foreground hover:text-primary transition-all">
-                                        <span className="relative flex items-center justify-center w-6 h-6">
-                                            <span className="absolute w-full h-full rounded-full bg-primary/10 group-hover:bg-primary/20 group-hover:scale-110 transition-all"></span>
-                                            <span className="relative w-2 h-2 rounded-full bg-primary/30 group-hover:bg-primary transition-colors"></span>
-                                        </span>
-                                        <span className="group-hover:translate-x-0.5 transition-transform">{t("termsOfService")}</span>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="#" className="group flex items-center gap-3 text-muted-foreground hover:text-primary transition-all">
-                                        <span className="relative flex items-center justify-center w-6 h-6">
-                                            <span className="absolute w-full h-full rounded-full bg-primary/10 group-hover:bg-primary/20 group-hover:scale-110 transition-all"></span>
-                                            <span className="relative w-2 h-2 rounded-full bg-primary/30 group-hover:bg-primary transition-colors"></span>
-                                        </span>
-                                        <span className="group-hover:translate-x-0.5 transition-transform">{t("advertise")}</span>
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
+                    {/* Column 1 */}
+                    <nav className="ch-footer__nav-col" aria-label={t("aboutUs")}>
+                        <p className="ch-footer__nav-label">{t("aboutUs")}</p>
+                        <ul className="ch-footer__nav-list">
+                            <li>
+                                <a href="/privacy-policy">
+                                    <span>{t("privacyPolicy")}</span>
+                                    <span className="arrow">→</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="https://docs.chanomhub.com">
+                                    <span>{t("documents")}</span>
+                                    <span className="arrow">→</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#">
+                                    <span>{t("contact")}</span>
+                                    <span className="arrow">→</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
 
-                        {/* Additional Section - Social or Quick Links */}
-                        <div className="space-y-5">
-                            <div className="relative inline-block">
-                                <div className="absolute inset-0 bg-gradient-to-r from-accent/20 to-transparent rounded blur-md"></div>
-                                <h4 className="relative text-sm font-bold text-foreground tracking-wider uppercase flex items-center gap-2">
-                                    <span className="w-1 h-4 bg-gradient-to-b from-accent to-primary rounded-full"></span>
-                                    Quick Links
-                                </h4>
-                            </div>
-                            <ul className="space-y-3.5 text-sm">
-                                <li>
-                                    <a href="#" className="group flex items-center gap-3 text-muted-foreground hover:text-accent transition-all">
-                                        <span className="relative flex items-center justify-center w-6 h-6">
-                                            <span className="absolute w-full h-full rounded-full bg-accent/10 group-hover:bg-accent/20 group-hover:scale-110 transition-all"></span>
-                                            <span className="relative w-2 h-2 rounded-full bg-accent/30 group-hover:bg-accent transition-colors"></span>
-                                        </span>
-                                        <span className="group-hover:translate-x-0.5 transition-transform">Latest Games</span>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="#" className="group flex items-center gap-3 text-muted-foreground hover:text-accent transition-all">
-                                        <span className="relative flex items-center justify-center w-6 h-6">
-                                            <span className="absolute w-full h-full rounded-full bg-accent/10 group-hover:bg-accent/20 group-hover:scale-110 transition-all"></span>
-                                            <span className="relative w-2 h-2 rounded-full bg-accent/30 group-hover:bg-accent transition-colors"></span>
-                                        </span>
-                                        <span className="group-hover:translate-x-0.5 transition-transform">Community</span>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="#" className="group flex items-center gap-3 text-muted-foreground hover:text-accent transition-all">
-                                        <span className="relative flex items-center justify-center w-6 h-6">
-                                            <span className="absolute w-full h-full rounded-full bg-accent/10 group-hover:bg-accent/20 group-hover:scale-110 transition-all"></span>
-                                            <span className="relative w-2 h-2 rounded-full bg-accent/30 group-hover:bg-accent transition-colors"></span>
-                                        </span>
-                                        <span className="group-hover:translate-x-0.5 transition-transform">Support</span>
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
+                    {/* Column 2 */}
+                    <nav className="ch-footer__nav-col" aria-label="Quick Links">
+                        <p className="ch-footer__nav-label">Quick Links</p>
+                        <ul className="ch-footer__nav-list">
+                            <li>
+                                <a href="/games">
+                                    <span>Latest Games</span>
+                                    <span className="arrow">→</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="https://linktr.ee/CrypticDay">
+                                    <span>Community</span>
+                                    <span className="arrow">→</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="https://t.me/NightCryptic">
+                                    <span>Support telegram</span>
+                                    <span className="arrow">→</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="https://theporndude.com/th" target="_blank" rel="nofollow noopener">
+                                    <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                        <img
+                                            src="https://www.google.com/s2/favicons?domain=theporndude.com&sz=32"
+                                            alt=""
+                                            aria-hidden="true"
+                                            width={14}
+                                            height={14}
+                                            style={{ borderRadius: '2px', opacity: 0.7, transition: 'opacity 0.2s' }}
+                                        />
+                                        ThePornDude
+                                    </span>
+                                    <span className="ext-icon">↗</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
                 </div>
 
-                {/* Enhanced Footer Bottom */}
-                <div className="mt-16 pt-8 border-t border-border/40 relative">
-                    {/* Decorative line with gradient */}
-                    <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-primary/30 to-transparent"></div>
-
-                    <div className="flex flex-col md:flex-row justify-between items-center gap-6">
-                        <div className="flex flex-col items-center md:items-start gap-2">
-                            <p className="text-xs text-muted-foreground text-center md:text-left">
-                                &copy; {new Date().getFullYear()} <span className="text-foreground font-semibold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">ChanomHub</span>. All rights reserved.
-                            </p>
-                            <p className="text-xs text-muted-foreground/70">
-                                Made with <Heart className="w-3 h-3 inline-block text-primary animate-pulse" /> for the community
-                            </p>
-                        </div>
-
-                        <div className="flex items-center gap-4">
-                            <a
-                                href="https://www.dmca.com/compliance/chanomhub.com"
-                                title="DMCA Compliance information for chanomhub.com"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="relative group"
-                            >
-                                <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-accent/20 rounded-lg blur-md opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                                <img
-                                    src="https://www.dmca.com/img/dmca-compliant-grayscale.png"
-                                    alt="DMCA compliant image"
-                                    width={100}
-                                    height={50}
-                                    className="relative opacity-60 group-hover:opacity-100 transition-all duration-300 grayscale group-hover:grayscale-0 group-hover:scale-105"
-                                />
-                            </a>
-                        </div>
+                {/* Bottom bar */}
+                <div className="ch-footer__bottom">
+                    <p className="ch-footer__copy">
+                        &copy; <span ref={yearRef} /> <strong>ChanomHub</strong>. All rights reserved. — {t("rights")}
+                    </p>
+                    <div className="ch-footer__right">
+                        <span className="ch-footer__age-gate">18+</span>
+                        <a
+                            href="https://www.dmca.com/compliance/chanomhub.com"
+                            target="_blank"
+                            rel="noopener"
+                            className="ch-footer__dmca"
+                            title="DMCA Compliance"
+                        >
+                            <img
+                                src="https://www.dmca.com/img/dmca-compliant-grayscale.png"
+                                alt="DMCA compliant"
+                                width={100}
+                                height={28}
+                            />
+                        </a>
                     </div>
                 </div>
-            </div>
-
-            {/* Animated gradient line at bottom */}
-            <div className="absolute bottom-0 left-0 w-full h-[2px] bg-gradient-to-r from-primary via-accent to-primary animate-gradient bg-[length:200%_auto] opacity-30"></div>
-
-            <style dangerouslySetInnerHTML={{
-                __html: `
-                @keyframes gradient {
-                    0% { background-position: 0% 50%; }
-                    50% { background-position: 100% 50%; }
-                    100% { background-position: 0% 50%; }
-                }
-                .animate-gradient {
-                    animation: gradient 8s linear infinite;
-                }
-            `}} />
-        </footer>
+            </footer>
+        </>
     );
 }
