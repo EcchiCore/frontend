@@ -7,10 +7,10 @@ export default function ChatPage() {
   const t = useTranslations('ContactPage');
 
   useEffect(() => {
-    // โหลดสคริปต์ tawk.to เมื่อ component mount
+    // Load tawk.to script when component mounts
     const script = document.createElement('script');
     script.async = true;
-    script.src = 'https://embed.tawk.to/67f38e4aa1fb1b1908fad00e/1io7m7m1n'; // แทนที่ด้วย Property ID และ Widget ID ของคุณ
+    script.src = 'https://embed.tawk.to/67f38e4aa1fb1b1908fad00e/1io7m7m1n'; // Replace with your Property ID and Widget ID
     script.charset = 'UTF-8';
     script.setAttribute('crossorigin', '*');
 
@@ -60,7 +60,7 @@ export default function ChatPage() {
             {/* Button */}
             <button
               className="btn btn-primary btn-wide"
-              onClick={() => window.Tawk_API?.toggle()} // เปิด/ปิดแชทเมื่อกดปุ่ม
+              onClick={() => window.Tawk_API?.toggle()} // Toggle chat when button clicked
             >
               {t('startChat')}
             </button>

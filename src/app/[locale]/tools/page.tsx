@@ -14,7 +14,7 @@ export async function generateMetadata({ params }: { params: { locale?: string }
   return {
     title: t('title') + ' | Chanomhub',
     description: t('description'),
-    keywords: ['Chanomhub', 'เครื่องมือ', 'โปรแกรม', 'T++', 'Chanomhub-Desktop', 'Chanomhub-Multiplatform', 'nst'],
+    keywords: t('keywords').split(','),
   };
 }
 

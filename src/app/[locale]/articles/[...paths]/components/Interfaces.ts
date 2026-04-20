@@ -126,7 +126,7 @@ export interface CommentsSectionProps {
   handleAddComment: () => void;
   isCurrentUserAuthor: boolean;
   handleDeleteComment: (commentId: number) => void;
-  isLoading?: boolean; // เพิ่ม prop สำหรับ loading state
+  isLoading?: boolean; // Add prop for loading state
 }
 
 export interface ImageLightboxProps {

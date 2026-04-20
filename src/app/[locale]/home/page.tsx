@@ -20,7 +20,7 @@ export async function generateMetadata({ params }: { params: { locale?: string }
     locale,
     title: t('title'),
     description: t('description'),
-    keywords: ['Chanomhub', 'เว็บบอร์ด', 'ถาม-ตอบ', 'ชุมชนออนไลน์', 'ข่าวสาร', 'เกมผู้ใหญ่', 'NSFW'],
+    keywords: t('keywords').split(','),
     contentPath: 'home',
   });
 }
@@ -60,7 +60,7 @@ const _getCachedHomeData = unstable_cache(
     }
   },
   ['home-page-data'],
-  { revalidate: 300 } // 5 นาที
+  { revalidate: 300 } // 5 minutes
 );
 
 // ห่อด้วย singleFlight ป้องกัน thundering herd
@@ -119,21 +119,21 @@ export default async function HomePage({ params }: { params: { locale: string } 
           {/* Category filter pills */}
           <CategoryPills />
 
-          {/* Shelf: แนะนำ */}
+          {/* Shelf: Recommended */}
           <GameShelf
             title={t('recommendedForYou')}
             posts={homeData.featured}
             href="/games"
           />
 
-          {/* Shelf: กระทู้ล่าสุด */}
+          {/* Shelf: Latest Posts */}
           <ArticleShelf
             title={t('latestPosts')}
             posts={homeData.latest}
             href="/articles"
           />
 
-          {/* Shelf: เครื่องมือ */}
+          {/* Shelf: Tools */}
           <ToolsShelf />
 
           {/* Shelf: Windows */}

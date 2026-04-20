@@ -30,7 +30,7 @@ const _getCachedGameResults = unstable_cache(
     })
   },
   ["game-results"],
-  { revalidate: 300 } // 5 นาที (เดิม 60 วินาที)
+  { revalidate: 300 } // 5 minutes (was 60 seconds)
 )
 
 // ห่อด้วย singleFlight ป้องกัน thundering herd

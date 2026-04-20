@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { ExternalLink, ShieldCheck, Sparkles, Zap } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion'; // เพิ่ม framer-motion สำหรับ animation ที่สวยงาม
+import { motion, AnimatePresence } from 'framer-motion'; // Add framer-motion for smooth animations
 
 function getFaviconUrl(url: string): string {
   try {
@@ -67,7 +67,7 @@ export default function AdRedirectContent({ redirectUrl, displayUrl }: AdRedirec
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 dark:from-slate-900 dark:via-slate-800 dark:to-purple-900 flex justify-center items-center p-4 font-sans relative overflow-hidden">
-      {/* เพิ่ม background particles สำหรับความสวยงาม */}
+      {/* Add background particles for aesthetics */}
       <div className="absolute inset-0 opacity-20">
         <motion.div
           className="absolute top-10 left-10 w-20 h-20 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full blur-xl"
@@ -87,7 +87,7 @@ export default function AdRedirectContent({ redirectUrl, displayUrl }: AdRedirec
         transition={{ duration: 0.6 }}
       >
         <Card className="w-full max-w-lg rounded-3xl shadow-2xl border-2 border-gradient-to-r from-primary/30 to-secondary/30 bg-white/90 dark:bg-slate-950/90 backdrop-blur-lg relative overflow-hidden animate-glow">
-          {/* เพิ่ม gradient border animation */}
+          {/* Add gradient border animation */}
           <div className="absolute inset-0 rounded-3xl bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 opacity-0 animate-border-glow pointer-events-none" />
 
           <CardHeader className="items-center text-center pt-8 pb-4 relative z-10">

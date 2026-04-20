@@ -9,7 +9,7 @@ import {
 
 export async function GET() {
   try {
-    const siteUrl = await getRequestUrl(); // ต้อง await!
+    const siteUrl = await getRequestUrl(); // Must await!
     const generatedAt = new Date().toISOString();
     const articles = await fetchPublishedArticles();
     const articleChunks = chunkArray(articles, SITEMAP_ARTICLE_PAGE_SIZE);

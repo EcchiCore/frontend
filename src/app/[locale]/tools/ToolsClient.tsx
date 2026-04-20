@@ -157,7 +157,7 @@ function ToolCard({ tool, index }: { tool: Tool; index: number }) {
             {tool.description}
           </p>
 
-          {/* Version Selector - แสดงเฉพาะเมื่อมีหลายเวอร์ชัน */}
+          {/* Version Selector - Only show if multiple versions exist */}
           {tool.versions && tool.versions.length > 1 && (
             <div className="mb-6">
               <label className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-2 block">
@@ -167,7 +167,7 @@ function ToolCard({ tool, index }: { tool: Tool; index: number }) {
                 value={selectedVersionIndex}
                 onChange={(e) => {
                   setSelectedVersionIndex(Number(e.target.value));
-                  setShowVideo(false); // ปิดวิดีโอเมื่อเปลี่ยนเวอร์ชัน
+                  setShowVideo(false); // Close video on version change
                 }}
                 className="w-full px-4 py-2.5 rounded-xl border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300 cursor-pointer hover:border-blue-400"
               >
@@ -182,7 +182,7 @@ function ToolCard({ tool, index }: { tool: Tool; index: number }) {
             </div>
           )}
 
-          {/* Changelog - แสดงเฉพาะเมื่อมี */}
+          {/* Changelog - Show only if available */}
           {selectedVersion.changelog && (
             <div className="mb-6 p-4 rounded-xl bg-gradient-to-br  dark:from-gray-800 dark:to-gray-850 border border-blue-200 dark:border-gray-700">
               <h4 className="text-sm font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
