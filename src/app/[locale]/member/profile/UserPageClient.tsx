@@ -1,7 +1,8 @@
 "use client";
 
+import { Link } from "@/i18n/navigation";
 import { useState } from "react";
-import Link from "next/link";
+
 import { Copy, Eye, EyeOff, Shield, Sparkles, Settings, User, Globe, Palette } from "lucide-react";
 
 interface SocialMediaLink {

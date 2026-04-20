@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import Cookies from "js-cookie"; // Import js-cookie
 import "react-toastify/dist/ReactToastify.css";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 
 const Switch = () => {

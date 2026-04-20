@@ -1,7 +1,8 @@
 "use client";
 
+import { Link } from "@/i18n/navigation";
 import React, { useState } from "react";
-import Link from "next/link";
+
 import { MessageSquare, Search, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

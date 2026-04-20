@@ -1,6 +1,7 @@
 "use client";
 
-import Link from 'next/link';
+
+import { Link } from "@/i18n/navigation";
 import Image from 'next/image';
 import imageLoader from '@/lib/imageLoader';
 import { useState } from 'react';

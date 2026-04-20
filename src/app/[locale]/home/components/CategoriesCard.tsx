@@ -1,7 +1,8 @@
 // components/CategoriesCard.tsx
 "use client";
 
-import Link from 'next/link';
+
+import { Link } from "@/i18n/navigation";
 import { useTranslations } from 'next-intl';
 
 // Platform color mapping similar to GameCard

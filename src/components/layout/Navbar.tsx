@@ -1,5 +1,6 @@
 "use client";
-import Link from "next/link";
+
+import { Link } from "@/i18n/navigation";
 import React, { useState, useEffect } from "react";
 import Cookies from "js-cookie";
 import { useTranslations } from "next-intl";

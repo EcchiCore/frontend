@@ -1,7 +1,8 @@
 "use client";
 
+import { Link } from "@/i18n/navigation";
 import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
+
 import Image from 'next/image';
 import type { ArticleListItem } from '@chanomhub/sdk';
 import imageLoader from '@/lib/imageLoader';

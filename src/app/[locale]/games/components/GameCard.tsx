@@ -1,5 +1,6 @@
+import { Link } from "@/i18n/navigation";
 import type { Article } from "@/types/article"
-import Link from "next/link"
+
 import { Heart, Clock } from "lucide-react"
 import Image from "next/image"
 import { Badge } from "@/components/ui/badge"

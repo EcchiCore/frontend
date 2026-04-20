@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { redirect } from "next/navigation";
+import { redirect } from "@/i18n/navigation";
 import { cookies } from "next/headers";
 import { ReactNode, Suspense } from 'react';
 import { User, Shield, Star, Link as LinkIcon } from "lucide-react";

@@ -14,8 +14,8 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+
+import { usePathname, Link } from "@/i18n/navigation";
 
 export default function CookieConsent() {
     const t = useTranslations("CookieConsent");

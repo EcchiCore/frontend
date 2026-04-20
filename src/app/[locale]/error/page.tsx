@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { AlertCircle, Home, RefreshCcw } from "lucide-react";
 
 const translations = {

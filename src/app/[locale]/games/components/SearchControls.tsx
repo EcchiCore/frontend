@@ -1,7 +1,8 @@
 "use client"
 
 import type React from "react"
-import { usePathname, useRouter, useSearchParams } from "next/navigation"
+import { useSearchParams } from "next/navigation";
+import { usePathname, useRouter } from "@/i18n/navigation";
 import { useCallback, useEffect, useRef, useState } from "react"
 import { useTranslations } from "next-intl"
 import { Button } from "@/components/ui/button"

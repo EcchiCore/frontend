@@ -1,5 +1,6 @@
+import { Link } from "@/i18n/navigation";
 import Image from 'next/image';
-import Link from 'next/link';
+
 import { resolveArticleImageUrl, shouldSkipNextImageOptimization } from '@/lib/articleImageUrl';
 import imageLoader from '@/lib/imageLoader';
 

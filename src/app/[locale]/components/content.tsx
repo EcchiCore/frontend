@@ -1,4 +1,5 @@
-import Link from "next/link";
+
+import { Link } from "@/i18n/navigation";
 import { JSX } from "react";
 
 interface Blog {

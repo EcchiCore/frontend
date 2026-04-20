@@ -1,6 +1,7 @@
 "use client";
 
-import Link from "next/link";
+
+import { Link } from "@/i18n/navigation";
 import { useMdxContext } from "./MdxContext";
 import type { AnchorHTMLAttributes } from "react";
 

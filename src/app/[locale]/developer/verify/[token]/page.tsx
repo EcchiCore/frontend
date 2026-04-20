@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import { useParams } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { getSdk } from '@/lib/sdk';
 import { Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 import { toast } from 'react-toastify';

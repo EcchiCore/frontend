@@ -1,8 +1,9 @@
 "use client";
 
+import { Link } from "@/i18n/navigation";
 import React, { useState } from "react";
 import Image from "next/image";
-import Link from "next/link";
+
 import { Download, Box, User, Tag, Plus, Upload } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";

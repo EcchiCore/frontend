@@ -1,8 +1,9 @@
 "use client";
 
+import { Link } from "@/i18n/navigation";
 import React from "react";
 import Image from "next/image";
-import Link from "next/link";
+
 
 import { Article } from "@/types/article";
 import { SidebarRightProps } from "./Interfaces"; // Reusing SidebarRightProps for now

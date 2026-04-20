@@ -1,8 +1,9 @@
+import { Link } from "@/i18n/navigation";
 import { createChanomhubClient } from "@chanomhub/sdk"
 import { ArticleListItem } from "@chanomhub/sdk"
 import GameCard from "./GameCard"
 import { Button } from "@/components/ui/button"
-import Link from "next/link"
+
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { unstable_cache } from "next/cache"
 import { singleFlight } from "@/lib/cache/singleFlight"

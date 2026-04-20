@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter } from "@/i18n/navigation";
 import ArticleItem from './ArticleItem';
 import { PlusIcon } from '@heroicons/react/24/outline';
 

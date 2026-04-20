@@ -1,7 +1,8 @@
 "use client";
 
+import { Link } from "@/i18n/navigation";
 import React, { useRef, useEffect, useState, useCallback, useMemo } from "react";
-import Link from "next/link";
+
 import Image from "next/image";
 import { Card } from "@/components/ui/card";
 import { ArticleListItem } from "@chanomhub/sdk";

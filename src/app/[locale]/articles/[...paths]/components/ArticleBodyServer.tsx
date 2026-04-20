@@ -1,10 +1,11 @@
 // Server Component - renders article body HTML for SEO/SSR
 // This component renders the article content that Google can index
 
+import { Link } from "@/i18n/navigation";
 import React from "react";
 import Image from "next/image";
 import imageLoader from '@/lib/imageLoader';
-import Link from "next/link";
+
 import { Article } from "@/types/article";
 import { formatDate } from "@/lib/dateUtils";
 import { encodeURLComponent } from "@/lib/utils";

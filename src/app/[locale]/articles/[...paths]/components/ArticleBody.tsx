@@ -1,7 +1,8 @@
 "use client";
+import { Link } from "@/i18n/navigation";
 import React, { useState } from "react";
 import Image from "next/image";
-import Link from "next/link";
+
 import { ArticleBodyProps } from "./Interfaces";
 import { useTranslations } from "next-intl";
 import { Alert, AlertTitle } from "@/components/ui/alert";

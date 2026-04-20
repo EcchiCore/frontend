@@ -1,6 +1,7 @@
+import { Link } from "@/i18n/navigation";
 import { Metadata } from 'next';
 import ArticleList from '../ArticleList/ArticleList';
-import Link from 'next/link';
+
 import { RssIcon, Tag, Monitor, FolderOpen, Calendar, User, Heart, Eye } from 'lucide-react';
 import { ArticlesResponse } from '../ArticleList/article';
 import { Button } from '@/components/ui/button';

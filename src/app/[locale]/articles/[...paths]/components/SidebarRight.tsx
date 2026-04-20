@@ -1,8 +1,9 @@
 "use client";
 
+import { Link } from "@/i18n/navigation";
 import React from "react";
 import Image from "next/image";
-import Link from "next/link";
+
 import { useTranslations } from "next-intl";
 import { SidebarRightProps } from "./Interfaces";
 

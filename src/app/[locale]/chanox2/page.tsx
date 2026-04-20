@@ -1,8 +1,9 @@
 
+import { Link } from "@/i18n/navigation";
 import Image from 'next/image'
 import { Zap, Shield, Globe, Cpu, Layout, Github, MessageCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import Link from 'next/link'
+
 import DownloadSection from './DownloadSection'
 import { getTranslations } from 'next-intl/server'
 

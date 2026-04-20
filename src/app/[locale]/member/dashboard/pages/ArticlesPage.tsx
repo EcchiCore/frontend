@@ -13,7 +13,7 @@ import {
   ArrowUpOnSquareIcon
 } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
-import { useRouter } from 'next/navigation';
+import { useRouter, Link } from "@/i18n/navigation";
 import { useUserData } from '@/hooks/useUserData';
 import { Article, ArticleStatus } from '@/types/dashboard';
 import { ITEMS_PER_PAGE_OPTIONS } from '@/constants/dashboard';
@@ -29,7 +29,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Switch } from '@/components/ui/switch';
 import { Loader2 } from 'lucide-react';
-import Link from "next/link";
+
 import { useAppSelector } from '@/store/hooks';
 
 export const ArticlesPage: React.FC = () => {

@@ -22,9 +22,10 @@ import ArticleDownloadDialog from "./ArticleDownloadDialog";
 import RelatedArticles from "./RelatedArticles";
 import { Button, Card, CardContent, Separator, Badge, Avatar, AvatarFallback } from "@/components/ui";
 import { ExternalLink, Lock, Unlock, ShoppingCart, MessageCircle, Trophy, Medal, Award, Clock, ChevronRight } from "lucide-react";
-import Link from "next/link";
+
 import { getSdk } from "@/lib/sdk";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { useRouter, Link } from "@/i18n/navigation";
 import Cookies from "js-cookie";
 // import ArticleModsSection from "./ArticleModsSection"; // Removed
 import ArticleCommunityTabs from "./ArticleCommunityTabs";

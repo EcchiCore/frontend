@@ -1,5 +1,6 @@
 'use client'
 
+import { Link } from "@/i18n/navigation";
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -11,7 +12,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Download, Monitor, Apple, Box, ChevronDown, Calendar, Hash } from 'lucide-react'
-import Link from 'next/link'
+
 import { format } from 'date-fns'
 
 type Asset = {

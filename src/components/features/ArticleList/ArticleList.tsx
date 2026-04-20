@@ -1,8 +1,9 @@
 // Also update the ArticleList component to handle URL-encoded slugs
 "use client";
 
+import { Link } from "@/i18n/navigation";
 import { useState } from 'react';
-import Link from 'next/link';
+
 import Image from 'next/image';
 import { Article } from './article';
 import imageLoader from '@/lib/imageLoader';

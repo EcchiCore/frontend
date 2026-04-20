@@ -1,6 +1,6 @@
 // src/app/[locale]/layout.tsx
 import { ReactNode, Suspense } from 'react';
-import { redirect } from 'next/navigation';
+import { redirect } from "@/i18n/navigation";
 import { routing } from '@/i18n/routing';
 import { NextIntlClientProvider } from 'next-intl';
 import { ThemeProvider } from '@/components/theme-provider';

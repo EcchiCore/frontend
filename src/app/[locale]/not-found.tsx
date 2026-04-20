@@ -1,7 +1,8 @@
 'use client';
 
+import { Link } from "@/i18n/navigation";
 import React from 'react';
-import Link from 'next/link';
+
 import { Home, RefreshCcw } from 'lucide-react';
 
 export default function PageNotFound() {

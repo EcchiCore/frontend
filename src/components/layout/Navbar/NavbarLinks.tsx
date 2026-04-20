@@ -1,10 +1,11 @@
 // NavbarLinks.tsx
 "use client";
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import Link from "next/link";
+
 import { ChevronDown, User } from "lucide-react";
 import Cookies from "js-cookie";
-import { useParams, usePathname, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
+import { usePathname, useRouter, Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";

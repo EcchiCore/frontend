@@ -1,9 +1,9 @@
 "use client";
 
 import React from "react";
-import Link from "next/link";
+
 import { cn } from "@/lib/utils";
-import { usePathname } from "next/navigation";
+import { usePathname, Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 
 interface ArticleCommunityTabsProps {

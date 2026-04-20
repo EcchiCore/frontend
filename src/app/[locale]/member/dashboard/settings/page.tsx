@@ -14,8 +14,9 @@ import {
 } from '@heroicons/react/24/outline';
 import { userApi, ApiError, getCookie, setCookie } from '@/lib/api/dashboardApi';
 import { DashboardUser, SocialMediaLink, Token } from '@/types/dashboard';
-import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
+
+import { useSearchParams } from "next/navigation";
+import { useRouter, Link } from "@/i18n/navigation";
 import ImageWithFallback from '@/components/ImageWithFallback';
 
 // shadcn/ui components
