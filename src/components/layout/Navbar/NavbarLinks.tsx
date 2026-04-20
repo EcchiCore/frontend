@@ -4,7 +4,6 @@ import React, { useState, useEffect, useCallback, useMemo } from "react";
 
 import { ChevronDown, User } from "lucide-react";
 import Cookies from "js-cookie";
-import { useParams } from "next/navigation";
 import { usePathname, useRouter, Link } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -27,47 +26,33 @@ interface NavbarLinksProps {
 
 const NavbarLinks = ({ section, onCloseMenu = () => { }, isMobile = false }: NavbarLinksProps) => {
   const [isClient, setIsClient] = useState(false);
-  const params = useParams();
   const pathname = usePathname();
   const router = useRouter();
   const t = useTranslations("Navbar");
-  const locale = (params?.locale as string) || "th";
 
   // Fix hydration issues
   useEffect(() => {
     setIsClient(true);
   }, []);
 
+  // @/i18n/navigation's Link and router handle locale prefix automatically,
+  // so we just need to return clean paths without locale prefix.
   const getLocalizedHref = useCallback(
-    (path: string, targetLocale?: string) => {
+    (path: string) => {
       if (path.startsWith("http")) return path;
-      if (path === "/") return `/${targetLocale || locale}`;
-      const newLocale = targetLocale || locale;
-      if (path.startsWith("/")) {
-        const segments = path.split("/");
-        if (["th", "en"].includes(segments[1])) {
-          segments[1] = newLocale;
-        } else {
-          segments.unshift("", newLocale);
-        }
-        return segments.join("/");
-      }
-      return `/${newLocale}/${path}`;
+      // Ensure path starts with /
+      if (!path.startsWith("/")) return `/${path}`;
+      return path;
     },
-    [locale]
+    []
   );
 
   const changeLanguage = useCallback((lang: string) => {
-    let targetPath = pathname || "";
-    if (pathname && pathname.startsWith(`/${locale}/`)) {
-      targetPath = pathname.substring(locale.length + 2);
-    } else if (pathname === `/${locale}`) {
-      targetPath = "/";
-    }
-    const newPath = getLocalizedHref(targetPath, lang);
-    router.push(newPath);
+    // usePathname from @/i18n/navigation already returns path without locale prefix
+    const targetPath = pathname || "/";
+    router.replace(targetPath, { locale: lang });
     onCloseMenu();
-  }, [pathname, locale, getLocalizedHref, router, onCloseMenu]);
+  }, [pathname, router, onCloseMenu]);
 
   // Use useMemo for links instead of useEffect + state to avoid double render on mount
   const { leftNavLinks, rightNavLinks } = useMemo(() => {
@@ -172,7 +157,7 @@ const NavbarLinks = ({ section, onCloseMenu = () => { }, isMobile = false }: Nav
     }
 
     return { leftNavLinks: leftLinks, rightNavLinks: rightLinks };
-  }, [isClient, locale, t, getLocalizedHref]);
+  }, [isClient, t, getLocalizedHref]);
 
   if (!isClient) {
     return <div className={isMobile ? "space-y-2" : "flex items-center gap-4"} />;
