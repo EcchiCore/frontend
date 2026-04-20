@@ -8,7 +8,7 @@ import UserPageClient from "./UserPageClient";
 import BackgroundImage from "./BackgroundImage";
 import LogoutButton from "./LogoutButton";
 import { getSdk } from "@/lib/sdk";
-import { getTranslations } from "next-intl/server";
+import { getTranslations, getLocale } from "next-intl/server";
 
 interface SocialMediaLink {
   platform: string;
@@ -66,8 +66,10 @@ export default async function UserPage() {
   const { userData, error } = await getUserData();
   const t = await getTranslations('ProfilePage');
 
+  const locale = await getLocale();
+
   if (error === "Not authenticated") {
-    redirect("/login");
+    redirect({ href: "/login", locale });
   }
 
   if (error || !userData) {

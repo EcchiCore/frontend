@@ -1,5 +1,5 @@
 // app/page.tsx
-import { redirect } from "@/i18n/navigation";
+import { redirect } from "next/navigation";
 import { defaultLocale } from "@/utils/localeUtils";
 
 
