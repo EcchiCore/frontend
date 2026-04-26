@@ -28,6 +28,7 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: 'via.placeholder.com', pathname: '/**' },
       { protocol: 'https', hostname: 'files.catbox.moe', pathname: '/**' },
       { protocol: 'https', hostname: 'i.ibb.co', pathname: '/**' },
+      { protocol: 'https', hostname: 'i.postimg.cc', pathname: '/**' },
       // Note: cdn.chanomhub.com/cdn-cgi/** URLs use Cloudflare Image Transformation and should use unoptimized prop
       { protocol: 'https', hostname: 'cdn.chanomhub.com', pathname: '/**' },
       { protocol: 'https', hostname: 'imgproxy.chanomhub.com', pathname: '/**' },
