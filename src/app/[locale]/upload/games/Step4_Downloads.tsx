@@ -148,6 +148,24 @@ export const Step4_Downloads = () => {
     dispatch(updateFormData({ downloads: downloads.filter((_, i) => i !== index) }));
   };
 
+  const handleAddPurchase = () => {
+    if (!canAddPurchase) return;
+    const newPurchases = [...authorizedPurchaseSources, {
+      name: purchaseName.trim(),
+      url: purchaseUrl.trim(),
+      submitNote: purchaseSubmitNote.trim() || undefined,
+    }];
+    dispatch(updateFormData({ authorizedPurchaseSources: newPurchases }));
+    setPurchaseName('');
+    setPurchaseUrl('');
+    setPurchaseSubmitNote('');
+    setIsPurchaseDialogOpen(false);
+  };
+
+  const handleRemovePurchase = (index: number) => {
+    dispatch(updateFormData({ authorizedPurchaseSources: authorizedPurchaseSources.filter((_, i) => i !== index) }));
+  };
+
   const getPlatformIcon = (name: string) => {
     const lowerName = name.toLowerCase();
     if (lowerName.includes('win') || lowerName.includes('pc')) return <Monitor className="h-4 w-4" />;
@@ -291,6 +309,95 @@ export const Step4_Downloads = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Official Purchase Sources */}
+      <div className="pt-6 border-t border-[#222] mt-8">
+        <h3 className="text-[13px] font-semibold text-[#e0e0e0] mb-3 flex items-center gap-2">
+          <ShoppingCart className="h-4 w-4 text-[#aaa]" />
+          Official Store / Purchase Links
+        </h3>
+        
+        <div className="space-y-4">
+          <div className="space-y-1.5">
+            {authorizedPurchaseSources.length > 0 ? (
+              <div className="flex flex-col gap-1.5">
+                {authorizedPurchaseSources.map((src, i) => (
+                  <div key={i} className="flex items-center gap-2.5 px-3 py-2.5 bg-[#171717] border border-[#222] rounded-[4px] group">
+                    <div className="w-[6px] h-[6px] rounded-full shrink-0 bg-green-500/80" />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 text-[12px] text-[#aaa] truncate">
+                        <span>{src.name}</span>
+                        {src.submitNote && <span className="text-[10px] text-slate-500">- {src.submitNote}</span>}
+                      </div>
+                      <div className="text-[10px] text-[#3d3d3d] mt-0.5 truncate font-mono">{src.url}</div>
+                    </div>
+                    <button
+                      className="text-[16px] text-[#333] hover:text-[#cc2f35] transition-all"
+                      onClick={() => handleRemovePurchase(i)}
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+            ) : null}
+          </div>
+
+          <button 
+            onClick={() => setIsPurchaseDialogOpen(true)}
+            className="w-full flex items-center justify-center gap-1.5 py-2 px-3 border border-dashed border-[#252525] rounded-[4px] bg-transparent text-[#3d3d3d] text-[11px] hover:border-[#3d3d3d] hover:text-[#666] transition-all"
+          >
+            <Plus className="h-3 w-3" />
+            Add official purchase link (e.g., Steam, DLsite)
+          </button>
+
+          <Dialog open={isPurchaseDialogOpen} onOpenChange={setIsPurchaseDialogOpen}>
+            <DialogContent className="sm:max-w-[400px] bg-[#1a1a1a] border-slate-800 text-white">
+              <DialogHeader>
+                <DialogTitle className="text-[14px]">Add Purchase Link</DialogTitle>
+                <DialogDescription className="text-[11px] text-slate-400">
+                  Add a link to where users can buy this game officially.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <Label className="text-[12px] text-slate-300">Store / Site Name</Label>
+                  <Input
+                    placeholder="e.g. Steam, DLsite, Patreon"
+                    value={purchaseName}
+                    onChange={(e) => setPurchaseName(e.target.value)}
+                    className="bg-slate-900 border-slate-700 h-9 text-[13px]"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-[12px] text-slate-300">URL</Label>
+                  <Input
+                    placeholder="https://"
+                    value={purchaseUrl}
+                    onChange={(e) => setPurchaseUrl(e.target.value)}
+                    className="bg-slate-900 border-slate-700 h-9 text-[13px]"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-[12px] text-slate-300">Note (Optional)</Label>
+                  <Input
+                    placeholder="e.g. 10% off"
+                    value={purchaseSubmitNote}
+                    onChange={(e) => setPurchaseSubmitNote(e.target.value)}
+                    className="bg-slate-900 border-slate-700 h-9 text-[13px]"
+                  />
+                </div>
+              </div>
+              <DialogFooter className="bg-slate-900/50 p-4 -m-6 mt-2 rounded-b-lg border-t border-slate-800">
+                <Button variant="ghost" onClick={() => setIsPurchaseDialogOpen(false)} className="text-[12px] text-slate-400">Cancel</Button>
+                <Button onClick={handleAddPurchase} disabled={!canAddPurchase} className="bg-green-600 hover:bg-green-500 text-[12px] px-6">
+                  Add Link
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
+      </div>
     </div>
   );
 };

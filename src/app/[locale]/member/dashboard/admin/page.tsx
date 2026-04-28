@@ -8,6 +8,7 @@ import { ContentManagementTab } from './tabs/ContentManagementTab';
 
 import { SponsoredArticlesTab } from './tabs/SponsoredArticlesTab';
 import { SettingsTab } from './tabs/SettingsTab';
+import { EngineManagementTab } from './tabs/EngineManagementTab';
 import { AdminGuard } from '@/components/features/admin/AdminGuard';
 
 export default function AdminDashboard() {
@@ -27,7 +28,7 @@ export default function AdminDashboard() {
                         <TabsTrigger value="users">Users</TabsTrigger>
                         <TabsTrigger value="content">Content</TabsTrigger>
                         <TabsTrigger value="sponsored">Sponsored</TabsTrigger>
-
+                        <TabsTrigger value="engines">Engines</TabsTrigger>
                         <TabsTrigger value="settings">Settings</TabsTrigger>
                     </TabsList>
                     <TabsContent value="overview" className="space-y-4">
@@ -42,7 +43,9 @@ export default function AdminDashboard() {
                     <TabsContent value="sponsored" className="space-y-4">
                         <SponsoredArticlesTab />
                     </TabsContent>
-
+                    <TabsContent value="engines" className="space-y-4">
+                        <EngineManagementTab />
+                    </TabsContent>
                     <TabsContent value="settings" className="space-y-4">
                         <SettingsTab />
                     </TabsContent>
