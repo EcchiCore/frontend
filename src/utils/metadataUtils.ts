@@ -234,3 +234,37 @@ export function generateWebsiteStructuredData(locale: Locale) {
     }))
   };
 }
+
+/**
+ * Generate BreadcrumbList structured data for Google rich results
+ * @param options - Breadcrumb options
+ * @returns JSON-LD structured data
+ */
+export function generateBreadcrumbStructuredData(options: {
+  locale: Locale;
+  items: Array<{ name: string; url?: string }>;
+}) {
+  const { locale, items } = options;
+  const baseUrl = locale === defaultLocale ? siteUrl : `${siteUrl}/${locale}`;
+
+  const breadcrumbItems = [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": baseUrl,
+    },
+    ...items.map((item, index) => ({
+      "@type": "ListItem",
+      "position": index + 2,
+      "name": item.name,
+      ...(item.url ? { "item": item.url } : {}),
+    })),
+  ];
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": breadcrumbItems,
+  };
+}

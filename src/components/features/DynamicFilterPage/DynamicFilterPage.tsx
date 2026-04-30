@@ -92,13 +92,48 @@ export async function generateMetadata({ params, filterType }: {
   const t = await getTranslations({ locale, namespace: 'dynamicFilterPage' });
   const rssUrl = `/${locale}/${filterType}/${encodeURIComponent(slug)}/rss`;
 
+  const siteUrl = process.env.FRONTEND || 'https://chanomhub.com';
+  const contentPath = `${filterType}/${encodeURIComponent(slug)}`;
+  const canonicalUrl = `${siteUrl}/${contentPath}`;
+
+  const pageTitle = t(`title_${filterType}`, { slug: decodedSlug });
+  const pageDescription = t(`description_${filterType}`, { slug: decodedSlug });
+
   const metadata: Metadata = {
-    title: t(`title_${filterType}`, { slug: decodedSlug }),
-    description: t(`description_${filterType}`, { slug: decodedSlug }),
+    title: pageTitle,
+    description: pageDescription,
+    alternates: {
+      canonical: canonicalUrl,
+      languages: {
+        'en': `${siteUrl}/${contentPath}`,
+        'th': `${siteUrl}/th/${contentPath}`,
+        'x-default': `${siteUrl}/${contentPath}`,
+      },
+    },
+    openGraph: {
+      title: pageTitle,
+      description: pageDescription,
+      url: canonicalUrl,
+      siteName: 'ChanomHub',
+      locale,
+      type: 'website',
+      images: [{
+        url: `${siteUrl}/chanomhub.ico`,
+        width: 512,
+        height: 512,
+        alt: `${decodedSlug} - ChanomHub`,
+      }],
+    },
+    twitter: {
+      card: 'summary',
+      title: pageTitle,
+      description: pageDescription,
+    },
   };
 
   if (filterType !== 'category') {
     metadata.alternates = {
+      ...metadata.alternates,
       types: {
         'application/rss+xml': [
           {

@@ -13,6 +13,7 @@ import ArticleViewTracker from './components/ArticleViewTracker';
 import {
   generatePageMetadata,
   generateArticleStructuredData,
+  generateBreadcrumbStructuredData,
   createSEOTitle,
   constructContentPath,
 } from "@/utils/metadataUtils";
@@ -166,6 +167,31 @@ export default async function ArticlePage(props: ArticlePageProps) {
     slug
   );
 
+  // Generate BreadcrumbList JSON-LD for Google rich results
+  const articleUrl = locale === 'en'
+    ? `${siteUrl}/articles/${slug}`
+    : `${siteUrl}/${locale}/articles/${slug}`;
+  const gamesUrl = locale === 'en'
+    ? `${siteUrl}/games`
+    : `${siteUrl}/${locale}/games`;
+
+  const categoryName = originalArticle.categories?.[0]?.name;
+  const breadcrumbItems: Array<{ name: string; url?: string }> = [
+    { name: 'Games', url: gamesUrl },
+  ];
+  if (categoryName) {
+    const categoryUrl = locale === 'en'
+      ? `${siteUrl}/category/${encodeURIComponent(categoryName)}`
+      : `${siteUrl}/${locale}/category/${encodeURIComponent(categoryName)}`;
+    breadcrumbItems.push({ name: categoryName, url: categoryUrl });
+  }
+  breadcrumbItems.push({ name: createSEOTitle(originalArticle) });
+
+  const breadcrumbJsonLd = generateBreadcrumbStructuredData({
+    locale,
+    items: breadcrumbItems,
+  });
+
   // Client Content: Hydrates after JS loads - replaces SSR content
   return (
     <>
@@ -174,6 +200,13 @@ export default async function ArticlePage(props: ArticlePageProps) {
         id="article-jsonld"
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
+      />
+
+      {/* BreadcrumbList JSON-LD for Google rich results */}
+      <Script
+        id="breadcrumb-jsonld"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
 
       <GTMArticleTracker

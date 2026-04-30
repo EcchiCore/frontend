@@ -7,13 +7,28 @@ import DonationSidebarWidget from "@/components/DonationSidebarWidget"
 import DonationCTA from "@/components/DonationCTA"
 
 import { getTranslations } from "next-intl/server"
+import { getValidLocale, siteUrl, defaultLocale } from "@/utils/localeUtils"
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const resolvedParams = await params;
+  const locale = getValidLocale(resolvedParams.locale);
   const t = await getTranslations({ locale: resolvedParams.locale, namespace: "GamesPage" })
+
+  const canonicalUrl = locale === defaultLocale
+    ? `${siteUrl}/games`
+    : `${siteUrl}/${locale}/games`;
+
   return {
     title: t("clubTitle"),
     description: t("clubDescription"),
+    alternates: {
+      canonical: canonicalUrl,
+      languages: {
+        'en': `${siteUrl}/games`,
+        'th': `${siteUrl}/th/games`,
+        'x-default': `${siteUrl}/games`,
+      },
+    },
   }
 }
 

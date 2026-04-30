@@ -32,41 +32,48 @@ export function generateViewport() {
   };
 }
 
-// Root layout metadata (สำหรับ SEO เบื้องต้น)
-export const metadata: Metadata = {
-  metadataBase: new URL(siteUrl),
-  title: {
-    template: '%s | ChanomHub',
-    default: 'ChanomHub - Adult Gaming Hub'
-  },
-  description: defaultMetadataContent.en.description,
-  keywords: defaultMetadataContent.en.keywords,
+// Dynamic layout metadata - resolves locale for proper i18n SEO
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale: rawLocale } = await params;
+  const locale = supportedLocales.includes(rawLocale as any) ? rawLocale as typeof supportedLocales[number] : defaultLocale;
+  const content = defaultMetadataContent[locale];
 
-  alternates: {
-    canonical: siteUrl,
-    languages: {
-      'en': siteUrl,
-      'th': `${siteUrl}/th`,
-      'x-default': siteUrl
+  const canonicalUrl = locale === defaultLocale ? siteUrl : `${siteUrl}/${locale}`;
+
+  return {
+    metadataBase: new URL(siteUrl),
+    title: {
+      template: '%s | ChanomHub',
+      default: content.title,
     },
-  },
-  openGraph: {
-    title: 'ChanomHub',
-    description: defaultMetadataContent.en.description,
-    url: siteUrl,
-    siteName: 'ChanomHub',
-    locale: defaultLocale,
-    type: 'website',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'ChanomHub',
-    description: defaultMetadataContent.en.description,
-  },
-  other: {
-    'webmention': 'https://webmention.io/chanomhub.com/webmention',
-  },
-};
+    description: content.description,
+    keywords: content.keywords,
+    alternates: {
+      canonical: canonicalUrl,
+      languages: {
+        'en': siteUrl,
+        'th': `${siteUrl}/th`,
+        'x-default': siteUrl,
+      },
+    },
+    openGraph: {
+      title: content.title,
+      description: content.description,
+      url: canonicalUrl,
+      siteName: 'ChanomHub',
+      locale,
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: content.title,
+      description: content.description,
+    },
+    other: {
+      'webmention': 'https://webmention.io/chanomhub.com/webmention',
+    },
+  };
+}
 
 
 // Infer the locale type from routing.locales
