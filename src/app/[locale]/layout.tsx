@@ -63,6 +63,9 @@ export const metadata: Metadata = {
     title: 'ChanomHub',
     description: defaultMetadataContent.en.description,
   },
+  other: {
+    'webmention': 'https://webmention.io/chanomhub.com/webmention',
+  },
 };
 
 
@@ -113,9 +116,7 @@ export default async function LocaleSegmentLayout({
     // data-event-theme={activeEventTheme?.id} // Removed, handled by script
     >
       <head>
-
-
-        {/* Prevent flash of unstyled content */}
+        {/* Prevent flash of unstyled content - must be in head to run before paint */}
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -139,10 +140,14 @@ export default async function LocaleSegmentLayout({
           `
           }}
         />
+      </head>
 
-        {/* Structured Data */}
-        <script
+      <body className={inter.className}>
+        {/* Structured Data - WebSite */}
+        <Script
+          id="website-jsonld"
           type="application/ld+json"
+          strategy="afterInteractive"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
               "@context": "https://schema.org",
@@ -164,8 +169,6 @@ export default async function LocaleSegmentLayout({
           }}
         />
 
-        <link rel="webmention" href="https://webmention.io/chanomhub.com/webmention" />
-
         {/* Google Tag Manager */}
         <Script id="google-tag-manager" strategy="lazyOnload">
           {`
@@ -177,9 +180,6 @@ export default async function LocaleSegmentLayout({
           `}
         </Script>
 
-      </head>
-
-      <body className={inter.className}>
         <AppBridge />
         <ThemeProvider defaultTheme="dark" storageKey="chanomhub-theme">
           <ReduxProvider>
