@@ -37,6 +37,10 @@ export interface GameUploadFormData {
     coverImage?: string; // URL or base64? Usually URL after upload
     screenshots?: string[]; // URLs
 
+    // Editor
+    editorMode?: 'rich-text' | 'block';
+    puckData?: any;
+
     // Step 4: Downloads
     downloads?: DownloadEntry[];
     authorizedPurchaseSources?: AuthorizedSourceEntry[];
@@ -60,7 +64,8 @@ const initialState: UploadState = {
         authorizedPurchaseSources: [],
         tags: [],
         categories: [],
-        screenshots: []
+        screenshots: [],
+        editorMode: 'rich-text'
     },
     activeSection: 'basic',
     status: 'idle',
