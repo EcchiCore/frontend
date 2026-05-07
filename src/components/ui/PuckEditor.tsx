@@ -48,28 +48,26 @@ const config: Config = {
 
 export default function PuckEditor({ data, onChange }: { data: any, onChange: (data: any) => void }) {
   return (
-    <div className="puck-container bg-[#141414] rounded-[4px] overflow-hidden">
+    <div className="puck-container bg-[#0a0a0a] h-full flex flex-col">
       <Puck
         config={config}
         data={data || { content: [], root: {} }}
         onPublish={(data) => onChange(data)}
       />
       <style jsx global>{`
+        .puck-container {
+          height: 100%;
+        }
         .puck-container .Puck {
+          height: 100% !important;
           --puck-color-grey-1: #0f0f0f;
-          --puck-color-grey-2: #1a1a1a;
-          --puck-color-grey-3: #2a2a2a;
-          --puck-color-grey-4: #333;
-          --puck-color-grey-5: #444;
-          --puck-color-grey-6: #666;
-          --puck-color-grey-7: #888;
-          --puck-color-grey-8: #aaa;
-          --puck-color-grey-9: #ccc;
-          --puck-color-grey-10: #eee;
-          --puck-color-white: #fff;
-          --puck-color-black: #000;
+...
           --puck-color-primary: #dc2626;
           --puck-color-primary-hover: #ef4444;
+        }
+        /* Override Puck inner scroll area if needed */
+        .puck-container [class*="Puck-Content"] {
+           background-color: #050505 !important;
         }
       `}</style>
     </div>

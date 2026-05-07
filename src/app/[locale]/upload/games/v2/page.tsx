@@ -7,10 +7,8 @@ export default async function UploadGamePageV2() {
   const availableCategories = await sdk.articles.getCategories() as string[];
 
   return (
-    <div className="min-h-screen bg-[#121212] text-slate-200 p-4 md:p-8">
-      <div className="max-w-5xl mx-auto">
-        <GameUploadFormV2 availableTags={availableTags} availableCategories={availableCategories} />
-      </div>
+    <div className="h-screen w-screen overflow-hidden">
+      <GameUploadFormV2 availableTags={availableTags} availableCategories={availableCategories} />
     </div>
   );
 }

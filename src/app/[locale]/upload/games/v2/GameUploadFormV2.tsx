@@ -54,7 +54,7 @@ export default function GameUploadFormV2({ availableTags, availableCategories }:
   ];
 
   return (
-    <div className="flex flex-col h-[calc(100vh-2rem)] bg-[#050505] rounded-xl border border-white/5 overflow-hidden shadow-2xl">
+    <div className="fixed inset-0 z-[60] flex flex-col bg-[#050505] overflow-hidden">
       {/* HEADER */}
       <header className="h-16 px-8 flex items-center justify-between border-b border-white/5 bg-[#0a0a0a]/80 backdrop-blur-xl z-50">
         <div className="flex items-center gap-4">
@@ -134,8 +134,8 @@ export default function GameUploadFormV2({ availableTags, availableCategories }:
         </aside>
 
         {/* MAIN WORKSPACE */}
-        <main className="flex-1 overflow-y-auto bg-black p-10 scrollbar-hide">
-          <div className="max-w-4xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <main className="flex-1 overflow-y-auto bg-black scrollbar-hide">
+          <div className={`${activeSection === 'content' ? 'h-full' : 'max-w-6xl mx-auto p-10'} animate-in fade-in slide-in-from-bottom-4 duration-500`}>
             {activeSection === 'general' && (
               <div className="space-y-12">
                 <header className="space-y-2">
@@ -230,14 +230,8 @@ export default function GameUploadFormV2({ availableTags, availableCategories }:
             )}
 
             {activeSection === 'content' && (
-              <div className="space-y-12 h-full flex flex-col">
-                <header className="space-y-2">
-                  <h2 className="text-3xl font-black text-white">Story & Features</h2>
-                  <p className="text-white/40 text-sm">Use blocks to build a compelling presentation for your game.</p>
-                </header>
-                <div className="flex-1 bg-[#0a0a0a] border border-white/5 rounded-2xl overflow-hidden min-h-[600px]">
-                   <Step1_BasicInfoV2 mode="editor-only" />
-                </div>
+              <div className="h-full bg-[#0a0a0a]">
+                <Step1_BasicInfoV2 mode="editor-only" />
               </div>
             )}
 
