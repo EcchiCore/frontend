@@ -122,22 +122,21 @@ export default async function LocaleSegmentLayout({
       suppressHydrationWarning
     // data-event-theme={activeEventTheme?.id} // Removed, handled by script
     >
-      <head>
-        {/* Prevent flash of unstyled content - must be in head to run before paint */}
-        <script
+
+      <body className={inter.className}>
+        {/* Prevent flash of unstyled content - runs before paint */}
+        <Script
+          id="theme-init"
+          strategy="beforeInteractive"
           dangerouslySetInnerHTML={{
             __html: `
             try {
               const theme = localStorage.getItem('chanomhub-theme') || 'light';
               document.documentElement.classList.add(theme);
-              
-              // Client-side event theme detection
               const month = new Date().getMonth();
               let eventTheme = null;
-              // 9 = October (Halloween), 11 = December (Christmas)
               if ([9].includes(month)) eventTheme = 'halloween';
               if ([11].includes(month)) eventTheme = 'christmas';
-
               if (eventTheme) {
                 document.documentElement.setAttribute('data-event-theme', eventTheme);
               } else {
@@ -147,9 +146,6 @@ export default async function LocaleSegmentLayout({
           `
           }}
         />
-      </head>
-
-      <body className={inter.className}>
         {/* Structured Data - WebSite */}
         <Script
           id="website-jsonld"
