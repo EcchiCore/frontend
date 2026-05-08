@@ -12,7 +12,7 @@ export function createSEOTitle(article: Article): string {
   }
 
   if ('sequentialCode' in article && article.sequentialCode) {
-    title += ` (${article.sequentialCode})`;
+    title += ` [${article.sequentialCode}]`;
   }
 
   return title;

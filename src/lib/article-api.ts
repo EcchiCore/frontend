@@ -207,6 +207,7 @@ export async function fetchArticleAndDownloads(
       title
       updatedAt
       ver
+      sequentialCode
       price
       isPaid
       isUnlocked
@@ -312,6 +313,7 @@ export async function getArticleBySlug(slug: string, language?: string): Promise
       title
       updatedAt
       ver
+      sequentialCode
       price
       isPaid
       isUnlocked
@@ -385,6 +387,7 @@ export async function getArticleWithDownloads(
       title
       updatedAt
       ver
+      sequentialCode
       price
       isPaid
       isUnlocked
