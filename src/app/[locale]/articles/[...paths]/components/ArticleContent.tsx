@@ -30,6 +30,7 @@ import Cookies from "js-cookie";
 // import ArticleModsSection from "./ArticleModsSection"; // Removed
 import ArticleCommunityTabs from "./ArticleCommunityTabs";
 import { useTranslations } from 'next-intl';
+import { getImageUrl } from "@/lib/imageUrl";
 import type { ArticleListItem } from '@chanomhub/sdk';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -251,120 +252,193 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
           </div>
         </nav>
 
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-8">
-          <main className="min-w-0 space-y-8">
-            <Card className="overflow-hidden border-none shadow-xl">
-              <CardContent className="p-0 sm:p-6 md:p-8">
+        {/* ── Top Section: Gallery & Cover Image ─────────────────── */}
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6 mb-6">
+          {/* Left: Gallery */}
+          <div className="rounded-2xl overflow-hidden border border-border/30 shadow-2xl bg-black/20">
+            <ArticleTitleMeta
+              article={article}
+              isDarkMode={isDarkMode}
+              hideHeader
+            />
+          </div>
+
+          {/* Right: Article Cover & Quick Info */}
+          <div className="hidden lg:flex flex-col gap-4">
+            <div className="aspect-video rounded-xl overflow-hidden border border-border/30 shadow-lg bg-muted relative group">
+              {(() => {
+                const coverImgUrl = getImageUrl(
+                  article.coverImage || article.mainImage || article.backgroundImage || null,
+                  "card"
+                );
                 
-                <ArticleTitleMeta
-                  article={article}
-                  isDarkMode={isDarkMode}
+                return coverImgUrl ? (
+                  <img 
+                    src={coverImgUrl} 
+                    alt="Cover" 
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.display = 'none';
+                      (e.target as HTMLImageElement).parentElement?.classList.add('flex', 'items-center', 'justify-center');
+                      const fallback = document.createElement('div');
+                      fallback.className = 'text-4xl font-bold text-muted-foreground/20';
+                      fallback.innerText = article.title.charAt(0).toUpperCase();
+                      (e.target as HTMLImageElement).parentElement?.appendChild(fallback);
+                    }}
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-muted-foreground/20 text-4xl font-bold">
+                    {article.title.charAt(0).toUpperCase()}
+                  </div>
+                );
+              })()}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            </div>
+            
+            {/* Quick Info */}
+            <div className="space-y-2">
+              {article.ver && (
+                <div className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                  <span className="text-[10px] bg-black/60 backdrop-blur-sm text-white px-2 py-0.5 rounded font-bold uppercase">Version</span>
+                  {article.ver}
+                </div>
+              )}
+              <div className="flex flex-wrap gap-1">
+                {article.categories?.slice(0, 3).map((cat, i) => (
+                  <span key={i} className="bg-primary/10 text-primary text-[10px] px-2 py-0.5 rounded-full font-bold">
+                    {cat.name}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6">
+          <main className="min-w-0 space-y-5">
+
+            {/* ── Content card: title row + body ────────────────────── */}
+            <Card className="overflow-hidden border border-border/30 shadow-xl">
+              <CardContent className="p-5 sm:p-7">
+
+                {/* Title row */}
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-5">
+                  <h1 className="text-2xl lg:text-3xl font-bold leading-tight flex-1">
+                    {article.title}
+                    {article.isPaid && (
+                      <span className="ml-3 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-500 text-white">
+                        PREMIUM
+                      </span>
+                    )}
+                  </h1>
+                  {(article as any).sequentialCode && (
+                    <div className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold border border-primary/30 bg-primary/10 text-primary shrink-0 self-start">
+                      <span className="text-primary/70">★</span>
+                      {(article as any).sequentialCode}
+                    </div>
+                  )}
+                </div>
+
+                {/* Article Description */}
+                {article.description && (
+                  <div className="mb-6 p-5 rounded-xl bg-primary/5 border-l-4 border-primary italic text-muted-foreground leading-relaxed">
+                    {article.description}
+                  </div>
+                )}
+
+                {/* Video Preview */}
+                <div className="mb-8 rounded-xl overflow-hidden bg-black aspect-video shadow-xl group relative border border-border/10">
+                  <video
+                    controls
+                    className="w-full h-full"
+                    preload="metadata"
+                    poster={article.coverImage || article.mainImage || undefined}
+                  >
+                    <source
+                      src="https://vidoes.chanomhub.com/file/Chanomhub-Vidoes/20-1-26_2.webm?Authorization=4_0051e50adc6bddd0000000001_01c1e6d3_f3aa13_acct_M803cRTXDpM8g_fqY8ZYrBjl__c="
+                      type="video/webm"
+                    />
+                  </video>
+                </div>
+
+                {/* Original Sources Section */}
+                {article.officialDownloadSources && article.officialDownloadSources.length > 0 && (!article.isPaid || article.isUnlocked) && (
+                  <div className="mb-7 space-y-3">
+                    <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+                      {article.officialDownloadSources.map((source, index) => (
+                        <a key={index} href={source.url} target="_blank" rel="noopener noreferrer" className="block w-full sm:w-auto flex-1">
+                          <Button variant="outline" className="w-full flex items-center justify-center gap-2 h-11 border-primary/20 hover:border-primary/50 hover:bg-primary/5 transition-all rounded-xl">
+                            <ExternalLink className="w-4 h-4 text-primary" />
+                            <span className="font-semibold">{t('loadOriginal', { source: source.name ? `(${source.name})` : "" })}</span>
+                          </Button>
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Article body */}
+                <div
+                  className={`prose prose-lg max-w-none mb-10 overflow-hidden break-words ${isDarkMode ? "prose-invert" : ""} prose-primary
+                            prose-headings:mb-5 prose-headings:font-bold prose-headings:tracking-tight
+                            prose-p:mb-5 prose-p:leading-relaxed prose-p:text-foreground/90
+                            prose-a:text-primary prose-a:underline hover:prose-a:text-primary/80
+                            prose-img:max-w-full prose-img:h-auto prose-img:rounded-2xl prose-img:my-8 prose-img:shadow-2xl
+                            prose-table:border-collapse prose-table:w-full prose-table:my-6
+                            prose-th:border prose-th:border-border prose-th:px-4 prose-th:py-3 prose-th:text-left prose-th:font-bold prose-th:bg-muted/50
+                            prose-td:border prose-td:border-border prose-td:px-4 prose-td:py-3`}
+                  dangerouslySetInnerHTML={{ __html: sanitizedBody }}
                 />
 
-                <div className="px-6 pb-8">
-                  {/* Article Description */}
-                  {article.description && (
-                    <div className="mb-8 p-6 rounded-2xl bg-primary/5 border-l-4 border-primary italic text-muted-foreground text-lg leading-relaxed">
-                      {article.description}
-                    </div>
-                  )}
-
-                  {/* Video Preview */}
-                  <div className="mb-10 rounded-2xl overflow-hidden bg-black aspect-video shadow-2xl group relative border border-border/10">
-                    <video
-                      controls
-                      className="w-full h-full"
-                      preload="metadata"
-                      poster={article.coverImage || article.mainImage || undefined}
-                    >
-                      <source
-                        src="https://vidoes.chanomhub.com/file/Chanomhub-Vidoes/20-1-26_2.webm?Authorization=4_0051e50adc6bddd0000000001_01c1e6d3_f3aa13_acct_M803cRTXDpM8g_fqY8ZYrBjl__c="
-                        type="video/webm"
-                      />
-                    </video>
-                  </div>
-
-                  {/* Original Sources Section */}
-                  {article.officialDownloadSources && article.officialDownloadSources.length > 0 && (!article.isPaid || article.isUnlocked) && (
-                    <div className="mb-10 space-y-3">
-                      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-                        {article.officialDownloadSources.map((source, index) => (
-                          <a key={index} href={source.url} target="_blank" rel="noopener noreferrer" className="block w-full sm:w-auto flex-1">
-                            <Button variant="outline" className="w-full flex items-center justify-center gap-2 h-12 border-primary/20 hover:border-primary/50 hover:bg-primary/5 transition-all rounded-xl">
-                              <ExternalLink className="w-4 h-4 text-primary" />
-                              <span className="font-semibold">{t('loadOriginal', { source: source.name ? `(${source.name})` : "" })}</span>
-                            </Button>
-                          </a>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Lightweight HTML renderer */}
-                  <div
-                    className={`prose prose-lg max-w-none mb-12 overflow-hidden break-words ${isDarkMode ? "prose-invert" : ""} prose-primary
-                              prose-headings:mb-6 prose-headings:font-bold prose-headings:tracking-tight
-                              prose-p:mb-6 prose-p:leading-relaxed prose-p:text-foreground/90
-                              prose-a:text-primary prose-a:underline hover:prose-a:text-primary/80
-                              prose-img:max-w-full prose-img:h-auto prose-img:rounded-2xl prose-img:my-10 prose-img:shadow-2xl
-                              prose-table:border-collapse prose-table:w-full prose-table:my-6
-                              prose-th:border prose-th:border-border prose-th:px-4 prose-th:py-3 prose-th:text-left prose-th:font-bold prose-th:bg-muted/50
-                              prose-td:border prose-td:border-border prose-td:px-4 prose-td:py-3`}
-                    dangerouslySetInnerHTML={{ __html: sanitizedBody }}
-                  />
-
-                  {/* Paid Article Section */}
-                  {article.isPaid && !article.isUnlocked && (
-                    <div className={`mt-8 p-10 rounded-3xl border-2 border-dashed flex flex-col items-center justify-center gap-6 text-center transition-all ${isDarkMode ? "bg-amber-500/5 border-amber-500/20" : "bg-amber-50/50 border-amber-200"
+                {/* Paid Article Section */}
+                {article.isPaid && !article.isUnlocked && (
+                  <div className={`mt-6 p-8 rounded-2xl border-2 border-dashed flex flex-col items-center justify-center gap-5 text-center transition-all ${isDarkMode ? "bg-amber-500/5 border-amber-500/20" : "bg-amber-50/50 border-amber-200"
+                    }`}>
+                    <div className={`p-4 rounded-full ${isDarkMode ? "bg-amber-500/20 text-amber-400" : "bg-amber-100 text-amber-600"
                       }`}>
-                      <div className={`p-5 rounded-full ${isDarkMode ? "bg-amber-500/20 text-amber-400" : "bg-amber-100 text-amber-600"
-                        }`}>
-                        <Lock className="w-10 h-10" />
-                      </div>
-
-                      <div className="space-y-2">
-                        <h3 className="text-2xl font-bold">{t('premiumContentTitle')}</h3>
-                        <p className="text-muted-foreground max-w-md text-lg">
-                          {Number(article.price || 0) > 0
-                            ? t('unlockToReadWithPrice', { price: article.price || 0 })
-                            : t('unlockToRead')}
-                        </p>
-                      </div>
-
-                      <Button
-                        onClick={handlePurchase}
-                        disabled={isPurchasing}
-                        size="lg"
-                        className="gap-2 bg-amber-500 hover:bg-amber-600 text-white font-bold h-16 px-10 rounded-2xl shadow-xl shadow-amber-500/20 text-lg"
-                      >
-                        {isPurchasing ? (
-                          <div className="animate-spin rounded-full h-6 w-6 border-2 border-white/30 border-t-white" />
-                        ) : (
-                          <ShoppingCart className="w-6 h-6" />
-                        )}
-                        {Number(article.price || 0) > 0 ? `Unlock for ${article.price} CC` : 'Unlock Content'}
-                      </Button>
+                      <Lock className="w-9 h-9" />
                     </div>
-                  )}
-
-                  {article.isPaid && article.isUnlocked && (
-                    <div className="flex items-center gap-3 mb-12 p-5 rounded-2xl bg-green-500/10 text-green-600 border border-green-500/20 shadow-sm">
-                      <Unlock className="w-6 h-6" />
-                      <span className="font-bold text-lg">{t('accessGranted')}</span>
+                    <div className="space-y-2">
+                      <h3 className="text-2xl font-bold">{t('premiumContentTitle')}</h3>
+                      <p className="text-muted-foreground max-w-md text-lg">
+                        {Number(article.price || 0) > 0
+                          ? t('unlockToReadWithPrice', { price: article.price || 0 })
+                          : t('unlockToRead')}
+                      </p>
                     </div>
-                  )}
+                    <Button
+                      onClick={handlePurchase}
+                      disabled={isPurchasing}
+                      size="lg"
+                      className="gap-2 bg-amber-500 hover:bg-amber-600 text-white font-bold h-14 px-8 rounded-2xl shadow-xl shadow-amber-500/20 text-lg"
+                    >
+                      {isPurchasing ? (
+                        <div className="animate-spin rounded-full h-6 w-6 border-2 border-white/30 border-t-white" />
+                      ) : (
+                        <ShoppingCart className="w-6 h-6" />
+                      )}
+                      {Number(article.price || 0) > 0 ? `Unlock for ${article.price} CC` : 'Unlock Content'}
+                    </Button>
+                  </div>
+                )}
 
-                  <InteractionBar
-                    isCurrentUserAuthor={isCurrentUserAuthor}
-                    isFollowing={isFollowing}
-                    handleFollow={handleFollow}
-                    isFavorited={isFavorited}
-                    favoritesCount={favoritesCount}
-                    handleFavorite={handleFavorite}
-                    handleShare={handleShare}
-                    isDarkBackground={isDarkMode}
-                  />
-                </div>
+                {article.isPaid && article.isUnlocked && (
+                  <div className="flex items-center gap-3 mb-10 p-4 rounded-xl bg-green-500/10 text-green-600 border border-green-500/20 shadow-sm">
+                    <Unlock className="w-5 h-5" />
+                    <span className="font-bold">{t('accessGranted')}</span>
+                  </div>
+                )}
+
+                <InteractionBar
+                  isCurrentUserAuthor={isCurrentUserAuthor}
+                  isFollowing={isFollowing}
+                  handleFollow={handleFollow}
+                  isFavorited={isFavorited}
+                  favoritesCount={favoritesCount}
+                  handleFavorite={handleFavorite}
+                  handleShare={handleShare}
+                  isDarkBackground={isDarkMode}
+                />
               </CardContent>
             </Card>
 
@@ -425,7 +499,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
             />
           </main>
 
-          <aside className="space-y-6">
+          <aside className="space-y-4 lg:sticky lg:top-6 lg:self-start lg:max-h-[calc(100vh-2rem)] lg:overflow-y-auto">
             <ArticleInfoSidebar
               article={article}
               isCurrentUserAuthor={isCurrentUserAuthor}

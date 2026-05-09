@@ -9,6 +9,8 @@ import { getImageUrl } from "@/lib/imageUrl"
 interface ArticleTitleMetaProps {
   article: Article
   isDarkMode: boolean
+  /** When true, hides the title/badge header — use when title is rendered externally */
+  hideHeader?: boolean
 }
 
 const MemoizedModalImage: React.FC<{ src: string; alt: string; fill: boolean; sizes: string; className: string }> = React.memo(({ src, alt, fill, sizes, className }) => (
@@ -24,7 +26,7 @@ const MemoizedModalImage: React.FC<{ src: string; alt: string; fill: boolean; si
 
 MemoizedModalImage.displayName = 'MemoizedModalImage';
 
-const ArticleTitleMeta: React.FC<ArticleTitleMetaProps> = ({ article, isDarkMode }) => {
+const ArticleTitleMeta: React.FC<ArticleTitleMetaProps> = ({ article, isDarkMode, hideHeader = false }) => {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0)
   const [, setImageErrors] = useState<Set<number>>(new Set())
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -234,9 +236,10 @@ const ArticleTitleMeta: React.FC<ArticleTitleMetaProps> = ({ article, isDarkMode
 
   // No images fallback
   if (!hasImages) {
+    if (hideHeader) return null;
     return (
-      <div className="mb-12">
-        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-8">
+      <div className="mb-6">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
           <div className="flex-1 space-y-2">
             <div className={`${styles.title} text-2xl sm:text-3xl`}>{article.title}</div>
             {article.creators && article.creators.length > 0 && (
@@ -255,36 +258,38 @@ const ArticleTitleMeta: React.FC<ArticleTitleMetaProps> = ({ article, isDarkMode
   }
 
   return (
-    <div className="mb-12">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-6 mb-10">
-        <div className="flex-1">
-          <div className={`${styles.title} mb-4`}>
-            {article.title}
-            {article.isPaid && (
-              <span className="ml-3 inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-amber-500 text-white shadow-lg shadow-amber-500/20">
-                PREMIUM
+    <div className={hideHeader ? "" : "mb-6"}>
+      {/* Header — hidden when used as gallery-only inside ArticleContent */}
+      {!hideHeader && (
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-6 mb-6">
+          <div className="flex-1">
+            <div className={`${styles.title} mb-3`}>
+              {article.title}
+              {article.isPaid && (
+                <span className="ml-3 inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-amber-500 text-white shadow-lg shadow-amber-500/20">
+                  PREMIUM
+                </span>
+              )}
+            </div>
+            <div className="flex items-center gap-4">
+              <span className={`text-sm font-medium ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
+                {imageCount} {imageCount === 1 ? "Image" : "Images"}
               </span>
-            )}
+              <div className={`w-1 h-1 rounded-full ${isDarkMode ? "bg-gray-600" : "bg-gray-400"}`} />
+              <span className={`text-sm font-medium ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
+                Gallery View
+              </span>
+            </div>
           </div>
-          <div className="flex items-center gap-4">
-            <span className={`text-sm font-medium ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
-              {imageCount} {imageCount === 1 ? "Image" : "Images"}
-            </span>
-            <div className={`w-1 h-1 rounded-full ${isDarkMode ? "bg-gray-600" : "bg-gray-400"}`} />
-            <span className={`text-sm font-medium ${isDarkMode ? "text-gray-400" : "text-gray-600"}`}>
-              Gallery View
-            </span>
-          </div>
-        </div>
 
-        {article.sequentialCode && (
-          <div className={styles.badge}>
-            <Star className="w-4 h-4 mr-2" />
-            {article.sequentialCode}
-          </div>
-        )}
-      </div>
+          {article.sequentialCode && (
+            <div className={styles.badge}>
+              <Star className="w-4 h-4 mr-2" />
+              {article.sequentialCode}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Image Gallery */}
       <div className="space-y-6">
