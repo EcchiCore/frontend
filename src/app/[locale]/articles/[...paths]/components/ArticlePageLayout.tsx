@@ -189,12 +189,12 @@ const DescriptionBlock = () => (
 const ArticleBody = () => (
   <div className="mb-10 space-y-3">
     {[100, 90, 95, 80, 85, 70, 90].map((w, i) => (
-      <Sk.Block key={i} className={`h-4 rounded`} style={{ width: `${w}%` }} />
+      <div key={i} className="animate-pulse rounded-lg bg-white/5 h-4 rounded" style={{ width: `${w}%` }} aria-hidden="true" />
     ))}
     <div className="mt-6 space-y-2">
       <Sk.Block className="h-5 w-48 rounded" />
       {[85, 75, 90].map((w, i) => (
-        <Sk.Block key={i} className="h-4 rounded" style={{ width: `${w}%` }} />
+        <div key={i} className="animate-pulse rounded-lg bg-white/5 h-4 rounded" style={{ width: `${w}%` }} aria-hidden="true" />
       ))}
     </div>
   </div>
@@ -399,7 +399,7 @@ const TagListCard = ({
               : "border-white/15 bg-white/5 text-white/40 hover:bg-white/10 hover:text-white/70"
           }`}
         >
-          <Sk.Block className="h-3 rounded bg-current/20" style={{ width: `${40 + i * 12}px` }} />
+          <div className="animate-pulse rounded-lg bg-white/5 h-3 rounded bg-current/20" style={{ width: `${40 + i * 12}px` }} aria-hidden="true" />
         </div>
       ))}
     </div>
