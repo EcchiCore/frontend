@@ -201,9 +201,27 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
 
   return (
     <div
-      className={`client-article-loaded min-h-screen overflow-x-hidden ${isDarkMode ? "bg-muted text-foreground" : "bg-muted text-foreground"
+      className={`client-article-loaded min-h-screen relative overflow-x-hidden ${isDarkMode ? "bg-muted text-foreground" : "bg-muted text-foreground"
         }`}
     >
+      {/* ── Background Hero Effect ────────────────────────────── */}
+      <div className="absolute top-0 left-0 w-full h-[600px] -z-10 pointer-events-none overflow-hidden opacity-50">
+        <div className={`absolute inset-0 z-10 ${isDarkMode ? "bg-gradient-to-b from-transparent via-muted to-muted" : "bg-gradient-to-b from-transparent via-muted to-muted"}`} />
+        {(() => {
+          const bgImgUrl = getImageUrl(
+            article.backgroundImage || article.coverImage || article.mainImage || null,
+            "hero"
+          );
+          return bgImgUrl ? (
+            <img
+              src={bgImgUrl}
+              className="w-full h-full object-cover blur-3xl scale-125 transition-opacity duration-1000"
+              alt=""
+            />
+          ) : null;
+        })()}
+      </div>
+
       <div className="fixed top-0 left-0 w-full h-1 bg-muted z-50">
         <div
           className="h-full bg-primary transition-all"
@@ -252,63 +270,56 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
           </div>
         </nav>
 
-        {/* ── Top Section: Gallery & Cover Image ─────────────────── */}
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6 mb-6">
-          {/* Left: Gallery */}
-          <div className="rounded-2xl overflow-hidden border border-border/30 shadow-2xl bg-black/20">
-            <ArticleTitleMeta
-              article={article}
-              isDarkMode={isDarkMode}
-              hideHeader
-            />
-          </div>
-
-          {/* Right: Article Cover & Quick Info */}
-          <div className="hidden lg:flex flex-col gap-4">
-            <div className="aspect-video rounded-xl overflow-hidden border border-border/30 shadow-lg bg-muted relative group">
-              {(() => {
-                const coverImgUrl = getImageUrl(
-                  article.coverImage || article.mainImage || article.backgroundImage || null,
-                  "card"
-                );
-                
-                return coverImgUrl ? (
+        {/* ── Top Hero Banner ────────────────────────────────────── */}
+        <div className="mb-8">
+          <div className="w-full aspect-[21/9] sm:aspect-[25/9] lg:aspect-[32/10] rounded-2xl overflow-hidden border border-border/30 shadow-2xl bg-black/40 relative group">
+            {(() => {
+              const coverImgUrl = getImageUrl(
+                article.coverImage || article.mainImage || article.backgroundImage || null,
+                "hero"
+              );
+              
+              return coverImgUrl ? (
+                <>
+                  {/* Blurred background for wide/narrow images */}
+                  <img 
+                    src={coverImgUrl} 
+                    alt="" 
+                    className="absolute inset-0 w-full h-full object-cover blur-3xl opacity-50 scale-125"
+                  />
+                  {/* Main Hero Image - object-contain to preserve width */}
                   <img 
                     src={coverImgUrl} 
                     alt="Cover" 
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).style.display = 'none';
-                      (e.target as HTMLImageElement).parentElement?.classList.add('flex', 'items-center', 'justify-center');
-                      const fallback = document.createElement('div');
-                      fallback.className = 'text-4xl font-bold text-muted-foreground/20';
-                      fallback.innerText = article.title.charAt(0).toUpperCase();
-                      (e.target as HTMLImageElement).parentElement?.appendChild(fallback);
-                    }}
+                    className="relative z-10 w-full h-full object-contain transition-transform duration-700 group-hover:scale-105"
                   />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-muted-foreground/20 text-4xl font-bold">
-                    {article.title.charAt(0).toUpperCase()}
-                  </div>
-                );
-              })()}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-            </div>
-            
-            {/* Quick Info */}
-            <div className="space-y-2">
-              {article.ver && (
-                <div className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                  <span className="text-[10px] bg-black/60 backdrop-blur-sm text-white px-2 py-0.5 rounded font-bold uppercase">Version</span>
-                  {article.ver}
+                </>
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-muted-foreground/20 text-6xl font-black">
+                  {article.title.toUpperCase()}
                 </div>
-              )}
-              <div className="flex flex-wrap gap-1">
-                {article.categories?.slice(0, 3).map((cat, i) => (
-                  <span key={i} className="bg-primary/10 text-primary text-[10px] px-2 py-0.5 rounded-full font-bold">
-                    {cat.name}
-                  </span>
-                ))}
+              );
+            })()}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent z-20" />
+            
+            {/* Quick Info Overlay on Banner */}
+            <div className="absolute bottom-6 left-6 right-6 z-30 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+              <div className="space-y-2">
+                <div className="flex flex-wrap gap-2">
+                  {article.categories?.slice(0, 3).map((cat, i) => (
+                    <span key={i} className="bg-primary text-white text-[10px] px-3 py-1 rounded-full font-bold uppercase tracking-wider shadow-lg">
+                      {cat.name}
+                    </span>
+                  ))}
+                  {article.ver && (
+                    <span className="bg-white/10 backdrop-blur-md text-white text-[10px] px-3 py-1 rounded-full font-bold uppercase tracking-wider border border-white/20">
+                      v{article.ver}
+                    </span>
+                  )}
+                </div>
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-white drop-shadow-2xl">
+                  {article.title}
+                </h1>
               </div>
             </div>
           </div>
@@ -316,6 +327,14 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
 
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6">
           <main className="min-w-0 space-y-5">
+            {/* Gallery Card */}
+            <div className="rounded-2xl overflow-hidden border border-border/30 shadow-2xl bg-black/20">
+              <ArticleTitleMeta
+                article={article}
+                isDarkMode={isDarkMode}
+                hideHeader
+              />
+            </div>
 
             {/* ── Content card: title row + body ────────────────────── */}
             <Card className="overflow-hidden border border-border/30 shadow-xl">

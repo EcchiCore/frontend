@@ -71,7 +71,7 @@ const SidebarRight: React.FC<SidebarRightProps> = ({
   };
 
   return (
-    <aside className="hidden md:block space-y-6">
+    <div className="hidden md:block space-y-6">
       {/* Author Card */}
       <Card>
         <CardContent className="pt-6 space-y-4">
@@ -288,7 +288,7 @@ const SidebarRight: React.FC<SidebarRightProps> = ({
           </CardContent>
         </Card>
       )}
-    </aside>
+    </div>
   );
 };
 

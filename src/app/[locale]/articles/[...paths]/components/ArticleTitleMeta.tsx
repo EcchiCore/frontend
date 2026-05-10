@@ -303,23 +303,34 @@ const ArticleTitleMeta: React.FC<ArticleTitleMetaProps> = ({ article, isDarkMode
           )}
 
           {/* Main image container with aspect-ratio to prevent CLS */}
-          <div className="relative w-full bg-muted/50" style={{ aspectRatio: '16/10' }}>
+          <div className="relative w-full bg-black/40" style={{ aspectRatio: '16/10' }}>
             {(() => {
               const mainImageSrc = getImageSrc(article.images[selectedImageIndex], 'hero');
               return mainImageSrc && (
-                <Image
-                  src={mainImageSrc}
-                  alt={`${article.title} - Image ${selectedImageIndex + 1}`}
-                  fill
-                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 90vw, 80vw"
-                  className="object-cover transition-all duration-700 group-hover:scale-105"
-                  onError={() => handleImageError(selectedImageIndex)}
-                  onLoad={() => setIsLoading(false)}
-                  priority={selectedImageIndex === 0}
-                  loading={selectedImageIndex === 0 ? "eager" : "lazy"}
-                  fetchPriority={selectedImageIndex === 0 ? "high" : undefined}
-                  unoptimized
-                />
+                <>
+                  {/* Blurred background for wide/tall images */}
+                  <Image
+                    src={mainImageSrc}
+                    alt=""
+                    fill
+                    className="object-cover blur-2xl opacity-40 scale-110"
+                    unoptimized
+                  />
+                  {/* Actual image with object-contain to preserve aspect ratio */}
+                  <Image
+                    src={mainImageSrc}
+                    alt={`${article.title} - Image ${selectedImageIndex + 1}`}
+                    fill
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 90vw, 80vw"
+                    className="relative z-10 object-contain transition-all duration-700 group-hover:scale-105"
+                    onError={() => handleImageError(selectedImageIndex)}
+                    onLoad={() => setIsLoading(false)}
+                    priority={selectedImageIndex === 0}
+                    loading={selectedImageIndex === 0 ? "eager" : "lazy"}
+                    fetchPriority={selectedImageIndex === 0 ? "high" : undefined}
+                    unoptimized
+                  />
+                </>
               );
             })()}
           </div>

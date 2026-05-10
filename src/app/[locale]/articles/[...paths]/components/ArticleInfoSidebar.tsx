@@ -348,7 +348,7 @@ const ArticleInfoSidebar: React.FC<ArticleInfoSidebarProps> = ({
       </div>
 
       {/* Desktop Sidebar (hidden on mobile) */}
-      <aside className="hidden md:block space-y-6">
+      <div className="hidden md:block space-y-6">
         {/* Author Card */}
         <Card>
           <CardContent className="pt-6 space-y-4">
@@ -612,7 +612,7 @@ const ArticleInfoSidebar: React.FC<ArticleInfoSidebarProps> = ({
             </CardContent>
           </Card>
         )}
-      </aside>
+      </div>
     </>
   );
 };

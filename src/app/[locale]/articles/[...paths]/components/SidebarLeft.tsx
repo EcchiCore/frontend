@@ -49,7 +49,7 @@ const SidebarLeft: React.FC<SidebarLeftProps> = ({
   };
 
   return (
-    <aside className="hidden md:block">
+    <div className="hidden md:block">
       <Card className="sticky top-20 overflow-hidden shadow-lg backdrop-blur-sm border transition-all duration-300 hover:shadow-xl hover:scale-[1.02]">
         <CardContent className="p-0">
           {/* Decorative gradient overlay */}
@@ -187,7 +187,7 @@ const SidebarLeft: React.FC<SidebarLeftProps> = ({
           </div>
         </CardContent>
       </Card>
-    </aside>
+    </div>
   );
 };
 
