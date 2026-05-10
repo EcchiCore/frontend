@@ -335,17 +335,17 @@ const ArticleTitleMeta: React.FC<ArticleTitleMetaProps> = ({ article, isDarkMode
             })()}
           </div>
 
-          <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20" />
 
           {/* Controls */}
-          <div className="absolute top-6 right-6">
+          <div className="absolute top-6 right-6 z-30">
             <div className={`px-4 py-2 rounded-full text-sm font-semibold backdrop-blur-md transition-all duration-300 ${isDarkMode ? "bg-black/60 text-white border border-white/20" : "bg-white/80 text-gray-900 border border-black/10"
               }`}>
               {selectedImageIndex + 1} / {imageCount}
             </div>
           </div>
 
-          <div className="absolute top-6 left-6 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
+          <div className="absolute top-6 left-6 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0 z-30">
             <div className={styles.controlButton}>
               <Maximize2 className="w-5 h-5" />
             </div>
@@ -356,14 +356,14 @@ const ArticleTitleMeta: React.FC<ArticleTitleMetaProps> = ({ article, isDarkMode
             <>
               <button
                 onClick={(e) => { e.stopPropagation(); navigateImage('prev') }}
-                className={`absolute left-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 ${styles.controlButton}`}
+                className={`absolute left-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 z-30 ${styles.controlButton}`}
               >
                 <ChevronLeft className="w-6 h-6" />
               </button>
 
               <button
                 onClick={(e) => { e.stopPropagation(); navigateImage('next') }}
-                className={`absolute right-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 ${styles.controlButton}`}
+                className={`absolute right-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 z-30 ${styles.controlButton}`}
               >
                 <ChevronRight className="w-6 h-6" />
               </button>
@@ -397,12 +397,12 @@ const ArticleTitleMeta: React.FC<ArticleTitleMetaProps> = ({ article, isDarkMode
                   })()}
 
                   {selectedImageIndex === index && (
-                    <div className="absolute inset-0 bg-violet-500/20 flex items-center justify-center">
+                    <div className="absolute inset-0 bg-violet-500/20 flex items-center justify-center z-10">
                       <div className="w-3 h-3 bg-white rounded-full shadow-lg animate-pulse" />
                     </div>
                   )}
 
-                  <div className="absolute top-1 right-1">
+                  <div className="absolute top-1 right-1 z-10">
                     <span className={`text-xs px-1.5 py-0.5 rounded-md font-medium ${selectedImageIndex === index
                       ? "bg-violet-500 text-white"
                       : isDarkMode ? "bg-black/60 text-white" : "bg-white/80 text-gray-900"
@@ -419,7 +419,7 @@ const ArticleTitleMeta: React.FC<ArticleTitleMetaProps> = ({ article, isDarkMode
 
       {/* Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black/95 backdrop-blur-sm z-50 flex items-center justify-center">
+        <div className="fixed inset-0 bg-black/95 backdrop-blur-sm z-[100] flex items-center justify-center">
           {/* Header */}
           <div className="absolute top-0 left-0 right-0 z-20 p-6">
             <div className="flex items-center justify-between">
