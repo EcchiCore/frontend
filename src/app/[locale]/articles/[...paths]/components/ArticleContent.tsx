@@ -80,7 +80,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
     openDownloadDialog,
     setOpenDownloadDialog,
   } = useDownloadDialog(downloads, showAlert);
-  
+
   // Essential state
   const { user } = useAppSelector((state) => state.auth);
   const isAuthenticated = isClient && !!user;
@@ -230,7 +230,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
       </div>
 
       <div className="container mx-auto px-4 py-6 md:py-8">
-        
+
         {/* 1. Primary Navigation Tabs - Highest priority */}
         <div className="mb-4 border-b border-border/50">
           <ArticleCommunityTabs
@@ -246,11 +246,11 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
           <Link href="/games" className="hover:text-primary transition-colors">
             All Games
           </Link>
-          
+
           {article.categories?.[0] && (
             <>
               <ChevronRight className="w-3.5 h-3.5 opacity-30" />
-              <Link 
+              <Link
                 href={`/games?category=${encodeURIComponent(article.categories[0].name)}`}
                 className="hover:text-primary transition-colors"
               >
@@ -278,19 +278,19 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
                 article.coverImage || article.mainImage || article.backgroundImage || null,
                 "hero"
               );
-              
+
               return coverImgUrl ? (
                 <>
                   {/* Blurred background for wide/narrow images */}
-                  <img 
-                    src={coverImgUrl} 
-                    alt="" 
+                  <img
+                    src={coverImgUrl}
+                    alt=""
                     className="absolute inset-0 w-full h-full object-cover blur-3xl opacity-50 scale-125"
                   />
                   {/* Main Hero Image - object-contain to preserve width */}
-                  <img 
-                    src={coverImgUrl} 
-                    alt="Cover" 
+                  <img
+                    src={coverImgUrl}
+                    alt="Cover"
                     className="relative z-10 w-full h-full object-contain transition-transform duration-700 group-hover:scale-105"
                   />
                 </>
@@ -301,13 +301,16 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
               );
             })()}
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent z-20" />
-            
+
             {/* Quick Info Overlay on Banner */}
             <div className="absolute bottom-6 left-6 right-6 z-30 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
               <div className="space-y-2">
                 <div className="flex flex-wrap gap-2">
                   {article.categories?.slice(0, 3).map((cat, i) => (
-                    <span key={i} className="bg-primary text-white text-[10px] px-3 py-1 rounded-full font-bold uppercase tracking-wider shadow-lg">
+                    <span
+                      key={i}
+                      className="bg-blue-500 text-white text-[10px] px-3 py-1 rounded-full font-bold uppercase tracking-wider shadow-lg"
+                    >
                       {cat.name}
                     </span>
                   ))}
