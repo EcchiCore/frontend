@@ -132,46 +132,6 @@ const ArticleInfoSidebar: React.FC<ArticleInfoSidebarProps> = ({
           </CardContent>
         </Card>
 
-        {/* Downloads Card */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <Download className="w-5 h-5 text-primary" />
-              <CardTitle>Downloads</CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent>
-            {article.isPaid && !article.isUnlocked ? (
-              <div className="space-y-3">
-                <p className="text-xs text-amber-600 font-medium bg-amber-50 dark:bg-amber-500/10 p-2 rounded border border-amber-200 dark:border-amber-500/20">
-                  {t('needPurchaseToDownload')}
-                </p>
-                <Button 
-                  variant="default"
-                  className="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold"
-                  onClick={handlePurchase}
-                  disabled={isPurchasing}
-                >
-                  {isPurchasing ? (
-                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-white/30 border-t-white mr-2" />
-                  ) : (
-                    <Download className="w-4 h-4 mr-2" />
-                  )}
-                  Purchase to Unlock
-                </Button>
-              </div>
-            ) : (
-              <Button
-                className="w-full flex items-center justify-center gap-2 text-white bg-cyan-600 hover:bg-cyan-700"
-                onClick={() => setOpenDownloadDialog()}
-              >
-                <Download className="w-5 h-5" />
-                View All
-              </Button>
-            )}
-          </CardContent>
-        </Card>
-
         {/* Article Info Card */}
         <Card>
           <CardHeader>
@@ -396,46 +356,6 @@ const ArticleInfoSidebar: React.FC<ArticleInfoSidebarProps> = ({
                 {isFavorited ? "Bookmarked" : "Bookmark"}
               </Button>
             </div>
-          </CardContent>
-        </Card>
-
-        {/* Downloads Card */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <Download className="w-5 h-5 text-primary" />
-              <CardTitle>Downloads</CardTitle>
-            </div>
-          </CardHeader>
-          <CardContent>
-            {article.isPaid && !article.isUnlocked ? (
-              <div className="space-y-3">
-                <p className="text-xs text-amber-600 font-medium bg-amber-50 dark:bg-amber-500/10 p-2 rounded border border-amber-200 dark:border-amber-500/20">
-                  {t('needPurchaseToDownload')}
-                </p>
-                <Button 
-                  variant="default"
-                  className="w-full bg-amber-500 hover:bg-amber-600 text-white font-bold"
-                  onClick={handlePurchase}
-                  disabled={isPurchasing}
-                >
-                  {isPurchasing ? (
-                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-white/30 border-t-white mr-2" />
-                  ) : (
-                    <Download className="w-4 h-4 mr-2" />
-                  )}
-                  Purchase to Unlock
-                </Button>
-              </div>
-            ) : (
-              <Button
-                className="w-full flex items-center justify-center gap-2 text-white bg-cyan-600 hover:bg-cyan-700"
-                onClick={() => setOpenDownloadDialog()}
-              >
-                <Download className="w-5 h-5" />
-                View All
-              </Button>
-            )}
           </CardContent>
         </Card>
 

@@ -139,7 +139,7 @@ const ArticleDownloadDialog: React.FC<ArticleDownloadDialogProps> = ({
 
         {/* Header */}
         <div className={cn(
-          "px-6 pt-6 pb-4",
+          "px-6 pt-6 pb-4 flex items-center justify-between",
           isDarkMode ? "bg-gray-900" : "bg-white"
         )}>
           <h3 className={cn(
@@ -149,6 +149,16 @@ const ArticleDownloadDialog: React.FC<ArticleDownloadDialogProps> = ({
             <Download className="size-6" />
             Download
           </h3>
+          <a href={`chanox2://article/${article.slug}`}>
+            <Button
+              size="sm"
+              variant="outline"
+              className="border-cyan-600 text-cyan-600 hover:bg-cyan-50 dark:hover:bg-cyan-950"
+            >
+              <Download className="size-4 mr-1.5" />
+              {t("openInChanoX2")}
+            </Button>
+          </a>
         </div>
 
         {/* Download List */}

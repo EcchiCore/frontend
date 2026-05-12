@@ -28,7 +28,16 @@ export type Article = {
   favorited: boolean;
   favoritesCount: number;
   sequentialCode: string | null;
-  downloads?: { id: number; isActive: boolean; name: string; url: string; vipOnly: boolean }[];
+  downloads?: { 
+    id: number; 
+    isActive: boolean; 
+    name: string; 
+    url: string; 
+    vipOnly: boolean;
+    forVersion?: string | null;
+    createdAt: string;
+    updatedAt: string;
+  }[];
   mods?: { id: number; downloadLink: string; description: string; creditTo: string; categories: { name: string }[]; images: { url: string }[]; name: string; status: string; version: string }[];
   officialDownloadSources?: { name: string; url: string; status: string }[];
   version?: string;

@@ -135,6 +135,10 @@ export async function fetchDownloadsByArticleId(
       url
       vipOnly
       isActive
+      type
+      forVersion
+      createdAt
+      updatedAt
     }
   }`;
 
@@ -219,6 +223,10 @@ export async function fetchArticleAndDownloads(
       url
       vipOnly
       isActive
+      type
+      forVersion
+      createdAt
+      updatedAt
     }
   }`;
 

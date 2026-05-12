@@ -72,5 +72,6 @@
   "loginToDeleteComment": "Please login to delete your comment",
   "deleteCommentSuccess": "Comment deleted successfully",
   "unableToDeleteComment": "Unable to delete comment",
-  "mainArticleImage": "Main article image"
+  "mainArticleImage": "Main article image",
+  "openInChanoX2": "Open in ChanoX2"
 }

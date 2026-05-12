@@ -32,6 +32,7 @@ import ArticleCommunityTabs from "./ArticleCommunityTabs";
 import { useTranslations } from 'next-intl';
 import { getImageUrl } from "@/lib/imageUrl";
 import type { ArticleListItem } from '@chanomhub/sdk';
+import ArticleDownloadSection from "./ArticleDownloadSection";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -460,6 +461,13 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
                   handleFavorite={handleFavorite}
                   handleShare={handleShare}
                   isDarkBackground={isDarkMode}
+                />
+
+                {/* Inline Downloads Section */}
+                <ArticleDownloadSection
+                  article={article}
+                  downloads={downloads}
+                  isDarkMode={isDarkMode}
                 />
               </CardContent>
             </Card>

@@ -72,5 +72,6 @@
   "loginToDeleteComment": "กรุณาเข้าสู่ระบบเพื่อลบความคิดเห็น",
   "deleteCommentSuccess": "ลบความคิดเห็นสำเร็จ",
   "unableToDeleteComment": "ไม่สามารถลบความคิดเห็น",
-  "mainArticleImage": "ภาพหลักของบทความ"
+  "mainArticleImage": "ภาพหลักของบทความ",
+  "openInChanoX2": "เปิดใน ChanoX2"
 }
