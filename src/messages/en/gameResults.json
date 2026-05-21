@@ -3,6 +3,7 @@
   "noItems": "No items found",
   "noItemsDesc": "No items match your search criteria. Try adjusting the filters or searching again.",
   "sortLatest": "Latest",
-  "sortPopular": "Popular",
+  "sortPopular": "Most Viewed",
+  "sortViewsAsc": "Least Viewed",
   "sortBy": "Sort by"
 }

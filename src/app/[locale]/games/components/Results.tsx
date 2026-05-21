@@ -13,36 +13,44 @@ const _getCachedGameResults = unstable_cache(
   async (
     limit: number,
     offset: number,
-    filter: Record<string, string | boolean | undefined>
+    filter: Record<string, string | boolean | undefined>,
+    sortBy?: string,
+    sortOrder?: string
   ) => {
     const sdk = createChanomhubClient()
     return sdk.articles.getAllPaginated({
       limit,
       offset,
       status: "PUBLISHED",
-      filter,
+      filter: {
+        ...filter,
+        sortBy: sortBy as any,
+        sortOrder: sortOrder as any,
+      },
       fields: [
         "id", "title", "slug", "description", "ver",
         "mainImage", "coverImage", "backgroundImage",
         "author", "tags", "platforms", "categories",
         "favoritesCount", "createdAt", "updatedAt",
-        "price", "isPaid",
+        "price", "isPaid", "viewsCount",
       ],
     })
   },
   ["game-results"],
-  { revalidate: 300 } // 5 minutes (was 60 seconds)
+  { revalidate: 300 }
 )
 
 // ห่อด้วย singleFlight ป้องกัน thundering herd
 const getCachedGameResults = (
   limit: number,
   offset: number,
-  filter: Record<string, string | boolean | undefined>
+  filter: Record<string, string | boolean | undefined>,
+  sortBy?: string,
+  sortOrder?: string
 ) =>
   singleFlight(
-    `game-results-${limit}-${offset}-${JSON.stringify(filter)}`,
-    () => _getCachedGameResults(limit, offset, filter)
+    `game-results-${limit}-${offset}-${JSON.stringify(filter)}-${sortBy}-${sortOrder}`,
+    () => _getCachedGameResults(limit, offset, filter, sortBy, sortOrder)
   )
 
 export default async function Results({
@@ -57,6 +65,23 @@ export default async function Results({
   const offset = (Number(params.page ?? 1) - 1) * limit
   const sort = String(params.sort ?? "latest")
 
+  let sortBy: string | undefined = "updatedAt"
+  let sortOrder: string | undefined = "desc"
+
+  if (sort === "popular") {
+    sortBy = "viewsCount"
+    sortOrder = "desc"
+  } else if (sort === "views_asc") {
+    sortBy = "viewsCount"
+    sortOrder = "asc"
+  } else if (sort === "az") {
+    sortBy = "title"
+    sortOrder = "asc"
+  } else if (sort === "oldest") {
+    sortBy = "createdAt"
+    sortOrder = "asc"
+  }
+
   const filter = {
     q: params.q ? String(params.q) : undefined,
     tag: params.tag ? String(params.tag) : undefined,
@@ -68,7 +93,7 @@ export default async function Results({
     favorited: params.favorited === "true" ? true : undefined,
   }
 
-  const result = await getCachedGameResults(limit, offset, filter)
+  const result = await getCachedGameResults(limit, offset, filter, sortBy, sortOrder)
   const { items, total, page, pageSize } = result
   const pages = Math.max(1, Math.ceil(total / pageSize))
 
@@ -118,7 +143,8 @@ async function SortBar({
 
   const options = [
     { label: t("sortLatest"), value: "latest" },
-    { label: t("sortPopular"), value: "popular" },
+    { label: t("sortPopular"), value: "popular" }, // View desc
+    { label: t("sortViewsAsc"), value: "views_asc" }, // View asc
     { label: "A–Z", value: "az" },
   ]
 
