@@ -26,7 +26,7 @@ const _getCachedGameResults = unstable_cache(
         ...filter,
         sortBy: sortBy as any,
         sortOrder: sortOrder as any,
-      },
+      } as any,
       fields: [
         "id", "title", "slug", "description", "ver",
         "mainImage", "coverImage", "backgroundImage",
