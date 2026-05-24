@@ -23,6 +23,7 @@ export function LoginForm({ onSwitch }: { onSwitch: () => void }) {
 
   // Create SDK instance with Supabase config for OAuth
   const sdk = useMemo(() => createChanomhubClient({
+    apiUrl: process.env.NEXT_PUBLIC_API_URL || 'https://api.chanomhub.com',
     supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
     supabaseAnonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
   }), []);
@@ -84,7 +85,29 @@ export function LoginForm({ onSwitch }: { onSwitch: () => void }) {
       if (window.location.hash && window.location.hash.includes('access_token')) {
         try {
           // Use SDK to handle the callback and exchange token with backend
-          const loginData = await sdk.auth.handleCallback();
+          let loginData = await sdk.auth.handleCallback();
+
+          // Robust fallback: if SDK/Supabase client hasn't parsed the hash in time, do it manually
+          if (!loginData) {
+            const hashParams = new URLSearchParams(window.location.hash.substring(1));
+            const accessToken = hashParams.get('access_token');
+            if (accessToken) {
+              const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://api.chanomhub.com'}/api/users/login-supabase`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ accessToken }),
+              });
+              if (response.ok) {
+                const responseJson = await response.json();
+                loginData = responseJson.data || responseJson;
+              } else {
+                throw new Error("Failed to exchange token via fallback API request");
+              }
+            }
+          }
+
           if (loginData) {
             handleOAuthCallback(loginData);
             // Clear the hash to look cleaner
