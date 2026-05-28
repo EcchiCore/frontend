@@ -468,6 +468,9 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
                   article={article}
                   downloads={downloads}
                   isDarkMode={isDarkMode}
+                  handlePurchase={handlePurchase}
+                  isPurchasing={isPurchasing}
+                  showAlert={showAlert}
                 />
               </CardContent>
             </Card>

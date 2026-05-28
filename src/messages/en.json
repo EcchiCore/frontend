@@ -428,6 +428,24 @@
     "success": "Success",
     "copied": "Copied",
     "next": "Next",
+    "downloads": {
+      "title": "Download",
+      "downloadNow": "Download Now",
+      "unlockNow": "Unlock Now",
+      "nameYourOwnPrice": "Name your own price",
+      "premiumContent": "Premium Content",
+      "freeAccess": "You have full access",
+      "clickToGetAccess": "Click download now to get access to the following files:",
+      "gotChanoX2": "Got ChanoX2?",
+      "modalDesc": "You need to have the ChanoX2 desktop application installed before you can install and launch {game}. Do you have ChanoX2 installed on this computer?",
+      "yesInstalled": "Yes, ChanoX2 is installed",
+      "playNow": "Play this game now",
+      "noNeed": "No, I need ChanoX2",
+      "downloadClient": "Read about and download ChanoX2",
+      "footerDesc": "ChanoX2 is the premiere desktop gaming platform. It's free to join and easy to use. ",
+      "learnMore": "Learn more about ChanoX2.",
+      "directDownload": "Or download {file} directly in your browser"
+    },
     "previous": "Previous"
   },
   "RelatedArticles": {
