@@ -3,13 +3,66 @@ import type { Metadata } from 'next';
 import { supportedLocales, defaultLocale, type Locale, siteUrl } from './localeUtils';
 import { Article } from '@/types/article';
 
+interface SEOLocalization {
+  downloadPrefix: string;
+  gameSuffix: string;
+  freeWord: string;
+  translationKeywords: string[];
+  translationLabel: string;
+}
+
+const SEO_LOCALES: Record<string, SEOLocalization> = {
+  th: {
+    downloadPrefix: 'ดาวน์โหลด',
+    gameSuffix: 'H Game',
+    freeWord: 'ฟรี',
+    translationKeywords: ['แปลไทย', 'ภาษาไทย', 'ซับไทย', 'thai translation', 'thai translated'],
+    translationLabel: 'แปลไทย'
+  },
+  en: {
+    downloadPrefix: 'Download',
+    gameSuffix: 'H Game',
+    freeWord: 'Free',
+    translationKeywords: ['english translation', 'english translated', 'english sub'],
+    translationLabel: 'English'
+  },
+  es: {
+    downloadPrefix: 'Descargar',
+    gameSuffix: 'Juego H',
+    freeWord: 'Gratis',
+    translationKeywords: ['español', 'traducido al español', 'sub español'],
+    translationLabel: 'Español'
+  },
+  pt: {
+    downloadPrefix: 'Baixar',
+    gameSuffix: 'Jogo H',
+    freeWord: 'Grátis',
+    translationKeywords: ['português', 'traduzido em português'],
+    translationLabel: 'Português'
+  }
+};
+
 // Helper function to create SEO-friendly title
-export function createSEOTitle(article: Article): string {
+export function createSEOTitle(article: Article, locale: string = 'en'): string {
   let title = article.title;
+  const config = SEO_LOCALES[locale] || SEO_LOCALES['en'];
 
   if ('ver' in article && article.ver) {
-    title += ` [${article.ver}]`;
+    title += ` v${article.ver}`;
   }
+
+  const platforms = article.platforms?.map(p => p.name) || [];
+  const platformStr = platforms.length > 0 ? ` (${platforms.join('/')})` : '';
+
+  // Check if article tags contain translations keywords
+  const hasTranslation = article.tags?.some(tag => 
+    config.translationKeywords.some(keyword => tag.name.toLowerCase().includes(keyword))
+  );
+
+  const translationSuffix = hasTranslation ? ` ${config.translationLabel}` : '';
+
+  // Construct dynamic localized title
+  title = `${config.downloadPrefix} ${title}${platformStr} ${config.gameSuffix}${translationSuffix} ${config.freeWord}`;
 
   if ('sequentialCode' in article && article.sequentialCode) {
     title += ` [${article.sequentialCode}]`;
@@ -17,6 +70,7 @@ export function createSEOTitle(article: Article): string {
 
   return title;
 }
+
 
 // Helper function to construct content path for metadata
 export function constructContentPath(locale: Locale, paths: string[]): string {
@@ -266,5 +320,45 @@ export function generateBreadcrumbStructuredData(options: {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     "itemListElement": breadcrumbItems,
+  };
+}
+
+/**
+ * Generate SoftwareApplication structured data for games to enable Rich Rating Snippets in Google Search
+ * @param article - Current article/game object
+ * @param locale - Current locale
+ * @returns JSON-LD SoftwareApplication schema object
+ */
+export function generateGameSoftwareStructuredData(article: Article, locale: Locale) {
+  const platformNames = article.platforms?.map(p => p.name) || ['Windows', 'Android'];
+  const ratingValue = article.favoritesCount > 0 
+    ? Math.min(5.0, 4.0 + (article.favoritesCount / 200))
+    : 4.5;
+  const ratingCount = Math.max(5, article.favoritesCount);
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": article.title,
+    "operatingSystem": platformNames.join(', '),
+    "applicationCategory": "GameApplication",
+    "description": article.description,
+    "url": locale === defaultLocale 
+      ? `${siteUrl}/articles/${article.slug}`
+      : `${siteUrl}/${locale}/articles/${article.slug}`,
+    "image": article.mainImage || `${siteUrl}/chanomhub.ico`,
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": ratingValue.toFixed(1),
+      "ratingCount": ratingCount,
+      "bestRating": "5",
+      "worstRating": "1"
+    },
+    "offers": {
+      "@type": "Offer",
+      "price": article.price || "0",
+      "priceCurrency": "USD",
+      "category": "free"
+    }
   };
 }

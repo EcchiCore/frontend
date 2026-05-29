@@ -15,6 +15,7 @@ import {
   generateArticleStructuredData,
   generateBreadcrumbStructuredData,
   createSEOTitle,
+  generateGameSoftwareStructuredData,
   constructContentPath,
 } from "@/utils/metadataUtils";
 import { getValidLocale, type Locale } from "@/utils/localeUtils";
@@ -71,7 +72,7 @@ export async function generateMetadata(props: ArticlePageProps): Promise<Metadat
   const contentPath = constructContentPath(locale, paths);
 
   // For original article page
-  const seoTitle = createSEOTitle(originalArticle);
+  const seoTitle = createSEOTitle(originalArticle, locale);
   return generatePageMetadata({
     title: seoTitle,
     description: originalArticle.description,
@@ -109,7 +110,7 @@ function generateArticleJsonLd(
     : `${siteUrl}/${locale}/articles/${slug}`;
 
   return generateArticleStructuredData({
-    title: createSEOTitle(article),
+    title: createSEOTitle(article, locale),
     description: article.description,
     url: articleUrl,
     locale,
@@ -185,12 +186,16 @@ export default async function ArticlePage(props: ArticlePageProps) {
       : `${siteUrl}/${locale}/category/${encodeURIComponent(categoryName)}`;
     breadcrumbItems.push({ name: categoryName, url: categoryUrl });
   }
-  breadcrumbItems.push({ name: createSEOTitle(originalArticle) });
+  breadcrumbItems.push({ name: createSEOTitle(originalArticle, locale) });
 
   const breadcrumbJsonLd = generateBreadcrumbStructuredData({
     locale,
     items: breadcrumbItems,
   });
+
+  // Generate Game SoftwareApplication schema if it's a software/game article
+  const isGame = originalArticle.platforms && originalArticle.platforms.length > 0;
+  const gameJsonLd = isGame ? generateGameSoftwareStructuredData(originalArticle, locale) : null;
 
   // Client Content: Hydrates after JS loads - replaces SSR content
   return (
@@ -208,6 +213,15 @@ export default async function ArticlePage(props: ArticlePageProps) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
+
+      {/* Game SoftwareApplication JSON-LD for rich rating snippets */}
+      {gameJsonLd && (
+        <Script
+          id="game-jsonld"
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(gameJsonLd) }}
+        />
+      )}
 
       <GTMArticleTracker
         title={originalArticle.title}
