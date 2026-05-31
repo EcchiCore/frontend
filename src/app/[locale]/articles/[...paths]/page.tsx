@@ -26,7 +26,6 @@ const siteUrl = process.env.FRONTEND || 'https://chanomhub.com';
 import { getCachedArticle, getCachedArticleWithDownloads } from '@/lib/articlePageCache';
 
 // Import shared cache functions - no extra API calls needed
-import { getCachedRecommendationPool, getRelatedFromPool } from '@/lib/articlesCache';
 
 
 
@@ -155,11 +154,8 @@ export default async function ArticlePage(props: ArticlePageProps) {
     return notFound();
   }
 
-  // Fetch related articles based on tags (server-side, no extra client request)
-  const tagNames = originalArticle.tags?.map((t: { name: string }) => t.name) || [];
-  
-  const articlePool = await getCachedRecommendationPool(token);
-  const relatedArticles = getRelatedFromPool(articlePool, tagNames, originalArticle.id);
+  // Fetch related articles recommended by the backend (fully Server-Side Rendered - SSR via GraphQL)
+  const relatedArticles = originalArticle.related || [];
 
   // Generate structured data JSON-LD for the article (only once, SEO handles language)
   const articleJsonLd = generateArticleJsonLd(

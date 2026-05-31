@@ -15,7 +15,7 @@ interface BulkActionBarProps {
     loading: boolean;
 }
 
-export const BulkActionBar: React.FC<BulkActionBarProps> = ({
+const BulkActionBar: React.FC<BulkActionBarProps> = ({
     totalCount,
     selectedCount,
     isAllSelected,

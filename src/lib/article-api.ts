@@ -122,6 +122,11 @@ function transformArticleData(article: Article): Article {
     }));
   }
 
+  // Transform nested related articles if they exist
+  if (transformed.related) {
+    transformed.related = transformed.related.map(rel => transformArticleData(rel));
+  }
+
   return transformed;
 }
 
@@ -216,6 +221,25 @@ export async function fetchArticleAndDownloads(
       isPaid
       isUnlocked
       viewsCount
+      related(limit: 12) {
+        id
+        slug
+        title
+        description
+        mainImage
+        coverImage
+        backgroundImage
+        author {
+          name
+        }
+        tags {
+          name
+        }
+        price
+        isPaid
+        isUnlocked
+        viewsCount
+      }
     }
     downloads(articleId: $downloadsArticleId) {
       id
@@ -396,10 +420,28 @@ export async function getArticleWithDownloads(
       updatedAt
       ver
       sequentialCode
-      price
       isPaid
       isUnlocked
       viewsCount
+      related(limit: 12) {
+        id
+        slug
+        title
+        description
+        mainImage
+        coverImage
+        backgroundImage
+        author {
+          name
+        }
+        tags {
+          name
+        }
+        price
+        isPaid
+        isUnlocked
+        viewsCount
+      }
     }
   }`;
 

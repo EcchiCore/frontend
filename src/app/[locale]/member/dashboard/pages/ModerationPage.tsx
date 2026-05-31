@@ -24,14 +24,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
 // Custom Components
-import {
-  ArticleModerationCard,
+import ArticleModerationCard, {
   ArticleModerationGroup,
   ModerationRequest,
   EntityType,
   RequestStatus
 } from '@/components/features/moderator/ArticleModerationCard';
-import { BulkActionBar } from '@/components/features/moderator/BulkActionBar';
+import BulkActionBar from '@/components/features/moderator/BulkActionBar';
 
 // API base URL
 const API_BASE_URL = `${process.env.NEXT_PUBLIC_API_URL || "https://api.chanomhub.com"}/api/graphql`;
@@ -45,7 +44,7 @@ interface Statistics {
   commentRequests: number;
 }
 
-export const ModerationPage: React.FC = () => {
+const ModerationPage: React.FC = () => {
   const { user, loading: authLoading, error: authError } = useAppSelector((state) => state.auth);
 
   // Data states

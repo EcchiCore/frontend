@@ -51,7 +51,7 @@ interface SpamLog {
   timestamp: string;
 }
 
-export const DiscordPage: React.FC = () => {
+const DiscordPage: React.FC = () => {
   // Auth state
   const [token, setToken] = useState<string | null>(null);
 

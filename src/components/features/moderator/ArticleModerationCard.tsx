@@ -132,7 +132,7 @@ const StatusBadge = ({ status }: { status: RequestStatus }) => {
     );
 };
 
-export const ArticleModerationCard: React.FC<ArticleModerationCardProps> = ({
+const ArticleModerationCard: React.FC<ArticleModerationCardProps> = ({
     group,
     isSelected,
     isExpanded,

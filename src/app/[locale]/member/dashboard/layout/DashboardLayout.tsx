@@ -16,7 +16,7 @@ import { NAVIGATION_ITEMS } from '@/constants/dashboard';
 const ArticlesPage = React.lazy(() => import('../pages/ArticlesPage').then(module => ({ default: module.ArticlesPage })));
 const ProfilePage = React.lazy(() => import('../profile/page'));
 const SettingsPage = React.lazy(() => import('../settings/page'));
-const ModerationPage = React.lazy(() => import('../pages/ModerationPage').then(module => ({ default: module.ModerationPage })));
+const ModerationPage = React.lazy(() => import('../pages/ModerationPage'));
 const StudioPage = React.lazy(() => import('../pages/StudioPage').then(module => ({ default: module.StudioPage })));
 
 const WalletPage = React.lazy(() => import('../pages/WalletPage').then(module => ({ default: module.WalletPage })));
