@@ -100,13 +100,17 @@ function transformArticleData(article: Article): Article {
     backgroundImage: resolveArticleImageUrl(article.backgroundImage),
     coverImage: resolveArticleImageUrl(article.coverImage),
     images: article.images
-      .map(img => resolveArticleImageObject(img))
-      .filter((img): img is { url: string } => img !== null),
-    author: {
-      ...article.author,
-      image: resolveArticleImageUrl(article.author.image),
-      backgroundImage: resolveArticleImageUrl(article.author.backgroundImage),
-    },
+      ? article.images
+          .map(img => resolveArticleImageObject(img))
+          .filter((img): img is { url: string } => img !== null)
+      : [],
+    author: article.author
+      ? {
+          ...article.author,
+          image: resolveArticleImageUrl(article.author.image),
+          backgroundImage: resolveArticleImageUrl(article.author.backgroundImage),
+        }
+      : article.author,
     // Transform official download sources
     officialDownloadSources: article.officialDownloadSources?.map(source => ({
       ...source,
