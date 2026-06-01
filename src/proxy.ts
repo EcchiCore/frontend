@@ -33,3 +33,4 @@ export const config = {
     '/((?!api|_next|studio|_vercel|ad-redirect|health|.*\\..*).*)'
   ]
 };
+

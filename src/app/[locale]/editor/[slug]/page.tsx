@@ -1,21 +1,29 @@
-'use client';
-
-import React from 'react';
-import { useParams } from 'next/navigation';
+import { cookies } from 'next/headers';
+import { redirect } from '@/i18n/navigation';
+import { getLocale } from 'next-intl/server';
 import { ArticleEditorForm } from '@/components/features/ArticleEditorForm';
 
-const EditArticlePage: React.FC = () => {
-  const params = useParams();
-  const slug = (params.slug as string) ?? '';
-  const locale = (params.locale as string) || 'en';
+interface EditArticlePageProps {
+    params: Promise<{ slug: string }>;
+}
 
-  if (!slug) return <div>Invalid slug</div>;
+export default async function EditArticlePage({ params }: EditArticlePageProps) {
+    const { slug } = await params;
+    const cookieStore = await cookies();
+    const token = cookieStore.get('token')?.value;
+    const locale = await getLocale();
 
-  return (
-    <div className="min-h-screen bg-background">
-      <ArticleEditorForm mode="edit" slug={slug} locale={locale} />
-    </div>
-  );
-};
+    if (!token) {
+        redirect({ href: `/login?redirect=/editor/${slug}`, locale });
+    }
 
-export default EditArticlePage;
+    if (!slug) {
+        redirect({ href: '/', locale });
+    }
+
+    return (
+        <div className="min-h-screen bg-background">
+            <ArticleEditorForm mode="edit" slug={slug} locale={locale} />
+        </div>
+    );
+}

@@ -740,11 +740,19 @@ export const ArticleEditorForm = ({ slug = '', initialData, mode, locale = 'en' 
     const [showValidationErrors, setShowValidationErrors] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
+    const [accessDenied, setAccessDenied] = useState<boolean>(false);
 
     useEffect(() => {
         const init = async () => {
             try {
                 setLoading(true);
+                const token = Cookies.get('token');
+                if (!token) {
+                    toast.error("Not authenticated. Redirecting...");
+                    router.replace(`/login?redirect=/editor/${slug || ''}`);
+                    return;
+                }
+
                 const sdk = await getSdk();
 
                 const [tags, categories, platforms, engines] = await Promise.all([
@@ -765,7 +773,6 @@ export const ArticleEditorForm = ({ slug = '', initialData, mode, locale = 'en' 
 
                 if (mode === 'edit' && slug) {
                     try {
-                        const token = Cookies.get('token');
                         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://api.chanomhub.com'}/api/articles/${slug}`, {
                             headers: {
                                 'Authorization': token ? `Bearer ${token}` : ''
@@ -778,6 +785,27 @@ export const ArticleEditorForm = ({ slug = '', initialData, mode, locale = 'en' 
                         const article = resData.data?.article || resData.article || resData;
 
                         if (article) {
+                            // Check ownership / moderator privileges
+                            let currentUser: any = null;
+                            try {
+                                currentUser = await sdk.users.getCurrentUser();
+                            } catch (e) {
+                                console.error("Failed to fetch user in editor check", e);
+                            }
+
+                            const isOwner = currentUser && article.author && article.author.id === currentUser.id;
+                            const isModerator = currentUser && (
+                                (currentUser.ranks && currentUser.ranks.some((r: any) => ['ADMIN', 'MODERATOR'].includes(r.toUpperCase()))) ||
+                                (currentUser.roles && currentUser.roles.some((r: any) => ['ADMIN', 'MODERATOR'].includes(r.toUpperCase())))
+                            );
+
+                            if (!isOwner && !isModerator) {
+                                setAccessDenied(true);
+                                toast.error("You do not have permission to edit this article.");
+                                router.replace('/member/dashboard');
+                                return;
+                            }
+
                             const downloadsData = article.downloads || [];
                             const rawImages = article.images || [];
                             const imageUrls = Array.isArray(rawImages)
@@ -993,6 +1021,15 @@ export const ArticleEditorForm = ({ slug = '', initialData, mode, locale = 'en' 
             setSaving(false);
         }
     };
+
+    if (accessDenied) return (
+        <div className="min-h-screen flex items-center justify-center bg-background">
+            <div className="flex flex-col items-center gap-4 text-center max-w-md p-6 bg-card border border-border rounded-xl shadow-lg">
+                <h1 className="text-2xl font-bold text-destructive">Access Denied</h1>
+                <p className="text-muted-foreground">You do not have permission to access or edit this article.</p>
+            </div>
+        </div>
+    );
 
     if (loading) return (
         <div className="min-h-screen flex items-center justify-center">
