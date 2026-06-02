@@ -2,6 +2,7 @@
 import { redirect } from "next/navigation";
 import { headers, cookies } from "next/headers";
 import { defaultLocale } from "@/utils/localeUtils";
+import { Suspense } from "react";
 
 // List of common bot/crawler user-agent substrings (case-insensitive)
 const BOT_USER_AGENTS = [
@@ -25,7 +26,7 @@ const BOT_USER_AGENTS = [
   "discordbot",
 ];
 
-export default async function RootPage() {
+async function RootPageRedirect() {
   const headersList = await headers();
   const userAgent = headersList.get("user-agent")?.toLowerCase() || "";
   // 1. Check if the visitor is a verified bot via Cloudflare or standard User-Agent
@@ -51,4 +52,13 @@ export default async function RootPage() {
 
   // 4. Default fallback redirect (including all bots/crawlers)
   redirect(`/${defaultLocale}`);
+  return null;
+}
+
+export default function RootPage() {
+  return (
+    <Suspense fallback={null}>
+      <RootPageRedirect />
+    </Suspense>
+  );
 }
