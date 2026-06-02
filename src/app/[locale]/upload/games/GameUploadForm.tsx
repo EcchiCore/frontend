@@ -10,7 +10,6 @@ import { Button } from '@/components/ui/button';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { submitGameUpload, resetUploadState, setStep } from '@/store/features/upload/uploadSlice';
 import { toast } from 'sonner';
-import { SidebarSection } from './SidebarSection';
 import { MediaUpload } from './MediaUpload';
 import { MediaGallery } from './MediaGallery';
 import { JsonImportDialog } from './JsonImportDialog';

@@ -35,7 +35,7 @@ export interface GameUploadFormData {
 
     // Step 3: Media
     coverImage?: string; // URL or base64? Usually URL after upload
-    screenshots?: string[]; // URLs
+    otherImages?: string[]; // URLs
 
     // Editor
     editorMode?: 'rich-text' | 'block';
@@ -64,7 +64,7 @@ const initialState: UploadState = {
         authorizedPurchaseSources: [],
         tags: [],
         categories: [],
-        screenshots: [],
+        otherImages: [],
         editorMode: 'rich-text'
     },
     activeSection: 'basic',

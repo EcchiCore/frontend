@@ -27,14 +27,14 @@ export function JsonImportDialog() {
         if (!html) return html;
         let repaired = html;
 
-        // 1. Decode generic HTML entities using DOMParser
-        // This handles &lt;, &gt;, &quot;, &amp;, etc. correctly even if they are mixed.
+        // 1. Decode generic HTML entities using a temporary textarea
+        // This safely decodes entities like &lt;, &gt;, &amp;, &quot;, &#39; etc. while preserving all HTML tags.
         try {
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(repaired, 'text/html');
-            repaired = doc.body.textContent || repaired;
+            const textarea = document.createElement('textarea');
+            textarea.innerHTML = repaired;
+            repaired = textarea.value;
         } catch (e) {
-            console.error("DOMParser error", e);
+            console.error("Entity decoding error", e);
             // Fallback
             repaired = repaired
                 .replace(/&lt;/g, '<')
