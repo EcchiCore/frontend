@@ -11,6 +11,10 @@ import { useDownloadDialog } from './hooks/useDownloadDialog';
 import { Article } from '@/types/article';
 import { getSdk } from '@/lib/sdk';
 
+import { Link } from "@/i18n/navigation";
+import { getImageUrl } from "@/lib/imageUrl";
+import type { ArticleListItem } from '@chanomhub/sdk';
+
 interface ArticleDownloadDialogProps {
   article: Article;
   downloads: DownloadFile[];
@@ -19,6 +23,7 @@ interface ArticleDownloadDialogProps {
   showAlert: (message: string, severity: 'success' | 'error') => void;
   openDownloadDialog: boolean;
   setOpenDownloadDialog: (open: boolean) => void;
+  relatedArticles?: ArticleListItem[];
 }
 
 const ArticleDownloadDialog: React.FC<ArticleDownloadDialogProps> = ({
@@ -29,6 +34,7 @@ const ArticleDownloadDialog: React.FC<ArticleDownloadDialogProps> = ({
   showAlert,
   openDownloadDialog,
   setOpenDownloadDialog,
+  relatedArticles = [],
 }) => {
   const t = useTranslations('ArticleContent');
   const {
@@ -179,6 +185,58 @@ const ArticleDownloadDialog: React.FC<ArticleDownloadDialogProps> = ({
             </div>
           )}
         </div>
+
+        {/* More you might be interested in (itch.io style) */}
+        {relatedArticles && relatedArticles.length > 0 && (
+          <div className={cn(
+            "px-6 py-4 border-t",
+            isDarkMode ? "bg-gray-900 border-gray-800 text-[#acb2b8]" : "bg-gray-50 border-gray-200 text-gray-700"
+          )}>
+            <h4 className={cn(
+              "text-xs font-bold uppercase tracking-wider mb-3",
+              isDarkMode ? "text-gray-400" : "text-gray-500"
+            )}>
+              {t("relatedArticles") || "More you might be interested in (บทความที่คุณอาจสนใจ)"}
+            </h4>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[220px] overflow-y-auto pr-1">
+              {relatedArticles.slice(0, 4).map((rel) => {
+                const cover = getImageUrl(rel.coverImage || rel.mainImage || null, "cardThumbnail") || rel.coverImage || rel.mainImage;
+                return (
+                  <Link
+                    key={rel.id}
+                    href={`/articles/${rel.slug}`}
+                    onClick={() => setOpenDownloadDialog(false)}
+                    className={cn(
+                      "flex gap-2.5 p-2 rounded-sm border transition-colors duration-150",
+                      isDarkMode 
+                        ? "bg-gray-800/40 hover:bg-gray-800 border-gray-700/50 hover:border-gray-600" 
+                        : "bg-white hover:bg-gray-55 border-gray-200 hover:border-gray-300"
+                    )}
+                  >
+                    <div className="w-14 aspect-video bg-black/40 rounded-sm overflow-hidden shrink-0 relative border border-gray-700/20">
+                      {cover ? (
+                        <img src={cover} alt={rel.title} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-xs">📰</div>
+                      )}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className={cn(
+                        "text-[11px] font-bold truncate transition-colors",
+                        isDarkMode ? "text-white hover:text-cyan-400" : "text-gray-900 hover:text-cyan-600"
+                      )}>
+                        {rel.title}
+                      </p>
+                      <p className="text-[9px] text-[#567086] truncate mt-0.5">
+                        By {rel.author?.name || "Admin"}
+                      </p>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {/* Footer */}
         <div className={cn(
