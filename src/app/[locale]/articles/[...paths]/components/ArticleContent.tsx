@@ -20,7 +20,7 @@ import { useDownloadDialog } from "./hooks/useDownloadDialog";
 import { useViewHistory } from "./hooks/useViewHistory";
 import ArticleDownloadDialog from "./ArticleDownloadDialog";
 import RelatedArticles from "./RelatedArticles";
-import { Button, Card, CardContent, Separator, Badge, Avatar, AvatarFallback } from "@/components/ui";
+import { Button, Card, CardContent, Separator, Badge, Avatar, AvatarFallback, Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui";
 import { ExternalLink, Lock, Unlock, ShoppingCart, MessageCircle, Trophy, Medal, Award, Clock, ChevronRight, Plus, Star, ChevronLeft, X, ZoomIn, ZoomOut, RotateCcw, Download, Maximize2 } from "lucide-react";
 
 import { getSdk } from "@/lib/sdk";
@@ -91,7 +91,29 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
 
   const initialPlatform = article.platforms?.[0]?.name?.toLowerCase() || "";
   const [activePlatform, setActivePlatform] = React.useState<string>(initialPlatform);
-  const [showAllTags, setShowAllTags] = React.useState<boolean>(false);
+  const [isTagsModalOpen, setIsTagsModalOpen] = React.useState<boolean>(false);
+
+  const ratingsCount = article.ratingsCount ?? article.favoritesCount ?? 0;
+  const ratingsAverage = article.ratingsAverage ?? (ratingsCount > 0 ? Math.min(5.0, 4.0 + (ratingsCount / 200)) : 0);
+
+  const renderStars = (rating: number) => {
+    return (
+      <div className="flex items-center gap-0.5 text-yellow-400">
+        {[1, 2, 3, 4, 5].map((s) => {
+          const isFilled = rating >= s;
+          const isHalf = !isFilled && rating >= s - 0.5;
+          return (
+            <Star
+              key={s}
+              className={`w-3.5 h-3.5 ${
+                isFilled ? "fill-current" : isHalf ? "fill-current opacity-70" : "opacity-30"
+              }`}
+            />
+          );
+        })}
+      </div>
+    );
+  };
 
   React.useEffect(() => {
     if (typeof window !== "undefined" && article.platforms) {
@@ -469,12 +491,15 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
 
             {/* Metadata details */}
             <div className="space-y-2 border-t border-border pt-3 text-[11px] text-muted-foreground">
-              <div className="flex justify-between items-center px-1">
-                <span className="uppercase">รีวิวทั้งหมด:</span>
-                <span className="text-primary font-bold hover:underline cursor-pointer">
-                  เป็นบวกอย่างยิ่ง ({favoritesCount} favorites)
-                </span>
-              </div>
+              {ratingsCount > 0 && (
+                <div className="flex justify-between items-center px-1">
+                  <span className="uppercase">รีวิวทั้งหมด:</span>
+                  <div className="flex items-center gap-1.5 font-bold">
+                    {renderStars(ratingsAverage)}
+                    <span className="text-foreground text-[10px] ml-1">{ratingsAverage.toFixed(1)} / 5.0</span>
+                  </div>
+                </div>
+              )}
               <div className="flex justify-between items-center px-1">
                 <span className="uppercase">วันวางจำหน่าย:</span>
                 <span className="text-foreground font-medium">
@@ -501,7 +526,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
             <div className="border-t border-border pt-3">
               <span className="text-[10px] text-muted-foreground block mb-1.5 uppercase font-semibold">แท็กยอดนิยมสำหรับเกมนี้:</span>
               <div className="flex flex-wrap gap-1">
-                {(showAllTags ? article.tags : article.tags?.slice(0, 4))?.map((tag, idx) => (
+                {article.tags?.slice(0, 4).map((tag, idx) => (
                   <Link
                     key={idx}
                     href={`/games?tag=${encodeURIComponent(tag.name)}`}
@@ -512,10 +537,11 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
                 ))}
                 {article.tags && article.tags.length > 4 && (
                   <button
-                    onClick={() => setShowAllTags(!showAllTags)}
-                    className="bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground text-[10px] px-2 py-0.5 rounded-sm transition-colors border border-border cursor-pointer font-semibold"
+                    onClick={() => setIsTagsModalOpen(true)}
+                    className="bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground text-[10px] px-2 py-0.5 rounded-sm transition-colors border border-border cursor-pointer font-bold"
+                    title="แสดงแท็กทั้งหมด"
                   >
-                    {showAllTags ? "แสดงน้อยลง" : `+ แสดงทั้งหมด (${article.tags.length})`}
+                    +
                   </button>
                 )}
               </div>
@@ -802,10 +828,12 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
                     <span className="text-foreground font-bold">{article.ver}</span>
                   </div>
                 )}
-                <div className="py-2 flex justify-between items-center">
-                  <span>วิวทั้งหมด</span>
-                  <span className="text-primary font-bold">{(article.viewsCount || 0).toLocaleString()} ครั้ง</span>
-                </div>
+                {article.viewsCount !== undefined && article.viewsCount >= 1000 && (
+                  <div className="py-2 flex justify-between items-center">
+                    <span>วิวทั้งหมด</span>
+                    <span className="text-primary font-bold">{(article.viewsCount).toLocaleString()} ครั้ง</span>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -824,15 +852,28 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border/40">
-                    <tr>
-                      <td className="py-2">ไทย (Thai)</td>
-                      <td className="py-2 text-center text-primary">✔</td>
-                      <td className="py-2 text-center text-muted-foreground">-</td>
+                    {/* ทางการ (Official) */}
+                    <tr className="bg-muted/30">
+                      <td colSpan={3} className="py-1 px-2 font-bold text-foreground text-[9px] uppercase tracking-wider">
+                        ทางการ (Official)
+                      </td>
                     </tr>
                     <tr>
-                      <td className="py-2">อังกฤษ (English)</td>
+                      <td className="py-2 pl-2">อังกฤษ (English)</td>
                       <td className="py-2 text-center text-primary">✔</td>
                       <td className="py-2 text-center text-primary">✔</td>
+                    </tr>
+                    
+                    {/* จากม็อดชุมชน (Community Mod) */}
+                    <tr className="bg-muted/30">
+                      <td colSpan={3} className="py-1 px-2 font-bold text-foreground text-[9px] uppercase tracking-wider">
+                        จากม็อดชุมชน (Community Mod)
+                      </td>
+                    </tr>
+                    <tr>
+                      <td className="py-2 pl-2">ไทย (Thai - แปลไทย)</td>
+                      <td className="py-2 text-center text-primary">✔</td>
+                      <td className="py-2 text-center text-muted-foreground">-</td>
                     </tr>
                   </tbody>
                 </table>
@@ -880,6 +921,29 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
         isDarkMode={isDarkMode}
         relatedArticles={relatedArticles}
       />
+
+      {/* ── Popular Tags Modal Popup ── */}
+      <Dialog open={isTagsModalOpen} onOpenChange={setIsTagsModalOpen}>
+        <DialogContent className="max-w-md bg-card border border-border text-foreground">
+          <DialogHeader>
+            <DialogTitle className="text-sm font-bold uppercase tracking-wider text-foreground pb-2 border-b border-border">
+              แท็กยอดนิยมทั้งหมดสำหรับเกมนี้
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-wrap gap-2 pt-2 max-h-[300px] overflow-y-auto">
+            {article.tags?.map((tag, idx) => (
+              <Link
+                key={idx}
+                href={`/games?tag=${encodeURIComponent(tag.name)}`}
+                onClick={() => setIsTagsModalOpen(false)}
+                className="bg-primary/10 hover:bg-primary/20 text-primary text-[11px] px-2.5 py-1 rounded-sm transition-colors border border-primary/20"
+              >
+                {tag.name}
+              </Link>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
       
       {/* ── Fullscreen Image Modal Gallery ── */}
       {isModalOpen && imageSlides.length > 0 && (

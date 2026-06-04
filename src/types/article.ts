@@ -46,5 +46,7 @@ export type Article = {
   isUnlocked?: boolean;
   patreonUrl?: string | null;
   viewsCount?: number;
+  ratingsAverage?: number;
+  ratingsCount?: number;
   related?: any[];
 };
