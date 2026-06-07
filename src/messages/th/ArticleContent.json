@@ -72,6 +72,8 @@
   "loginToDeleteComment": "กรุณาเข้าสู่ระบบเพื่อลบความคิดเห็น",
   "loginToComment": "กรุณาเข้าสู่ระบบก่อนเพื่อแสดงความคิดเห็น",
   "rateThisGame": "ให้คะแนนบทความนี้",
+  "votesCount": "{count} รีวิว",
+  "yourRating": "คุณให้ {rating} ดาว",
   "ratingSuccess": "ขอบคุณสำหรับคะแนนความพึงพอใจ!",
   "ratingError": "ไม่สามารถส่งคะแนนได้ กรุณาลองใหม่อีกครั้ง",
   "deleteCommentSuccess": "ลบความคิดเห็นสำเร็จ",

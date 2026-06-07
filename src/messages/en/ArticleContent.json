@@ -72,6 +72,8 @@
   "loginToDeleteComment": "Please login to delete your comment",
   "loginToComment": "Please login to comment",
   "rateThisGame": "Rate this article",
+  "votesCount": "{count} Votes",
+  "yourRating": "You rated {rating} stars",
   "ratingSuccess": "Thank you for rating!",
   "ratingError": "Failed to submit rating. Please try again.",
   "deleteCommentSuccess": "Comment deleted successfully",

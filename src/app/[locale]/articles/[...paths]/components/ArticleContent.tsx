@@ -474,10 +474,61 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
           <span className="text-primary truncate max-w-[200px] sm:max-w-none">{article.title}</span>
         </nav>
 
-        {/* Title */}
-        <h1 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-wide mb-5 drop-shadow-sm">
-          {article.title}
-        </h1>
+        {/* Title & Ratings Header */}
+        <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-border/20 pb-4">
+          <h1 className="text-3xl font-bold text-[#dcdedf] tracking-wide">{article.title}</h1>
+          
+          <div className="flex items-center gap-2.5 bg-muted/10 border border-border/20 px-3 py-1.5 rounded-md backdrop-blur-sm w-fit md:self-center text-xs text-muted-foreground select-none">
+            {/* Combined Interactive Stars */}
+            <div className="flex items-center">
+              {[1, 2, 3, 4, 5].map((star) => {
+                const isHovered = hoverRating > 0;
+                const isFilled = isHovered 
+                  ? hoverRating >= star 
+                  : localRatingsAverage >= star;
+                const isHalf = !isHovered && !isFilled && localRatingsAverage + 0.5 >= star;
+                
+                return (
+                  <button
+                    key={star}
+                    type="button"
+                    onClick={() => handleRate(star)}
+                    onMouseEnter={() => setHoverRating(star)}
+                    onMouseLeave={() => setHoverRating(0)}
+                    disabled={isSubmittingRating}
+                    className="p-0.5 hover:scale-110 transition-transform focus:outline-none disabled:opacity-50"
+                    title={t('rateThisGame') || "ให้คะแนนบทความนี้"}
+                  >
+                    <Star
+                      className={`w-4 h-4 transition-colors duration-150 ${
+                        isFilled 
+                          ? "fill-yellow-400 text-yellow-400" 
+                          : isHalf 
+                            ? "fill-yellow-400 text-yellow-400 opacity-70" 
+                            : "text-muted-foreground/30"
+                      }`}
+                    />
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Score & Votes info */}
+            {localRatingsCount >= 0 && (
+              <div className="flex items-center gap-1.5 font-bold text-[11px] text-foreground/90">
+                <span>{localRatingsAverage.toFixed(1)}</span>
+                <span className="text-muted-foreground/50 font-normal">
+                  ({t('votesCount', { count: localRatingsCount })})
+                </span>
+                {userRating > 0 && (
+                  <span className="text-primary text-[10px] font-semibold ml-1 bg-primary/10 border border-primary/20 px-1.5 py-0.5 rounded-sm">
+                    {t('yourRating', { rating: userRating })}
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
 
         {/* ── 2. Showcase Block (Split View) ── */}
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-5 bg-card border border-border p-4 sm:p-5 rounded-lg shadow-xl mb-6">
@@ -562,15 +613,6 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
 
             {/* Metadata details */}
             <div className="space-y-2 border-t border-border pt-3 text-[11px] text-muted-foreground">
-              {localRatingsCount >= 0 && (
-                <div className="flex justify-between items-center px-1">
-                  <span className="uppercase">รีวิวทั้งหมด:</span>
-                  <div className="flex items-center gap-1.5 font-bold">
-                    {renderStars(localRatingsAverage)}
-                    <span className="text-foreground text-[10px] ml-1">{localRatingsAverage.toFixed(1)} / 5.0</span>
-                  </div>
-                </div>
-              )}
               <div className="flex justify-between items-center px-1">
                 <span className="uppercase">วันวางจำหน่าย:</span>
                 <span className="text-foreground font-medium">
@@ -871,39 +913,6 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
                 <ExternalLink className="w-3.5 h-3.5 text-primary" />
                 แชร์ลิงก์บทความ
               </Button>
-            </div>
-
-            {/* Rate this Game/Article Card */}
-            <div className="bg-card border border-border p-4 rounded-lg shadow-lg">
-              <span className="text-[10px] text-muted-foreground block mb-2 uppercase font-bold tracking-wider">
-                {t('rateThisGame') || "ให้คะแนนบทความนี้:"}
-              </span>
-              <div className="flex items-center gap-1.5 justify-center py-2 bg-muted/30 rounded-md border border-border/40">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <button
-                    key={star}
-                    type="button"
-                    onClick={() => handleRate(star)}
-                    onMouseEnter={() => setHoverRating(star)}
-                    onMouseLeave={() => setHoverRating(0)}
-                    disabled={isSubmittingRating}
-                    className="p-1 hover:scale-110 transition-transform focus:outline-none disabled:opacity-50"
-                  >
-                    <Star
-                      className={`w-6 h-6 transition-colors duration-150 ${
-                        (hoverRating || userRating || 0) >= star
-                          ? "fill-yellow-400 text-yellow-400"
-                          : "text-muted-foreground/40"
-                      }`}
-                    />
-                  </button>
-                ))}
-              </div>
-              {userRating > 0 && (
-                <p className="text-[10px] text-center text-primary font-semibold mt-1.5">
-                  คุณให้คะแนนแล้ว: {userRating} ดาว
-                </p>
-              )}
             </div>
 
             {/* Game Features details */}
