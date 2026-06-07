@@ -29,7 +29,7 @@ import { useRouter, Link } from "@/i18n/navigation";
 import Cookies from "js-cookie";
 // import ArticleModsSection from "./ArticleModsSection"; // Removed
 import ArticleCommunityTabs from "./ArticleCommunityTabs";
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { getImageUrl } from "@/lib/imageUrl";
 import type { ArticleListItem } from '@chanomhub/sdk';
 import ArticleDownloadSection from "./ArticleDownloadSection";
@@ -51,6 +51,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
   relatedArticles = [],
 }) => {
   const t = useTranslations('ArticleContent');
+  const locale = useLocale();
   const {
     isFavorited,
     favoritesCount,
@@ -497,7 +498,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
                     onMouseLeave={() => setHoverRating(0)}
                     disabled={isSubmittingRating}
                     className="p-0.5 hover:scale-110 transition-transform focus:outline-none disabled:opacity-50"
-                    title={t('rateThisGame') || "ให้คะแนนบทความนี้"}
+                    title={t('rateThisGame')}
                   >
                     <Star
                       className={`w-4 h-4 transition-colors duration-150 ${
@@ -608,19 +609,19 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
 
             {/* Description */}
             <div className="text-muted-foreground leading-relaxed line-clamp-3 text-[11px] px-1 italic">
-              {article.description || "สัมผัสประสบการณ์การเล่นและการใช้งานม็อดสุดเจ๋งที่รวบรวมไว้สำหรับคุณโดยเฉพาะ..."}
+              {article.description || t("defaultDescription")}
             </div>
 
             {/* Metadata details */}
             <div className="space-y-2 border-t border-border pt-3 text-[11px] text-muted-foreground">
               <div className="flex justify-between items-center px-1">
-                <span className="uppercase">วันวางจำหน่าย:</span>
+                <span className="uppercase">{t("releaseDate")}</span>
                 <span className="text-foreground font-medium">
-                  {new Date(article.createdAt).toLocaleDateString("th-TH", { year: "numeric", month: "short", day: "numeric" })}
+                  {new Date(article.createdAt).toLocaleDateString(locale === "th" ? "th-TH" : "en-US", { year: "numeric", month: "short", day: "numeric" })}
                 </span>
               </div>
               <div className="flex justify-between items-center px-1">
-                <span className="uppercase">ผู้พัฒนา:</span>
+                <span className="uppercase">{t("developers")}</span>
                 <span className="text-primary hover:underline cursor-pointer">
                   {article.creators && article.creators.length > 0
                     ? article.creators.map((c) => c.name).join(", ")
@@ -628,7 +629,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
                 </span>
               </div>
               <div className="flex justify-between items-center px-1">
-                <span className="uppercase">ผู้เผยแพร่:</span>
+                <span className="uppercase">{t("publishers")}</span>
                 <span className="text-primary hover:underline cursor-pointer">
                   {article.author?.name || "AdminChanom"}
                 </span>
@@ -637,7 +638,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
 
             {/* Popular tags box */}
             <div className="border-t border-border pt-3">
-              <span className="text-[10px] text-muted-foreground block mb-1.5 uppercase font-semibold">แท็กยอดนิยมสำหรับเกมนี้:</span>
+              <span className="text-[10px] text-muted-foreground block mb-1.5 uppercase font-semibold">{t("popularTagsForGame")}</span>
               <div className="flex flex-wrap gap-1">
                 {article.tags?.slice(0, 4).map((tag, idx) => (
                   <Link
@@ -652,7 +653,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
                   <button
                     onClick={() => setIsTagsModalOpen(true)}
                     className="bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground text-[10px] px-2 py-0.5 rounded-sm transition-colors border border-border cursor-pointer font-bold"
-                    title="แสดงแท็กทั้งหมด"
+                    title={t("showAllTags")}
                   >
                     +
                   </button>
@@ -668,12 +669,12 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
         <div className="mb-8 bg-card border border-border p-4 sm:p-5 rounded-lg flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 shadow-lg">
           <div className="space-y-1">
             <h3 className="text-base sm:text-lg font-bold text-foreground tracking-wide">
-              {article.isPaid && !article.isUnlocked ? `ปลดล็อกเนื้อหาพรีเมียม ${article.title}` : `ดาวน์โหลด/เล่น ${article.title}`}
+              {article.isPaid && !article.isUnlocked ? t("unlockPremiumContent", { title: article.title }) : t("downloadOrPlay", { title: article.title })}
             </h3>
             <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
               {article.ver && (
                 <span className="bg-muted border border-border text-foreground px-2 py-0.5 rounded-sm">
-                  เวอร์ชัน: v{article.ver}
+                  {t("version", { version: article.ver })}
                 </span>
               )}
               {article.platforms?.map((plat, idx) => (
@@ -700,7 +701,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
                   ) : (
                     <>
                       <ShoppingCart className="w-4 h-4 mr-1.5" />
-                      ปลดล็อกเนื้อหา
+                      {t("unlockContent")}
                     </>
                   )}
                 </Button>
@@ -708,14 +709,14 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
             ) : (
               <div className="bg-background border border-border rounded-md p-1 flex items-center gap-3">
                 <span className="text-xs text-muted-foreground font-semibold px-3 uppercase">
-                  ฟรีดาวน์โหลด
+                  {t("freeDownload")}
                 </span>
                 <Button
                   onClick={handleDownloadClick}
                   className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold rounded-sm px-6 h-10 shadow-md transition-all text-sm flex items-center gap-1.5"
                 >
                   <Unlock className="w-4 h-4" />
-                  ดาวน์โหลด/เล่นทันที
+                  {t("downloadOrPlayNow")}
                 </Button>
               </div>
             )}
@@ -735,7 +736,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
                 {/* Title */}
                 <div className="border-b border-border pb-3 mb-5">
                   <h2 className="text-base sm:text-lg font-bold text-foreground uppercase tracking-wider">
-                    ABOUT THIS GAME (เกี่ยวกับเกมนี้)
+                    {t("aboutThisGame")}
                   </h2>
                 </div>
 
@@ -763,7 +764,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
                 {/* Original Sources Section */}
                 {article.officialDownloadSources && article.officialDownloadSources.length > 0 && (!article.isPaid || article.isUnlocked) && (
                   <div className="pt-6 border-t border-border/30 space-y-3">
-                    <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">ลิงก์ดาวน์โหลดต้นทาง (Official Sources)</h4>
+                    <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">{t("officialSources")}</h4>
                     <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
                       {article.officialDownloadSources.map((source, index) => (
                         <a key={index} href={source.url} target="_blank" rel="noopener noreferrer" className="block w-full sm:w-auto flex-1">
@@ -800,7 +801,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
                 <Card className="border border-border bg-card rounded-lg p-5 sm:p-7 shadow-lg text-xs text-muted-foreground">
                   <div className="border-b border-border pb-3 mb-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                     <h3 className="text-xs sm:text-sm font-bold text-foreground uppercase tracking-wider">
-                      SYSTEM REQUIREMENTS (ความต้องการระบบ)
+                      {t("systemRequirements")}
                     </h3>
                     {platforms.length > 1 && (
                       <div className="flex gap-1 bg-muted p-0.5 rounded-sm border border-border">
@@ -831,46 +832,46 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
                       <div className="space-y-2 text-muted-foreground">
                         <h4 className="font-bold text-foreground uppercase text-[10px] tracking-wide border-b border-border/50 pb-1 mb-2">WINDOWS:</h4>
                         <p><span className="text-muted-foreground/60">OS:</span> Windows 10/11 (64-bit)</p>
-                        <p><span className="text-muted-foreground/60">Processor:</span> Dual Core CPU 2.0 GHz หรือรุ่นที่เทียบเท่า</p>
+                        <p><span className="text-muted-foreground/60">Processor:</span> Dual Core CPU 2.0 GHz {t("orEquivalent")}</p>
                         <p><span className="text-muted-foreground/60">Memory:</span> 4 GB RAM</p>
                         <p><span className="text-muted-foreground/60">Graphics:</span> DirectX 10 Compatible GPU</p>
-                        <p><span className="text-muted-foreground/60">Storage:</span> 2 GB พื้นที่ว่างที่พร้อมใช้งาน</p>
+                        <p><span className="text-muted-foreground/60">Storage:</span> 2 GB {t("availableSpace")}</p>
                       </div>
                     )}
                     {["android", "apk", "mobile"].includes(selectedPlatform) && (
                       <div className="space-y-2 text-muted-foreground">
                         <h4 className="font-bold text-foreground uppercase text-[10px] tracking-wide border-b border-border/50 pb-1 mb-2">ANDROID (APK):</h4>
-                        <p><span className="text-muted-foreground/60">OS:</span> Android 9.0 ขึ้นไป</p>
-                        <p><span className="text-muted-foreground/60">Processor:</span> Octa-core CPU 1.8 GHz ขึ้นไป</p>
+                        <p><span className="text-muted-foreground/60">OS:</span> Android 9.0 {t("orAbove")}</p>
+                        <p><span className="text-muted-foreground/60">Processor:</span> Octa-core CPU 1.8 GHz {t("orAbove")}</p>
                         <p><span className="text-muted-foreground/60">Memory:</span> 3 GB RAM</p>
-                        <p><span className="text-muted-foreground/60">Storage:</span> 2 GB พื้นที่ว่างที่พร้อมใช้งาน</p>
+                        <p><span className="text-muted-foreground/60">Storage:</span> 2 GB {t("availableSpace")}</p>
                       </div>
                     )}
                     {selectedPlatform === "macos" && (
                       <div className="space-y-2 text-muted-foreground">
                         <h4 className="font-bold text-foreground uppercase text-[10px] tracking-wide border-b border-border/50 pb-1 mb-2">MACOS:</h4>
-                        <p><span className="text-muted-foreground/60">OS:</span> macOS 10.15 ขึ้นไป</p>
-                        <p><span className="text-muted-foreground/60">Processor:</span> Apple M1 หรือ Intel Core i5</p>
+                        <p><span className="text-muted-foreground/60">OS:</span> macOS 10.15 {t("orAbove")}</p>
+                        <p><span className="text-muted-foreground/60">Processor:</span> Apple M1 {t("or")} Intel Core i5</p>
                         <p><span className="text-muted-foreground/60">Memory:</span> 4 GB RAM</p>
-                        <p><span className="text-muted-foreground/60">Storage:</span> 2 GB พื้นที่ว่างที่พร้อมใช้งาน</p>
+                        <p><span className="text-muted-foreground/60">Storage:</span> 2 GB {t("availableSpace")}</p>
                       </div>
                     )}
                     {selectedPlatform === "linux" && (
                       <div className="space-y-2 text-muted-foreground">
                         <h4 className="font-bold text-foreground uppercase text-[10px] tracking-wide border-b border-border/50 pb-1 mb-2">LINUX:</h4>
-                        <p><span className="text-muted-foreground/60">OS:</span> Ubuntu 20.04 ขึ้นไป หรือเทียบเท่า</p>
-                        <p><span className="text-muted-foreground/60">Processor:</span> Intel Core i5 หรือ AMD equivalent</p>
+                        <p><span className="text-muted-foreground/60">OS:</span> Ubuntu 20.04 {t("orAbove")} {t("orEquivalent")}</p>
+                        <p><span className="text-muted-foreground/60">Processor:</span> Intel Core i5 {t("or")} AMD equivalent</p>
                         <p><span className="text-muted-foreground/60">Memory:</span> 4 GB RAM</p>
-                        <p><span className="text-muted-foreground/60">Storage:</span> 2 GB พื้นที่ว่างที่พร้อมใช้งาน</p>
+                        <p><span className="text-muted-foreground/60">Storage:</span> 2 GB {t("availableSpace")}</p>
                       </div>
                     )}
                     {!["windows", "android", "apk", "mobile", "macos", "linux"].includes(selectedPlatform) && (
                       <div className="space-y-2 text-muted-foreground">
                         <h4 className="font-bold text-foreground uppercase text-[10px] tracking-wide border-b border-border/50 pb-1 mb-2">{selectedPlatform.toUpperCase()}:</h4>
-                        <p><span className="text-muted-foreground/60">OS:</span> Windows 10/11 หรือ Android 9.0 หรือเทียบเท่า</p>
-                        <p><span className="text-muted-foreground/60">Processor:</span> Dual Core CPU 2.0 GHz ขึ้นไป</p>
+                        <p><span className="text-muted-foreground/60">OS:</span> Windows 10/11 {t("or")} Android 9.0 {t("orEquivalent")}</p>
+                        <p><span className="text-muted-foreground/60">Processor:</span> Dual Core CPU 2.0 GHz {t("orAbove")}</p>
                         <p><span className="text-muted-foreground/60">Memory:</span> 4 GB RAM</p>
-                        <p><span className="text-muted-foreground/60">Storage:</span> 2 GB พื้นที่ว่างที่พร้อมใช้งาน</p>
+                        <p><span className="text-muted-foreground/60">Storage:</span> 2 GB {t("availableSpace")}</p>
                       </div>
                     )}
                   </div>
@@ -891,7 +892,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
                 onClick={handleFavorite}
               >
                 <Star className={`w-3.5 h-3.5 ${isFavorited ? "fill-current" : ""}`} />
-                {isFavorited ? "บุ๊คมาร์กแล้ว" : "เพิ่มในรายการโปรด"}
+                {isFavorited ? t("bookmarked") : t("addToFavorites")}
               </Button>
 
               {!isCurrentUserAuthor && (
@@ -901,7 +902,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
                   onClick={handleFollow}
                 >
                   <Plus className="w-3.5 h-3.5" />
-                  {isFollowing ? "กำลังติดตาม" : "ติดตามบทความนี้"}
+                  {isFollowing ? t("following") : t("followThisArticle")}
                 </Button>
               )}
 
@@ -911,25 +912,25 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
                 className="w-full flex items-center justify-center gap-2 rounded-md text-xs font-semibold h-9"
               >
                 <ExternalLink className="w-3.5 h-3.5 text-primary" />
-                แชร์ลิงก์บทความ
+                {t("shareArticleLink")}
               </Button>
             </div>
 
             {/* Game Features details */}
             <div className="bg-card border border-border rounded-lg shadow-lg overflow-hidden text-xs">
               <div className="bg-muted px-4 py-2 font-bold text-foreground uppercase tracking-wider">
-                คุณสมบัติบทความ/เกม
+                {t("articleOrGameFeatures")}
               </div>
               <div className="p-3 divide-y divide-border text-[11px] text-muted-foreground">
                 <div className="py-2 flex justify-between items-center">
-                  <span>ผู้แต่ง</span>
+                  <span>{t("author")}</span>
                   <Link href={`/profiles/${encodeURIComponent(article.author?.name || "")}`} className="text-primary hover:underline font-bold">
                     {article.author?.name}
                   </Link>
                 </div>
                 {article.engine && (
                   <div className="py-2 flex justify-between items-center">
-                    <span>เอนจินพัฒนา</span>
+                    <span>{t("developmentEngine")}</span>
                     <span className="bg-primary/10 border border-primary/20 text-primary px-1.5 py-0.5 rounded-sm font-semibold">
                       {article.engine.name}
                     </span>
@@ -937,14 +938,14 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
                 )}
                 {article.ver && (
                   <div className="py-2 flex justify-between items-center">
-                    <span>เวอร์ชันล่าสุด</span>
+                    <span>{t("latestVersion")}</span>
                     <span className="text-foreground font-bold">{article.ver}</span>
                   </div>
                 )}
                 {article.viewsCount !== undefined && article.viewsCount >= 1000 && (
                   <div className="py-2 flex justify-between items-center">
-                    <span>วิวทั้งหมด</span>
-                    <span className="text-primary font-bold">{(article.viewsCount).toLocaleString()} ครั้ง</span>
+                    <span>{t("totalViews")}</span>
+                    <span className="text-primary font-bold">{t("viewsCountTimes", { count: article.viewsCount.toLocaleString() })}</span>
                   </div>
                 )}
               </div>
@@ -953,26 +954,26 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
             {/* Supported Languages box */}
             <div className="bg-card border border-border rounded-lg shadow-lg overflow-hidden text-xs">
               <div className="bg-muted px-4 py-2 font-bold text-foreground uppercase tracking-wider">
-                ภาษาที่รองรับ
+                {t("supportedLanguages")}
               </div>
               <div className="p-3 text-[11px]">
                 <table className="w-full text-left text-muted-foreground divide-y divide-border/60">
                   <thead>
                     <tr className="text-muted-foreground/60">
-                      <th className="pb-1.5 font-normal">ภาษา</th>
-                      <th className="pb-1.5 font-normal text-center">อินเตอร์เฟซ</th>
-                      <th className="pb-1.5 font-normal text-center">เสียงพากย์</th>
+                      <th className="pb-1.5 font-normal">{t("language")}</th>
+                      <th className="pb-1.5 font-normal text-center">{t("interface")}</th>
+                      <th className="pb-1.5 font-normal text-center">{t("audio")}</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border/40">
                     {/* ทางการ (Official) */}
                     <tr className="bg-muted/30">
                       <td colSpan={3} className="py-1 px-2 font-bold text-foreground text-[9px] uppercase tracking-wider">
-                        ทางการ (Official)
+                        {t("official")}
                       </td>
                     </tr>
                     <tr>
-                      <td className="py-2 pl-2">อังกฤษ (English)</td>
+                      <td className="py-2 pl-2">{t("english")}</td>
                       <td className="py-2 text-center text-primary">✔</td>
                       <td className="py-2 text-center text-primary">✔</td>
                     </tr>
@@ -980,11 +981,11 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
                     {/* จากม็อดชุมชน (Community Mod) */}
                     <tr className="bg-muted/30">
                       <td colSpan={3} className="py-1 px-2 font-bold text-foreground text-[9px] uppercase tracking-wider">
-                        จากม็อดชุมชน (Community Mod)
+                        {t("communityMod")}
                       </td>
                     </tr>
                     <tr>
-                      <td className="py-2 pl-2">ไทย (Thai - แปลไทย)</td>
+                      <td className="py-2 pl-2">{t("thai")}</td>
                       <td className="py-2 text-center text-primary">✔</td>
                       <td className="py-2 text-center text-muted-foreground">-</td>
                     </tr>
@@ -995,13 +996,13 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
 
             {/* Donation Sidebar Widget */}
             <Card className="border border-border bg-card rounded-lg p-4 text-xs">
-              <h4 className="font-bold text-foreground uppercase mb-2">สนับสนุนชุมชนของเรา</h4>
+              <h4 className="font-bold text-foreground uppercase mb-2">{t("supportOurCommunity")}</h4>
               <p className="text-muted-foreground mb-3 leading-relaxed">
-                การสนับสนุนของคุณช่วยขับเคลื่อนให้แอดมินและผู้แปลมีกำลังใจในการทำม็อดแปลไทยต่อ
+                {t("supportDesc")}
               </p>
               <Link href="/donations" className="block w-full">
                 <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold h-9 rounded-sm text-xs border-none">
-                  ร่วมโดเนตสนับสนุน
+                  {t("donateToSupport")}
                 </Button>
               </Link>
             </Card>
@@ -1040,7 +1041,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
         <DialogContent className="max-w-md bg-card border border-border text-foreground">
           <DialogHeader>
             <DialogTitle className="text-sm font-bold uppercase tracking-wider text-foreground pb-2 border-b border-border">
-              แท็กยอดนิยมทั้งหมดสำหรับเกมนี้
+              {t("allPopularTagsForGame")}
             </DialogTitle>
           </DialogHeader>
           <div className="flex flex-wrap gap-2 pt-2 max-h-[300px] overflow-y-auto">
@@ -1161,7 +1162,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
 
       {alert.open && (
         <CustomArticleAlert
-          title={alert.severity === "success" ? t("success") || "สำเร็จ" : t("error") || "เกิดข้อผิดพลาด"}
+          title={alert.severity === "success" ? t("success") : t("error")}
           message={alert.message}
           variant={alert.severity === "success" ? "default" : "destructive"}
         />

@@ -122,12 +122,9 @@ export default async function LocaleSegmentLayout({
       suppressHydrationWarning
     // data-event-theme={activeEventTheme?.id} // Removed, handled by script
     >
-
-      <body className={inter.className}>
+      <head>
         {/* Prevent flash of unstyled content - runs before paint */}
-        <Script
-          id="theme-init"
-          strategy="beforeInteractive"
+        <script
           dangerouslySetInnerHTML={{
             __html: `
             try {
@@ -143,9 +140,12 @@ export default async function LocaleSegmentLayout({
                 document.documentElement.removeAttribute('data-event-theme');
               }
             } catch (e) {}
-          `
+            `
           }}
         />
+      </head>
+
+      <body className={inter.className}>
         {/* Structured Data - WebSite */}
         <Script
           id="website-jsonld"

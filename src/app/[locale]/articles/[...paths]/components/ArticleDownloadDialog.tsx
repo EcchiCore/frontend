@@ -196,7 +196,7 @@ const ArticleDownloadDialog: React.FC<ArticleDownloadDialogProps> = ({
               "text-xs font-bold uppercase tracking-wider mb-3",
               isDarkMode ? "text-gray-400" : "text-gray-500"
             )}>
-              {t("relatedArticles") || "More you might be interested in (บทความที่คุณอาจสนใจ)"}
+              {t("relatedArticles")}
             </h4>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[220px] overflow-y-auto pr-1">
               {relatedArticles.slice(0, 4).map((rel) => {

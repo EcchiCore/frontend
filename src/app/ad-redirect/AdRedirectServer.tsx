@@ -168,7 +168,7 @@ export default async function AdRedirectServer({ searchParams }: AdRedirectServe
                 <Script
                     id="ad-redirect-inline"
                     type="text/javascript"
-                    strategy="beforeInteractive"
+                    strategy="afterInteractive"
                 >
                     {inlineScriptContent}
                 </Script>
