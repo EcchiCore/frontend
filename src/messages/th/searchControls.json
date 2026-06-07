@@ -15,5 +15,17 @@
   "selectGameTags": "เลือกแท็กเกม ({count})",
   "searchTagsPlaceholder": "ค้นหาแท็ก...",
   "noTagsFound": "ไม่พบแท็กที่ตรงกับ \"{query}\"",
-  "all": "ทั้งหมด"
+  "all": "ทั้งหมด",
+  "searchHistory": "ประวัติค้นหา",
+  "searchGuidance": "แนวทางช่วยค้นหา",
+  "clearAll": "ล้างทั้งหมด",
+  "noRecentSearches": "ไม่มีประวัติการค้นหาล่าสุด",
+  "filterByTag": "กรองตามแท็ก",
+  "filterByCreator": "กรองตามผู้สร้าง/สตูดิโอ",
+  "filterByCategory": "กรองตามหมวดหมู่",
+  "filterByPlatform": "กรองตามแพลตฟอร์ม",
+  "filterByEngine": "กรองตามเอนจิ้น",
+  "filterByAuthor": "กรองตามผู้เขียน (username)",
+  "filterByVersion": "กรองตามเวอร์ชันเกม",
+  "filterByCode": "กรองตามรหัสเกม"
 }

@@ -98,7 +98,7 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({
             </div>
           ) : (
             <div className="mb-8 p-4 bg-muted/40 border border-border rounded-lg text-center text-sm text-muted-foreground font-medium">
-              โปรด login เพื่อโต้ตอบ
+              {t('loginToComment') || "โปรด login ก่อนเพื่อแสดงความคิดเห็น"}
             </div>
           )}
 

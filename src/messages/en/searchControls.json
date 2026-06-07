@@ -15,5 +15,17 @@
   "selectGameTags": "Select Game Tags ({count})",
   "searchTagsPlaceholder": "Search tags...",
   "noTagsFound": "No tags matching \"{query}\"",
-  "all": "All"
+  "all": "All",
+  "searchHistory": "Search History",
+  "searchGuidance": "Search Guidance",
+  "clearAll": "Clear All",
+  "noRecentSearches": "No recent searches",
+  "filterByTag": "Filter by tag",
+  "filterByCreator": "Filter by creator/studio",
+  "filterByCategory": "Filter by category",
+  "filterByPlatform": "Filter by platform",
+  "filterByEngine": "Filter by engine",
+  "filterByAuthor": "Filter by author (username)",
+  "filterByVersion": "Filter by game version",
+  "filterByCode": "Filter by game code"
 }

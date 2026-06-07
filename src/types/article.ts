@@ -33,7 +33,6 @@ export type Article = {
     isActive: boolean; 
     name: string; 
     url: string; 
-    vipOnly: boolean;
     forVersion?: string | null;
     createdAt: string;
     updatedAt: string;

@@ -83,8 +83,8 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
 
   // Essential state
   const { user } = useAppSelector((state) => state.auth);
-  const isAuthenticated = isClient && !!user;
-  const isCurrentUserAuthor = isClient && !!user && user?.username === article.author?.name;
+  const isAuthenticated = isClient && !!user && !!Cookies.get('token');
+  const isCurrentUserAuthor = isClient && !!user && user?.username === article.author?.name && !!Cookies.get('token');
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isPurchasing, setIsPurchasing] = React.useState(false);
@@ -95,6 +95,26 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
 
   const ratingsCount = article.ratingsCount ?? article.favoritesCount ?? 0;
   const ratingsAverage = article.ratingsAverage ?? (ratingsCount > 0 ? Math.min(5.0, 4.0 + (ratingsCount / 200)) : 0);
+
+  const [userRating, setUserRating] = React.useState<number>(0);
+  const [hoverRating, setHoverRating] = React.useState<number>(0);
+  const [isSubmittingRating, setIsSubmittingRating] = React.useState<boolean>(false);
+  const [localRatingsCount, setLocalRatingsCount] = React.useState<number>(ratingsCount);
+  const [localRatingsAverage, setLocalRatingsAverage] = React.useState<number>(ratingsAverage);
+
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      const cached = localStorage.getItem(`article_rating_${article.id}`);
+      if (cached) {
+        setUserRating(Number(cached));
+      }
+    }
+  }, [article.id]);
+
+  React.useEffect(() => {
+    setLocalRatingsCount(ratingsCount);
+    setLocalRatingsAverage(ratingsAverage);
+  }, [ratingsCount, ratingsAverage]);
 
   const renderStars = (rating: number) => {
     return (
@@ -176,6 +196,57 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
       setIsPurchasing(false);
     }
   }, [isAuthenticated, article.id, slug, router, showAlert, t]);
+
+  const handleRate = React.useCallback(async (score: number) => {
+    if (!isAuthenticated) {
+      showAlert(t('loginToSave') || "Please login first", 'error');
+      return;
+    }
+
+    if (isSubmittingRating) return;
+
+    try {
+      setIsSubmittingRating(true);
+      const token = Cookies.get('token');
+      const response = await fetch(`${API_BASE_URL}/api/articles/${slug}/rate`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ rating: score }),
+      });
+
+      if (response.ok) {
+        const previousUserRating = userRating;
+        setUserRating(score);
+        if (typeof window !== "undefined") {
+          localStorage.setItem(`article_rating_${article.id}`, String(score));
+        }
+
+        // Optimistic UI update
+        setLocalRatingsCount((prevCount) => {
+          setLocalRatingsAverage((prevAvg) => {
+            if (previousUserRating === 0) {
+              const newCount = prevCount + 1;
+              return (prevAvg * prevCount + score) / newCount;
+            } else {
+              return (prevAvg * prevCount - previousUserRating + score) / prevCount;
+            }
+          });
+          return previousUserRating === 0 ? prevCount + 1 : prevCount;
+        });
+
+        showAlert(t('ratingSuccess') || "Rated successfully!", 'success');
+      } else {
+        showAlert(t('ratingError') || "Failed to submit rating.", 'error');
+      }
+    } catch {
+      showAlert(t('connectionError') || "Connection error.", 'error');
+    } finally {
+      setIsSubmittingRating(false);
+    }
+  }, [isAuthenticated, isSubmittingRating, userRating, article.id, slug, showAlert, t]);
 
   useEffect(() => {
     if (searchParams.get('purchase') === 'true' && article.isPaid && !article.isUnlocked) {
@@ -491,12 +562,12 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
 
             {/* Metadata details */}
             <div className="space-y-2 border-t border-border pt-3 text-[11px] text-muted-foreground">
-              {ratingsCount > 0 && (
+              {localRatingsCount >= 0 && (
                 <div className="flex justify-between items-center px-1">
                   <span className="uppercase">รีวิวทั้งหมด:</span>
                   <div className="flex items-center gap-1.5 font-bold">
-                    {renderStars(ratingsAverage)}
-                    <span className="text-foreground text-[10px] ml-1">{ratingsAverage.toFixed(1)} / 5.0</span>
+                    {renderStars(localRatingsAverage)}
+                    <span className="text-foreground text-[10px] ml-1">{localRatingsAverage.toFixed(1)} / 5.0</span>
                   </div>
                 </div>
               )}
@@ -800,6 +871,39 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
                 <ExternalLink className="w-3.5 h-3.5 text-primary" />
                 แชร์ลิงก์บทความ
               </Button>
+            </div>
+
+            {/* Rate this Game/Article Card */}
+            <div className="bg-card border border-border p-4 rounded-lg shadow-lg">
+              <span className="text-[10px] text-muted-foreground block mb-2 uppercase font-bold tracking-wider">
+                {t('rateThisGame') || "ให้คะแนนบทความนี้:"}
+              </span>
+              <div className="flex items-center gap-1.5 justify-center py-2 bg-muted/30 rounded-md border border-border/40">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={star}
+                    type="button"
+                    onClick={() => handleRate(star)}
+                    onMouseEnter={() => setHoverRating(star)}
+                    onMouseLeave={() => setHoverRating(0)}
+                    disabled={isSubmittingRating}
+                    className="p-1 hover:scale-110 transition-transform focus:outline-none disabled:opacity-50"
+                  >
+                    <Star
+                      className={`w-6 h-6 transition-colors duration-150 ${
+                        (hoverRating || userRating || 0) >= star
+                          ? "fill-yellow-400 text-yellow-400"
+                          : "text-muted-foreground/40"
+                      }`}
+                    />
+                  </button>
+                ))}
+              </div>
+              {userRating > 0 && (
+                <p className="text-[10px] text-center text-primary font-semibold mt-1.5">
+                  คุณให้คะแนนแล้ว: {userRating} ดาว
+                </p>
+              )}
             </div>
 
             {/* Game Features details */}

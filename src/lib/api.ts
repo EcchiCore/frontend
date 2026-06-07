@@ -198,7 +198,6 @@ export async function fetchDownloadsByArticleId(articleId: number): Promise<Arti
       name
       url
       createdAt
-      vipOnly
     }
   }`;
   const variables = {
@@ -260,7 +259,6 @@ export async function fetchArticle(slug: string): Promise<Article | null> {
         name
         url
         createdAt
-        vipOnly
       }
       favorited
       favoritesCount

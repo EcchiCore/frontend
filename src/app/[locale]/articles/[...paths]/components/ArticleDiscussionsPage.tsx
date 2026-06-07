@@ -1,7 +1,7 @@
 "use client";
 
 import { Link } from "@/i18n/navigation";
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 
 import { MessageSquare, Search, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,10 @@ import { Article } from "@/types/article";
 import ArticleCommunityTabs from "./ArticleCommunityTabs";
 import CommentsSection from "./CommentsSection"; // Reuse existing comments section
 import { useArticleComments } from "./hooks/useArticleComments"; // Reuse existing hook
+import Cookies from "js-cookie";
+import { useAppSelector } from "@/store/hooks";
+import { useTranslations } from 'next-intl';
+import CustomAlert from "./Alert";
 
 interface ArticleDiscussionsPageProps {
     article: Article;
@@ -18,9 +22,28 @@ interface ArticleDiscussionsPageProps {
 
 const ArticleDiscussionsPage: React.FC<ArticleDiscussionsPageProps> = ({
     article,
-    isAuthenticated = false,
+    isAuthenticated: propIsAuthenticated = false,
 }) => {
+    const t = useTranslations('ArticleContent');
+    const { user } = useAppSelector((state) => state.auth);
     const [searchTerm, setSearchTerm] = useState("");
+    const [isClient, setIsClient] = useState(false);
+    const [alert, setAlert] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({
+        open: false,
+        message: '',
+        severity: 'success'
+    });
+
+    useEffect(() => {
+        setIsClient(true);
+    }, []);
+
+    const isUserAuthenticated = isClient && (propIsAuthenticated || (!!user && !!Cookies.get('token')));
+
+    const showAlert = useCallback((message: string, severity: 'success' | 'error') => {
+        setAlert({ open: true, message, severity });
+        setTimeout(() => setAlert((prev) => ({ ...prev, open: false })), 4000);
+    }, []);
 
     // Reuse the existing comments logic
     // In a real implementation, this might need to be adapted for a full forum-style view
@@ -32,7 +55,7 @@ const ArticleDiscussionsPage: React.FC<ArticleDiscussionsPageProps> = ({
         handleAddComment,
         handleDeleteComment,
         isLoading
-    } = useArticleComments(article.slug, (alert) => console.log(alert)); // Simple alert handler placeholder
+    } = useArticleComments(article.slug, showAlert);
 
     // Filter logic would go here if we were listing threads
 
@@ -85,7 +108,7 @@ const ArticleDiscussionsPage: React.FC<ArticleDiscussionsPageProps> = ({
                     <div>
                         <div className="bg-[#1b2838]/50 p-4 rounded-lg">
                             <CommentsSection
-                                isAuthenticated={isAuthenticated}
+                                isAuthenticated={isUserAuthenticated}
                                 isDarkBackground={true}
                                 comments={comments} // Pass comments here
                                 newComment={newComment}
@@ -111,6 +134,15 @@ const ArticleDiscussionsPage: React.FC<ArticleDiscussionsPageProps> = ({
                     </div>
                 </div>
             </div>
+            {alert.open && (
+                <div className="fixed bottom-4 right-4 z-50 max-w-sm">
+                    <CustomAlert
+                        title={alert.severity === "success" ? t("success") || "สำเร็จ" : t("error") || "เกิดข้อผิดพลาด"}
+                        message={alert.message}
+                        variant={alert.severity === "success" ? "default" : "destructive"}
+                    />
+                </div>
+            )}
         </div>
     );
 };

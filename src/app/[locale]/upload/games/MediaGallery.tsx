@@ -37,12 +37,12 @@ export const MediaGallery = () => {
           const result = await sdk.storage.upload(file, { 
             bucket: 'images',
             game: formData.slug || 'temp'
-          });
+          }) as any;
           
           if (!result || !result.url) {
             throw new Error('Upload failed');
           }
-          
+
           return result.url;
         } catch (err) {
           console.error(`Failed to upload ${file.name}:`, err);

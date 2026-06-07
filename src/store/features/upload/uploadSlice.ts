@@ -8,7 +8,6 @@ export interface DownloadEntry {
     url: string;
     submitNote?: string;
     isActive?: boolean;
-    vipOnly?: boolean;
 }
 
 export interface AuthorizedSourceEntry {

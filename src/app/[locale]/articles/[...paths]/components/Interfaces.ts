@@ -8,7 +8,6 @@ export interface DownloadFile {
   name: string;
   url: string;
   isActive: boolean;
-  vipOnly: boolean;
   forVersion?: string | null;
   createdAt: string;
   updatedAt: string;

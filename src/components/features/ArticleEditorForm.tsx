@@ -41,7 +41,6 @@ interface DownloadItem {
     url: string;
     iframe: string;
     isActive: boolean;
-    vipOnly: boolean;
     forVersion?: string;
     fileSize?: string;
     syncStatus: 'synced' | 'saving' | 'error' | 'new';
@@ -200,11 +199,11 @@ const ImageManager: React.FC<{
             const uploadPromises = Array.from(files).map(file => sdk.storage.upload(file, { bucket: 'images' }));
             const results = await Promise.all(uploadPromises);
 
-            results.forEach(res => {
+            for (const res of results) {
                 if (res && res.url) {
                     addImage(res.url);
                 }
-            });
+            }
             toast.success(`Successfully uploaded ${files.length} image(s)`);
         } catch (error) {
             console.error('Upload error:', error);
@@ -413,7 +412,6 @@ const DownloadManager: React.FC<{
                                 articleId,
                                 name: currentItem.name,
                                 url: currentItem.url || 'https://example.com',
-                                vipOnly: currentItem.vipOnly,
                                 forVersion: currentItem.forVersion
                             });
 
@@ -438,7 +436,6 @@ const DownloadManager: React.FC<{
                                 name: currentItem.name,
                                 url: currentItem.url,
                                 isActive: currentItem.isActive,
-                                vipOnly: currentItem.vipOnly,
                                 forVersion: currentItem.forVersion
                             });
 
@@ -475,7 +472,6 @@ const DownloadManager: React.FC<{
             url: '',
             iframe: '',
             isActive: true,
-            vipOnly: false,
             syncStatus: 'new'
         };
 
@@ -675,10 +671,6 @@ const DownloadManager: React.FC<{
                                     <Switch checked={item.isActive} onCheckedChange={(c) => updateDownload(item.tempId, 'isActive', c)} id={`active-${idx}`} />
                                     <Label htmlFor={`active-${idx}`}>Active</Label>
                                 </div>
-                                <div className="flex items-center space-x-2">
-                                    <Switch checked={item.vipOnly} onCheckedChange={(c) => updateDownload(item.tempId, 'vipOnly', c)} id={`vip-${idx}`} />
-                                    <Label htmlFor={`vip-${idx}`}>VIP Only</Label>
-                                </div>
                             </div>
                             <div className="flex justify-end md:col-span-2">
                                 <Button type="button" variant="destructive" size="sm" onClick={() => removeDownload(item)}>
@@ -831,7 +823,6 @@ export const ArticleEditorForm = ({ slug = '', initialData, mode, locale = 'en' 
                                 name: d.name,
                                 url: d.url,
                                 isActive: d.isActive ?? true,
-                                vipOnly: d.vipOnly ?? false,
                                 forVersion: d.forVersion,
                                 syncStatus: 'synced' as const
                             }));

@@ -1,7 +1,7 @@
 "use client";
 
 import { Link } from "@/i18n/navigation";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 
 import { Download, Box, Search, ChevronRight, Clock, Plus } from "lucide-react";
@@ -22,6 +22,7 @@ import ArticleCommunityTabs from "./ArticleCommunityTabs";
 import { AddModDialog } from "./AddModDialog";
 
 import { useAppSelector } from "@/store/hooks";
+import Cookies from "js-cookie";
 
 interface ArticleModsPageProps {
     article: Article;
@@ -35,7 +36,11 @@ const ArticleModsPage: React.FC<ArticleModsPageProps> = ({
     isAuthenticated: propIsAuthenticated = false,
 }) => {
     const { user } = useAppSelector((state) => state.auth);
-    const isAuthenticated = propIsAuthenticated || !!user;
+    const [isClient, setIsClient] = useState(false);
+    useEffect(() => {
+        setIsClient(true);
+    }, []);
+    const isAuthenticated = isClient && (propIsAuthenticated || (!!user && !!Cookies.get('token')));
     const [searchTerm, setSearchTerm] = useState("");
 
     const displayMods = initialMods;

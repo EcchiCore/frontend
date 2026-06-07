@@ -44,7 +44,6 @@ export const Step4_Downloads = () => {
   const [downloadUrl, setDownloadUrl] = useState('');
   const [downloadSubmitNote, setDownloadSubmitNote] = useState('');
   const [downloadIsActive, setDownloadIsActive] = useState(true);
-  const [downloadVipOnly, setDownloadVipOnly] = useState(false);
   const [downloadUrlError, setDownloadUrlError] = useState('');
   const [downloadPlatforms, setDownloadPlatforms] = useState<string[]>([]);
   const [isDownloadDialogOpen, setIsDownloadDialogOpen] = useState(false);
@@ -103,7 +102,6 @@ export const Step4_Downloads = () => {
       url: downloadUrl.trim(),
       submitNote: downloadSubmitNote.trim() || undefined,
       isActive: downloadIsActive,
-      vipOnly: downloadVipOnly,
     }];
     dispatch(updateFormData({ downloads: newDownloads }));
     setDownloadUrl('');
@@ -182,11 +180,10 @@ export const Step4_Downloads = () => {
           <div className="flex flex-col gap-1.5">
             {downloads.map((dl, i) => (
               <div key={i} className="flex items-center gap-2.5 px-3 py-2.5 bg-[#171717] border border-[#222] rounded-[4px] group">
-                <div className={`w-[6px] h-[6px] rounded-full shrink-0 ${dl.vipOnly ? 'bg-[#e8a000]' : 'bg-[#3d3d3d]'}`} />
+                <div className="w-[6px] h-[6px] rounded-full shrink-0 bg-[#3d3d3d]" />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 text-[12px] text-[#aaa] truncate">
                     <span>{dl.name}</span>
-                    {dl.vipOnly && <span className="text-[9px] text-[#e8a000] font-bold">VIP</span>}
                     {!dl.isActive && <span className="text-[9px] text-red-500/60 font-bold uppercase">Inactive</span>}
                   </div>
                   <div className="text-[10px] text-[#3d3d3d] mt-0.5 truncate font-mono">{dl.url}</div>
@@ -294,10 +291,6 @@ export const Step4_Downloads = () => {
               <div className="flex items-center gap-2">
                 <Switch checked={downloadIsActive} onCheckedChange={setDownloadIsActive} />
                 <Label className="text-[12px]">Active</Label>
-              </div>
-              <div className="flex items-center gap-2">
-                <Switch checked={downloadVipOnly} onCheckedChange={setDownloadVipOnly} />
-                <Label className="text-[12px]">VIP Only</Label>
               </div>
             </div>
           </div>

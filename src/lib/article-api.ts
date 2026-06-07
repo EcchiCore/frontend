@@ -142,7 +142,6 @@ export async function fetchDownloadsByArticleId(
       id
       name
       url
-      vipOnly
       isActive
       type
       forVersion
@@ -249,7 +248,6 @@ export async function fetchArticleAndDownloads(
       id
       name
       url
-      vipOnly
       isActive
       type
       forVersion
