@@ -386,7 +386,7 @@ const ArticleTitleMeta: React.FC<ArticleTitleMetaProps> = ({ article, isDarkMode
                     return thumbnailImageSrc && (
                       <Image
                         src={thumbnailImageSrc}
-                        alt={`Thumbnail ${index + 1}`}
+                        alt={`${article.title} Thumbnail ${index + 1}`}
                         fill
                         sizes="(max-width: 640px) 25vw, (max-width: 768px) 16.67vw, (max-width: 1024px) 12.5vw, 8.33vw"
                         className="object-cover transition-transform duration-300 hover:scale-110"

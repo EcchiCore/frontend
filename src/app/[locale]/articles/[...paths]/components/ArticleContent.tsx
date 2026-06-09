@@ -477,7 +477,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
 
         {/* Title & Ratings Header */}
         <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-border/20 pb-4">
-          <h1 className="text-3xl font-bold text-[#dcdedf] tracking-wide">{article.title}</h1>
+          <div className="text-3xl font-bold text-[#dcdedf] tracking-wide">{article.title}</div>
           
           <div className="flex items-center gap-2.5 bg-muted/10 border border-border/20 px-3 py-1.5 rounded-md backdrop-blur-sm w-fit md:self-center text-xs text-muted-foreground select-none">
             {/* Combined Interactive Stars */}
@@ -587,7 +587,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
                           ▶ VIDEO
                         </div>
                       ) : (
-                        <img src={slide.url} alt="thumb" className="w-full h-full object-cover" />
+                        <img src={slide.url} alt={`${article.title} thumbnail ${idx + 1}`} className="w-full h-full object-cover" />
                       )}
                     </button>
                   );
@@ -602,7 +602,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
             <div className="relative w-full h-[150px] bg-muted border border-border rounded-sm overflow-hidden shadow-inner">
               <img
                 src={getImageUrl(article.coverImage || article.mainImage || article.backgroundImage, "hero") || "/placeholder-image.png"}
-                alt="Game Capsule"
+                alt={`${article.title} Cover`}
                 className="w-full h-full object-cover"
               />
             </div>

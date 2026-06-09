@@ -51,7 +51,12 @@ export function createSEOTitle(article: Article, locale: string = 'en'): string 
     title += ` v${article.ver}`;
   }
 
-  const platforms = article.platforms?.map(p => p.name) || [];
+  const platforms = article.platforms?.map(p => {
+    const name = p.name.toLowerCase();
+    if (name === 'windows') return 'Win';
+    if (name === 'android') return 'APK';
+    return p.name;
+  }) || [];
   const platformStr = platforms.length > 0 ? ` (${platforms.join('/')})` : '';
 
   // Check if article tags contain translations keywords
@@ -62,13 +67,31 @@ export function createSEOTitle(article: Article, locale: string = 'en'): string 
   const translationSuffix = hasTranslation ? ` ${config.translationLabel}` : '';
 
   // Construct dynamic localized title
-  title = `${config.downloadPrefix} ${title}${platformStr} ${config.gameSuffix}${translationSuffix} ${config.freeWord}`;
-
-  if ('sequentialCode' in article && article.sequentialCode) {
-    title += ` [${article.sequentialCode}]`;
+  // Shorten: Remove "H Game" if title is already long
+  const baseTitle = `${config.downloadPrefix} ${title}${platformStr}${translationSuffix} ${config.freeWord}`;
+  const suffix = ` ${config.gameSuffix}`;
+  
+  let finalTitle = baseTitle;
+  
+  // Try to fit "H Game" if possible, but prioritize stay under 55 chars 
+  // (to leave room for " | ChanomHub" which is 12 chars, total < 70)
+  if (finalTitle.length + suffix.length <= 55) {
+    finalTitle += suffix;
   }
 
-  return title;
+  if ('sequentialCode' in article && article.sequentialCode) {
+    const code = ` [${article.sequentialCode}]`;
+    if (finalTitle.length + code.length <= 58) {
+      finalTitle += code;
+    }
+  }
+
+  // Final fallback: if still too long, we might need to truncate
+  if (finalTitle.length > 58) {
+    return finalTitle.substring(0, 55) + '...';
+  }
+
+  return finalTitle;
 }
 
 

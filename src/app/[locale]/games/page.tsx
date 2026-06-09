@@ -2,25 +2,28 @@ import { Suspense } from "react"
 import Results from "./components/Results"
 import SidebarFilters from "./components/SidebarFilters"
 import ResultsSkeleton from "./components/ResultsSkeleton"
-import SearchControlsWrapper from "./components/SearchControlsWrapper"
 import DonationSidebarWidget from "@/components/DonationSidebarWidget"
 import DonationCTA from "@/components/DonationCTA"
 
 import { getTranslations } from "next-intl/server"
+import { locales } from "@/app/[locale]/lib/navigation"
 import { getValidLocale, siteUrl, defaultLocale } from "@/utils/localeUtils"
 
-export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
+export async function generateMetadata({ params, searchParams }: { params: Promise<{ locale: string }>, searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
   const resolvedParams = await params;
   const locale = getValidLocale(resolvedParams.locale);
   const t = await getTranslations({ locale: resolvedParams.locale, namespace: "GamesPage" })
+  const resolvedSearchParams = await searchParams;
+  const page = resolvedSearchParams.page;
+  const category = resolvedSearchParams.category;
 
   const canonicalUrl = locale === defaultLocale
     ? `${siteUrl}/games`
     : `${siteUrl}/${locale}/games`;
 
   return {
-    title: t("clubTitle"),
-    description: t("clubDescription"),
+    title: `${t("clubTitle")}${category ? ` - ${category}` : ""}${page ? ` (Page ${page})` : ""}`,
+    description: `${t("clubDescription")}${category ? ` in ${category}` : ""}${page ? ` - Page ${page}` : ""}.` + " Browse our collection of adult games and visual novels.",
     alternates: {
       canonical: canonicalUrl,
       languages: {
@@ -44,15 +47,6 @@ export default async function GamesPage({ searchParams }: PageProps) {
         <div className="container mx-auto px-4 py-6">
           <h1 className="sr-only">{t("clubH1")}</h1>
           <DonationCTA />
-
-          {/* Search bar — visible on ALL breakpoints */}
-          <div className="mt-6">
-            <Suspense fallback={
-              <div className="h-12 bg-card border border-border/50 rounded-lg animate-pulse" />
-            }>
-              <SearchControlsWrapper />
-            </Suspense>
-          </div>
 
           <div className="flex gap-6 mt-4">
             {/* Sidebar — desktop only, filters only (no search bar) */}

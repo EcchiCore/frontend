@@ -68,12 +68,6 @@ const NavbarLinks = ({ section, onCloseMenu = () => { }, isMobile = false }: Nav
         link: getLocalizedHref("games")
       },
       {
-        id: "search",
-        name: t("search"),
-        transKey: "search",
-        link: getLocalizedHref("search")
-      },
-      {
         id: "extensions",
         name: t("extensions"),
         transKey: "extensions",

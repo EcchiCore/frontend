@@ -72,9 +72,13 @@ export async function generateMetadata(props: ArticlePageProps): Promise<Metadat
 
   // For original article page
   const seoTitle = createSEOTitle(originalArticle, locale);
+  const isMods = paths[1] === "mods";
+  const isDiscussions = paths[1] === "discussions";
+  const finalTitle = isMods ? `Mods - ${seoTitle}` : isDiscussions ? `Discussions - ${seoTitle}` : seoTitle;
+  const finalDesc = isMods ? `Download mods and translations for ${originalArticle.title}. ${originalArticle.description}` : isDiscussions ? `Join the community discussion about ${originalArticle.title}. ${originalArticle.description}` : originalArticle.description;
   return generatePageMetadata({
-    title: seoTitle,
-    description: originalArticle.description,
+    title: finalTitle,
+    description: finalDesc,
     keywords: originalArticle.tags.map((tag: { name: string }) => tag.name) || [],
     locale,
     contentPath,
@@ -86,7 +90,7 @@ export async function generateMetadata(props: ArticlePageProps): Promise<Metadat
       url: mainImageUrl,
       width: 1200,
       height: 630,
-      alt: seoTitle
+      alt: finalTitle
     }] : undefined
   });
 }

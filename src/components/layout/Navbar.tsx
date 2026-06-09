@@ -10,8 +10,10 @@ import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/co
 import { User, CircleUser } from "lucide-react";
 import dynamic from "next/dynamic";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
 import { useAppSelector } from "@/store/hooks";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import NavbarSearch from "./Navbar/NavbarSearch";
 
 // Lazy load heavy client-only components
 const NavbarLinks = dynamic(() => import("./Navbar/NavbarLinks"), {
@@ -23,39 +25,6 @@ const NotificationDropdown = dynamic(() => import("./Navbar/NotificationDropdown
   ssr: false,
   loading: () => <div className="w-9 h-9" />,
 });
-
-// Simple logo component for the navbar
-const Logo = (props: React.SVGAttributes<SVGElement>) => {
-  return (
-    <svg
-      width="1em"
-      height="1em"
-      viewBox="0 0 324 323"
-      fill="currentColor"
-      xmlns="http://www.w3.org/2000/svg"
-      {...props}
-    >
-      <rect
-        x="88.1023"
-        y="144.792"
-        width="151.802"
-        height="36.5788"
-        rx="18.2894"
-        transform="rotate(-38.5799 88.1023 144.792)"
-        fill="currentColor"
-      />
-      <rect
-        x="85.3459"
-        y="244.537"
-        width="151.802"
-        height="36.5788"
-        rx="18.2894"
-        transform="rotate(-38.5799 85.3459 244.537)"
-        fill="currentColor"
-      />
-    </svg>
-  );
-};
 
 // Hamburger icon component
 const HamburgerIcon = ({
@@ -118,7 +87,9 @@ const Navbar = () => {
       // Only update state if value has changed
       setIsDesktop((prev) => {
         if (prev !== desktop) {
-          if (desktop) setIsMenuOpen(false);
+          if (desktop) {
+            setIsMenuOpen(false);
+          }
           return desktop;
         }
         return prev;
@@ -153,12 +124,15 @@ const Navbar = () => {
               href="/"
               className="flex items-center gap-2 text-2xl font-bold tracking-tight transition-all duration-300 hover:text-primary group"
             >
-              <div className="p-1.5 bg-primary/10 rounded-lg group-hover:bg-primary/20 transition-colors">
-                <Logo className="h-5 w-5 text-primary" />
-              </div>
-              <span className="bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
-                Chanom<span className="text-primary">Hub</span>
-              </span>
+              <Image
+                src="https://chanomhub.com/favicon.ico"
+                alt="ChanomHub"
+                width={28}
+                height={28}
+                className="rounded-md group-hover:scale-110 transition-transform duration-300"
+                unoptimized
+              />
+
             </Link>
           </div>
           <div className="flex items-center gap-4" />
@@ -168,33 +142,48 @@ const Navbar = () => {
   }
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b border-border/50 bg-background/80 backdrop-blur-md lg:backdrop-blur-xl py-4 shadow-sm">
-      <div className="container mx-auto flex h-14 items-center justify-between px-4 lg:px-6">
-        {/* Left Section: Logo + Left Navigation */}
-        <div className="flex items-center gap-8">
-          <Link
-            href="/"
-            className="flex items-center gap-2 text-2xl font-bold tracking-tight transition-all duration-300 hover:text-primary flex-shrink-0 group"
-            onClick={closeMenu}
-          >
-            <div className="p-1.5 bg-primary/10 rounded-lg group-hover:bg-primary/20 group-hover:scale-110 transition-all duration-300">
-              <Logo className="h-5 w-5 text-primary" />
-            </div>
-            <span className="bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent group-hover:from-primary group-hover:to-primary/80 transition-all duration-300">
-              Chanom<span className="text-primary">Hub</span>
-            </span>
-          </Link>
+    <nav className="sticky top-0 z-50 w-full border-b border-border/50 bg-background/80 backdrop-blur-md lg:backdrop-blur-xl shadow-sm relative">
+      <div className="container mx-auto flex h-14 items-center gap-3 px-4 lg:px-6">
+        {/* Logo */}
+        <Link
+          href="/"
+          className="flex items-center gap-2 text-xl font-bold tracking-tight transition-all duration-300 hover:text-primary flex-shrink-0 group"
+          onClick={closeMenu}
+        >
+          <Image
+            src="https://chanomhub.com/favicon.ico"
+            alt="ChanomHub"
+            width={28}
+            height={28}
+            className="rounded-md group-hover:scale-110 transition-transform duration-300"
+            unoptimized
+          />
+        </Link>
 
-          {/* Left Navigation Links (Desktop Only) */}
-          <div className="hidden lg:flex items-center text-foreground">
-            <NavbarLinks section="left" onCloseMenu={closeMenu} />
-          </div>
+        {/* Search bar — Desktop: fixed width; Mobile: flex-1 fills space */}
+        <div className="flex md:w-[240px] lg:w-[360px] flex-1 md:flex-none flex-shrink-0">
+          <NavbarSearch />
         </div>
 
-        {/* Right Section: Right Navigation */}
+        {/* Left Navigation Links (Desktop Only) — Games, Extensions */}
+        <div className="hidden lg:flex items-center text-foreground">
+          <NavbarLinks section="left" onCloseMenu={closeMenu} />
+        </div>
+
+        {/* Spacer — pushes right section to far right */}
+        <div className="flex-1" />
+
+        {/* Right Section: Language + Notifications + User + Register */}
         <div className="flex items-center gap-2 text-foreground">
-          
-          {/* User Account / Login Icon - Dynamic behavior */}
+
+          {/* Right Nav Links (Language, Member) — Desktop Only */}
+          <div className="hidden md:flex items-center">
+            <NavbarLinks section="right" onCloseMenu={closeMenu} />
+          </div>
+
+          {hasToken && isDesktop && <NotificationDropdown />}
+
+          {/* User Account / Login Icon */}
           <Link href={hasToken ? "/member/dashboard" : "/login"}>
             <Button
               variant="ghost"
@@ -218,26 +207,21 @@ const Navbar = () => {
             </Button>
           </Link>
 
-          {/* Right Navigation Links (Desktop Only) */}
-          <div className="hidden md:flex items-center gap-4">
-            <NavbarLinks section="right" onCloseMenu={closeMenu} />
-
-            {hasToken && isDesktop && <NotificationDropdown />}
-
-            {!hasToken && (
-              <Link href="/register">
-                <Button variant="outline" size="sm" className="h-9 px-4 font-medium hover:bg-primary/5 hover:border-primary/20 transition-all duration-200">
-                  {t('signUp')}
-                </Button>
-              </Link>
-            )}
-          </div>
+          {!hasToken && (
+            <Link href="/register" className="hidden md:block">
+              <Button variant="outline" size="sm" className="h-9 px-4 font-medium hover:bg-primary/5 hover:border-primary/20 transition-all duration-200">
+                {t('signUp')}
+              </Button>
+            </Link>
+          )}
 
           {/* Mobile Section (Hamburger) */}
-          <div className="flex md:hidden items-center gap-2 ">
+          <div className="flex md:hidden items-center gap-1.5">
             {hasToken && !isDesktop && <NotificationDropdown isMobile />}
 
-            <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
+            <Sheet open={isMenuOpen} onOpenChange={(open) => {
+              setIsMenuOpen(open);
+            }}>
               <SheetTrigger asChild>
                 <Button
                   variant="ghost"

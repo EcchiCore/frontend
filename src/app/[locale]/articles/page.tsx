@@ -2,7 +2,6 @@ import { Suspense } from "react";
 import ArticleResults from "./components/ArticleResults";
 import SidebarFilters from "@/app/[locale]/games/components/SidebarFilters";
 import ResultsSkeleton from "@/app/[locale]/games/components/ResultsSkeleton";
-import SearchControlsWrapper from "@/app/[locale]/games/components/SearchControlsWrapper";
 import DonationSidebarWidget from "@/components/DonationSidebarWidget";
 import DonationCTA from "@/components/DonationCTA";
 
@@ -41,15 +40,6 @@ export default async function ArticlesIndexPage({ searchParams }: PageProps) {
     <div className="min-h-screen bg-[#1b2838] text-[#c1dbf4] pb-12">
       <div className="container mx-auto px-4 py-6 max-w-7xl">
         <DonationCTA />
-
-        {/* Search bar ── visible on all breakpoints */}
-        <div className="mt-6">
-          <Suspense fallback={
-            <div className="h-12 bg-[#171a21]/50 border border-[#2a475e]/40 rounded-sm animate-pulse" />
-          }>
-            <SearchControlsWrapper />
-          </Suspense>
-        </div>
 
         <div className="flex flex-col lg:flex-row gap-6 mt-4">
           {/* Sidebar ── filters */}
