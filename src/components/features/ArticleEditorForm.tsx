@@ -12,7 +12,7 @@ import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { X, Image as ImageIcon, LayoutIcon, BookOpenIcon, Save, ArrowLeft, Plus, Trash2, Eye, FileText, Download, Gamepad, FolderOpen, Loader2, Check, Upload } from 'lucide-react';
+import { X, Image as ImageIcon, LayoutIcon, BookOpenIcon, Save, ArrowLeft, Plus, Trash2, Eye, FileText, Download, Gamepad, FolderOpen, Loader2, Check, Upload, ShoppingBag, Link } from 'lucide-react';
 import { toast } from 'sonner';
 import Image from 'next/image';
 import Cookies from 'js-cookie';
@@ -685,6 +685,218 @@ const DownloadManager: React.FC<{
     );
 };
 
+interface OfficialStoreItem {
+    id?: number;
+    tempId: string;
+    name: string;
+    url: string;
+    submitNote?: string;
+    status?: 'PENDING' | 'APPROVED' | 'REJECTED';
+    syncStatus: 'synced' | 'saving' | 'error' | 'new';
+}
+
+const OfficialStoreManager: React.FC<{
+    articleId: number | undefined;
+    items: OfficialStoreItem[];
+    setItems: React.Dispatch<React.SetStateAction<OfficialStoreItem[]>>;
+}> = ({ articleId, items, setItems }) => {
+    const itemsRef = React.useRef(items);
+
+    useEffect(() => {
+        itemsRef.current = items;
+    }, [items]);
+
+    useEffect(() => {
+        const timeoutIds: Record<string, NodeJS.Timeout> = {};
+
+        items.forEach(item => {
+            if (item.syncStatus === 'saving') {
+                if (timeoutIds[item.tempId]) clearTimeout(timeoutIds[item.tempId]);
+
+                timeoutIds[item.tempId] = setTimeout(async () => {
+                    if (!articleId) return;
+
+                    const currentItem = itemsRef.current.find(i => i.tempId === item.tempId);
+                    if (!currentItem) return;
+
+                    // If it already has an ID, we shouldn't create it again, just set it to synced
+                    if (currentItem.id) {
+                        setItems((currentItems: OfficialStoreItem[]) =>
+                            currentItems.map(i => i.tempId === currentItem.tempId ? {
+                                ...i,
+                                syncStatus: 'synced' as const
+                            } : i)
+                        );
+                        return;
+                    }
+
+                    const nameTrimmed = (currentItem.name || '').trim();
+                    const urlTrimmed = (currentItem.url || '').trim();
+
+                    // Do not attempt to save to backend until both fields are populated
+                    if (!nameTrimmed || !urlTrimmed) {
+                        return;
+                    }
+
+                    try {
+                        const token = Cookies.get('token');
+                        // Create
+                        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://api.chanomhub.com'}/api/official-download-sources`, {
+                            method: 'POST',
+                            headers: {
+                                'Authorization': token ? `Bearer ${token}` : '',
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                articleId,
+                                name: nameTrimmed,
+                                url: urlTrimmed,
+                                submitNote: currentItem.submitNote || 'Added via Editor'
+                            })
+                        });
+
+                        if (!response.ok) throw new Error('Failed to create official store link');
+                        const resData = await response.json();
+                        const created = resData.officialDownloadSource;
+
+                        if (created) {
+                            setItems((currentItems: OfficialStoreItem[]) =>
+                                currentItems.map(i => i.tempId === currentItem.tempId ? {
+                                    ...i,
+                                    id: created.id,
+                                    status: created.status,
+                                    syncStatus: 'synced' as const
+                                } : i)
+                            );
+                            toast.success("Purchase link submitted for review");
+                        }
+                    } catch (error) {
+                        console.error('Failed to save official source:', error);
+                        setItems((currentItems: OfficialStoreItem[]) =>
+                            currentItems.map(i => i.tempId === currentItem.tempId ? { ...i, syncStatus: 'error' as const } : i)
+                        );
+                        toast.error('Failed to submit purchase link');
+                    }
+                }, 1500);
+            }
+        });
+
+        return () => {
+            Object.values(timeoutIds).forEach(clearTimeout);
+        };
+    }, [items, articleId, setItems]);
+
+    const addSource = () => {
+        if (!articleId) {
+            toast.error("Please save the article first to add purchase links");
+            return;
+        }
+
+        const tempId = `official-${Date.now()}`;
+        const newItem: OfficialStoreItem = {
+            tempId,
+            name: '',
+            url: '',
+            syncStatus: 'new'
+        };
+
+        setItems([...items, newItem]);
+    };
+
+    const removeSource = async (item: OfficialStoreItem) => {
+        if (!item.id) {
+            setItems(items.filter(i => i.tempId !== item.tempId));
+            return;
+        }
+
+        const previousItems = [...items];
+        setItems(items.filter(i => i.tempId !== item.tempId));
+
+        try {
+            const token = Cookies.get('token');
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://api.chanomhub.com'}/api/official-download-sources/${item.id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': token ? `Bearer ${token}` : ''
+                }
+            });
+
+            if (!response.ok) throw new Error('Failed to delete official source');
+            toast.success("Purchase link removed");
+        } catch (error) {
+            console.error('Failed to delete official source:', error);
+            setItems(previousItems);
+            toast.error("Failed to delete purchase link");
+        }
+    };
+
+    const updateSource = (tempId: string, field: keyof OfficialStoreItem, value: any) => {
+        setItems(items.map(i => {
+            if (i.tempId !== tempId) return i;
+            return { ...i, [field]: value, syncStatus: 'saving' };
+        }));
+    };
+
+    return (
+        <div className="space-y-4">
+            <div className="flex justify-between items-center">
+                <h3 className="text-lg font-medium text-foreground">Official Store / Purchase Links</h3>
+                <Button type="button" onClick={addSource} size="sm" variant="outline" disabled={!articleId}>
+                    <Plus className="h-4 w-4 mr-2" /> Add Link
+                </Button>
+            </div>
+
+            {!articleId && <p className="text-sm text-amber-500 bg-amber-50 p-2 rounded border border-amber-200">Please save the article first to manage purchase links.</p>}
+
+            {items.length === 0 && <p className="text-sm text-muted-foreground italic">No purchase links added yet. (Links require moderator approval before appearing publicly)</p>}
+
+            <div className="space-y-4">
+                {items.map((item, idx) => (
+                    <Card key={item.tempId} className={`border-none shadow-sm ring-1 transition-all ${item.syncStatus === 'error' ? 'ring-destructive/50 bg-destructive/10' : 'ring-border bg-card'}`}>
+                        <CardContent className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4 relative">
+                            {item.syncStatus === 'saving' && <div className="absolute top-2 right-2"><Loader2 className="h-4 w-4 animate-spin text-muted-foreground" /></div>}
+                            {item.syncStatus === 'synced' && (
+                                <div className="absolute top-2 right-2 flex items-center gap-1.5">
+                                    <Badge variant={item.status === 'APPROVED' ? 'default' : item.status === 'REJECTED' ? 'destructive' : 'secondary'}>
+                                        {item.status || 'PENDING'}
+                                    </Badge>
+                                    <Check className="h-4 w-4 text-green-500" />
+                                </div>
+                            )}
+
+                            <div>
+                                <Label>Store Name</Label>
+                                <Input
+                                    value={item.name}
+                                    onChange={(e) => updateSource(item.tempId, 'name', e.target.value)}
+                                    className="mt-1"
+                                    placeholder="e.g. Steam, itch.io, Google Play"
+                                    disabled={!!item.id}
+                                />
+                            </div>
+                            <div>
+                                <Label>Purchase URL</Label>
+                                <Input 
+                                    value={item.url} 
+                                    onChange={(e) => updateSource(item.tempId, 'url', e.target.value)} 
+                                    className="mt-1"
+                                    placeholder="https://..."
+                                    disabled={!!item.id}
+                                />
+                            </div>
+                            <div className="flex justify-end md:col-span-2">
+                                <Button type="button" variant="destructive" size="sm" onClick={() => removeSource(item)}>
+                                    <Trash2 className="h-4 w-4 mr-2" /> Remove
+                                </Button>
+                            </div>
+                        </CardContent>
+                    </Card>
+                ))}
+            </div>
+        </div>
+    );
+};
+
 export const ArticleEditorForm = ({ slug = '', initialData, mode, locale = 'en' }: ArticleEditorFormProps) => {
     const router = useRouter();
     const t = useTranslations('ArticleEditorForm');
@@ -726,6 +938,7 @@ export const ArticleEditorForm = ({ slug = '', initialData, mode, locale = 'en' 
 
     const [imageItems, setImageItems] = useState<ImageItem[]>([]);
     const [downloadItems, setDownloadItems] = useState<DownloadItem[]>([]);
+    const [officialStoreItems, setOfficialStoreItems] = useState<OfficialStoreItem[]>([]);
 
     const [loading, setLoading] = useState<boolean>(true);
     const [saving, setSaving] = useState<boolean>(false);
@@ -827,6 +1040,17 @@ export const ArticleEditorForm = ({ slug = '', initialData, mode, locale = 'en' 
                                 syncStatus: 'synced' as const
                             }));
                             setDownloadItems(dls);
+
+                            const officialData = article.officialDownloadSources || [];
+                            const offs = officialData.map((d: any) => ({
+                                id: d.id,
+                                tempId: `official-${d.id}`,
+                                name: d.name,
+                                url: d.url,
+                                status: d.status,
+                                syncStatus: 'synced' as const
+                            }));
+                            setOfficialStoreItems(offs);
 
                             setFormData({
                                 ...article,
@@ -1148,6 +1372,23 @@ export const ArticleEditorForm = ({ slug = '', initialData, mode, locale = 'en' 
                                     title={formData.title}
                                 />                            </CardContent>
                         </Card>
+
+                        <Card className="border border-border shadow-sm">
+                             <div className="border-b border-border px-6 py-4 flex items-center justify-between bg-muted/40">
+                                 <div className="flex items-center gap-2">
+                                     <ShoppingBag className="h-5 w-5 text-green-500" />
+                                     <h3 className="font-semibold text-foreground">Official Store / Purchase Links</h3>
+                                 </div>
+                                 <Badge variant="outline" className="bg-background border-border">{officialStoreItems.length} items</Badge>
+                             </div>
+                             <CardContent className="p-6">
+                                 <OfficialStoreManager
+                                     articleId={formData.id ? Number(formData.id) : undefined}
+                                     items={officialStoreItems}
+                                     setItems={setOfficialStoreItems}
+                                 />
+                             </CardContent>
+                         </Card>
 
                     </div>
 
