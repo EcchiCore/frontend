@@ -1,5 +1,5 @@
 export interface DashboardUser {
-  id: string;
+  id: number;
   username: string;
   email: string;
   bio?: string | null;
