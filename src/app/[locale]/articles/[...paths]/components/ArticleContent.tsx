@@ -761,22 +761,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
                   dangerouslySetInnerHTML={{ __html: sanitizedBody }}
                 />
 
-                {/* Original Sources Section */}
-                {article.officialDownloadSources && article.officialDownloadSources.length > 0 && (!article.isPaid || article.isUnlocked) && (
-                  <div className="pt-6 border-t border-border/30 space-y-3">
-                    <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">{t("officialSources")}</h4>
-                    <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-                      {article.officialDownloadSources.map((source, index) => (
-                        <a key={index} href={source.url} target="_blank" rel="noopener noreferrer" className="block w-full sm:w-auto flex-1">
-                          <Button variant="outline" className="w-full flex items-center justify-center gap-2 h-10 border-border hover:bg-muted transition-all rounded-sm text-xs text-foreground">
-                            <ExternalLink className="w-3.5 h-3.5 text-primary" />
-                            <span className="font-semibold">{t('loadOriginal', { source: source.name ? `(${source.name})` : "" })}</span>
-                          </Button>
-                        </a>
-                      ))}
-                    </div>
-                  </div>
-                )}
+
               </CardContent>
             </Card>
 
@@ -915,6 +900,41 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
                 {t("shareArticleLink")}
               </Button>
             </div>
+
+            {/* Official Store Links */}
+            {(() => {
+              const approvedSources = article.officialDownloadSources?.filter(s => s.status === 'APPROVED') || [];
+              if (approvedSources.length === 0) return null;
+              if (article.isPaid && !article.isUnlocked) return null;
+
+              return (
+                <div className="bg-card border border-border rounded-lg shadow-lg overflow-hidden text-xs">
+                  <div className="bg-muted px-4 py-2 font-bold text-foreground uppercase tracking-wider flex items-center gap-1.5">
+                    <ShoppingCart className="w-3.5 h-3.5 text-green-500" />
+                    {t("officialSources")}
+                  </div>
+                  <div className="p-3 space-y-2">
+                    {approvedSources.map((source, index) => (
+                      <a
+                        key={index}
+                        href={source.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block w-full"
+                      >
+                        <Button
+                          variant="outline"
+                          className="w-full flex items-center justify-between gap-2 h-9 border-border hover:bg-muted transition-all rounded-md text-xs text-foreground px-3 font-semibold"
+                        >
+                          <span className="truncate">{source.name || "Official Store"}</span>
+                          <ExternalLink className="w-3.5 h-3.5 text-primary shrink-0" />
+                        </Button>
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              );
+            })()}
 
             {/* Game Features details */}
             <div className="bg-card border border-border rounded-lg shadow-lg overflow-hidden text-xs">
