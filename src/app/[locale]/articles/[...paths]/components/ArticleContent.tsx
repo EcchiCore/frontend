@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
+import { preload } from "react-dom";
 import dynamic from "next/dynamic";
 import { mutate } from "swr";
 import { useAppSelector } from "@/store/hooks";
@@ -50,6 +51,15 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
   downloads,
   relatedArticles = [],
 }) => {
+  // Preload the main hero image for fast LCP using React 19 ReactDOM.preload
+  const heroImageUrl = getImageUrl(
+    article.mainImage || article.coverImage || article.backgroundImage,
+    "hero"
+  );
+  if (heroImageUrl) {
+    preload(heroImageUrl, { as: "image", fetchPriority: "high" });
+  }
+
   const t = useTranslations('ArticleContent');
   const locale = useLocale();
   const {
@@ -313,12 +323,6 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
   // ── Assemble media slides ──
   const slides: { type: "video" | "image"; url: string }[] = [];
   
-  // Video preview (default slide)
-  slides.push({
-    type: "video",
-    url: "https://vidoes.chanomhub.com/file/Chanomhub-Vidoes/20-1-26_2.webm?Authorization=4_0051e50adc6bddd0000000001_01c1e6d3_f3aa13_acct_M803cRTXDpM8g_fqY8ZYrBjl__c="
-  });
-
   if (article.mainImage) {
     slides.push({ type: "image", url: getImageUrl(article.mainImage, "hero") || article.mainImage });
   }
@@ -345,6 +349,12 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
       }
     });
   }
+
+  // Video preview (appended as a secondary slide to prioritize images for LCP optimization)
+  slides.push({
+    type: "video",
+    url: "https://vidoes.chanomhub.com/file/Chanomhub-Vidoes/20-1-26_2.webm?Authorization=4_0051e50adc6bddd0000000001_01c1e6d3_f3aa13_acct_M803cRTXDpM8g_fqY8ZYrBjl__c="
+  });
 
   const [activeSlideIndex, setActiveSlideIndex] = useState(0);
   const [activeSlide, setActiveSlide] = useState<{ type: "video" | "image"; url: string }>(
@@ -555,6 +565,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
                   <img
                     src={activeSlide.url}
                     alt={`${article.title} Media`}
+                    fetchPriority="high"
                     className="w-full h-full object-contain select-none transition-transform duration-300 group-hover/active:scale-[1.01]"
                   />
                   <div className="absolute top-3 left-3 bg-black/60 text-white p-2 rounded-sm opacity-0 group-hover/active:opacity-100 transition-opacity duration-200">

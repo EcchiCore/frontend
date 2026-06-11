@@ -30,7 +30,8 @@ export default function myImageLoader({
   }
 
   // If it's already a full URL, return as-is but with width param to satisfy Next.js
-  if (src.startsWith('http://') || src.startsWith('https://')) {
+  // But allow images hosted on our own storage CDN to be optimized by imgproxy
+  if ((src.startsWith('http://') || src.startsWith('https://')) && !src.startsWith('https://cdn.chanomhub.com')) {
     const separator = src.includes('?') ? '&' : '?';
     return `${src}${separator}w=${width}`;
   }
