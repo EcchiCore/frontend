@@ -383,7 +383,7 @@ export default function Footer() {
                                     <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                         <img
                                             src="https://www.google.com/s2/favicons?domain=theporndude.com&sz=32"
-                                            alt=""
+                                            alt="ThePornDude Favicon"
                                             aria-hidden="true"
                                             width={14}
                                             height={14}

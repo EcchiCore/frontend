@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback, useMemo } from "react"
 import Image from "next/image"
 import { ChevronLeft, ChevronRight, X, ZoomIn, ZoomOut, RotateCcw, Download, Maximize2, Star } from "lucide-react"
 import { Article } from "@/types/article";
-import { getImageUrl } from "@/lib/imageUrl"
+import { getImageUrl, getImageFallbackUrl } from "@/lib/imageUrl"
 
 interface ArticleTitleMetaProps {
   article: Article
@@ -28,7 +28,7 @@ MemoizedModalImage.displayName = 'MemoizedModalImage';
 
 const ArticleTitleMeta: React.FC<ArticleTitleMetaProps> = ({ article, isDarkMode, hideHeader = false }) => {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0)
-  const [, setImageErrors] = useState<Set<number>>(new Set())
+  const [imageErrors, setImageErrors] = useState<Set<number>>(new Set())
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [modalImageIndex, setModalImageIndex] = useState(0)
   const [zoomLevel, setZoomLevel] = useState(1)
@@ -64,14 +64,29 @@ const ArticleTitleMeta: React.FC<ArticleTitleMetaProps> = ({ article, isDarkMode
       } ${isDarkMode ? "bg-gray-800 ring-offset-gray-900" : "bg-gray-100 ring-offset-white"}`
   }), [isDarkMode])
 
-  const handleImageError = (index: number) => setImageErrors(prev => new Set(prev).add(index))
+  const handleImageError = (index: number) => {
+    setImageErrors(prev => {
+      if (prev.has(index)) return prev;
+      const next = new Set(prev);
+      next.add(index);
+      return next;
+    });
+  };
 
-  const getImageSrc = useCallback((image: { url: string } | null | undefined, preset: 'gallery' | 'cardThumbnail' | 'hero' = 'gallery') => {
+  const getImageSrc = useCallback((image: { url: string } | null | undefined, preset: 'gallery' | 'cardThumbnail' | 'hero' = 'gallery', index?: number) => {
     const src = image?.url;
     if (typeof src !== 'string' || !src) return null;
+    
+    // If this image index has errored, fallback to the original CDN/storage URL
+    if (index !== undefined && imageErrors.has(index)) {
+      const fallbackUrl = getImageFallbackUrl(src) || src;
+      const separator = fallbackUrl.includes("?") ? "&" : "?";
+      return `${fallbackUrl}${separator}bypass-imgproxy=true`;
+    }
+    
     // Transform to imgproxy URL
     return getImageUrl(src, preset) || src;
-  }, [])
+  }, [imageErrors])
 
   const preloadImage = useCallback((src: string, index: number) => {
     if (preloadedImages.has(index)) return
@@ -85,7 +100,7 @@ const ArticleTitleMeta: React.FC<ArticleTitleMetaProps> = ({ article, isDarkMode
       handleImageError(index)
       if (index === selectedImageIndex) setIsLoading(false)
     }
-    const imageSrc = getImageSrc(article.images[index], 'gallery');
+    const imageSrc = getImageSrc(article.images[index], 'gallery', index);
     if (!imageSrc) return;
     img.src = imageSrc;
   }, [preloadedImages, selectedImageIndex, getImageSrc, article.images])
@@ -170,7 +185,7 @@ const ArticleTitleMeta: React.FC<ArticleTitleMetaProps> = ({ article, isDarkMode
 
   const downloadImage = async () => {
     if (!hasImages) return
-    const imageUrl = getImageSrc(article.images[modalImageIndex])
+    const imageUrl = getImageSrc(article.images[modalImageIndex], 'gallery', modalImageIndex)
     if (!imageUrl) return;
     try {
       const response = await fetch(imageUrl)
@@ -305,7 +320,7 @@ const ArticleTitleMeta: React.FC<ArticleTitleMetaProps> = ({ article, isDarkMode
           {/* Main image container with aspect-ratio to prevent CLS */}
           <div className="relative w-full bg-black/40" style={{ aspectRatio: '16/10' }}>
             {(() => {
-              const mainImageSrc = getImageSrc(article.images[selectedImageIndex], 'hero');
+              const mainImageSrc = getImageSrc(article.images[selectedImageIndex], 'hero', selectedImageIndex);
               return mainImageSrc && (
                 <>
                   {/* Blurred background for wide/tall images */}
@@ -382,7 +397,7 @@ const ArticleTitleMeta: React.FC<ArticleTitleMetaProps> = ({ article, isDarkMode
                   className={`${styles.thumbnail(selectedImageIndex === index)} w-20 sm:w-24 md:w-28 lg:w-32 xl:w-36`}
                 >
                   {(() => {
-                    const thumbnailImageSrc = getImageSrc(image, 'cardThumbnail');
+                    const thumbnailImageSrc = getImageSrc(image, 'cardThumbnail', index);
                     return thumbnailImageSrc && (
                       <Image
                         src={thumbnailImageSrc}
@@ -494,7 +509,7 @@ const ArticleTitleMeta: React.FC<ArticleTitleMetaProps> = ({ article, isDarkMode
               onTouchEnd={handleTouchEnd}
             >
               {(() => {
-                const modalImageSrc = getImageSrc(article.images[modalImageIndex], 'gallery');
+                const modalImageSrc = getImageSrc(article.images[modalImageIndex], 'gallery', modalImageIndex);
                 return modalImageSrc && (
                   <MemoizedModalImage
                     src={modalImageSrc}

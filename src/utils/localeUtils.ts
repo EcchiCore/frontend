@@ -51,9 +51,9 @@ export interface MetaDict {
 
 export const defaultMetadataContent: Record<Locale, MetaDict> = {
   en: {
-    title: 'ChanomHub',
+    title: 'ChanomHub - Adult Gaming Hub, Downloads & Community',
     description:
-      'ChanomHub - Your ultimate destination for adult gaming content. Discover free game downloads, translations, mods, and a vibrant community for gaming enthusiasts.',
+      'ChanomHub - Your ultimate destination for free adult games and h-games. Download free adult games, translations, mods, and join our community.',
     keywords: [
       'Adult games',
       'Free game downloads',
@@ -69,7 +69,7 @@ export const defaultMetadataContent: Record<Locale, MetaDict> = {
     logo_alt: 'ChanomHub Logo',
   },
   th: {
-    title: 'ChanomHub - ศูนย์รวมเกมสำหรับผู้ใหญ่',
+    title: 'ChanomHub - ชุมชนเกมสำหรับผู้ใหญ่ ดาวน์โหลดเกมฟรี',
     description:
       'ChanomHub - จุดหมายปลายทางสุดยอดสำหรับเนื้อหาเกมสำหรับผู้ใหญ่ ค้นพบการดาวน์โหลดเกมฟรี การแปล มอด และชุมชนที่มีชีวิตชีวา',
     keywords: [

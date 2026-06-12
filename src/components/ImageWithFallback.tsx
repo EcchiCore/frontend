@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Image from "next/image";
 import { AvatarImage } from "@/components/ui/avatar";
 import imageLoader from '@/lib/imageLoader';
+import { getImageFallbackUrl } from "@/lib/imageUrl";
 
 const PLACEHOLDER_IMAGE = "/placeholder-image.png";
 
@@ -31,7 +32,18 @@ const ImageWithFallback: React.FC<ImageWithFallbackProps> = ({
   const [imageSrc, setImageSrc] = useState(src || PLACEHOLDER_IMAGE);
 
   const handleError = () => {
-    setImageSrc(PLACEHOLDER_IMAGE);
+    if (!imageSrc || imageSrc === PLACEHOLDER_IMAGE || imageSrc.includes("bypass-imgproxy=true")) {
+      setImageSrc(PLACEHOLDER_IMAGE);
+      return;
+    }
+
+    const fallbackUrl = getImageFallbackUrl(imageSrc);
+    if (fallbackUrl && fallbackUrl !== imageSrc) {
+      const separator = fallbackUrl.includes("?") ? "&" : "?";
+      setImageSrc(`${fallbackUrl}${separator}bypass-imgproxy=true`);
+    } else {
+      setImageSrc(PLACEHOLDER_IMAGE);
+    }
   };
 
   if (type === "nextImage") {

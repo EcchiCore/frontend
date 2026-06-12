@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { preload } from "react-dom";
 import dynamic from "next/dynamic";
 import { mutate } from "swr";
@@ -31,7 +31,7 @@ import Cookies from "js-cookie";
 // import ArticleModsSection from "./ArticleModsSection"; // Removed
 import ArticleCommunityTabs from "./ArticleCommunityTabs";
 import { useTranslations, useLocale } from 'next-intl';
-import { getImageUrl } from "@/lib/imageUrl";
+import { getImageUrl, getImageFallbackUrl } from "@/lib/imageUrl";
 import type { ArticleListItem } from '@chanomhub/sdk';
 import ArticleDownloadSection from "./ArticleDownloadSection";
 
@@ -320,22 +320,44 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
     }
   };
 
+  const [failedUrls, setFailedUrls] = useState<Set<string>>(new Set());
+
+  const handleUrlError = useCallback((url: string) => {
+    setFailedUrls((prev) => {
+      if (prev.has(url)) return prev;
+      const next = new Set(prev);
+      next.add(url);
+      return next;
+    });
+  }, []);
+
+  const getSlideUrl = useCallback((originalUrl: string | null | undefined, preset: 'hero' | 'gallery' | 'cardThumbnail' = 'hero') => {
+    if (!originalUrl) return "/placeholder-image.png";
+    const imgproxyUrl = getImageUrl(originalUrl, preset) || originalUrl;
+    if (failedUrls.has(imgproxyUrl)) {
+      const fallbackUrl = getImageFallbackUrl(imgproxyUrl) || originalUrl;
+      const separator = fallbackUrl.includes("?") ? "&" : "?";
+      return `${fallbackUrl}${separator}bypass-imgproxy=true`;
+    }
+    return imgproxyUrl;
+  }, [failedUrls]);
+
   // ── Assemble media slides ──
   const slides: { type: "video" | "image"; url: string }[] = [];
   
   if (article.mainImage) {
-    slides.push({ type: "image", url: getImageUrl(article.mainImage, "hero") || article.mainImage });
+    slides.push({ type: "image", url: getSlideUrl(article.mainImage, "hero") });
   }
 
   if (article.coverImage) {
-    const coverUrl = getImageUrl(article.coverImage, "hero") || article.coverImage;
+    const coverUrl = getSlideUrl(article.coverImage, "hero");
     if (!slides.some(s => s.url === coverUrl)) {
       slides.push({ type: "image", url: coverUrl });
     }
   }
 
   if (article.backgroundImage) {
-    const bgUrl = getImageUrl(article.backgroundImage, "hero") || article.backgroundImage;
+    const bgUrl = getSlideUrl(article.backgroundImage, "hero");
     if (!slides.some(s => s.url === bgUrl)) {
       slides.push({ type: "image", url: bgUrl });
     }
@@ -343,7 +365,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
 
   if (article.images && article.images.length > 0) {
     article.images.forEach((img) => {
-      const fullUrl = getImageUrl(img.url, "hero") || img.url;
+      const fullUrl = getSlideUrl(img.url, "hero");
       if (fullUrl && !slides.some(s => s.url === fullUrl)) {
         slides.push({ type: "image", url: fullUrl });
       }
@@ -357,9 +379,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
   });
 
   const [activeSlideIndex, setActiveSlideIndex] = useState(0);
-  const [activeSlide, setActiveSlide] = useState<{ type: "video" | "image"; url: string }>(
-    slides[0] || { type: "image", url: "/placeholder-image.png" }
-  );
+  const activeSlide = slides[activeSlideIndex] || { type: "image", url: "/placeholder-image.png" };
 
   // ── Fullscreen Modal Gallery States ──
   const imageSlides = slides.filter(s => s.type === "image");
@@ -431,7 +451,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
       <div className="absolute top-0 left-0 w-full h-[600px] -z-10 pointer-events-none overflow-hidden opacity-30">
         <div className="absolute inset-0 z-10 bg-gradient-to-b from-transparent via-background to-background" />
         {(() => {
-          const bgImgUrl = getImageUrl(
+          const bgImgUrl = getSlideUrl(
             article.backgroundImage || article.coverImage || article.mainImage || null,
             "hero"
           );
@@ -440,6 +460,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
               src={bgImgUrl}
               className="w-full h-full object-cover blur-3xl scale-125 transition-opacity duration-1000"
               alt=""
+              onError={() => handleUrlError(bgImgUrl)}
             />
           ) : null;
         })()}
@@ -567,6 +588,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
                     alt={`${article.title} Media`}
                     fetchPriority="high"
                     className="w-full h-full object-contain select-none transition-transform duration-300 group-hover/active:scale-[1.01]"
+                    onError={() => handleUrlError(activeSlide.url)}
                   />
                   <div className="absolute top-3 left-3 bg-black/60 text-white p-2 rounded-sm opacity-0 group-hover/active:opacity-100 transition-opacity duration-200">
                     <Maximize2 className="w-4 h-4" />
@@ -585,7 +607,6 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
                       key={idx}
                       onClick={() => {
                         setActiveSlideIndex(idx);
-                        setActiveSlide(slide);
                       }}
                       className={`relative w-20 aspect-video rounded-sm overflow-hidden shrink-0 border transition-all duration-200 ${
                         isActive 
@@ -598,7 +619,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
                           ▶ VIDEO
                         </div>
                       ) : (
-                        <img src={slide.url} alt={`${article.title} thumbnail ${idx + 1}`} className="w-full h-full object-cover" />
+                        <img src={slide.url} alt={`${article.title} thumbnail ${idx + 1}`} className="w-full h-full object-cover" onError={() => handleUrlError(slide.url)} />
                       )}
                     </button>
                   );
@@ -611,11 +632,17 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
           <div className="flex flex-col justify-between h-full gap-4 text-xs">
             {/* Top capsule thumbnail image */}
             <div className="relative w-full h-[150px] bg-muted border border-border rounded-sm overflow-hidden shadow-inner">
-              <img
-                src={getImageUrl(article.coverImage || article.mainImage || article.backgroundImage, "hero") || "/placeholder-image.png"}
-                alt={`${article.title} Cover`}
-                className="w-full h-full object-cover"
-              />
+              {(() => {
+                const capsuleUrl = getSlideUrl(article.coverImage || article.mainImage || article.backgroundImage, "hero");
+                return (
+                  <img
+                    src={capsuleUrl}
+                    alt={`${article.title} Cover`}
+                    className="w-full h-full object-cover"
+                    onError={() => handleUrlError(capsuleUrl)}
+                  />
+                );
+              })()}
             </div>
 
             {/* Description */}
@@ -1185,6 +1212,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
                 src={imageSlides[modalImageIndex].url}
                 alt={`${article.title} Fullscreen`}
                 className="w-full h-full object-contain"
+                onError={() => handleUrlError(imageSlides[modalImageIndex].url)}
               />
             </div>
           </div>

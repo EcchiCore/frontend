@@ -146,29 +146,56 @@ export default async function LocaleSegmentLayout({
       </head>
 
       <body className={inter.className}>
-        {/* Structured Data - WebSite */}
-        <Script
-          id="website-jsonld"
+        {/* Structured Data - WebSite & Organization (Identity) */}
+        <script
           type="application/ld+json"
-          strategy="afterInteractive"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
               "@context": "https://schema.org",
-              "@type": "WebSite",
-              "name": "ChanomHub",
-              "url": siteUrl,
-              "potentialAction": {
-                "@type": "SearchAction",
-                "target": `${siteUrl}/search?q={search_term_string}`,
-                "query-input": "required name=search_term_string"
-              },
-              "inLanguage": supportedLocales,
-              "availableLanguage": supportedLocales.map(lang => ({
-                "@type": "Language",
-                "name": lang === 'en' ? 'English' : 'Thai',
-                "alternateName": lang
-              }))
-            })
+              "@graph": [
+                {
+                  "@type": "WebSite",
+                  "@id": `${siteUrl}/#website`,
+                  "url": siteUrl,
+                  "name": "ChanomHub",
+                  "description": "Your ultimate destination for adult gaming content",
+                  "publisher": {
+                    "@id": `${siteUrl}/#organization`
+                  },
+                  "potentialAction": {
+                    "@type": "SearchAction",
+                    "target": `${siteUrl}/search?q={search_term_string}`,
+                    "query-input": "required name=search_term_string"
+                  },
+                  "inLanguage": supportedLocales,
+                  "availableLanguage": supportedLocales.map(lang => ({
+                    "@type": "Language",
+                    "name": lang === 'en' ? 'English' : 'Thai',
+                    "alternateName": lang
+                  }))
+                },
+                {
+                  "@type": "Organization",
+                  "@id": `${siteUrl}/#organization`,
+                  "name": "ChanomHub",
+                  "url": siteUrl,
+                  "logo": {
+                    "@type": "ImageObject",
+                    "@id": `${siteUrl}/#logo`,
+                    "url": `${siteUrl}/chanomhub.ico`,
+                    "caption": "ChanomHub"
+                  },
+                  "image": {
+                    "@id": `${siteUrl}/#logo`
+                  },
+                  "sameAs": [
+                    "https://t.me/NightCryptic",
+                    "https://linktr.ee/CrypticDay"
+                  ],
+                  "description": "ChanomHub is the ultimate destination for free adult games, h-games, game downloads, translations, mods, and a vibrant community."
+                }
+              ]
+            }).replace(/</g, '\\u003c')
           }}
         />
 

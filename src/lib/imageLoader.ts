@@ -17,6 +17,12 @@ export default function myImageLoader({
   width: number
   quality?: number
 }) {
+  // If the image is explicitly marked to bypass imgproxy (due to fallbacks)
+  if (src.includes('bypass-imgproxy=true')) {
+    const separator = src.includes('?') ? '&' : '?';
+    return `${src}${separator}w=${width}`;
+  }
+
   // URLs with /cdn-cgi/image/ are already optimized by Cloudflare
   if (src.includes('/cdn-cgi/image/')) {
     const separator = src.includes('?') ? '&' : '?';

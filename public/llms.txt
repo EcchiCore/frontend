@@ -1,0 +1,23 @@
+# ChanomHub
+
+> Your ultimate destination for adult gaming content. Discover free game downloads, translations, mods, and a vibrant community.
+
+## About ChanomHub
+
+ChanomHub is a leading community platform for adult games (H-games), providing curated content including:
+- **Free Game Downloads**: Easily find and download a wide variety of adult games across multiple platforms (Windows, Android/APK, macOS, Linux, iOS, and Web).
+- **Game Translations**: Community-driven and official translations (especially English and Thai translations) for popular visual novels, RPGs, and simulators.
+- **Game Mods**: Add-ons, patches, and uncensor mods to enhance your gaming experience.
+- **Vibrant Community**: Forums, Q&A boards, and discussions for gaming enthusiasts.
+
+## Site Map & Key Sections
+
+- **Homepage**: [https://chanomhub.com](https://chanomhub.com) - Features trending recommendations, sponsored posts, latest posts, and platform-specific game shelves.
+- **Games Directory**: [https://chanomhub.com/games](https://chanomhub.com/games) - Complete list of adult games filterable by category, tag, and platform.
+- **Windows H-Games**: [https://chanomhub.com/games?platform=windows](https://chanomhub.com/games?platform=windows) - Catalog of popular Windows-compatible adult games.
+- **Android H-Games (APKs)**: [https://chanomhub.com/games?platform=android](https://chanomhub.com/games?platform=android) - Curated adult games optimized for Android mobile devices.
+- **Community Tools**:
+  - **ChanoX2**: [https://chanomhub.com/chanox2](https://chanomhub.com/chanox2) - Our custom desktop gaming client.
+  - **ChanoLite**: [https://chanomhub.com/chanolite](https://chanomhub.com/chanolite) - Lightweight mobile client.
+  - **NST Ghost**: [https://chanomhub.com/nst](https://chanomhub.com/nst) - Translation helper utility.
+- **About & Privacy**: [https://chanomhub.com/privacy-policy](https://chanomhub.com/privacy-policy) - Terms and privacy statement.
