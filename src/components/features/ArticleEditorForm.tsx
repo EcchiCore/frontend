@@ -927,7 +927,9 @@ export const ArticleEditorForm = ({ slug = '', initialData, mode, locale = 'en' 
 
         mainImageId: null,
         backgroundImageId: null,
-        coverImageId: null
+        coverImageId: null,
+        message: '',
+        notes: ''
     });
 
     const [availableTags, setAvailableTags] = useState<string[]>([]);
@@ -1201,6 +1203,8 @@ export const ArticleEditorForm = ({ slug = '', initialData, mode, locale = 'en' 
                 backgroundImage: formData.backgroundImageId ? imageItems.find(i => i.id === formData.backgroundImageId)?.url : (formData.backgroundImage?.url || formData.backgroundImage),
                 coverImage: formData.coverImageId ? imageItems.find(i => i.id === formData.coverImageId)?.url : (formData.coverImage?.url || formData.coverImage),
                 otherImages: imageItems.map(i => i.url),
+                ...(mode === 'edit' && { message: formData.message }),
+                ...(mode === 'edit' && { notes: formData.notes }),
             };
 
             if (mode === 'create') {
@@ -1333,6 +1337,43 @@ export const ArticleEditorForm = ({ slug = '', initialData, mode, locale = 'en' 
                                         required
                                     />
                                 </div>
+                                {mode === 'edit' && (
+                                    <>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="message" className="text-xs uppercase text-muted-foreground font-bold tracking-wider">
+                                                Update Message / Devlog Description (Optional)
+                                            </Label>
+                                            <Input
+                                                id="message"
+                                                name="message"
+                                                value={formData.message || ''}
+                                                onChange={handleInputChange}
+                                                placeholder="e.g. Fixed bugs, updated to v1.2, or leave blank for AI to auto-generate"
+                                                className="border-gray-200 focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all"
+                                            />
+                                            <p className="text-xs text-muted-foreground">
+                                                If left blank, our AI model (Llama-SEA-LION-3.5) will automatically write a summary of your changes in the background.
+                                            </p>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="notes" className="text-xs uppercase text-muted-foreground font-bold tracking-wider">
+                                                Developer Notes / Patch Notes (Optional)
+                                            </Label>
+                                            <Textarea
+                                                id="notes"
+                                                name="notes"
+                                                value={formData.notes || ''}
+                                                onChange={handleInputChange}
+                                                placeholder="Write detailed patch notes, updates, bug fixes, or instructions for this version..."
+                                                rows={5}
+                                                className="resize-none border-gray-200 focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all"
+                                            />
+                                            <p className="text-xs text-muted-foreground">
+                                                Detailed changes to display on the devlog page.
+                                            </p>
+                                        </div>
+                                    </>
+                                )}
                             </CardContent>
                         </Card>
 

@@ -22,7 +22,8 @@ const ArticleCommunityTabs: React.FC<ArticleCommunityTabsProps> = ({
     const pathname = usePathname();
     const isWorkshop = pathname.includes('/mods');
     const isDiscussions = pathname.includes('/discussions');
-    const isOverview = !isWorkshop && !isDiscussions;
+    const isDevlog = pathname.includes('/devlog');
+    const isOverview = !isWorkshop && !isDiscussions && !isDevlog;
     const t = useTranslations("ArticleContent");
 
     const tabs = [
@@ -46,6 +47,11 @@ const ArticleCommunityTabs: React.FC<ArticleCommunityTabsProps> = ({
             label: t('tabMods'), // Mods (was Workshop)
             href: `/articles/${slug}/mods`,
             isActive: isWorkshop,
+        },
+        {
+            label: t('tabDevlog'), // Devlog / Update Log
+            href: `/articles/${slug}/devlog`,
+            isActive: isDevlog,
         },
     ];
 

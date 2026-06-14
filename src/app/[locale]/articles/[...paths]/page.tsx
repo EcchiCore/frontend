@@ -9,6 +9,8 @@ import GTMArticleTracker from './components/GTMArticleTracker';
 import Script from 'next/script';
 import ArticleModsPage from './components/ArticleModsPage';
 import ArticleDiscussionsPage from './components/ArticleDiscussionsPage';
+import ArticleDevlogPage from './components/ArticleDevlogPage';
+import ArticleDevlogDetail from './components/ArticleDevlogDetail';
 import ArticleViewTracker from './components/ArticleViewTracker';
 import {
   generatePageMetadata,
@@ -74,8 +76,27 @@ export async function generateMetadata(props: ArticlePageProps): Promise<Metadat
   const seoTitle = createSEOTitle(originalArticle, locale);
   const isMods = paths[1] === "mods";
   const isDiscussions = paths[1] === "discussions";
-  const finalTitle = isMods ? `Mods - ${seoTitle}` : isDiscussions ? `Discussions - ${seoTitle}` : seoTitle;
-  const finalDesc = isMods ? `Download mods and translations for ${originalArticle.title}. ${originalArticle.description}` : isDiscussions ? `Join the community discussion about ${originalArticle.title}. ${originalArticle.description}` : originalArticle.description;
+  const isDevlog = paths[1] === "devlog";
+  
+  let finalTitle = seoTitle;
+  let finalDesc = originalArticle.description;
+
+  if (isMods) {
+    finalTitle = `Mods - ${seoTitle}`;
+    finalDesc = `Download mods and translations for ${originalArticle.title}. ${originalArticle.description}`;
+  } else if (isDiscussions) {
+    finalTitle = `Discussions - ${seoTitle}`;
+    finalDesc = `Join the community discussion about ${originalArticle.title}. ${originalArticle.description}`;
+  } else if (isDevlog) {
+    if (paths[2]) {
+      finalTitle = `Update v${paths[2]} - ${seoTitle}`;
+      finalDesc = `View change log version ${paths[2]} for ${originalArticle.title}. ${originalArticle.description}`;
+    } else {
+      finalTitle = `Devlog - ${seoTitle}`;
+      finalDesc = `View update log and revision history for ${originalArticle.title}. ${originalArticle.description}`;
+    }
+  }
+
   return generatePageMetadata({
     title: finalTitle,
     description: finalDesc,
@@ -244,6 +265,17 @@ export default async function ArticlePage(props: ArticlePageProps) {
           article={originalArticle}
           isAuthenticated={false}
         />
+      ) : paths[1] === 'devlog' ? (
+        paths[2] ? (
+          <ArticleDevlogDetail
+            article={originalArticle}
+            version={parseInt(paths[2], 10) || 1}
+          />
+        ) : (
+          <ArticleDevlogPage
+            article={originalArticle}
+          />
+        )
       ) : (
         <>
           {/* SSR Content: Rendered on server for SEO - Google will index this */}
