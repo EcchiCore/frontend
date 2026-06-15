@@ -28,11 +28,9 @@ export function RegisterForm({ onSwitch }: { onSwitch: () => void }) {
   });
   const [loading, setLoading] = useState(false);
 
-  // Create SDK instance with Supabase config for OAuth
+  // Create SDK instance
   const sdk = useMemo(() => createChanomhubClient({
     apiUrl: process.env.NEXT_PUBLIC_API_URL || 'https://api.chanomhub.com',
-    supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
-    supabaseAnonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
   }), []);
 
   const handleGoogleLogin = async () => {
@@ -85,41 +83,13 @@ export function RegisterForm({ onSwitch }: { onSwitch: () => void }) {
   // Check for OAuth callback on mount
   useEffect(() => {
     const handleSession = async () => {
-      // Check if we have a hash with access_token (OAuth callback)
-      if (window.location.hash && window.location.hash.includes('access_token')) {
-        try {
-          // Use SDK to handle the callback and exchange token with backend
-          let loginData = await sdk.auth.handleCallback();
-
-          // Robust fallback: if SDK/Supabase client hasn't parsed the hash in time, do it manually
-          if (!loginData) {
-            const hashParams = new URLSearchParams(window.location.hash.substring(1));
-            const accessToken = hashParams.get('access_token');
-            if (accessToken) {
-              const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://api.chanomhub.com'}/api/users/login-supabase`, {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ accessToken }),
-              });
-              if (response.ok) {
-                const responseJson = await response.json();
-                loginData = responseJson.data || responseJson;
-              } else {
-                throw new Error("Failed to exchange token via fallback API request");
-              }
-            }
-          }
-
-          if (loginData) {
-            handleOAuthCallback(loginData);
-            window.history.replaceState(null, '', window.location.pathname);
-          }
-        } catch (e) {
-          console.error("Error processing OAuth callback:", e);
-          toast.error(t('invalidResponseMessage'));
+      try {
+        const loginData = await sdk.auth.handleCallback();
+        if (loginData) {
+          handleOAuthCallback(loginData);
         }
+      } catch (e) {
+        console.error("Error processing OAuth callback:", e);
       }
     };
 
