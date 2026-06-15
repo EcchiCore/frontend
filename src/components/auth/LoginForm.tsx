@@ -30,9 +30,9 @@ export function LoginForm({ onSwitch }: { onSwitch: () => void }) {
 
   const handleGoogleLogin = async () => {
     try {
-      await sdk.auth.signInWithGoogle({
-        redirectTo: `${window.location.origin}/login${redirectTo !== '/' ? `?redirect=${encodeURIComponent(redirectTo)}` : ''}`,
-      });
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.chanomhub.com';
+      const redirectUrl = `${window.location.origin}/login${redirectTo !== '/' ? `?redirect=${encodeURIComponent(redirectTo)}` : ''}`;
+      window.location.href = `${apiBaseUrl}/api/auth/login/social?provider=google&callbackURL=${encodeURIComponent(redirectUrl)}`;
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : t('unexpectedErrorMessage');
       toast.error(message);
@@ -81,7 +81,7 @@ export function LoginForm({ onSwitch }: { onSwitch: () => void }) {
   // Check for OAuth callback on mount
   useEffect(() => {
     const handleSession = async () => {
-      // Check if we have a hash with access_token (OAuth callback)
+      // Check if we have a hash with access_token (Legacy Supabase OAuth callback)
       if (window.location.hash && window.location.hash.includes('access_token')) {
         try {
           // Use SDK to handle the callback and exchange token with backend
@@ -117,11 +117,26 @@ export function LoginForm({ onSwitch }: { onSwitch: () => void }) {
           console.error("Error processing OAuth callback:", e);
           toast.error(t('invalidResponseMessage'));
         }
+      } else {
+        // Exchange Better Auth session for legacy JWT tokens if logged in
+        try {
+          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://api.chanomhub.com'}/api/auth/exchange`, {
+            method: 'POST',
+            credentials: 'include',
+          });
+          if (response.ok) {
+            const responseJson = await response.json();
+            const loginData = responseJson.data || responseJson;
+            handleOAuthCallback(loginData);
+          }
+        } catch (e) {
+          console.error("Error exchanging Better Auth session:", e);
+        }
       }
     };
 
     handleSession();
-  }, [sdk]);
+  }, [sdk, redirectTo]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

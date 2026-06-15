@@ -6,7 +6,6 @@ import { useRouter } from "@/i18n/navigation";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Cookies from 'js-cookie';
-import { supabase } from "@/lib/supabaseClient";
 import { userApi } from "@/lib/api/dashboardApi";
 
 const LogoutPage = () => {
@@ -25,9 +24,6 @@ const LogoutPage = () => {
         // Remove tokens from cookies
         Cookies.remove('token');
         Cookies.remove('refreshToken');
-
-        // Sign out from Supabase
-        await supabase.auth.signOut().catch(e => console.error("Supabase signOut error", e));
 
         // Notify the user
         toast.success("Logged out successfully! Redirecting to login...");

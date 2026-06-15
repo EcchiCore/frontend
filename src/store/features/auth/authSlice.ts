@@ -2,7 +2,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { DashboardUser } from '@/types/dashboard';
 import { userApi, ApiError } from '@/lib/api/dashboardApi';
-import { supabase } from "@/lib/supabaseClient";
 
 interface AuthState {
     user: DashboardUser | null;
@@ -116,7 +115,6 @@ export const loginUser = createAsyncThunk(
 export const logoutUser = createAsyncThunk(
     'auth/logoutUser',
     async (_, { dispatch }) => {
-        await supabase.auth.signOut();
         dispatch(logout());
     }
 );
