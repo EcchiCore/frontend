@@ -162,7 +162,7 @@ const Navbar = () => {
 
         {/* Search bar — Desktop: fixed width; Mobile: flex-1 fills space */}
         <div className="flex md:w-[240px] lg:w-[360px] flex-1 md:flex-none flex-shrink-0">
-          <NavbarSearch />
+          <NavbarSearch isMobile={!isDesktop} />
         </div>
 
         {/* Left Navigation Links (Desktop Only) — Games, Extensions */}
@@ -171,7 +171,7 @@ const Navbar = () => {
         </div>
 
         {/* Spacer — pushes right section to far right */}
-        <div className="flex-1" />
+        <div className="hidden md:block flex-1" />
 
         {/* Right Section: Language + Notifications + User + Register */}
         <div className="flex items-center gap-2 text-foreground">

@@ -4,10 +4,11 @@ import type React from "react"
 import { useSearchParams } from "next/navigation"
 import { usePathname, useRouter } from "@/i18n/navigation"
 import { useCallback, useEffect, useRef, useState } from "react"
+import { createPortal } from "react-dom"
 import { useTranslations } from "next-intl"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Search, X, Hash, Tag, Clock, Star, Loader2 } from "lucide-react"
+import { Search, X, Hash, Tag, Clock, Star, Loader2, ArrowLeft, Compass } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { getSdk } from "@/lib/sdk"
 
@@ -130,6 +131,33 @@ export default function NavbarSearch({ isMobile = false, onSearchComplete }: Nav
   const [activeSuggestion, setActiveSuggestion] = useState(-1)
   const wrapRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+
+  // Mobile overlay state
+  const [isOpen, setIsOpen] = useState(false)
+  const mobileInputRef = useRef<HTMLInputElement>(null)
+
+  // Prevent background scrolling when mobile search is open
+  useEffect(() => {
+    if (isMobile && isOpen) {
+      document.body.classList.add("overflow-hidden")
+      fetchMetadata() // Prefetch metadata on mobile overlay open
+    } else {
+      document.body.classList.remove("overflow-hidden")
+    }
+    return () => {
+      document.body.classList.remove("overflow-hidden")
+    }
+  }, [isOpen, isMobile])
+
+  // Focus mobile input on open
+  useEffect(() => {
+    if (isMobile && isOpen && mobileInputRef.current) {
+      const timer = setTimeout(() => {
+        mobileInputRef.current?.focus()
+      }, 100)
+      return () => clearTimeout(timer)
+    }
+  }, [isOpen, isMobile])
 
   // Load history from localStorage on mount
   useEffect(() => {
@@ -322,6 +350,7 @@ export default function NavbarSearch({ isMobile = false, onSearchComplete }: Nav
 
     addToHistory(textToSearch)
     setShowSuggestions(false)
+    setIsOpen(false)
 
     // Game code routing detection
     if (GAME_CODE_PATTERN.test(textToSearch) && forceType !== "text") {
@@ -582,6 +611,225 @@ export default function NavbarSearch({ isMobile = false, onSearchComplete }: Nav
   }
 
   let currentSection = ""
+
+  if (isMobile) {
+    return (
+      <div className="relative w-full">
+        {/* Trigger Button styled as search input */}
+        <button
+          type="button"
+          onClick={() => setIsOpen(true)}
+          className="flex items-center gap-2 px-3.5 bg-muted hover:bg-muted/80 border border-border text-muted-foreground text-sm rounded-full h-9 w-full transition-all duration-200 active:scale-[0.98]"
+        >
+          <Search className="h-4 w-4 text-muted-foreground shrink-0" />
+          <span className="truncate text-left text-muted-foreground/80">{tSearch("searchPlaceholder")}</span>
+        </button>
+
+        {/* Fullscreen Search Overlay */}
+        {isOpen && typeof window !== "undefined" && createPortal(
+          <div className="fixed inset-0 z-[9999] bg-background flex flex-col animate-in fade-in slide-in-from-top-2 duration-150 text-foreground">
+            {/* Header */}
+            <div className="flex items-center gap-3 px-4 py-3 border-b border-border bg-background">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="rounded-full shrink-0 hover:bg-muted h-9 w-9 p-0 flex items-center justify-center"
+                onClick={() => setIsOpen(false)}
+              >
+                <ArrowLeft className="h-5 w-5 text-foreground" />
+              </Button>
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault()
+                  handleSearch()
+                }}
+                className="relative flex-1"
+              >
+                <Input
+                  ref={mobileInputRef}
+                  value={searchText}
+                  onChange={(e) => {
+                    setSearchText(e.target.value)
+                    setActiveSuggestion(-1)
+                    setShowSuggestions(true)
+                  }}
+                  onKeyDown={handleKeyDown}
+                  placeholder={tSearch("searchPlaceholder")}
+                  className={cn(
+                    "pl-9 bg-muted hover:bg-muted/80 border border-border focus:border-primary text-foreground text-sm rounded-full h-10 w-full transition-all duration-200 focus:ring-2 focus:ring-primary/20 focus-visible:ring-0 focus-visible:ring-offset-0",
+                    searchText ? "pr-9" : "pr-3"
+                  )}
+                  autoComplete="off"
+                />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                {searchText && (
+                  <button
+                    type="button"
+                    onClick={clearSearch}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-1 rounded-full hover:bg-muted/80 transition-colors"
+                    aria-label="Clear search"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                )}
+              </form>
+            </div>
+
+            {/* Scrollable suggestions & guidance body */}
+            <div className="flex-1 overflow-y-auto px-4 py-5 space-y-6 pb-12">
+              {searchText.trim() === "" ? (
+                // Empty search state: history, guidance
+                <>
+                  {/* Search History */}
+                  {history.length > 0 && (
+                    <div className="space-y-2.5">
+                      <div className="flex items-center justify-between px-1">
+                        <h4 className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                          <Clock className="w-3.5 h-3.5" />
+                          {tSearch("searchHistory")}
+                        </h4>
+                        <button
+                          type="button"
+                          onClick={clearAllHistory}
+                          className="text-xs text-destructive hover:underline font-semibold"
+                        >
+                          {tSearch("clearAll")}
+                        </button>
+                      </div>
+                      <div className="divide-y divide-border border border-border rounded-2xl overflow-hidden bg-card">
+                        {history.map((h) => (
+                          <div
+                            key={h.query}
+                            className="flex items-center gap-3 py-1.5 px-3.5 hover:bg-muted active:bg-muted/80 transition-colors"
+                          >
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setSearchText(h.query)
+                                handleSearch(h.query)
+                              }}
+                              className="flex-1 text-left text-sm text-foreground truncate py-2.5"
+                            >
+                              {h.query}
+                            </button>
+                            <button
+                              type="button"
+                              onClick={(e) => toggleFavoriteHistory(h.query, e)}
+                              className="p-2.5 hover:bg-muted rounded-full text-muted-foreground transition-colors"
+                            >
+                              <Star
+                                className={cn(
+                                  "w-4 h-4 transition-colors",
+                                  h.isFavorite ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground hover:text-yellow-400"
+                                )}
+                              />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={(e) => deleteFromHistory(h.query, e)}
+                              className="p-2.5 hover:bg-muted rounded-full text-muted-foreground hover:text-destructive transition-colors"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Search Guidance grid */}
+                  <div className="space-y-2.5">
+                    <h4 className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5 px-1">
+                      <Compass className="w-3.5 h-3.5 text-primary" />
+                      {tSearch("searchGuidance")}
+                    </h4>
+                    <div className="grid grid-cols-2 gap-2.5">
+                      {guides.map((g) => (
+                        <button
+                          key={g.prefix}
+                          type="button"
+                          onClick={() => selectHelper(g.prefix)}
+                          className="flex flex-col text-left p-3.5 rounded-2xl border border-border bg-card hover:bg-muted transition-all duration-200 active:scale-[0.98]"
+                        >
+                          <span className="font-mono text-xs font-semibold text-primary">{g.label}</span>
+                          <span className="text-[10px] text-muted-foreground mt-1 leading-normal">{g.desc}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              ) : (
+                // Active typing suggestions list
+                <div className="space-y-3">
+                  <div className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground px-1">
+                    {tSearch("search")}
+                  </div>
+                  <div className="border border-border rounded-2xl overflow-hidden divide-y divide-border bg-card">
+                    {dropdownItems.map((item, index) => (
+                      <button
+                        key={`${item.type}-${item.value}-${index}`}
+                        type="button"
+                        onClick={() => handleSelectItem(item)}
+                        className={cn(
+                          "flex w-full items-center gap-3 px-4 py-3.5 text-sm text-left transition-colors border-b border-border last:border-b-0",
+                          index === activeSuggestion ? "bg-accent text-accent-foreground font-medium" : "hover:bg-muted text-foreground"
+                        )}
+                      >
+                        {item.type === "history" && (
+                          <>
+                            <Clock className="w-4 h-4 text-muted-foreground shrink-0" />
+                            <span className="flex-1 truncate">{item.label}</span>
+                          </>
+                        )}
+
+                        {item.type === "guide" && (
+                          <>
+                            <Hash className="w-4 h-4 text-primary shrink-0" />
+                            <span className="flex-1 font-mono font-medium text-foreground">{item.label}</span>
+                            {item.desc && (
+                              <span className="text-xs text-muted-foreground shrink-0">{item.desc}</span>
+                            )}
+                          </>
+                        )}
+
+                        {["tag", "category", "platform", "engine"].includes(item.type) && (
+                          <>
+                            <Tag className="w-4 h-4 text-muted-foreground shrink-0" />
+                            <span className="flex-1 truncate">{item.label}</span>
+                            <span className="text-[9px] text-muted-foreground bg-secondary px-2 py-0.5 rounded font-semibold uppercase tracking-wider scale-95 shrink-0">
+                              {item.type}
+                            </span>
+                          </>
+                        )}
+
+                        {(item.type === "code-code" || item.type === "code-text") && (
+                          <>
+                            <Hash className={cn("w-4 h-4 shrink-0", item.type === "code-code" ? "text-primary" : "text-muted-foreground")} />
+                            <div className="flex-1 min-w-0">
+                              <div className="font-semibold text-xs leading-none">{item.label}</div>
+                              {item.desc && <div className="text-[10px] text-muted-foreground mt-0.5 truncate">{item.desc}</div>}
+                            </div>
+                          </>
+                        )}
+
+                        {item.type === "search-fallback" && (
+                          <>
+                            <Search className="w-4 h-4 text-muted-foreground shrink-0" />
+                            <span className="truncate flex-1 font-medium">{tSearch('searchFor', { query: item.label })}</span>
+                          </>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>,
+          document.body
+        )}
+      </div>
+    )
+  }
 
   return (
     <div className="relative w-full" ref={wrapRef}>
