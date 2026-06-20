@@ -385,3 +385,80 @@ export function generateGameSoftwareStructuredData(article: Article, locale: Loc
     }
   };
 }
+
+/**
+ * Generate VideoObject structured data for articles to enable Video rich snippets for SEO
+ * @param article - Current article object
+ * @param locale - Current locale
+ * @returns JSON-LD VideoObject schema object
+ */
+export function generateVideoStructuredData(article: Article, locale: Locale) {
+  let videoUrl = (article as any).videoUrl || (article as any).video_url;
+
+  // Try to find any video link in the body
+  if (!videoUrl && article.body) {
+    const videoRegex = /https?:\/\/[^\s"'<>\(\)]+\.(?:mp4|webm|ogg)\b/i;
+    const match = article.body.match(videoRegex);
+    if (match) {
+      videoUrl = match[0];
+    } else {
+      const ytRegex = /https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?v=|youtube\.com\/embed\/|youtu\.be\/)([a-zA-Z0-9_-]{11})/i;
+      const ytMatch = article.body.match(ytRegex);
+      if (ytMatch) {
+        videoUrl = `https://www.youtube.com/watch?v=${ytMatch[1]}`;
+      }
+    }
+  }
+
+  // Check if any url in images has a video extension
+  if (!videoUrl && article.images) {
+    const videoImg = article.images.find(img => 
+      /\.(?:mp4|webm|ogg)$/i.test(img.url)
+    );
+    if (videoImg) {
+      videoUrl = videoImg.url;
+    }
+  }
+
+  // Fallback to the default webm video URL
+  if (!videoUrl) {
+    videoUrl = "https://vidoes.chanomhub.com/file/Chanomhub-Vidoes/20-1-26_2.webm?Authorization=4_0051e50adc6bddd0000000001_01c1e6d3_f3aa13_acct_M803cRTXDpM8g_fqY8ZYrBjl__c=";
+  }
+
+  const title = article.title;
+  const description = article.description || `${title} gameplay preview and features description.`;
+  
+  let thumbnailUrl = article.coverImage || article.mainImage || article.backgroundImage;
+  if (!thumbnailUrl && article.images && article.images.length > 0) {
+    thumbnailUrl = article.images[0].url;
+  }
+  if (!thumbnailUrl) {
+    thumbnailUrl = `${siteUrl}/chanomhub.ico`;
+  }
+
+  const articleUrl = locale === defaultLocale 
+    ? `${siteUrl}/articles/${article.slug}`
+    : `${siteUrl}/${locale}/articles/${article.slug}`;
+
+  const uploadDate = article.createdAt || new Date().toISOString();
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "VideoObject",
+    "name": `${title} Video Preview & Gameplay`,
+    "description": description,
+    "thumbnailUrl": [thumbnailUrl],
+    "uploadDate": uploadDate,
+    "contentUrl": videoUrl,
+    "embedUrl": articleUrl,
+    "duration": "PT1M00S",
+    "publisher": {
+      "@type": "Organization",
+      "name": "ChanomHub",
+      "logo": {
+        "@type": "ImageObject",
+        "url": `${siteUrl}/chanomhub.ico`
+      }
+    }
+  };
+}

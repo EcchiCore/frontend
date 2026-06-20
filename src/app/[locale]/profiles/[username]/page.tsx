@@ -93,9 +93,13 @@ export async function generateMetadata({
   const { username } = await params;
   const profile = await getProfile(username);
 
+  if (!profile) {
+    notFound();
+  }
+
   const frontendUrl = process.env.FRONTEND_URL ?? '';
-  const title = profile?.name ? `${profile.name}'s Profile` : 'User Profile';
-  const desc = profile?.bio ? `${profile.bio} - Profile of ${username} on ChanomHub` : `Explore ${username}'s profile on ChanomHub. See their articles, contributions and activity in the adult gaming community.`;
+  const title = `${profile.name}'s Profile`;
+  const desc = profile.bio ? `${profile.bio} - Profile of ${username} on ChanomHub` : `Explore ${username}'s profile on ChanomHub. See their articles, contributions and activity in the adult gaming community.`;
 
   return {
     title,

@@ -19,6 +19,7 @@ import {
   createSEOTitle,
   generateGameSoftwareStructuredData,
   constructContentPath,
+  generateVideoStructuredData,
 } from "@/utils/metadataUtils";
 import { getValidLocale, type Locale } from "@/utils/localeUtils";
 import { Article } from "@/types/article";
@@ -45,10 +46,7 @@ export async function generateMetadata(props: ArticlePageProps): Promise<Metadat
 
   const originalArticle = await getCachedArticle(slug, locale, token);
   if (!originalArticle) {
-    return {
-      title: 'Article Not Found',
-      description: 'The requested article could not be found',
-    };
+    notFound();
   }
 
   // Get main image URL - ensure we extract string value
@@ -218,6 +216,9 @@ export default async function ArticlePage(props: ArticlePageProps) {
   const isGame = originalArticle.platforms && originalArticle.platforms.length > 0;
   const gameJsonLd = isGame ? generateGameSoftwareStructuredData(originalArticle, locale) : null;
 
+  // Generate VideoObject structured data for Video SEO
+  const videoJsonLd = generateVideoStructuredData(originalArticle, locale);
+
   // Client Content: Hydrates after JS loads - replaces SSR content
   return (
     <>
@@ -241,6 +242,15 @@ export default async function ArticlePage(props: ArticlePageProps) {
           id="game-jsonld"
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(gameJsonLd) }}
+        />
+      )}
+
+      {/* VideoObject JSON-LD for Video SEO */}
+      {videoJsonLd && (
+        <Script
+          id="video-jsonld"
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(videoJsonLd) }}
         />
       )}
 
