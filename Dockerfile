@@ -1,5 +1,5 @@
 # Stage 1: Dependencies stage
-FROM oven/bun:1 AS deps
+FROM oven/bun:latest AS deps
 
 WORKDIR /app
 
@@ -8,7 +8,7 @@ COPY package.json bun.lockb* ./
 RUN bun install --frozen-lockfile
 
 # Stage 2: Build stage
-FROM oven/bun:1 AS builder
+FROM oven/bun:latest AS builder
 
 WORKDIR /app
 
