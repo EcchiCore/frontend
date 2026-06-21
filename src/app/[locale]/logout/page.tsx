@@ -7,9 +7,17 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Cookies from 'js-cookie';
 import { userApi } from "@/lib/api/dashboardApi";
+import { createChanomhubClient } from '@chanomhub/sdk';
+import { useAppDispatch } from "@/store/hooks";
+import { logout } from "@/store/features/auth/authSlice";
+
+const sdk = createChanomhubClient({
+  apiUrl: process.env.NEXT_PUBLIC_API_URL || 'https://api.chanomhub.com',
+});
 
 const LogoutPage = () => {
   const router = useRouter();
+  const dispatch = useAppDispatch();
   const logoutPerformed = useRef(false);
 
   useEffect(() => {
@@ -21,7 +29,13 @@ const LogoutPage = () => {
         // Revoke token on the server
         await userApi.logout().catch(e => console.error("Failed to revoke token on server", e));
         
-        // Remove tokens from cookies
+        // Sign out from Better Auth
+        await sdk.auth.signOut().catch(e => console.error("Better Auth sign out failed", e));
+
+        // Remove tokens from cookies via Redux action
+        dispatch(logout());
+
+        // Remove tokens from cookies manually just in case
         Cookies.remove('token');
         Cookies.remove('refreshToken');
 
@@ -39,7 +53,7 @@ const LogoutPage = () => {
     };
 
     performLogout();
-  }, [router]);
+  }, [router, dispatch]);
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100">

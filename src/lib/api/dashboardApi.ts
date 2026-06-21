@@ -206,10 +206,13 @@ export const userApi = {
     apiRequest<void>('/api/user', {
       method: 'DELETE',
     }),
-  logout: () =>
-    apiRequest<void>('/api/auth/logout', {
+  logout: () => {
+    const refreshToken = getCookie('refreshToken');
+    return apiRequest<void>('/api/auth/logout', {
       method: 'POST',
-    }),
+      body: JSON.stringify({ refreshToken }),
+    });
+  },
   logoutAll: () =>
     apiRequest<void>('/api/auth/logout-all', {
       method: 'POST',

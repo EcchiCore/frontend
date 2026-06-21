@@ -7,15 +7,8 @@ export default function LogoutButton() {
   const router = useRouter();
 
   const handleLogout = () => {
-    // Clear all cookies
-    const cookies = document.cookie.split(';');
-    cookies.forEach(cookie => {
-      const eqPos = cookie.indexOf('=');
-      const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
-      document.cookie = name + '=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/';
-    });
-    // Redirect to login page
-    router.push("/login");
+    // Redirect to logout page to perform clean server-side and client-side sign out
+    router.push("/logout");
   };
 
   return (

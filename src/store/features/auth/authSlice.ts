@@ -2,6 +2,11 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { DashboardUser } from '@/types/dashboard';
 import { userApi, ApiError } from '@/lib/api/dashboardApi';
+import { createChanomhubClient } from '@chanomhub/sdk';
+
+const sdk = createChanomhubClient({
+    apiUrl: process.env.NEXT_PUBLIC_API_URL || 'https://api.chanomhub.com',
+});
 
 interface AuthState {
     user: DashboardUser | null;
@@ -115,7 +120,16 @@ export const loginUser = createAsyncThunk(
 export const logoutUser = createAsyncThunk(
     'auth/logoutUser',
     async (_, { dispatch }) => {
-        dispatch(logout());
+        try {
+            // Revoke legacy tokens on backend
+            await userApi.logout().catch(e => console.error("Failed to revoke token on server", e));
+            // Sign out from Better Auth
+            await sdk.auth.signOut().catch(e => console.error("Better Auth sign out failed", e));
+        } catch (e) {
+            console.error("Logout async errors", e);
+        } finally {
+            dispatch(logout());
+        }
     }
 );
 
