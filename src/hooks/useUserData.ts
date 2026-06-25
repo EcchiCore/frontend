@@ -25,6 +25,7 @@ export const useUserData = () => {
     limit?: number;
     offset?: number;
     feedMode?: boolean;
+    q?: string;
   }) => {
     const cacheKey = `${CACHE_PREFIX}${JSON.stringify(params || {})}`;
 
@@ -46,6 +47,7 @@ export const useUserData = () => {
       if (params?.limit) queryParams.append('limit', params.limit.toString());
       if (params?.offset) queryParams.append('offset', params.offset.toString());
       if (params?.status) queryParams.append('status', params.status);
+      if (params?.q) queryParams.append('q', params.q);
 
       const response = params?.feedMode
         ? await articlesApi.getFeedArticles(queryParams)

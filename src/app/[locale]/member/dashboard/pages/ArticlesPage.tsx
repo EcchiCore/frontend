@@ -10,7 +10,8 @@ import {
   FunnelIcon,
   MagnifyingGlassIcon,
   PlusIcon,
-  ArrowUpOnSquareIcon
+  ArrowUpOnSquareIcon,
+  XMarkIcon
 } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
 import { useRouter, Link } from "@/i18n/navigation";
@@ -49,29 +50,49 @@ export const ArticlesPage: React.FC = () => {
 
   // Local state with explicit typing
   const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<ArticleStatus | 'all'>('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [showFilters, setShowFilters] = useState(false);
   const [feedMode, setFeedMode] = useState(false);
 
+  // Debounce search term
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchTerm);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  // Reset to page 1 when search or filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [debouncedSearch, statusFilter, feedMode]);
+
   // Fetch articles on component mount and when filters change
   useEffect(() => {
     const offset = (currentPage - 1) * itemsPerPage;
+    const queryTerm = debouncedSearch.trim();
+    const q = queryTerm.length >= 3 ? queryTerm : undefined;
+
     fetchArticles({
       status: statusFilter === 'all' ? undefined : statusFilter,
       limit: itemsPerPage,
       offset,
-      feedMode
+      feedMode,
+      q
     });
-  }, [fetchArticles, statusFilter, currentPage, itemsPerPage, feedMode]);
+  }, [fetchArticles, statusFilter, currentPage, itemsPerPage, feedMode, debouncedSearch]);
 
   // Filter articles based on search term
-  const filteredArticles = articles.filter(article =>
-    article.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    article.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (article.author.name && article.author.name.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  const filteredArticles = debouncedSearch.trim().length > 0 && debouncedSearch.trim().length < 3
+    ? articles.filter(article =>
+        article.title.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+        article.description.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+        (article.author.name && article.author.name.toLowerCase().includes(debouncedSearch.toLowerCase()))
+      )
+    : articles;
 
   // Handle favorite toggle
   const handleToggleFavorite = async (article: Article) => {
@@ -189,7 +210,17 @@ export const ArticlesPage: React.FC = () => {
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pr-10"
                 />
-                <MagnifyingGlassIcon className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                {searchTerm ? (
+                  <button
+                    onClick={() => setSearchTerm('')}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    aria-label="Clear search"
+                  >
+                    <XMarkIcon className="h-4 w-4" />
+                  </button>
+                ) : (
+                  <MagnifyingGlassIcon className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                )}
               </div>
             </div>
 
