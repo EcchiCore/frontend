@@ -2,7 +2,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTranslations } from 'next-intl';
-import { Download, ShieldCheck, Lock, X } from 'lucide-react';
+import { Download, ShieldCheck, Lock, X, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { getFileIcon, getFileSize } from "@/utils/fileUtils";
 import { DownloadFile } from "./Interfaces";
@@ -86,6 +86,7 @@ const ArticleDownloadSection: React.FC<ArticleDownloadSectionProps> = ({
   const [showSteamModal, setShowSteamModal] = React.useState(false);
   const [selectedFile, setSelectedFile] = React.useState<DownloadFile | null>(null);
   const [isMobile, setIsMobile] = React.useState(false);
+  const [showOlderVersions, setShowOlderVersions] = React.useState(false);
 
   // Detect mobile device layout and capabilities to skip Steam-style modal on mobile
   React.useEffect(() => {
@@ -156,108 +157,297 @@ const ArticleDownloadSection: React.FC<ArticleDownloadSectionProps> = ({
         {t('downloads.clickToGetAccess') || 'Click download now to get access to the following files:'}
       </p>
 
-      {/* Files List */}
-      <div id="download-files-list" className="divide-y divide-border/30 border border-border/40 rounded-2xl bg-card/40 backdrop-blur-md shadow-lg overflow-hidden">
-        {activeDownloads.map((dl, i) => {
-          const platformIcons = detectPlatforms(dl.name);
-          const sizeStr = "size" in dl && typeof dl.size === 'number' ? getFileSize(dl.size) : null;
-          
+      {/* Files List Grouped by Version */}
+      <div className="space-y-6">
+        {(() => {
+          const groupedDownloads: Record<string, DownloadFile[]> = {};
+          activeDownloads.forEach((dl) => {
+            const ver = dl.forVersion || 'All Versions';
+            if (!groupedDownloads[ver]) {
+              groupedDownloads[ver] = [];
+            }
+            groupedDownloads[ver].push(dl);
+          });
+
+          const versionKeys = Object.keys(groupedDownloads).sort((a, b) => {
+            if (a === 'All Versions') return 1;
+            if (b === 'All Versions') return -1;
+            return b.localeCompare(a, undefined, { numeric: true, sensitivity: 'base' });
+          });
+
+          // Find the latest version key (the first key that is not 'All Versions')
+          const latestVersionKey = versionKeys.find(k => k !== 'All Versions');
+
+          // Split into visible (latest version + All Versions) and older keys
+          const visibleKeys = versionKeys.filter(k => k === 'All Versions' || k === latestVersionKey);
+          const olderKeys = versionKeys.filter(k => k !== 'All Versions' && k !== latestVersionKey);
+
           return (
-            <motion.div 
-              key={dl.id}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.05 }}
-              className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 hover:bg-muted/10 transition-colors duration-200"
-            >
-              {/* Left Column: Icon + File Details */}
-              <div className="flex items-start gap-4 min-w-0">
-                {/* Outlined Custom document icon inside a rounded dark grey box */}
-                <div className="p-3 rounded-xl bg-slate-900/60 text-blue-500 shadow-inner border border-border/10 shrink-0">
-                  <svg className="w-6 h-6 fill-none stroke-current" viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
-                    <polyline points="14 2 14 8 20 8" />
-                  </svg>
-                </div>
-                
-                <div className="space-y-1.5 min-w-0">
-                  {isUnlocked ? (
-                    <button 
-                      onClick={() => handleDownloadClick(dl)}
-                      className="text-left font-extrabold text-foreground hover:text-primary transition-colors text-base md:text-lg block truncate cursor-pointer focus:outline-none"
-                    >
-                      {dl.name}
-                    </button>
-                  ) : (
-                    <button
-                      onClick={handlePurchase}
-                      disabled={isPurchasing}
-                      className="text-left font-extrabold text-muted-foreground/80 hover:text-primary transition-colors text-base md:text-lg block truncate cursor-pointer focus:outline-none"
-                    >
-                      {dl.name}
-                    </button>
-                  )}
-                  
-                  {/* Badges and Metadata row (visible on mobile under the title) */}
-                  <div className="flex flex-wrap items-center gap-2">
-                    {dl.forVersion && (
-                      <span className="inline-block text-[10px] font-black text-muted-foreground bg-muted px-2 py-0.5 rounded-md uppercase tracking-wider">
-                        v{dl.forVersion}
+            <>
+              {visibleKeys.map((versionKey) => {
+                const files = groupedDownloads[versionKey];
+                return (
+                  <div key={versionKey} className="space-y-3">
+                    <div className="flex items-center gap-2 px-1">
+                      <span className="text-sm font-black uppercase tracking-wider text-muted-foreground/80">
+                        {versionKey === 'All Versions' ? (t('downloads.allVersions') || 'All Versions / General') : `${t('downloads.version') || 'Version'} ${versionKey}`}
                       </span>
-                    )}
-                    {sizeStr && (
-                      <span className="inline-block text-[10px] font-black text-muted-foreground bg-muted px-2 py-0.5 rounded-md uppercase tracking-wider">
-                        {sizeStr}
-                      </span>
-                    )}
-                    {/* Render platform icons inline on mobile */}
-                    <div className="flex md:hidden items-center gap-1.5 ml-1">
-                      {platformIcons}
+                      {article.ver && versionKey === article.ver && (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-green-500/10 text-green-500 border border-green-500/20">
+                          {t('downloads.latest') || 'Latest'}
+                        </span>
+                      )}
+                      <div className="h-[1px] bg-border/30 flex-1 ml-2" />
+                    </div>
+                    <div className="divide-y divide-border/30 border border-border/40 rounded-2xl bg-card/40 backdrop-blur-md shadow-lg overflow-hidden">
+                      {files.map((dl, idx) => {
+                        const platformIcons = detectPlatforms(dl.name);
+                        const sizeStr = "size" in dl && typeof dl.size === 'number' ? getFileSize(dl.size) : null;
+                        
+                        return (
+                          <motion.div 
+                            key={dl.id}
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: idx * 0.05 }}
+                            className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 hover:bg-muted/10 transition-colors duration-200"
+                          >
+                            {/* Left Column: Icon + File Details */}
+                            <div className="flex items-start gap-4 min-w-0">
+                              <div className="p-3 rounded-xl bg-slate-900/60 text-blue-500 shadow-inner border border-border/10 shrink-0">
+                                <svg className="w-6 h-6 fill-none stroke-current" viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                  <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
+                                  <polyline points="14 2 14 8 20 8" />
+                                </svg>
+                              </div>
+                              
+                              <div className="space-y-1.5 min-w-0">
+                                {isUnlocked ? (
+                                  <button 
+                                    onClick={() => handleDownloadClick(dl)}
+                                    className="text-left font-extrabold text-foreground hover:text-primary transition-colors text-base md:text-lg block truncate cursor-pointer focus:outline-none"
+                                  >
+                                    {dl.name}
+                                  </button>
+                                ) : (
+                                  <button
+                                    onClick={handlePurchase}
+                                    disabled={isPurchasing}
+                                    className="text-left font-extrabold text-muted-foreground/80 hover:text-primary transition-colors text-base md:text-lg block truncate cursor-pointer focus:outline-none"
+                                  >
+                                    {dl.name}
+                                  </button>
+                                )}
+                                
+                                {/* Badges and Metadata row */}
+                                <div className="flex flex-wrap items-center gap-2">
+                                  {dl.forVersion && (
+                                    <span className="inline-block text-[10px] font-black text-muted-foreground bg-muted px-2 py-0.5 rounded-md uppercase tracking-wider">
+                                      v{dl.forVersion}
+                                    </span>
+                                  )}
+                                  {sizeStr && (
+                                    <span className="inline-block text-[10px] font-black text-muted-foreground bg-muted px-2 py-0.5 rounded-md uppercase tracking-wider">
+                                      {sizeStr}
+                                    </span>
+                                  )}
+                                  <div className="flex md:hidden items-center gap-1.5 ml-1">
+                                    {platformIcons}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Right Column: Platforms & Buttons */}
+                            <div className="flex flex-col sm:flex-row md:items-center gap-4 shrink-0 md:justify-end border-t border-border/20 pt-4 md:pt-0 md:border-0 mt-2 md:mt-0">
+                              <div className="hidden md:flex items-center gap-3">
+                                {platformIcons.length > 0 && (
+                                  <div className="flex items-center gap-1.5">
+                                    {platformIcons}
+                                  </div>
+                                )}
+                              </div>
+                              
+                              {isUnlocked ? (
+                                <Button 
+                                  size="lg"
+                                  onClick={() => handleDownloadClick(dl)}
+                                  className="w-full md:w-auto h-11 md:h-9 px-6 md:px-4 rounded-xl md:rounded-lg bg-white hover:bg-slate-100 text-slate-900 dark:bg-white dark:hover:bg-slate-100 dark:text-slate-900 font-black shadow-sm hover:scale-105 active:scale-95 transition-all text-sm md:text-xs cursor-pointer border border-border/10 flex items-center justify-center gap-2"
+                                >
+                                  <Download className="w-4 h-4 md:w-3.5 md:h-3.5 text-slate-800" />
+                                  Download
+                                </Button>
+                              ) : (
+                                <Button 
+                                  size="lg"
+                                  onClick={handlePurchase}
+                                  disabled={isPurchasing}
+                                  className="w-full md:w-auto h-11 md:h-9 px-6 md:px-4 rounded-xl md:rounded-lg bg-orange-500 hover:bg-orange-600 text-white font-black shadow-md hover:scale-105 active:scale-95 transition-all text-sm md:text-xs cursor-pointer flex items-center justify-center gap-2"
+                                >
+                                  {isPurchasing ? (
+                                    <div className="animate-spin rounded-full h-4 w-4 md:h-3 md:w-3 border-2 border-white/30 border-t-white" />
+                                  ) : (
+                                    <Lock className="w-4 h-4 md:w-3 md:h-3" />
+                                  )}
+                                  Unlock
+                                </Button>
+                              )}
+                            </div>
+                          </motion.div>
+                        );
+                      })}
                     </div>
                   </div>
-                </div>
-              </div>
+                );
+              })}
 
-              {/* Right Column: Platform icons (Desktop only) and Download/Unlock button */}
-              <div className="flex flex-col sm:flex-row md:items-center gap-4 shrink-0 md:justify-end border-t border-border/20 pt-4 md:pt-0 md:border-0 mt-2 md:mt-0">
-                {/* Platform Icons & Size (Desktop only) */}
-                <div className="hidden md:flex items-center gap-3">
-                  {platformIcons.length > 0 && (
-                    <div className="flex items-center gap-1.5">
-                      {platformIcons}
-                    </div>
-                  )}
-                </div>
-                
-                {/* Download Button */}
-                {isUnlocked ? (
-                  <Button 
-                    size="lg"
-                    onClick={() => handleDownloadClick(dl)}
-                    className="w-full md:w-auto h-11 md:h-9 px-6 md:px-4 rounded-xl md:rounded-lg bg-white hover:bg-slate-100 text-slate-900 dark:bg-white dark:hover:bg-slate-100 dark:text-slate-900 font-black shadow-sm hover:scale-105 active:scale-95 transition-all text-sm md:text-xs cursor-pointer border border-border/10 flex items-center justify-center gap-2"
-                  >
-                    <Download className="w-4 h-4 md:w-3.5 md:h-3.5 text-slate-800" />
-                    Download
-                  </Button>
-                ) : (
-                  <Button 
-                    size="lg"
-                    onClick={handlePurchase}
-                    disabled={isPurchasing}
-                    className="w-full md:w-auto h-11 md:h-9 px-6 md:px-4 rounded-xl md:rounded-lg bg-orange-500 hover:bg-orange-600 text-white font-black shadow-md hover:scale-105 active:scale-95 transition-all text-sm md:text-xs cursor-pointer flex items-center justify-center gap-2"
-                  >
-                    {isPurchasing ? (
-                      <div className="animate-spin rounded-full h-4 w-4 md:h-3 md:w-3 border-2 border-white/30 border-t-white" />
-                    ) : (
-                      <Lock className="w-4 h-4 md:w-3 md:h-3" />
+              {olderKeys.length > 0 && (
+                <div className="space-y-4 pt-4 border-t border-border/20">
+                  <div className="flex justify-center">
+                    <Button
+                      variant="outline"
+                      onClick={() => setShowOlderVersions(!showOlderVersions)}
+                      className="w-full md:w-auto px-6 h-10 flex items-center justify-center gap-2 border-border/40 hover:bg-muted/10 font-bold text-sm rounded-xl cursor-pointer"
+                    >
+                      {showOlderVersions ? (
+                        <>
+                          <ChevronUp className="w-4 h-4 text-muted-foreground" />
+                          <span>{t('downloads.hideOlderVersions') || 'Hide Older Versions'}</span>
+                        </>
+                      ) : (
+                        <>
+                          <ChevronDown className="w-4 h-4 text-muted-foreground" />
+                          <span>{t('downloads.showOlderVersions') || 'Show Older Versions'} ({olderKeys.length})</span>
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                  
+                  <AnimatePresence initial={false}>
+                    {showOlderVersions && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.3, ease: "easeInOut" }}
+                        className="overflow-hidden space-y-6"
+                      >
+                        {olderKeys.map((versionKey) => {
+                          const files = groupedDownloads[versionKey];
+                          return (
+                            <div key={versionKey} className="space-y-3 pt-2">
+                              <div className="flex items-center gap-2 px-1">
+                                <span className="text-sm font-black uppercase tracking-wider text-muted-foreground/80">
+                                  {t('downloads.version') || 'Version'} {versionKey}
+                                </span>
+                                <div className="h-[1px] bg-border/30 flex-1 ml-2" />
+                              </div>
+                              <div className="divide-y divide-border/30 border border-border/40 rounded-2xl bg-card/40 backdrop-blur-md shadow-lg overflow-hidden">
+                                {files.map((dl, idx) => {
+                                  const platformIcons = detectPlatforms(dl.name);
+                                  const sizeStr = "size" in dl && typeof dl.size === 'number' ? getFileSize(dl.size) : null;
+                                  
+                                  return (
+                                    <div 
+                                      key={dl.id}
+                                      className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 hover:bg-muted/10 transition-colors duration-200"
+                                    >
+                                      {/* Left Column: Icon + File Details */}
+                                      <div className="flex items-start gap-4 min-w-0">
+                                        <div className="p-3 rounded-xl bg-slate-900/60 text-blue-500 shadow-inner border border-border/10 shrink-0">
+                                          <svg className="w-6 h-6 fill-none stroke-current" viewBox="0 0 24 24" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                            <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
+                                            <polyline points="14 2 14 8 20 8" />
+                                          </svg>
+                                        </div>
+                                        
+                                        <div className="space-y-1.5 min-w-0">
+                                          {isUnlocked ? (
+                                            <button 
+                                              onClick={() => handleDownloadClick(dl)}
+                                              className="text-left font-extrabold text-foreground hover:text-primary transition-colors text-base md:text-lg block truncate cursor-pointer focus:outline-none"
+                                            >
+                                              {dl.name}
+                                            </button>
+                                          ) : (
+                                            <button
+                                              onClick={handlePurchase}
+                                              disabled={isPurchasing}
+                                              className="text-left font-extrabold text-muted-foreground/80 hover:text-primary transition-colors text-base md:text-lg block truncate cursor-pointer focus:outline-none"
+                                            >
+                                              {dl.name}
+                                            </button>
+                                          )}
+                                          
+                                          {/* Badges and Metadata row */}
+                                          <div className="flex flex-wrap items-center gap-2">
+                                            {dl.forVersion && (
+                                              <span className="inline-block text-[10px] font-black text-muted-foreground bg-muted px-2 py-0.5 rounded-md uppercase tracking-wider">
+                                                v{dl.forVersion}
+                                              </span>
+                                            )}
+                                            {sizeStr && (
+                                              <span className="inline-block text-[10px] font-black text-muted-foreground bg-muted px-2 py-0.5 rounded-md uppercase tracking-wider">
+                                                {sizeStr}
+                                              </span>
+                                            )}
+                                            <div className="flex md:hidden items-center gap-1.5 ml-1">
+                                              {platformIcons}
+                                            </div>
+                                          </div>
+                                        </div>
+                                      </div>
+
+                                      {/* Right Column: Platforms & Buttons */}
+                                      <div className="flex flex-col sm:flex-row md:items-center gap-4 shrink-0 md:justify-end border-t border-border/20 pt-4 md:pt-0 md:border-0 mt-2 md:mt-0">
+                                        <div className="hidden md:flex items-center gap-3">
+                                          {platformIcons.length > 0 && (
+                                            <div className="flex items-center gap-1.5">
+                                              {platformIcons}
+                                            </div>
+                                          )}
+                                        </div>
+                                        
+                                        {isUnlocked ? (
+                                          <Button 
+                                            size="lg"
+                                            onClick={() => handleDownloadClick(dl)}
+                                            className="w-full md:w-auto h-11 md:h-9 px-6 md:px-4 rounded-xl md:rounded-lg bg-white hover:bg-slate-100 text-slate-900 dark:bg-white dark:hover:bg-slate-100 dark:text-slate-900 font-black shadow-sm hover:scale-105 active:scale-95 transition-all text-sm md:text-xs cursor-pointer border border-border/10 flex items-center justify-center gap-2"
+                                          >
+                                            <Download className="w-4 h-4 md:w-3.5 md:h-3.5 text-slate-800" />
+                                            Download
+                                          </Button>
+                                        ) : (
+                                          <Button 
+                                            size="lg"
+                                            onClick={handlePurchase}
+                                            disabled={isPurchasing}
+                                            className="w-full md:w-auto h-11 md:h-9 px-6 md:px-4 rounded-xl md:rounded-lg bg-orange-500 hover:bg-orange-600 text-white font-black shadow-md hover:scale-105 active:scale-95 transition-all text-sm md:text-xs cursor-pointer flex items-center justify-center gap-2"
+                                          >
+                                            {isPurchasing ? (
+                                              <div className="animate-spin rounded-full h-4 w-4 md:h-3 md:w-3 border-2 border-white/30 border-t-white" />
+                                            ) : (
+                                              <Lock className="w-4 h-4 md:w-3 md:h-3" />
+                                            )}
+                                            Unlock
+                                          </Button>
+                                        )}
+                                      </div>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </motion.div>
                     )}
-                    Unlock
-                  </Button>
-                )}
-              </div>
-            </motion.div>
+                  </AnimatePresence>
+                </div>
+              )}
+            </>
           );
-        })}
+        })()}
       </div>
 
       {/* Steam-Style Modal Dialog (PC only) */}

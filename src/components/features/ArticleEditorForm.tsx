@@ -343,7 +343,8 @@ const DownloadManager: React.FC<{
     setItems: React.Dispatch<React.SetStateAction<DownloadItem[]>>;
     isPaid: boolean;
     title: string;
-}> = ({ articleId, gameSlug, items, setItems, isPaid, title }) => {
+    defaultVersion?: string;
+}> = ({ articleId, gameSlug, items, setItems, isPaid, title, defaultVersion }) => {
     const itemsRef = React.useRef(items);
     const [uploadingId, setUploadingId] = useState<string | null>(null);
     const [uploadProgress, setUploadProgress] = useState(0);
@@ -472,6 +473,7 @@ const DownloadManager: React.FC<{
             url: '',
             iframe: '',
             isActive: true,
+            forVersion: defaultVersion || '',
             syncStatus: 'new'
         };
 
@@ -662,15 +664,25 @@ const DownloadManager: React.FC<{
                                     </div>
                                 )}
                             </div>
+                            <div>
+                                <Label>For Version</Label>
+                                <Input
+                                    value={item.forVersion || ''}
+                                    onChange={(e) => updateDownload(item.tempId, 'forVersion', e.target.value)}
+                                    className="mt-1"
+                                    placeholder="e.g. v1.0.0 (Optional)"
+                                />
+                            </div>
+                            <div className="flex flex-col justify-end pb-1">
+                                <Label htmlFor={`active-${idx}`} className="mb-2 block">Status</Label>
+                                <div className="flex items-center space-x-2 h-9">
+                                    <Switch checked={item.isActive} onCheckedChange={(c) => updateDownload(item.tempId, 'isActive', c)} id={`active-${idx}`} />
+                                    <Label htmlFor={`active-${idx}`}>Active / Available for download</Label>
+                                </div>
+                            </div>
                             <div className="md:col-span-2">
                                 <Label>Embed / Iframe Code</Label>
                                 <Input disabled value={item.iframe} placeholder="Iframe not editable directly" className="mt-1 bg-muted/50" />
-                            </div>
-                            <div className="flex items-center gap-4">
-                                <div className="flex items-center space-x-2">
-                                    <Switch checked={item.isActive} onCheckedChange={(c) => updateDownload(item.tempId, 'isActive', c)} id={`active-${idx}`} />
-                                    <Label htmlFor={`active-${idx}`}>Active</Label>
-                                </div>
                             </div>
                             <div className="flex justify-end md:col-span-2">
                                 <Button type="button" variant="destructive" size="sm" onClick={() => removeDownload(item)}>
@@ -1411,6 +1423,7 @@ export const ArticleEditorForm = ({ slug = '', initialData, mode, locale = 'en' 
                                     setItems={setDownloadItems}
                                     isPaid={formData.isPaid}
                                     title={formData.title}
+                                    defaultVersion={formData.ver}
                                 />                            </CardContent>
                         </Card>
 
