@@ -11,7 +11,8 @@ import {
   MagnifyingGlassIcon,
   PlusIcon,
   ArrowUpOnSquareIcon,
-  XMarkIcon
+  XMarkIcon,
+  ArrowUturnLeftIcon
 } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
 import { useRouter, Link } from "@/i18n/navigation";
@@ -45,6 +46,8 @@ export const ArticlesPage: React.FC = () => {
     fetchArticles,
     toggleFavorite,
     deleteArticle,
+    restoreArticle,
+    permanentDeleteArticle,
     publishRequest
   } = useUserData();
 
@@ -105,7 +108,7 @@ export const ArticlesPage: React.FC = () => {
 
   // Handle article deletion
   const handleDeleteArticle = async (article: Article) => {
-    if (!window.confirm(`Are you sure you want to delete "${article.title}"?`)) {
+    if (!window.confirm(`Are you sure you want to delete "${article.title}"? It will be moved to Trash.`)) {
       return;
     }
 
@@ -114,6 +117,34 @@ export const ArticlesPage: React.FC = () => {
     } catch (error) {
       console.error('Failed to delete article:', error);
       alert('Failed to delete article. Please try again.');
+    }
+  };
+
+  // Handle article restore
+  const handleRestoreArticle = async (article: Article) => {
+    if (!window.confirm(`Are you sure you want to restore "${article.title}" to Draft?`)) {
+      return;
+    }
+
+    try {
+      await restoreArticle(article.slug);
+    } catch (error) {
+      console.error('Failed to restore article:', error);
+      alert('Failed to restore article. Please try again.');
+    }
+  };
+
+  // Handle article permanent deletion
+  const handlePermanentDeleteArticle = async (article: Article) => {
+    if (!window.confirm(`WARNING: Are you sure you want to PERMANENTLY delete "${article.title}"? This action cannot be undone and will delete all associated download links.`)) {
+      return;
+    }
+
+    try {
+      await permanentDeleteArticle(article.slug);
+    } catch (error) {
+      console.error('Failed to permanently delete article:', error);
+      alert('Failed to permanently delete article. Please try again.');
     }
   };
 
@@ -400,34 +431,59 @@ export const ArticlesPage: React.FC = () => {
                         {/* Show edit/delete only for own articles */}
                         {!feedMode && article.author.name === user?.username && (
                           <>
-                            {article.status === ArticleStatus.DRAFT && (
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handlePublishRequest(article)}
-                                disabled={publishingSlug === article.slug}
-                              >
-                                {publishingSlug === article.slug ? (
-                                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                                ) : (
-                                  <ArrowUpOnSquareIcon className="h-4 w-4 mr-2" />
+                            {article.status === ArticleStatus.DELETED ? (
+                              <>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleRestoreArticle(article)}
+                                  className="text-primary hover:text-primary"
+                                >
+                                  <ArrowUturnLeftIcon className="h-4 w-4 mr-2" />
+                                  Restore
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handlePermanentDeleteArticle(article)}
+                                  className="text-destructive hover:text-destructive"
+                                >
+                                  <TrashIcon className="h-4 w-4 mr-2" />
+                                  Delete Permanently
+                                </Button>
+                              </>
+                            ) : (
+                              <>
+                                {article.status === ArticleStatus.DRAFT && (
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => handlePublishRequest(article)}
+                                    disabled={publishingSlug === article.slug}
+                                  >
+                                    {publishingSlug === article.slug ? (
+                                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                    ) : (
+                                      <ArrowUpOnSquareIcon className="h-4 w-4 mr-2" />
+                                    )}
+                                    {publishingSlug === article.slug ? 'Requesting...' : 'Request Publish'}
+                                  </Button>
                                 )}
-                                {publishingSlug === article.slug ? 'Requesting...' : 'Request Publish'}
-                              </Button>
+                                <Button variant="outline" size="sm" onClick={() => router.push(`/editor/${article.slug}`)}>
+                                  <PencilIcon className="h-4 w-4 mr-2" />
+                                  Edit
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleDeleteArticle(article)}
+                                  className="text-destructive hover:text-destructive"
+                                >
+                                  <TrashIcon className="h-4 w-4 mr-2" />
+                                  Delete
+                                </Button>
+                              </>
                             )}
-                            <Button variant="outline" size="sm" onClick={() => router.push(`/editor/${article.slug}`)}>
-                              <PencilIcon className="h-4 w-4 mr-2" />
-                              Edit
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleDeleteArticle(article)}
-                              className="text-destructive hover:text-destructive"
-                            >
-                              <TrashIcon className="h-4 w-4 mr-2" />
-                              Delete
-                            </Button>
                           </>
                         )}
                       </div>

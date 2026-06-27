@@ -233,6 +233,15 @@ export const articlesApi = {
     apiRequest<void>(`/api/articles/${slug}`, {
       method: 'DELETE',
     }),
+  restoreArticle: (slug: string) =>
+    apiRequest<{ article: Article }>(`/api/articles/${slug}/restore`, {
+      method: 'POST',
+      body: JSON.stringify({}),
+    }),
+  permanentDeleteArticle: (slug: string) =>
+    apiRequest<void>(`/api/articles/${slug}/permanent`, {
+      method: 'DELETE',
+    }),
   favoriteArticle: (slug: string) =>
     apiRequest<{ article: Article }>(`/api/articles/${slug}/favorite`, {
       method: 'POST',

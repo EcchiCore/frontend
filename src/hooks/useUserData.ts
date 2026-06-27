@@ -140,6 +140,33 @@ export const useUserData = () => {
     }
   }, [removeArticle]);
 
+  const restoreArticle = useCallback(async (slug: string) => {
+    try {
+      const response = await articlesApi.restoreArticle(slug);
+      removeArticle(slug);
+      clearArticlesCache();
+      return (response as { article: Article }).article;
+    } catch (err) {
+      const errorMessage = err instanceof ApiError
+        ? err.message
+        : 'Failed to restore article';
+      throw new Error(errorMessage);
+    }
+  }, [removeArticle]);
+
+  const permanentDeleteArticle = useCallback(async (slug: string) => {
+    try {
+      await articlesApi.permanentDeleteArticle(slug);
+      removeArticle(slug);
+      clearArticlesCache();
+    } catch (err) {
+      const errorMessage = err instanceof ApiError
+        ? err.message
+        : 'Failed to permanently delete article';
+      throw new Error(errorMessage);
+    }
+  }, [removeArticle]);
+
   const publishRequest = useCallback(async (slug: string) => {
     try {
       await articlesApi.publishRequest(slug);
@@ -164,6 +191,8 @@ export const useUserData = () => {
     addArticle,
     toggleFavorite,
     deleteArticle,
+    restoreArticle,
+    permanentDeleteArticle,
     publishRequest
   };
 };
