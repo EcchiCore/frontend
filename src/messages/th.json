@@ -21,6 +21,11 @@
     "description": "Chanomhub ศูนย์รวมเกมสำหรับผู้ใหญ่และเกมที่แปลแล้ว"
   },
   "homePage": {
+    "otherTagsYouMayLike": "แท็กที่คุณอาจชอบ",
+    "tagMixes": "ผสมแท็กยอดนิยม",
+    "mixRpgFantasy": "RPG + แฟนตาซี",
+    "mixRpgAdventure": "RPG + ผจญภัย",
+    "mixRpgStoryRich": "RPG + เนื้อเรื่องเข้มข้น",
     "welcomeTo": "ยินดีต้อนรับสู่ Chanom",
     "hub": "Hub",
     "heroDescription": "เข้าร่วมชุมชนนักพัฒนาและผู้สร้างเกมสำหรับผู้ใหญ่ที่กำลังเติบโตอย่างรวดเร็ว แบ่งปันไอเดียและสร้างประสบการณ์ที่น่าตื่นเต้นไปด้วยกัน!",

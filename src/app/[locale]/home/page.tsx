@@ -1,9 +1,12 @@
 import HomeCarousel from './components/HomeCarousel';
 import SponsoredArticles from './components/SponsoredArticles';
-import GameShelf from './components/GameShelf';
-import ArticleShelf from './components/ArticleShelf';
-import CategoryPills from './components/CategoryPills';
-import ToolsShelf from './components/ToolsShelf';
+import FeatureStrip from './components/FeatureStrip';
+import TabbedGameLists from './components/TabbedGameLists';
+import SearchControlsWrapper from '@/app/[locale]/games/components/SearchControlsWrapper';
+import SidebarFilters from '@/app/[locale]/games/components/SidebarFilters';
+import Results from '@/app/[locale]/games/components/Results';
+import ResultsSkeleton from '@/app/[locale]/games/components/ResultsSkeleton';
+import DonationSidebarWidget from '@/components/DonationSidebarWidget';
 import DonationCTA from '@/components/DonationCTA';
 import { generatePageMetadata } from '@/utils/metadataUtils';
 import { getTranslations } from 'next-intl/server';
@@ -12,6 +15,12 @@ import { createChanomhubClient } from '@chanomhub/sdk';
 import type { ArticleField } from '@chanomhub/sdk';
 import { unstable_cache } from 'next/cache';
 import { singleFlight } from '@/lib/cache/singleFlight';
+import { Suspense } from 'react';
+
+type PageProps = {
+  params: Promise<{ locale: string }> | { locale: string }
+  searchParams: Promise<Record<string, string | string[] | undefined>>
+}
 
 export async function generateMetadata({ params }: { params: { locale?: string } }) {
   const locale = (params?.locale || 'en') as (typeof locales)[number];
@@ -38,33 +47,26 @@ const _getCachedHomeData = unstable_cache(
   async (token?: string) => {
     try {
       const sdk = createChanomhubClient({ token });
-      const [carouselData, featuredData, latestData, windowsData, androidData, sponsoredData] = await Promise.all([
+      const [carouselData, sponsoredData, rpgData] = await Promise.all([
         sdk.articles.getAll({ limit: 5, status: 'PUBLISHED', fields: HOME_CARD_FIELDS }),
-        sdk.articles.getAll({ limit: 12, status: 'PUBLISHED', fields: HOME_CARD_FIELDS }),
-        sdk.articles.getAll({ limit: 12, status: 'PUBLISHED', fields: HOME_CARD_FIELDS }),
-        sdk.articles.getByPlatform('windows', { limit: 12 }),
-        sdk.articles.getByPlatform('android', { limit: 12 }),
         sdk.sponsoredArticles.getAll().catch(() => []),
+        sdk.articles.getAll({ limit: 50, status: 'PUBLISHED', fields: HOME_CARD_FIELDS, filter: { tag: 'rpg' } }).catch(() => []),
       ]);
       return {
         carousel: carouselData || [],
-        featured: featuredData || [],
-        latest: latestData || [],
-        windows: windowsData || [],
-        android: androidData || [],
         sponsored: sponsoredData || [],
+        rpg: rpgData || [],
       };
     } catch (error) {
       console.error('Error fetching home page data:', error);
-      return { carousel: [], featured: [], latest: [], windows: [], android: [], sponsored: [] };
+      return { carousel: [], sponsored: [], rpg: [] };
     }
   },
-  ['home-page-data'],
+  ['home-page-data-v2'],
   { revalidate: 300 } // 5 minutes
 );
 
 // ห่อด้วย singleFlight ป้องกัน thundering herd
-// เมื่อ cache expired หลาย request พร้อมกัน → มีแค่ตัวเดียวที่ยิง API จริง
 const getCachedHomeData = (token?: string) =>
   singleFlight(`home-data-${token ? 'auth' : 'guest'}`, () => _getCachedHomeData(token));
 
@@ -81,11 +83,29 @@ const getStats = (t: any) => [
   { label: t('statsToday'),  val: '234',    color: 'text-primary' },
 ];
 
-export default async function HomePage({ params }: { params: { locale: string } }) {
+export default async function HomePage({ params, searchParams }: PageProps) {
   const token = await getAuthToken();
   const homeData = await getCachedHomeData(token);
+  
+  // Resolve locale translations
+  const resolvedParams = await params;
   const t = await getTranslations('homePage.HomePage');
   const stats = getStats(t);
+
+  const rpgGames = homeData.rpg || [];
+
+  const getMixGames = (games: any[], secondaryTag: string) => {
+    const matching = games.filter(g => g.tags?.some((t: any) => t.name.toLowerCase() === secondaryTag));
+    if (matching.length >= 8) {
+      return matching.slice(0, 8);
+    }
+    const remaining = games.filter(g => !matching.some(m => m.id === g.id));
+    return [...matching, ...remaining].slice(0, 8);
+  };
+
+  const mixRpgFantasy = getMixGames(rpgGames, 'fantasy');
+  const mixRpgAdventure = getMixGames(rpgGames, 'adventure');
+  const mixRpgStoryRich = getMixGames(rpgGames, 'story rich');
 
   return (
     <div className="min-h-screen bg-background">
@@ -98,9 +118,8 @@ export default async function HomePage({ params }: { params: { locale: string } 
         {/* Hero carousel */}
         <HomeCarousel articles={homeData.carousel} loading={false} />
 
-        {/* Single-column full-width content */}
-        <div className="container mx-auto px-3 pt-3 pb-12 max-w-5xl">
-
+        {/* Top Content: Stats, Donation CTA, Feature Strip, Tabbed Mixes */}
+        <div className="container mx-auto px-3 pt-3 pb-6 max-w-5xl">
           {/* Stats row */}
           <div className="grid grid-cols-4 gap-2 mb-5">
             {stats.map(({ label, val, color }) => (
@@ -116,40 +135,38 @@ export default async function HomePage({ params }: { params: { locale: string } 
             <DonationCTA />
           </div>
 
-          {/* Category filter pills */}
-          <CategoryPills />
+          {/* Other tags you may like */}
+          <FeatureStrip />
 
-          {/* Shelf: Recommended */}
-          <GameShelf
-            title={t('recommendedForYou')}
-            posts={homeData.featured}
-            href="/games"
+          {/* Tag mixes */}
+          <TabbedGameLists
+            mixRpgFantasy={mixRpgFantasy}
+            mixRpgAdventure={mixRpgAdventure}
+            mixRpgStoryRich={mixRpgStoryRich}
           />
 
-          {/* Shelf: Latest Posts */}
-          <ArticleShelf
-            title={t('latestPosts')}
-            posts={homeData.latest}
-            href="/articles"
-          />
+          {/* Centered Search Bar */}
+          <div id="catalog" className="max-w-2xl mx-auto my-8 pt-4">
+            <SearchControlsWrapper />
+          </div>
+        </div>
 
-          {/* Shelf: Tools */}
-          <ToolsShelf />
+        {/* Catalog Section (Sidebar + Results) with a wider max-w-7xl layout */}
+        <div className="container mx-auto px-4 pb-16 max-w-7xl">
+          <div className="flex gap-6 mt-4">
+            {/* Sidebar — desktop only, filters only */}
+            <aside className="hidden lg:flex flex-col w-[220px] shrink-0 gap-4">
+              <SidebarFilters />
+              <DonationSidebarWidget />
+            </aside>
 
-          {/* Shelf: Windows */}
-          <GameShelf
-            title={t('popularWindows')}
-            posts={homeData.windows}
-            href="/games?platform=windows"
-          />
-
-          {/* Shelf: Android */}
-          <GameShelf
-            title={t('popularAndroid')}
-            posts={homeData.android}
-            href="/games?platform=android"
-          />
-
+            {/* Main content */}
+            <main className="flex-1 min-w-0">
+              <Suspense fallback={<ResultsSkeleton />}>
+                <Results searchParams={searchParams} />
+              </Suspense>
+            </main>
+          </div>
         </div>
       </main>
     </div>
