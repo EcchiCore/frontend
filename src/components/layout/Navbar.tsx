@@ -208,9 +208,9 @@ const Navbar = () => {
           </Link>
 
           {!hasToken && (
-            <Link href="/register" className="hidden md:block">
+            <Link href="/login" className="hidden md:block">
               <Button variant="outline" size="sm" className="h-9 px-4 font-medium hover:bg-primary/5 hover:border-primary/20 transition-all duration-200">
-                {t('signUp')}
+                {t('signIn')}
               </Button>
             </Link>
           )}
@@ -268,9 +268,9 @@ const Navbar = () => {
                       {/* Login Button for non-authenticated users */}
                       {!hasToken && (
                         <div className="pt-4 border-t border-border/50">
-                          <Link href="/register" onClick={closeMenu} className="block">
+                          <Link href="/login" onClick={closeMenu} className="block">
                             <Button variant="outline" className="w-full h-11 font-medium hover:bg-primary/5 hover:border-primary/20 transition-all duration-200">
-                              {t('signUp')}
+                              {t('signIn')}
                             </Button>
                           </Link>
                         </div>
