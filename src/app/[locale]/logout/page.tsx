@@ -42,10 +42,8 @@ const LogoutPage = () => {
         // Notify the user
         toast.success("Logged out successfully! Redirecting to login...");
 
-        // Delay for 3 seconds before redirecting
-        setTimeout(() => {
-          router.push("/login");
-        }, 3000);
+        // Redirect immediately
+        router.push("/login");
       } catch (e) {
         console.error("Critical logout failure", e);
         router.push("/login");
