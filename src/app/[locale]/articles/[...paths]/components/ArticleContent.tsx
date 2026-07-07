@@ -565,66 +565,83 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
         {/* ── 2. Showcase Block (Split View) ── */}
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-5 bg-card border border-border p-4 sm:p-5 rounded-lg shadow-xl mb-6">
           
-          {/* Left Column: Media Slider */}
+          {/* Left Column: Media Slider or Game Embed */}
           <div className="flex flex-col min-w-0">
-            {/* Active Display Panel */}
-            <div 
-              onClick={() => activeSlide.type === "image" && handleImageClick()}
-              className={`relative w-full aspect-video bg-black/60 border border-border rounded-sm overflow-hidden flex items-center justify-center ${activeSlide.type === "image" ? "cursor-pointer group/active" : ""}`}
-            >
-              {activeSlide.type === "video" ? (
-                <video
-                  controls
-                  className="w-full h-full object-contain"
-                  preload="metadata"
-                  poster={getImageUrl(article.coverImage || article.mainImage || null, "hero") || undefined}
-                >
-                  <source src={activeSlide.url} type="video/webm" />
-                </video>
-              ) : (
-                <>
-                  <img
-                    src={activeSlide.url}
-                    alt={`${article.title} Media`}
-                    fetchPriority="high"
-                    className="w-full h-full object-contain select-none transition-transform duration-300 group-hover/active:scale-[1.01]"
-                    onError={() => handleUrlError(activeSlide.url)}
-                  />
-                  <div className="absolute top-3 left-3 bg-black/60 text-white p-2 rounded-sm opacity-0 group-hover/active:opacity-100 transition-opacity duration-200">
-                    <Maximize2 className="w-4 h-4" />
-                  </div>
-                </>
-              )}
-            </div>
-
-            {/* Thumbnails list */}
-            {slides.length > 1 && (
-              <div className="flex gap-2 mt-2 overflow-x-auto pb-1 [scrollbar-width:thin] scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
-                {slides.map((slide, idx) => {
-                  const isActive = idx === activeSlideIndex;
-                  return (
-                    <button
-                      key={idx}
-                      onClick={() => {
-                        setActiveSlideIndex(idx);
-                      }}
-                      className={`relative w-20 aspect-video rounded-sm overflow-hidden shrink-0 border transition-all duration-200 ${
-                        isActive 
-                          ? "border-primary opacity-100 ring-1 ring-primary/50" 
-                          : "border-border/60 opacity-60 hover:opacity-100 hover:border-primary/50"
-                      }`}
-                    >
-                      {slide.type === "video" ? (
-                        <div className="w-full h-full bg-muted flex items-center justify-center text-[9px] text-primary font-bold">
-                          ▶ VIDEO
-                        </div>
-                      ) : (
-                        <img src={slide.url} alt={`${article.title} thumbnail ${idx + 1}`} className="w-full h-full object-cover" onError={() => handleUrlError(slide.url)} />
-                      )}
-                    </button>
-                  );
-                })}
+            {article.embedUrl ? (
+              <div 
+                className={`relative w-full aspect-video bg-black/60 border border-border rounded-sm overflow-hidden flex items-center justify-center`}
+              >
+                <iframe
+                    src={article.embedUrl}
+                    className="w-full h-full"
+                    sandbox="allow-scripts allow-same-origin"
+                    allowFullScreen
+                    loading="lazy"
+                    title={article.title}
+                ></iframe>
               </div>
+            ) : (
+              <>
+                {/* Active Display Panel */}
+                <div 
+                  onClick={() => activeSlide.type === "image" && handleImageClick()}
+                  className={`relative w-full aspect-video bg-black/60 border border-border rounded-sm overflow-hidden flex items-center justify-center ${activeSlide.type === "image" ? "cursor-pointer group/active" : ""}`}
+                >
+                  {activeSlide.type === "video" ? (
+                    <video
+                      controls
+                      className="w-full h-full object-contain"
+                      preload="metadata"
+                      poster={getImageUrl(article.coverImage || article.mainImage || null, "hero") || undefined}
+                    >
+                      <source src={activeSlide.url} type="video/webm" />
+                    </video>
+                  ) : (
+                    <>
+                      <img
+                        src={activeSlide.url}
+                        alt={`${article.title} Media`}
+                        fetchPriority="high"
+                        className="w-full h-full object-contain select-none transition-transform duration-300 group-hover/active:scale-[1.01]"
+                        onError={() => handleUrlError(activeSlide.url)}
+                      />
+                      <div className="absolute top-3 left-3 bg-black/60 text-white p-2 rounded-sm opacity-0 group-hover/active:opacity-100 transition-opacity duration-200">
+                        <Maximize2 className="w-4 h-4" />
+                      </div>
+                    </>
+                  )}
+                </div>
+
+                {/* Thumbnails list */}
+                {slides.length > 1 && (
+                  <div className="flex gap-2 mt-2 overflow-x-auto pb-1 [scrollbar-width:thin] scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
+                    {slides.map((slide, idx) => {
+                      const isActive = idx === activeSlideIndex;
+                      return (
+                        <button
+                          key={idx}
+                          onClick={() => {
+                            setActiveSlideIndex(idx);
+                          }}
+                          className={`relative w-20 aspect-video rounded-sm overflow-hidden shrink-0 border transition-all duration-200 ${
+                            isActive 
+                              ? "border-primary opacity-100 ring-1 ring-primary/50" 
+                              : "border-border/60 opacity-60 hover:opacity-100 hover:border-primary/50"
+                          }`}
+                        >
+                          {slide.type === "video" ? (
+                            <div className="w-full h-full bg-muted flex items-center justify-center text-[9px] text-primary font-bold">
+                              ▶ VIDEO
+                            </div>
+                          ) : (
+                            <img src={slide.url} alt={`${article.title} thumbnail ${idx + 1}`} className="w-full h-full object-cover" onError={() => handleUrlError(slide.url)} />
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </>
             )}
           </div>
 

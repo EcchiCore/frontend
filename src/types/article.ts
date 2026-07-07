@@ -48,4 +48,5 @@ export type Article = {
   ratingsAverage?: number;
   ratingsCount?: number;
   related?: any[];
+  embedUrl?: string | null;
 };
