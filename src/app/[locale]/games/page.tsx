@@ -51,7 +51,7 @@ export default async function GamesPage({ searchParams }: PageProps) {
           <div className="flex gap-6 mt-4">
             {/* Sidebar — desktop only, filters only (no search bar) */}
             <aside className="hidden lg:flex flex-col w-[220px] shrink-0 gap-4">
-              <SidebarFilters />
+              <SidebarFilters context="games" />
               <DonationSidebarWidget />
             </aside>
 

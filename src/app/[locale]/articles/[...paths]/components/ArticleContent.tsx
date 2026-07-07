@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import { preload } from "react-dom";
 import dynamic from "next/dynamic";
 import { mutate } from "swr";
@@ -136,9 +136,8 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
           return (
             <Star
               key={s}
-              className={`w-3.5 h-3.5 ${
-                isFilled ? "fill-current" : isHalf ? "fill-current opacity-70" : "opacity-30"
-              }`}
+              className={`w-3.5 h-3.5 ${isFilled ? "fill-current" : isHalf ? "fill-current opacity-70" : "opacity-30"
+                }`}
             />
           );
         })}
@@ -150,7 +149,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
     if (typeof window !== "undefined" && article.platforms) {
       const userAgent = window.navigator.userAgent.toLowerCase();
       const articlePlatforms = article.platforms.map(p => p.name.toLowerCase());
-      
+
       let detected = "";
       if (userAgent.includes("win") && articlePlatforms.includes("windows")) {
         detected = "windows";
@@ -161,7 +160,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
       } else if ((userAgent.includes("android") || userAgent.includes("mobile")) && (articlePlatforms.includes("android") || articlePlatforms.includes("apk") || articlePlatforms.includes("mobile"))) {
         detected = articlePlatforms.find(p => ["android", "apk", "mobile"].includes(p)) || "";
       }
-      
+
       if (detected) {
         setActivePlatform(detected);
       }
@@ -344,7 +343,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
 
   // ── Assemble media slides ──
   const slides: { type: "video" | "image"; url: string }[] = [];
-  
+
   if (article.mainImage) {
     slides.push({ type: "image", url: getSlideUrl(article.mainImage, "hero") });
   }
@@ -380,6 +379,43 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
 
   const [activeSlideIndex, setActiveSlideIndex] = useState(0);
   const activeSlide = slides[activeSlideIndex] || { type: "image", url: "/placeholder-image.png" };
+
+  const thumbsContainerRef = useRef<HTMLDivElement>(null);
+
+  const handleNextSlide = () => {
+    if (slides.length === 0) return;
+    setActiveSlideIndex((prev) => (prev + 1) % slides.length);
+  };
+
+  const handlePrevSlide = () => {
+    if (slides.length === 0) return;
+    setActiveSlideIndex((prev) => (prev - 1 + slides.length) % slides.length);
+  };
+
+  const scrollThumbs = (direction: "left" | "right") => {
+    if (thumbsContainerRef.current) {
+      const scrollAmount = 240;
+      thumbsContainerRef.current.scrollBy({
+        left: direction === "left" ? -scrollAmount : scrollAmount,
+        behavior: "smooth",
+      });
+    }
+  };
+
+  // Scroll active thumbnail into view
+  useEffect(() => {
+    if (thumbsContainerRef.current) {
+      const container = thumbsContainerRef.current;
+      const activeElement = container.children[activeSlideIndex] as HTMLElement;
+      if (activeElement) {
+        activeElement.scrollIntoView({
+          behavior: "smooth",
+          block: "nearest",
+          inline: "center",
+        });
+      }
+    }
+  }, [activeSlideIndex]);
 
   // ── Fullscreen Modal Gallery States ──
   const imageSlides = slides.filter(s => s.type === "image");
@@ -446,7 +482,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
 
   return (
     <div className="client-article-loaded min-h-screen bg-background text-foreground pb-16 font-sans relative overflow-x-hidden">
-      
+
       {/* ── Background Hero Effect (Ambient Glow using design system variables) ────────────────────────────── */}
       <div className="absolute top-0 left-0 w-full h-[600px] -z-10 pointer-events-none overflow-hidden opacity-30">
         <div className="absolute inset-0 z-10 bg-gradient-to-b from-transparent via-background to-background" />
@@ -509,17 +545,17 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
         {/* Title & Ratings Header */}
         <div className="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-border/20 pb-4">
           <div className="text-3xl font-bold text-[#dcdedf] tracking-wide">{article.title}</div>
-          
+
           <div className="flex items-center gap-2.5 bg-muted/10 border border-border/20 px-3 py-1.5 rounded-md backdrop-blur-sm w-fit md:self-center text-xs text-muted-foreground select-none">
             {/* Combined Interactive Stars */}
             <div className="flex items-center">
               {[1, 2, 3, 4, 5].map((star) => {
                 const isHovered = hoverRating > 0;
-                const isFilled = isHovered 
-                  ? hoverRating >= star 
+                const isFilled = isHovered
+                  ? hoverRating >= star
                   : localRatingsAverage >= star;
                 const isHalf = !isHovered && !isFilled && localRatingsAverage + 0.5 >= star;
-                
+
                 return (
                   <button
                     key={star}
@@ -532,13 +568,12 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
                     title={t('rateThisGame')}
                   >
                     <Star
-                      className={`w-4 h-4 transition-colors duration-150 ${
-                        isFilled 
-                          ? "fill-yellow-400 text-yellow-400" 
-                          : isHalf 
-                            ? "fill-yellow-400 text-yellow-400 opacity-70" 
-                            : "text-muted-foreground/30"
-                      }`}
+                      className={`w-4 h-4 transition-colors duration-150 ${isFilled
+                        ? "fill-yellow-400 text-yellow-400"
+                        : isHalf
+                          ? "fill-yellow-400 text-yellow-400 opacity-70"
+                          : "text-muted-foreground/30"
+                        }`}
                     />
                   </button>
                 );
@@ -564,28 +599,27 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
 
         {/* ── 2. Showcase Block (Split View) ── */}
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-5 bg-card border border-border p-4 sm:p-5 rounded-lg shadow-xl mb-6">
-          
+
           {/* Left Column: Media Slider or Game Embed */}
           <div className="flex flex-col min-w-0">
             {article.embedUrl ? (
-              <div 
+              <div
                 className={`relative w-full aspect-video bg-black/60 border border-border rounded-sm overflow-hidden flex items-center justify-center`}
               >
                 <iframe
-                    src={article.embedUrl}
-                    className="w-full h-full"
-                    sandbox="allow-scripts allow-same-origin"
-                    allowFullScreen
-                    loading="lazy"
-                    title={article.title}
+                  src={article.embedUrl}
+                  className="w-full h-full"
+                  sandbox="allow-scripts allow-same-origin"
+                  allowFullScreen
+                  loading="lazy"
+                  title={article.title}
                 ></iframe>
               </div>
             ) : (
               <>
                 {/* Active Display Panel */}
-                <div 
-                  onClick={() => activeSlide.type === "image" && handleImageClick()}
-                  className={`relative w-full aspect-video bg-black/60 border border-border rounded-sm overflow-hidden flex items-center justify-center ${activeSlide.type === "image" ? "cursor-pointer group/active" : ""}`}
+                <div
+                  className={`relative w-full aspect-video bg-black/60 border border-border rounded-sm overflow-hidden flex items-center justify-center group/panel`}
                 >
                   {activeSlide.type === "video" ? (
                     <video
@@ -597,48 +631,110 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
                       <source src={activeSlide.url} type="video/webm" />
                     </video>
                   ) : (
-                    <>
+                    <div
+                      onClick={handleImageClick}
+                      className="w-full h-full flex items-center justify-center cursor-pointer relative"
+                    >
                       <img
                         src={activeSlide.url}
                         alt={`${article.title} Media`}
                         fetchPriority="high"
-                        className="w-full h-full object-contain select-none transition-transform duration-300 group-hover/active:scale-[1.01]"
+                        className="w-full h-full object-contain select-none transition-transform duration-300 hover:scale-[1.01]"
                         onError={() => handleUrlError(activeSlide.url)}
                       />
-                      <div className="absolute top-3 left-3 bg-black/60 text-white p-2 rounded-sm opacity-0 group-hover/active:opacity-100 transition-opacity duration-200">
+                      <div className="absolute top-3 left-3 bg-black/60 text-white p-2 rounded-sm opacity-0 group-hover/panel:opacity-100 transition-opacity duration-200 pointer-events-none">
                         <Maximize2 className="w-4 h-4" />
                       </div>
+                    </div>
+                  )}
+
+                  {/* Left & Right Slide Navigation Arrows */}
+                  {slides.length > 1 && (
+                    <>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handlePrevSlide();
+                        }}
+                        className="absolute left-3 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-primary text-white p-2 rounded-full transition-all duration-200 opacity-0 group-hover/panel:opacity-100 hover:scale-105 active:scale-95 shadow-md z-10"
+                        aria-label="Previous slide"
+                      >
+                        <ChevronLeft className="w-5 h-5" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleNextSlide();
+                        }}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-primary text-white p-2 rounded-full transition-all duration-200 opacity-0 group-hover/panel:opacity-100 hover:scale-105 active:scale-95 shadow-md z-10"
+                        aria-label="Next slide"
+                      >
+                        <ChevronRight className="w-5 h-5" />
+                      </button>
                     </>
                   )}
                 </div>
 
                 {/* Thumbnails list */}
                 {slides.length > 1 && (
-                  <div className="flex gap-2 mt-2 overflow-x-auto pb-1 [scrollbar-width:thin] scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
-                    {slides.map((slide, idx) => {
-                      const isActive = idx === activeSlideIndex;
-                      return (
-                        <button
-                          key={idx}
-                          onClick={() => {
-                            setActiveSlideIndex(idx);
-                          }}
-                          className={`relative w-20 aspect-video rounded-sm overflow-hidden shrink-0 border transition-all duration-200 ${
-                            isActive 
-                              ? "border-primary opacity-100 ring-1 ring-primary/50" 
+                  <div className="relative group/thumbs mt-2">
+                    {/* Left Scroll Arrow Button */}
+                    <button
+                      type="button"
+                      onClick={() => scrollThumbs("left")}
+                      className="absolute left-0 top-0 bottom-0 z-10 flex items-center justify-center w-8 bg-gradient-to-r from-card via-card/70 to-transparent hover:from-card hover:to-transparent text-muted-foreground hover:text-foreground transition-all duration-200 opacity-0 group-hover/thumbs:opacity-100"
+                      aria-label="Scroll left"
+                    >
+                      <ChevronLeft className="w-5 h-5" />
+                    </button>
+
+                    {/* Right Scroll Arrow Button */}
+                    <button
+                      type="button"
+                      onClick={() => scrollThumbs("right")}
+                      className="absolute right-0 top-0 bottom-0 z-10 flex items-center justify-center w-8 bg-gradient-to-l from-card via-card/70 to-transparent hover:from-card hover:to-transparent text-muted-foreground hover:text-foreground transition-all duration-200 opacity-0 group-hover/thumbs:opacity-100"
+                      aria-label="Scroll right"
+                    >
+                      <ChevronRight className="w-5 h-5" />
+                    </button>
+
+                    {/* Scrollable Container */}
+                    <div
+                      ref={thumbsContainerRef}
+                      className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden px-8 scroll-smooth"
+                    >
+                      {slides.map((slide, idx) => {
+                        const isActive = idx === activeSlideIndex;
+                        return (
+                          <button
+                            key={idx}
+                            type="button"
+                            onClick={() => {
+                              setActiveSlideIndex(idx);
+                            }}
+                            className={`relative w-37 aspect-video rounded-sm overflow-hidden shrink-0 border transition-all duration-200 ${isActive
+                              ? "border-primary opacity-100 ring-1 ring-primary/50"
                               : "border-border/60 opacity-60 hover:opacity-100 hover:border-primary/50"
-                          }`}
-                        >
-                          {slide.type === "video" ? (
-                            <div className="w-full h-full bg-muted flex items-center justify-center text-[9px] text-primary font-bold">
-                              ▶ VIDEO
-                            </div>
-                          ) : (
-                            <img src={slide.url} alt={`${article.title} thumbnail ${idx + 1}`} className="w-full h-full object-cover" onError={() => handleUrlError(slide.url)} />
-                          )}
-                        </button>
-                      );
-                    })}
+                              }`}
+                          >
+                            {slide.type === "video" ? (
+                              <div className="w-full h-full bg-muted flex items-center justify-center text-[9px] text-primary font-bold">
+                                ▶ VIDEO
+                              </div>
+                            ) : (
+                              <img
+                                src={slide.url}
+                                alt={`${article.title} thumbnail ${idx + 1}`}
+                                className="w-full h-full object-cover"
+                                onError={() => handleUrlError(slide.url)}
+                              />
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
                 )}
               </>
@@ -780,14 +876,14 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
 
         {/* ── 5. Main Content Columns ── */}
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-6 items-start">
-          
+
           {/* Left Column: About & Reviews */}
           <main className="min-w-0 space-y-6">
-            
+
             {/* About This Game Card */}
             <Card className="border border-border bg-card rounded-lg p-5 sm:p-7 shadow-lg">
               <CardContent className="p-0 space-y-6">
-                
+
                 {/* Title */}
                 <div className="border-b border-border pb-3 mb-5">
                   <h2 className="text-base sm:text-lg font-bold text-foreground uppercase tracking-wider">
@@ -847,18 +943,17 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
                       <div className="flex gap-1 bg-muted p-0.5 rounded-sm border border-border">
                         {platforms.map(p => {
                           const displayLabel = p === "windows" ? "Windows" :
-                                               p === "macos" ? "macOS" :
-                                               p === "linux" ? "SteamOS + Linux" :
-                                               ["android", "apk", "mobile"].includes(p) ? "Android" : p.toUpperCase();
+                            p === "macos" ? "macOS" :
+                              p === "linux" ? "SteamOS + Linux" :
+                                ["android", "apk", "mobile"].includes(p) ? "Android" : p.toUpperCase();
                           return (
                             <button
                               key={p}
                               onClick={() => setActivePlatform(p)}
-                              className={`px-3 py-1 text-[10px] font-bold rounded-sm uppercase tracking-wider transition-all cursor-pointer ${
-                                selectedPlatform === p 
-                                  ? "bg-background text-primary shadow-sm border border-border" 
-                                  : "text-muted-foreground hover:text-foreground"
-                              }`}
+                              className={`px-3 py-1 text-[10px] font-bold rounded-sm uppercase tracking-wider transition-all cursor-pointer ${selectedPlatform === p
+                                ? "bg-background text-primary shadow-sm border border-border"
+                                : "text-muted-foreground hover:text-foreground"
+                                }`}
                             >
                               {displayLabel}
                             </button>
@@ -1052,7 +1147,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
                       <td className="py-2 text-center text-primary">✔</td>
                       <td className="py-2 text-center text-primary">✔</td>
                     </tr>
-                    
+
                     {/* จากม็อดชุมชน (Community Mod) */}
                     <tr className="bg-muted/30">
                       <td colSpan={3} className="py-1 px-2 font-bold text-foreground text-[9px] uppercase tracking-wider">
@@ -1133,7 +1228,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
           </div>
         </DialogContent>
       </Dialog>
-      
+
       {/* ── Fullscreen Image Modal Gallery ── */}
       {isModalOpen && imageSlides.length > 0 && (
         <div className="fixed inset-0 bg-black/95 backdrop-blur-sm z-[100] flex items-center justify-center">
@@ -1179,9 +1274,9 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
           {/* Zoom and download Controls */}
           <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 z-20">
             <div className="flex items-center gap-2 bg-white/10 rounded-2xl px-6 py-2.5 backdrop-blur-md">
-              <button 
-                onClick={handleZoomOut} 
-                className="p-1.5 text-white hover:bg-white/20 rounded-xl transition-all duration-200 hover:scale-110" 
+              <button
+                onClick={handleZoomOut}
+                className="p-1.5 text-white hover:bg-white/20 rounded-xl transition-all duration-200 hover:scale-110"
                 title="Zoom Out"
               >
                 <ZoomOut className="w-4 h-4" />
@@ -1191,17 +1286,17 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
                 {Math.round(zoomLevel * 100)}%
               </span>
 
-              <button 
-                onClick={handleZoomIn} 
-                className="p-1.5 text-white hover:bg-white/20 rounded-xl transition-all duration-200 hover:scale-110" 
+              <button
+                onClick={handleZoomIn}
+                className="p-1.5 text-white hover:bg-white/20 rounded-xl transition-all duration-200 hover:scale-110"
                 title="Zoom In"
               >
                 <ZoomIn className="w-4 h-4" />
               </button>
 
-              <button 
-                onClick={resetZoom} 
-                className="p-1.5 text-white hover:bg-white/20 rounded-xl transition-all duration-200 hover:scale-110" 
+              <button
+                onClick={resetZoom}
+                className="p-1.5 text-white hover:bg-white/20 rounded-xl transition-all duration-200 hover:scale-110"
                 title="Reset Zoom"
               >
                 <RotateCcw className="w-4 h-4" />
@@ -1209,9 +1304,9 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
 
               <div className="w-px h-5 bg-white/30 mx-1.5" />
 
-              <button 
-                onClick={downloadImage} 
-                className="p-1.5 text-white hover:bg-white/20 rounded-xl transition-all duration-200 hover:scale-110" 
+              <button
+                onClick={downloadImage}
+                className="p-1.5 text-white hover:bg-white/20 rounded-xl transition-all duration-200 hover:scale-110"
                 title="Download Image"
               >
                 <Download className="w-4 h-4" />
