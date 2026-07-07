@@ -744,7 +744,7 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
           {/* Right Column: Capsule Info Card */}
           <div className="flex flex-col justify-between h-full gap-4 text-xs">
             {/* Top capsule thumbnail image */}
-            <div className="relative w-full h-[150px] bg-muted border border-border rounded-sm overflow-hidden shadow-inner">
+            <div className="hidden lg:block relative w-full h-[150px] bg-muted border border-border rounded-sm overflow-hidden shadow-inner">
               {(() => {
                 const capsuleUrl = getSlideUrl(article.coverImage || article.mainImage || article.backgroundImage, "hero");
                 return (
@@ -901,14 +901,17 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
                 {/* Body Content */}
                 <div
                   className={`prose prose-lg max-w-none text-muted-foreground prose-invert prose-primary
+                            w-full max-w-full break-words overflow-hidden
                             prose-headings:text-foreground prose-headings:font-bold prose-headings:tracking-tight prose-headings:mt-6 prose-headings:mb-3
                             prose-h2:text-base prose-h2:border-b prose-h2:border-border/50 prose-h2:pb-2
                             prose-p:mb-4 prose-p:leading-relaxed prose-p:text-xs prose-p:text-muted-foreground
                             prose-a:text-primary prose-a:underline hover:prose-a:text-primary/85
                             prose-img:max-w-full prose-img:h-auto prose-img:rounded-md prose-img:my-6 prose-img:border prose-img:border-border
-                            prose-table:border-collapse prose-table:w-full prose-table:my-5 prose-table:text-xs
+                            prose-table:block prose-table:overflow-x-auto prose-table:w-full prose-table:my-5 prose-table:text-xs
                             prose-th:border prose-th:border-border/60 prose-th:px-3 prose-th:py-2 prose-th:text-left prose-th:font-semibold prose-th:bg-muted/50
-                            prose-td:border prose-td:border-border/40 prose-td:px-3 prose-td:py-2`}
+                            prose-td:border prose-td:border-border/40 prose-td:px-3 prose-td:py-2
+                            [&_img]:max-w-full [&_img]:h-auto
+                            [&_iframe]:max-w-full [&_iframe]:w-full [&_iframe]:aspect-video [&_iframe]:h-auto`}
                   dangerouslySetInnerHTML={{ __html: sanitizedBody }}
                 />
 
