@@ -71,6 +71,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     },
     other: {
       'webmention': 'https://webmention.io/chanomhub.com/webmention',
+      'juicyads-site-verification': 'c8c734ceaf30f78219c087f4fa46069f',
     },
   };
 }
@@ -199,19 +200,6 @@ export default async function LocaleSegmentLayout({
           }}
         />
 
-        {/* Gatekeeper Consent */}
-        <Script data-cfasync="false" src="https://cmp.gatekeeperconsent.com/min.js" strategy="beforeInteractive" />
-        <Script data-cfasync="false" src="https://the.gatekeeperconsent.com/cmp.min.js" strategy="beforeInteractive" />
-
-        {/* Ezoic */}
-        <Script src="https://www.ezojs.com/ezoic/sa.min.js" strategy="beforeInteractive" />
-        <Script id="ezoic-standalone" strategy="beforeInteractive">
-          {`
-            window.ezstandalone = window.ezstandalone || {};
-            ezstandalone.cmd = ezstandalone.cmd || [];
-          `}
-        </Script>
-        <Script src="https://ezoicanalytics.com/analytics.js" strategy="beforeInteractive" />
 
         {/* Google Tag Manager */}
         <Script id="google-tag-manager" strategy="lazyOnload">
