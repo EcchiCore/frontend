@@ -35,6 +35,7 @@ import Tools from './Tools.json';
 import UserClient from './UserClient.json';
 import WebsiteSettings from './WebsiteSettings.json';
 import ad_redirect from './ad-redirect.json';
+import downloadRedirect from './download-redirect.json';
 import dynamicFilterPage from './dynamicFilterPage.json';
 import gameCodeDetection from './gameCodeDetection.json';
 import gameResults from './gameResults.json';
@@ -83,6 +84,7 @@ export default {
   "UserClient": UserClient,
   "WebsiteSettings": WebsiteSettings,
   "ad-redirect": ad_redirect,
+  "download-redirect": downloadRedirect,
   "dynamicFilterPage": dynamicFilterPage,
   "gameCodeDetection": gameCodeDetection,
   "gameResults": gameResults,

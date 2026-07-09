@@ -1,7 +1,8 @@
 // src/app/[locale]/articles/[...paths]/components/ArticleDownloadDialog.tsx
 import React from 'react';
 import { motion } from 'framer-motion';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
+import { encodeDownloadUrl } from '@/utils/downloadUrl';
 import cn from 'classnames';
 import { Dialog, DialogContent, DialogTitle, Button } from '@/components/ui';
 import { Download, ShieldCheck, LogIn } from 'lucide-react';
@@ -37,6 +38,7 @@ const ArticleDownloadDialog: React.FC<ArticleDownloadDialogProps> = ({
   relatedArticles = [],
 }) => {
   const t = useTranslations('ArticleContent');
+  const locale = useLocale();
   const {
     filteredDownloads,
   } = useDownloadDialog(downloads, showAlert);
@@ -60,7 +62,12 @@ const ArticleDownloadDialog: React.FC<ArticleDownloadDialogProps> = ({
       }
     }
 
-    window.open(url, "_blank");
+    const encodedUrl = encodeDownloadUrl(url);
+    const encodedName = encodeURIComponent(item.name);
+    const size = "size" in item && typeof item.size === 'number' ? item.size : '';
+    const encodedSize = size ? encodeURIComponent(size.toString()) : '';
+    const redirectUrl = `/${locale}/download/redirect?url=${encodedUrl}&name=${encodedName}&size=${encodedSize}`;
+    window.open(redirectUrl, "_blank");
   };
 
   const isPseudoLink = (item: DownloadFile | TranslationFile) => {

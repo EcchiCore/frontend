@@ -1,7 +1,8 @@
 "use client";
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
+import { encodeDownloadUrl } from '@/utils/downloadUrl';
 import { Download, ShieldCheck, Lock, X, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { getFileIcon, getFileSize } from "@/utils/fileUtils";
@@ -80,6 +81,7 @@ const ArticleDownloadSection: React.FC<ArticleDownloadSectionProps> = ({
   showAlert,
 }) => {
   const t = useTranslations('ArticleContent');
+  const locale = useLocale();
   const activeDownloads = downloads?.filter((d) => d.isActive) || [];
   const isUnlocked = article.isUnlocked || article.price === 0;
   
@@ -124,18 +126,16 @@ const ArticleDownloadSection: React.FC<ArticleDownloadSectionProps> = ({
       }
     }
 
-    window.open(url, "_blank");
+    const encodedUrl = encodeDownloadUrl(url);
+    const encodedName = encodeURIComponent(dl.name);
+    const size = (dl as any).size;
+    const encodedSize = size ? encodeURIComponent(typeof size === 'number' ? size.toString() : size) : '';
+    const redirectUrl = `/${locale}/download/redirect?url=${encodedUrl}&name=${encodedName}&size=${encodedSize}`;
+    window.open(redirectUrl, "_blank");
   };
 
   const handleDownloadClick = (dl: DownloadFile) => {
-    if (isMobile) {
-      // Mobile device: direct browser download immediately!
-      handleOpenDownload(dl);
-    } else {
-      // PC desktop: show the beautiful Steam-style Got ChanoX2 modal!
-      setSelectedFile(dl);
-      setShowSteamModal(true);
-    }
+    handleOpenDownload(dl);
   };
 
   return (
