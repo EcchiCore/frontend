@@ -1,128 +1,231 @@
 "use client";
 
-
 import { Link } from "@/i18n/navigation";
-import Image from 'next/image';
-import imageLoader from '@/lib/imageLoader';
-import { useState } from 'react';
-import type { ArticleListItem } from '@chanomhub/sdk';
-import { useTranslations } from 'next-intl';
+import Image from "next/image";
+import imageLoader from "@/lib/imageLoader";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { useSwipeable } from "react-swipeable";
+import type { ArticleListItem } from "@chanomhub/sdk";
+import { useTranslations } from "next-intl";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface HomeCarouselProps {
   articles: ArticleListItem[];
   loading: boolean;
 }
 
+const AUTO_INTERVAL = 6000;
+
 const fallbacks = [
-  'from-violet-950 via-purple-900 to-slate-950',
-  'from-blue-950 via-blue-900 to-slate-950',
-  'from-rose-950 via-pink-900 to-slate-950',
+  "from-primary/20 via-card to-background",
+  "from-accent/20 via-card to-background",
+  "from-primary/15 via-card to-background",
+  "from-accent/15 via-card to-background",
+  "from-primary/10 via-card to-background",
 ];
 
 export default function HomeCarousel({ articles, loading }: HomeCarouselProps) {
-  const t = useTranslations('homePage.HomeCarousel');
+  const t = useTranslations("homePage.HomeCarousel");
+  const [current, setCurrent] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
   const [imageErrors, setImageErrors] = useState<{ [key: number]: boolean }>({});
+  const [direction, setDirection] = useState<"left" | "right">("right");
+  const [isAnimating, setIsAnimating] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const total = articles?.length || 0;
+
+  const goTo = useCallback(
+    (index: number, dir?: "left" | "right") => {
+      if (total === 0) return;
+      const next = ((index % total) + total) % total;
+      setDirection(dir || (next > current ? "right" : "left"));
+      setIsAnimating(true);
+      setTimeout(() => {
+        setCurrent(next);
+        setIsAnimating(false);
+      }, 50);
+    },
+    [total, current],
+  );
+
+  const next = useCallback(() => goTo(current + 1, "right"), [goTo, current]);
+  const prev = useCallback(() => goTo(current - 1, "left"), [goTo, current]);
+
+  // Auto-rotate
+  useEffect(() => {
+    if (isPaused || total <= 1) {
+      if (timerRef.current) clearInterval(timerRef.current);
+      return;
+    }
+    timerRef.current = setInterval(next, AUTO_INTERVAL);
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [isPaused, next, total]);
+
+  // Keyboard nav
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "ArrowRight") next();
+      else if (e.key === "ArrowLeft") prev();
+    };
+    const el = document.getElementById("hero-carousel");
+    if (!el) return;
+    el.addEventListener("keydown", handleKey);
+    return () => el.removeEventListener("keydown", handleKey);
+  }, [next, prev]);
+
+  const swipeHandlers = useSwipeable({
+    onSwipedLeft: next,
+    onSwipedRight: prev,
+    trackMouse: false,
+  });
+
   const handleImageError = (id: number) =>
-    setImageErrors(prev => ({ ...prev, [id]: true }));
+    setImageErrors((prev) => ({ ...prev, [id]: true }));
 
   if (loading) {
     return (
-      <section className="container mx-auto px-3 py-3 max-w-5xl">
-        <div className="bg-muted rounded-xl animate-pulse h-[200px] sm:h-[260px]" />
+      <section className="relative w-full h-[clamp(280px,50vh,480px)] bg-card overflow-hidden">
+        <div className="absolute inset-0 animate-pulse bg-muted/50" />
       </section>
     );
   }
+
   if (!articles || articles.length === 0) return null;
 
-  const [main, ...secondary] = articles.slice(0, 3);
+  const article = articles[current];
+  const coverSrc = article.coverImage || article.mainImage || "";
+  const hasError = imageErrors[article.id];
+  const categories = article.categories || [];
 
   return (
-    <section className="container mx-auto px-3 py-3 max-w-5xl">
-      <div className="flex items-center gap-2 mb-2 px-0.5">
-        <div className="w-0.5 h-5 bg-primary rounded-full" />
-        <h3 className="text-sm font-bold text-foreground">{t('featuredPostsToday')}</h3>
-      </div>
+    <section
+      id="hero-carousel"
+      {...swipeHandlers}
+      className="relative w-full h-[clamp(280px,50vh,480px)] overflow-hidden bg-background"
+      tabIndex={0}
+      role="region"
+      aria-roledescription="carousel"
+      aria-label={t("featuredPostsToday")}
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
+      onFocus={() => setIsPaused(true)}
+      onBlur={(e) => {
+        if (!e.currentTarget.contains(e.relatedTarget as Node)) setIsPaused(false);
+      }}
+    >
+      {/* Slide content */}
+      <Link
+        href={`/articles/${article.slug}?id=${article.id}`}
+        className="group absolute inset-0 flex items-end"
+        aria-current={true}
+      >
+        {/* Background image */}
+        {coverSrc && !hasError ? (
+          <Image
+            loader={imageLoader}
+            src={coverSrc}
+            alt={article.title}
+            fill
+            priority
+            sizes="100vw"
+            className={`object-cover transition-transform duration-700 group-hover:scale-[1.03] ${
+              isAnimating
+                ? direction === "right"
+                  ? "animate-[slideInRight_500ms_ease-out]"
+                  : "animate-[slideInLeft_500ms_ease-out]"
+                : ""
+            }`}
+            onError={() => handleImageError(article.id)}
+          />
+        ) : (
+          <div
+            className={`absolute inset-0 bg-gradient-to-br ${
+              fallbacks[current % fallbacks.length]
+            }`}
+          />
+        )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:h-[260px]">
-        {/* Main hero */}
-        <Link
-          href={`/articles/${main.slug}?id=${main.id}`}
-          className="group relative overflow-hidden rounded-xl border border-border hover:border-primary/60 transition-all duration-300
-            h-[200px] sm:col-span-2 sm:h-full"
-        >
-          <div className="absolute inset-0">
-            {(main.coverImage || main.mainImage) && !imageErrors[main.id] ? (
-              <Image
-                loader={imageLoader}
-                src={main.coverImage || main.mainImage || ''}
-                alt={main.title} fill priority
-                sizes="(max-width: 640px) 100vw, 66vw"
-                className="object-cover transition-transform duration-700 group-hover:scale-105"
-                onError={() => handleImageError(main.id)}
-              />
-            ) : (
-              <div className={`w-full h-full bg-gradient-to-br ${fallbacks[0]} flex items-center justify-center`}>
-                <span className="text-5xl opacity-15">🎮</span>
-              </div>
-            )}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
-          </div>
-          <div className="absolute top-3 left-3 z-10">
-            <span className="text-[9px] font-extrabold bg-primary text-primary-foreground px-2 py-0.5 rounded tracking-wider">
-              FEATURED
+        {/* Gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/20" />
+
+        {/* Bottom content */}
+        <div className="relative z-10 w-full max-w-5xl mx-auto px-6 pb-8 sm:pb-12">
+          {/* Badges */}
+          <div className="flex items-center gap-2 mb-3">
+            <span className="text-[10px] font-bold bg-primary text-primary-foreground px-2.5 py-1 rounded tracking-wider uppercase">
+              Featured
             </span>
-          </div>
-          <div className="absolute bottom-0 left-0 right-0 z-10 p-4">
-            {main.categories?.[0] && (
-              <span className="inline-block text-[10px] font-bold text-primary bg-primary/15 border border-primary/30 px-2 py-0.5 rounded mb-2">
-                {main.categories[0].name}
+            {categories[0] && (
+              <span className="text-[10px] font-semibold text-white/70 bg-white/10 backdrop-blur-sm px-2.5 py-1 rounded">
+                {categories[0].name}
               </span>
             )}
-            <h4 className="text-white font-bold text-base sm:text-xl leading-snug line-clamp-2 group-hover:text-primary/90 transition-colors">
-              {main.title}
-            </h4>
-            {main.description && (
-              <p className="text-white/55 text-xs line-clamp-1 mt-1">{main.description}</p>
-            )}
           </div>
-        </Link>
 
-        {/* Secondary cards — horizontal scroll on mobile, stacked on sm+ */}
-        <div className="flex flex-row gap-2 overflow-x-auto sm:flex-col sm:overflow-visible [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {secondary.map((article, i) => (
-            <Link
-              key={article.id}
-              href={`/articles/${article.slug}?id=${article.id}`}
-              className="group relative overflow-hidden rounded-xl border border-border hover:border-primary/60 transition-all duration-300
-                flex-shrink-0 w-[180px] h-[120px]
-                sm:w-auto sm:flex-1"
-            >
-              <div className="absolute inset-0">
-                {(article.coverImage || article.mainImage) && !imageErrors[article.id] ? (
-                  <Image
-                    loader={imageLoader}
-                    src={article.coverImage || article.mainImage || ''}
-                    alt={article.title} fill
-                    sizes="(max-width: 640px) 180px, 33vw"
-                    className="object-cover group-hover:scale-105 transition-transform duration-500"
-                    onError={() => handleImageError(article.id)}
-                  />
-                ) : (
-                  <div className={`w-full h-full bg-gradient-to-br ${fallbacks[i + 1]} flex items-center justify-center`}>
-                    <span className="text-3xl opacity-15">🎮</span>
-                  </div>
-                )}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
-              </div>
-              <div className="absolute bottom-0 left-0 right-0 z-10 p-2.5">
-                <h4 className="text-white font-bold text-xs leading-snug line-clamp-2 group-hover:text-primary/90 transition-colors">
-                  {article.title}
-                </h4>
-              </div>
-            </Link>
+          {/* Title */}
+          <h2 className="text-white font-bold text-xl sm:text-3xl md:text-4xl leading-tight max-w-3xl line-clamp-2 text-wrap-balance group-hover:text-primary/90 transition-colors duration-300">
+            {article.title}
+          </h2>
+
+          {/* Description */}
+          {article.description && (
+            <p className="text-white/50 text-sm sm:text-base mt-2 line-clamp-1 max-w-2xl">
+              {article.description}
+            </p>
+          )}
+        </div>
+      </Link>
+
+      {/* Navigation arrows */}
+      {total > 1 && (
+        <>
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              prev();
+            }}
+            className="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm border border-white/10 flex items-center justify-center text-white/70 hover:text-white hover:bg-black/60 transition-all duration-200 cursor-pointer"
+            aria-label="Previous slide"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              next();
+            }}
+            className="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm border border-white/10 flex items-center justify-center text-white/70 hover:text-white hover:bg-black/60 transition-all duration-200 cursor-pointer"
+            aria-label="Next slide"
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
+        </>
+      )}
+
+      {/* Dots */}
+      {total > 1 && (
+        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2">
+          {articles.map((_, i) => (
+            <button
+              key={i}
+              onClick={(e) => {
+                e.preventDefault();
+                goTo(i, i > current ? "right" : "left");
+              }}
+              className={`transition-all duration-300 rounded-full cursor-pointer ${
+                i === current
+                  ? "w-6 h-1.5 bg-primary"
+                  : "w-1.5 h-1.5 bg-white/30 hover:bg-white/50"
+              }`}
+              aria-label={`Go to slide ${i + 1}`}
+              aria-current={i === current ? "true" : undefined}
+            />
           ))}
         </div>
-      </div>
+      )}
     </section>
   );
 }

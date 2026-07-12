@@ -52,38 +52,38 @@
 }
 
 .dark {
-  --background: oklch(0.1450 0 0);
-  --foreground: oklch(0.9850 0 0);
-  --card: oklch(0.2050 0 0);
-  --card-foreground: oklch(0.9850 0 0);
-  --popover: oklch(0.2690 0 0);
-  --popover-foreground: oklch(0.9850 0 0);
-  --primary: oklch(0.9220 0 0);
-  --primary-foreground: oklch(0.2050 0 0);
-  --secondary: oklch(0.2690 0 0);
-  --secondary-foreground: oklch(0.9850 0 0);
-  --muted: oklch(0.2690 0 0);
-  --muted-foreground: oklch(0.7080 0 0);
-  --accent: oklch(0.3710 0 0);
-  --accent-foreground: oklch(0.9850 0 0);
+  --background: oklch(0.1150 0.005 290);
+  --foreground: oklch(0.9650 0.005 290);
+  --card: oklch(0.1750 0.008 290);
+  --card-foreground: oklch(0.9650 0.005 290);
+  --popover: oklch(0.1950 0.008 290);
+  --popover-foreground: oklch(0.9650 0.005 290);
+  --primary: oklch(0.6500 0.2400 350);
+  --primary-foreground: oklch(0.9850 0.005 350);
+  --secondary: oklch(0.2100 0.010 290);
+  --secondary-foreground: oklch(0.9650 0.005 290);
+  --muted: oklch(0.2200 0.008 290);
+  --muted-foreground: oklch(0.6200 0.020 290);
+  --accent: oklch(0.7000 0.2000 350);
+  --accent-foreground: oklch(0.9850 0.005 350);
   --destructive: oklch(0.7040 0.1910 22.2160);
   --destructive-foreground: oklch(0.9850 0 0);
-  --border: oklch(0.2750 0 0);
-  --input: oklch(0.3250 0 0);
-  --ring: oklch(0.5560 0 0);
+  --border: oklch(0.2500 0.010 290);
+  --input: oklch(0.2800 0.010 290);
+  --ring: oklch(0.6500 0.2400 350);
   --chart-1: oklch(0.8100 0.1000 252);
   --chart-2: oklch(0.6200 0.1900 260);
   --chart-3: oklch(0.5500 0.2200 263);
   --chart-4: oklch(0.4900 0.2200 264);
   --chart-5: oklch(0.4200 0.1800 266);
-  --sidebar: oklch(0.2050 0 0);
-  --sidebar-foreground: oklch(0.9850 0 0);
-  --sidebar-primary: oklch(0.4880 0.2430 264.3760);
-  --sidebar-primary-foreground: oklch(0.9850 0 0);
-  --sidebar-accent: oklch(0.2690 0 0);
-  --sidebar-accent-foreground: oklch(0.9850 0 0);
-  --sidebar-border: oklch(0.2750 0 0);
-  --sidebar-ring: oklch(0.4390 0 0);
+  --sidebar: oklch(0.1450 0.008 290);
+  --sidebar-foreground: oklch(0.9650 0.005 290);
+  --sidebar-primary: oklch(0.6500 0.2400 350);
+  --sidebar-primary-foreground: oklch(0.9850 0.005 350);
+  --sidebar-accent: oklch(0.2100 0.010 290);
+  --sidebar-accent-foreground: oklch(0.9650 0.005 290);
+  --sidebar-border: oklch(0.2500 0.010 290);
+  --sidebar-ring: oklch(0.6500 0.2000 350);
   --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   --font-serif: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
@@ -451,4 +451,25 @@ html[data-event-theme="christmas"].dark body {
     padding-right: 0px !important;
     --removed-body-scroll-bar-size: 0px !important;
   }
+}
+
+/* Reduced motion — disable transforms and animations for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Hero carousel keyframes */
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(2%); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-2%); }
+  to   { opacity: 1; transform: translateX(0); }
 }
