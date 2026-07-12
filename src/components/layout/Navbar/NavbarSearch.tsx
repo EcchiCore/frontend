@@ -250,21 +250,22 @@ export default function NavbarSearch({ isMobile = false, onSearchComplete }: Nav
 
   const pushParams = useCallback(
     (overrides: Record<string, string | null>) => {
-      // Determine targets
-      const targetPath = pathname.startsWith("/articles") ? "/articles" : "/games"
+      // Search results always live on the games page, even when the navbar is
+      // used from an /articles/[page] route, so we never target /articles here.
+      const targetPath = "/games"
       const params = new URLSearchParams()
-      
+
       // Transfer overrides
       for (const [key, value] of Object.entries(overrides)) {
         if (value !== null && value !== "") {
           params.set(key, value)
         }
       }
-      
+
       router.push(`${targetPath}?${params.toString()}`)
       if (onSearchComplete) onSearchComplete()
     },
-    [router, pathname, onSearchComplete]
+    [router, onSearchComplete]
   )
 
   const addToHistory = useCallback((query: string) => {
@@ -604,9 +605,8 @@ export default function NavbarSearch({ isMobile = false, onSearchComplete }: Nav
     setSearchText("")
     setShowSuggestions(false)
     
-    // Clear route search parameters
-    const targetPath = pathname.startsWith("/articles") ? "/articles" : "/games"
-    router.push(targetPath)
+    // Clear route search parameters — always return to the games page.
+    router.push("/games")
     if (onSearchComplete) onSearchComplete()
   }
 
