@@ -183,14 +183,20 @@ export default async function ArticlePage(props: ArticlePageProps) {
       try {
         revisionDetail = await sdk.articles.getRevision(slug, version);
       } catch (err) {
-        console.error("Failed to load revision detail via SDK", err);
+        const isAbort = err instanceof Error && (err.name === 'AbortError' || err.message.toLowerCase().includes('aborted'));
+        if (!isAbort) {
+          console.error("Failed to load revision detail via SDK", err);
+        }
       }
     } else {
       try {
         const response = await sdk.articles.getRevisions(slug);
         revisions = response.items || [];
       } catch (err) {
-        console.error("Failed to load revisions via SDK", err);
+        const isAbort = err instanceof Error && (err.name === 'AbortError' || err.message.toLowerCase().includes('aborted'));
+        if (!isAbort) {
+          console.error("Failed to load revisions via SDK", err);
+        }
       }
     }
   }
