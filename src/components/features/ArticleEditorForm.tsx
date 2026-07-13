@@ -1360,11 +1360,11 @@ export const ArticleEditorForm = ({ slug = '', initialData, mode, locale = 'en' 
                                                 name="message"
                                                 value={formData.message || ''}
                                                 onChange={handleInputChange}
-                                                placeholder="e.g. Fixed bugs, updated to v1.2, or leave blank for AI to auto-generate"
+                                                placeholder="e.g. Fixed bugs, updated to v1.2, or leave blank to auto-generate"
                                                 className="border-gray-200 focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all"
                                             />
                                             <p className="text-xs text-muted-foreground">
-                                                If left blank, our AI model (Llama-SEA-LION-3.5) will automatically write a summary of your changes in the background.
+                                                If left blank, a default update timestamp message or an AI-generated summary will be used.
                                             </p>
                                         </div>
                                         <div className="space-y-2">

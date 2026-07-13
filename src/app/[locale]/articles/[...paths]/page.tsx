@@ -173,6 +173,28 @@ export default async function ArticlePage(props: ArticlePageProps) {
     mods = await getArticleMods(articleId);
   }
 
+  let revisions: any[] = [];
+  let revisionDetail: any = null;
+  if (originalArticle && paths[1] === 'devlog') {
+    const { getSdk } = await import('@/lib/sdk');
+    const sdk = await getSdk();
+    if (paths[2]) {
+      const version = parseInt(paths[2], 10) || 1;
+      try {
+        revisionDetail = await sdk.articles.getRevision(slug, version);
+      } catch (err) {
+        console.error("Failed to load revision detail via SDK", err);
+      }
+    } else {
+      try {
+        const response = await sdk.articles.getRevisions(slug);
+        revisions = response.items || [];
+      } catch (err) {
+        console.error("Failed to load revisions via SDK", err);
+      }
+    }
+  }
+
   if (!originalArticle) {
     return notFound();
   }
@@ -280,10 +302,12 @@ export default async function ArticlePage(props: ArticlePageProps) {
           <ArticleDevlogDetail
             article={originalArticle}
             version={parseInt(paths[2], 10) || 1}
+            detail={revisionDetail}
           />
         ) : (
           <ArticleDevlogPage
             article={originalArticle}
+            revisions={revisions}
           />
         )
       ) : (
