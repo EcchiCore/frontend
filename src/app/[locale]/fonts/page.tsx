@@ -21,7 +21,8 @@ import {
   Type,
   FileCode,
   Loader2,
-  RefreshCw
+  RefreshCw,
+  Upload
 } from 'lucide-react';
 
 const ENGINES = [
