@@ -33,8 +33,57 @@ const ENGINES = [
   { value: 'godot', label: 'Godot' },
   { value: 'unreal', label: 'Unreal Engine' },
   { value: 'renpy', label: 'Ren\'Py' },
+  { value: 'rpgmaker', label: 'RPG Maker' },
+  { value: 'gamemaker', label: 'GameMaker' },
   { value: 'other', label: 'Other Engine' },
 ];
+
+const ENGINE_VERSIONS: Record<string, { value: string; label: string }[]> = {
+  unity: [
+    { value: 'all', label: 'All Versions' },
+    { value: 'unity-6000', label: 'Unity 6000.x (Unity 6+)' },
+    { value: 'unity-2022', label: 'Unity 2022.x LTS' },
+    { value: 'unity-2021', label: 'Unity 2021.x LTS' },
+    { value: 'unity-2020', label: 'Unity 2020.x LTS' },
+    { value: 'unity-2019', label: 'Unity 2019.x LTS' },
+    { value: 'unity-legacy', label: 'Unity 2018 or older' },
+  ],
+  godot: [
+    { value: 'all', label: 'All Versions' },
+    { value: 'godot-4.x', label: 'Godot 4.x' },
+    { value: 'godot-3.x', label: 'Godot 3.x' },
+    { value: 'godot-legacy', label: 'Godot 2.x or older' },
+  ],
+  unreal: [
+    { value: 'all', label: 'All Versions' },
+    { value: 'ue-5.5', label: 'UE 5.5+' },
+    { value: 'ue-5.x', label: 'UE 5.0 – 5.4' },
+    { value: 'ue-4.x', label: 'UE 4.x' },
+    { value: 'ue-legacy', label: 'UE 3 or older' },
+  ],
+  renpy: [
+    { value: 'all', label: 'All Versions' },
+    { value: 'renpy-8.x', label: 'Ren\'Py 8.x' },
+    { value: 'renpy-7.x', label: 'Ren\'Py 7.x' },
+    { value: 'renpy-legacy', label: 'Ren\'Py 6.x or older' },
+  ],
+  rpgmaker: [
+    { value: 'all', label: 'All Versions' },
+    { value: 'rpgmaker-mz', label: 'RPG Maker MZ' },
+    { value: 'rpgmaker-mv', label: 'RPG Maker MV' },
+    { value: 'rpgmaker-vxace', label: 'RPG Maker VX Ace' },
+    { value: 'rpgmaker-legacy', label: 'RPG Maker XP / 2003 / older' },
+  ],
+  gamemaker: [
+    { value: 'all', label: 'All Versions' },
+    { value: 'gms-2024', label: 'GameMaker 2024.x+' },
+    { value: 'gms-2.x', label: 'GameMaker Studio 2' },
+    { value: 'gms-1.x', label: 'GameMaker Studio 1.x' },
+  ],
+  other: [
+    { value: 'all', label: 'All Versions / N/A' },
+  ],
+};
 
 const LANGUAGES = [
   { value: 'th', label: 'Thai (th)' },
@@ -63,6 +112,15 @@ export default function FontUploadForm() {
   const [currentUploadingFile, setCurrentUploadingFile] = useState('');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
+  // Derived: available version options based on selected engine
+  const versionOptions = engine ? (ENGINE_VERSIONS[engine] || []) : [];
+
+  // Clear version when engine changes
+  const handleEngineChange = (newEngine: string) => {
+    setEngine(newEngine);
+    setEngineVersion('');
+  };
+
   // File Drag & Drop Handlers
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -84,14 +142,16 @@ export default function FontUploadForm() {
   const addFiles = (newFiles: File[]) => {
     const validFiles = newFiles.filter(file => {
       const ext = file.name.split('.').pop()?.toLowerCase();
-      const isValidExt = ['ttf', 'otf', 'woff', 'woff2', 'zip'].includes(ext || '');
+      // Files with no extension are allowed (Unity AssetBundles)
+      const hasNoExtension = !file.name.includes('.');
+      const isValidExt = hasNoExtension || ['ttf', 'otf', 'woff', 'woff2', 'zip', 'manifest'].includes(ext || '');
       const isValidSize = file.size <= 20 * 1024 * 1024; // 20MB limit
 
       if (!isValidExt) {
-        toast.error(`Invalid extension: ${file.name}. Only .ttf, .otf, .woff, .woff2, or .zip files are allowed.`);
+        toast.error(`ไม่รองรับไฟล์: ${file.name} — รองรับ .ttf .otf .woff .woff2 .zip และ Unity AssetBundle`);
       }
       if (!isValidSize) {
-        toast.error(`File too large: ${file.name}. Maximum file size is 20MB.`);
+        toast.error(`ไฟล์ใหญ่เกินไป: ${file.name} — สูงสุด 20MB ต่อไฟล์`);
       }
 
       return isValidExt && isValidSize;
@@ -133,7 +193,7 @@ export default function FontUploadForm() {
         name: name.trim(),
         engine,
         language,
-        engineVersion: engineVersion.trim() || undefined,
+        engineVersion: (engineVersion && engineVersion !== 'all') ? engineVersion : undefined,
       });
 
       if (!font) {
@@ -211,6 +271,14 @@ export default function FontUploadForm() {
               <div className="flex justify-between">
                 <span className="text-slate-500">Engine:</span>
                 <span className="text-slate-300 font-semibold">{ENGINES.find(e => e.value === engine)?.label}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500">Version:</span>
+                <span className="text-slate-300 font-semibold">
+                  {engineVersion && engineVersion !== 'all'
+                    ? (ENGINE_VERSIONS[engine]?.find(v => v.value === engineVersion)?.label ?? engineVersion)
+                    : 'All Versions'}
+                </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-slate-500">Language:</span>
@@ -310,7 +378,7 @@ export default function FontUploadForm() {
               <Label htmlFor="engine" className="text-xs font-bold text-slate-400 uppercase tracking-wider">
                 Target Game Engine <span className="text-rose-500">*</span>
               </Label>
-              <Select value={engine} onValueChange={setEngine} disabled={status !== 'idle'}>
+              <Select value={engine} onValueChange={handleEngineChange} disabled={status !== 'idle'}>
                 <SelectTrigger id="engine" className="bg-slate-900/60 border-slate-800">
                   <SelectValue placeholder="Select Engine" />
                 </SelectTrigger>
@@ -328,14 +396,22 @@ export default function FontUploadForm() {
               <Label htmlFor="engineVersion" className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
                 <Settings size={13} className="text-slate-500" /> Compatible Engine Version
               </Label>
-              <Input
-                id="engineVersion"
-                placeholder="e.g. Unity 6+, Godot 4.x, or blank for all"
+              <Select
                 value={engineVersion}
-                onChange={(e) => setEngineVersion(e.target.value)}
-                disabled={status !== 'idle'}
-                className="bg-slate-900/60 border-slate-800 focus:border-violet-500/50"
-              />
+                onValueChange={setEngineVersion}
+                disabled={status !== 'idle' || !engine}
+              >
+                <SelectTrigger id="engineVersion" className="bg-slate-900/60 border-slate-800">
+                  <SelectValue placeholder={engine ? 'Select Version' : 'Select engine first'} />
+                </SelectTrigger>
+                <SelectContent className="bg-[#1a1a1a] border-slate-800">
+                  {versionOptions.map(ver => (
+                    <SelectItem key={ver.value} value={ver.value} className="focus:bg-violet-600 focus:text-white">
+                      {ver.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="space-y-2">
@@ -377,7 +453,6 @@ export default function FontUploadForm() {
                 ref={fileInputRef}
                 onChange={handleFileSelect}
                 multiple
-                accept=".ttf,.otf,.woff,.woff2,.zip"
                 className="hidden"
                 disabled={status !== 'idle'}
               />
@@ -387,7 +462,7 @@ export default function FontUploadForm() {
               <div className="space-y-1">
                 <p className="text-sm font-semibold text-slate-200">Click or drag files here to upload</p>
                 <p className="text-xs text-slate-500">
-                  Supports .ttf, .otf, .woff, .woff2, or .zip archives (max 20MB per file)
+                  Accepts <span className="font-mono text-slate-400">.ttf .otf .woff .woff2 .zip</span> — รองรับ Unity AssetBundle ด้วย
                 </p>
               </div>
             </div>
