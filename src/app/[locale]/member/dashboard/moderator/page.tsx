@@ -1,12 +1,12 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from "react";
-import { Search, Eye, Check, X, Clock, Trash2, AlertTriangle, FileText, Link, MessageCircle, RefreshCw, AlertCircle } from "lucide-react";
+import { Search, Eye, Check, X, Clock, Trash2, AlertTriangle, FileText, Link, MessageCircle, RefreshCw, AlertCircle, Type } from "lucide-react";
 import { parseCookies } from 'nookies';
 
 // Define types
 type RequestStatus = "PENDING" | "APPROVED" | "REJECTED" | "NEEDS_REVISION";
-type EntityType = "ARTICLE" | "DOWNLOAD_LINK" | "COMMENT";
+type EntityType = "ARTICLE" | "DOWNLOAD_LINK" | "COMMENT" | "FONT";
 type EntityStatus = "DRAFT" | "PUBLISHED" | "ARCHIVED" | "DELETED" | "PENDING_REVIEW" | "PENDING" | "NEEDS_REVISION";
 
 interface ModerationRequest {
@@ -38,7 +38,16 @@ interface ModerationRequest {
     name?: string;
     content?: string;
     status: EntityStatus;
-    articleId?: number;
+    // FONT properties
+    engine?: string;
+    engineVersion?: string;
+    language?: string;
+    assets?: {
+      id: string;
+      key: string;
+      url: string;
+      bucket: string;
+    }[];
   };
 }
 
@@ -48,6 +57,7 @@ interface Statistics {
   articleRequests: number;
   downloadLinkRequests: number;
   commentRequests: number;
+  fontRequests: number;
 }
 
 // API base URL
@@ -92,6 +102,8 @@ const EntityIcon = ({ type }: { type: EntityType }) => {
       return <Link className="w-4 h-4" />;
     case "COMMENT":
       return <MessageCircle className="w-4 h-4" />;
+    case "FONT":
+      return <Type className="w-4 h-4" />;
     default:
       return <FileText className="w-4 h-4" />;
   }
@@ -155,6 +167,7 @@ export default function ModerationDashboard() {
     articleRequests: requests.filter(r => r.entityType === "ARTICLE").length,
     downloadLinkRequests: requests.filter(r => r.entityType === "DOWNLOAD_LINK").length,
     commentRequests: requests.filter(r => r.entityType === "COMMENT").length,
+    fontRequests: requests.filter(r => r.entityType === "FONT").length,
   };
 
   // API call helper
@@ -239,6 +252,22 @@ export default function ModerationDashboard() {
                   content
                   status
                   articleId
+                }
+                ... on FontDetails {
+                  id
+                  name
+                  slug
+                  engine
+                  engineVersion
+                  language
+                  status
+                  uploaderId
+                  assets {
+                    id
+                    key
+                    url
+                    bucket
+                  }
                 }
               }
             }
@@ -491,6 +520,16 @@ export default function ModerationDashboard() {
               <div className="stat-value text-accent">{stats.commentRequests}</div>
             </div>
           </div>
+
+          <div className="stats shadow bg-base-100">
+            <div className="stat">
+              <div className="stat-figure text-secondary">
+                <Type className="w-8 h-8" />
+              </div>
+              <div className="stat-title">Fonts</div>
+              <div className="stat-value text-secondary">{stats.fontRequests}</div>
+            </div>
+          </div>
         </div>
 
         {/* Filters and Search */}
@@ -541,6 +580,13 @@ export default function ModerationDashboard() {
                 >
                   <MessageCircle className="w-4 h-4 mr-1" />
                   Comments ({stats.commentRequests})
+                </button>
+                <button
+                  className={`btn btn-sm ${activeFilter === "FONT" ? "btn-primary" : "btn-outline"}`}
+                  onClick={() => handleFilterChange("FONT")}
+                >
+                  <Type className="w-4 h-4 mr-1" />
+                  Fonts ({stats.fontRequests})
                 </button>
               </div>
             </div>
@@ -601,6 +647,7 @@ export default function ModerationDashboard() {
                               (request.entityDetails.content?.substring(0, 50) || "No content") +
                               (request.entityDetails.content && request.entityDetails.content.length > 50 ? "..." : "")
                             }
+                            {request.entityType === "FONT" && (request.entityDetails.name || "Unnamed Font")}
                           </div>
                           <div className="text-sm text-base-content/70 truncate">
                             {request.requestNote}
@@ -721,9 +768,30 @@ export default function ModerationDashboard() {
                       <p><strong>URL:</strong> <a href={selectedRequest.entityDetails.url} target="_blank" rel="noopener noreferrer" className="link link-primary">{selectedRequest.entityDetails.url}</a></p>
                     </div>
                   )}
-                  {selectedRequest.entityType === "COMMENT" && (
+                   {selectedRequest.entityType === "COMMENT" && (
                     <div>
                       <p><strong>Comment:</strong> {selectedRequest.entityDetails.content}</p>
+                    </div>
+                  )}
+                  {selectedRequest.entityType === "FONT" && (
+                    <div>
+                      <p><strong>Font Name:</strong> {selectedRequest.entityDetails.name || "Unnamed"}</p>
+                      <p><strong>Slug:</strong> {selectedRequest.entityDetails.slug}</p>
+                      <p><strong>Engine:</strong> {selectedRequest.entityDetails.engine} {selectedRequest.entityDetails.engineVersion ? `(${selectedRequest.entityDetails.engineVersion})` : ''}</p>
+                      <p><strong>Language:</strong> {selectedRequest.entityDetails.language?.toUpperCase()}</p>
+                      {selectedRequest.entityDetails.assets && selectedRequest.entityDetails.assets.length > 0 && (
+                        <div className="mt-2">
+                          <p className="font-semibold text-xs">Files:</p>
+                          <div className="space-y-1 mt-1">
+                            {selectedRequest.entityDetails.assets.map((asset: any) => (
+                              <div key={asset.id} className="text-xs flex items-center justify-between p-1 bg-base-300 rounded">
+                                <span className="font-mono truncate max-w-[200px]">{asset.key.split('/').pop()}</span>
+                                <a href={asset.url} download className="link link-primary font-semibold">Download</a>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>

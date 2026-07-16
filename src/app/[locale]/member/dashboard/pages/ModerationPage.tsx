@@ -14,6 +14,7 @@ import {
   MessageCircle,
   AlertTriangle,
   Loader2,
+  Type,
 } from 'lucide-react';
 import { useAppSelector } from '@/store/hooks';
 
@@ -31,6 +32,8 @@ import ArticleModerationCard, {
   RequestStatus
 } from '@/components/features/moderator/ArticleModerationCard';
 import BulkActionBar from '@/components/features/moderator/BulkActionBar';
+import { PlatformRequestCard } from '@/components/features/moderator/PlatformRequestCard';
+import { ArticleRequestsSection } from '@/components/features/moderator/ArticleRequestsSection';
 
 // API base URL
 const API_BASE_URL = `${process.env.NEXT_PUBLIC_API_URL || "https://api.chanomhub.com"}/api/graphql`;
@@ -42,6 +45,7 @@ interface Statistics {
   downloadRequests: number;
   officialRequests: number;
   commentRequests: number;
+  fontRequests: number;
 }
 
 const ModerationPage: React.FC = () => {
@@ -60,6 +64,7 @@ const ModerationPage: React.FC = () => {
   const [expandedArticle, setExpandedArticle] = useState<number | null>(null);
   const [selectedArticles, setSelectedArticles] = useState<Set<number>>(new Set());
   const [selectedRequests, setSelectedRequests] = useState<Set<number>>(new Set());
+  const [selectedPlatformRequests, setSelectedPlatformRequests] = useState<Set<number>>(new Set());
 
   // API call helper
   const fetchData = useCallback(async (query: string, variables: object = {}) => {
@@ -115,7 +120,9 @@ const ModerationPage: React.FC = () => {
                 slug
                 mainImage
                 description
-                images { url }
+                images {
+                  url
+                }
                 author {
                   id
                   name
@@ -136,29 +143,52 @@ const ModerationPage: React.FC = () => {
                   image
                 }
                 entityDetails {
-                  ... on DownloadLinkDetails {
-                    name
-                    url
-                  }
-                  ... on OfficialDownloadSourceDetails {
-                    name
-                    url
-                  }
-                  ... on CommentDetails {
-                    content
-                  }
-                  ... on DeveloperProfileDetails {
-                    realName
-                    bankType
-                    bankName
-                    bankAccount
-                    swiftCode
-                    bankAddress
-                    citizenId
-                  }
+                  ...DownloadLinkFields
+                  ...OfficialDownloadSourceFields
+                  ...CommentFields
+                  ...DeveloperProfileFields
+                  ...FontFields
                 }
               }
             }
+          }
+        }
+
+        fragment DownloadLinkFields on DownloadLinkDetails {
+          name
+          url
+        }
+
+        fragment OfficialDownloadSourceFields on OfficialDownloadSourceDetails {
+          name
+          url
+        }
+
+        fragment CommentFields on CommentDetails {
+          content
+        }
+
+        fragment DeveloperProfileFields on DeveloperProfileDetails {
+          realName
+          bankType
+          bankName
+          bankAccount
+          swiftCode
+          bankAddress
+          citizenId
+        }
+
+        fragment FontFields on FontDetails {
+          name
+          slug
+          engine
+          engineVersion
+          language
+          assets {
+            id
+            key
+            url
+            bucket
           }
         }
       `;
@@ -223,17 +253,19 @@ const ModerationPage: React.FC = () => {
   // Calculate statistics
   const stats: Statistics = useMemo(() => {
     const allRequests = groups.flatMap(g => g.requests);
+    const articleGroupsCount = groups.filter(g => g.article.id !== 0).length;
     return {
-      totalGroups: groups.length,
+      totalGroups: articleGroupsCount,
       totalRequests: allRequests.length,
       articleRequests: allRequests.filter(r => r.entityType === 'ARTICLE').length,
       downloadRequests: allRequests.filter(r => r.entityType === 'DOWNLOAD_LINK').length,
       officialRequests: allRequests.filter(r => r.entityType === 'OFFICIAL_DOWNLOAD_SOURCE').length,
       commentRequests: allRequests.filter(r => r.entityType === 'COMMENT').length,
+      fontRequests: allRequests.filter(r => r.entityType === 'FONT').length,
     };
   }, [groups]);
 
-  // Filter groups based on search and filter
+  // Filtered groups (Articles, Fonts, Developer Profiles), sorted by date
   const filteredGroups = useMemo(() => {
     let filtered = groups;
 
@@ -254,8 +286,25 @@ const ModerationPage: React.FC = () => {
       );
     }
 
-    return filtered;
+    // Sort by latest request date (newest first)
+    return [...filtered].sort((a, b) => {
+      const aLatest = a.requests.reduce(
+        (max, r) => (r.createdAt > max ? r.createdAt : max),
+        a.requests[0]?.createdAt ?? ''
+      );
+      const bLatest = b.requests.reduce(
+        (max, r) => (r.createdAt > max ? r.createdAt : max),
+        b.requests[0]?.createdAt ?? ''
+      );
+      return new Date(bLatest).getTime() - new Date(aLatest).getTime();
+    });
   }, [groups, activeFilter, searchTerm]);
+
+  // Total selectable items count for bulk action bar
+  const totalSelectableCount = filteredGroups.length;
+
+  const selectedCount = selectedArticles.size + selectedPlatformRequests.size;
+  const isAllSelected = totalSelectableCount > 0 && selectedCount === totalSelectableCount;
 
   // Handle refresh
   const handleRefresh = async () => {
@@ -290,6 +339,19 @@ const ModerationPage: React.FC = () => {
     });
   };
 
+  // Toggle platform request selection
+  const togglePlatformRequestSelect = (requestId: number) => {
+    setSelectedPlatformRequests(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(requestId)) {
+        newSet.delete(requestId);
+      } else {
+        newSet.add(requestId);
+      }
+      return newSet;
+    });
+  };
+
   // Toggle expand
   const toggleExpand = (articleId: number) => {
     setExpandedArticle(prev => prev === articleId ? null : articleId);
@@ -297,10 +359,24 @@ const ModerationPage: React.FC = () => {
 
   // Select all
   const handleSelectAll = () => {
-    if (selectedArticles.size === filteredGroups.length) {
+    if (selectedCount === totalSelectableCount) {
       setSelectedArticles(new Set());
+      setSelectedPlatformRequests(new Set());
     } else {
-      setSelectedArticles(new Set(filteredGroups.map(g => g.article.id)));
+      const newArticles = new Set<number>();
+      const newPlatform = new Set<number>();
+      filteredGroups.forEach(group => {
+        if (group.article.id < 0) {
+          // Platform request request ID is the absolute value of the negative ID or fetched from requests
+          if (group.requests[0]) {
+            newPlatform.add(group.requests[0].id);
+          }
+        } else {
+          newArticles.add(group.article.id);
+        }
+      });
+      setSelectedArticles(newArticles);
+      setSelectedPlatformRequests(newPlatform);
     }
   };
 
@@ -385,22 +461,32 @@ const ModerationPage: React.FC = () => {
     }
   };
 
-  // Bulk approve selected articles
+  // Bulk approve selected
   const handleApproveSelected = async () => {
-    const requestIds = filteredGroups
-      .filter(g => selectedArticles.has(g.article.id))
+    const articleRequestIds = filteredGroups
+      .filter(g => g.article.id > 0 && selectedArticles.has(g.article.id))
       .flatMap(g => g.requests.map(r => r.id));
-    await handleApproveAll(requestIds, '');
+    
+    const platformRequestIds = Array.from(selectedPlatformRequests);
+    const allRequestIds = [...articleRequestIds, ...platformRequestIds];
+
+    await handleApproveAll(allRequestIds, '');
     setSelectedArticles(new Set());
+    setSelectedPlatformRequests(new Set());
   };
 
-  // Bulk reject selected articles
+  // Bulk reject selected
   const handleRejectSelected = async () => {
-    const requestIds = filteredGroups
-      .filter(g => selectedArticles.has(g.article.id))
+    const articleRequestIds = filteredGroups
+      .filter(g => g.article.id > 0 && selectedArticles.has(g.article.id))
       .flatMap(g => g.requests.map(r => r.id));
-    await handleRejectAll(requestIds, '');
+    
+    const platformRequestIds = Array.from(selectedPlatformRequests);
+    const allRequestIds = [...articleRequestIds, ...platformRequestIds];
+
+    await handleRejectAll(allRequestIds, '');
     setSelectedArticles(new Set());
+    setSelectedPlatformRequests(new Set());
   };
 
   // Loading state
@@ -434,7 +520,7 @@ const ModerationPage: React.FC = () => {
               Moderation Dashboard
             </h1>
             <p className="text-muted-foreground">
-              {filteredGroups.length} articles • {stats.totalRequests} pending requests
+              {stats.totalGroups} articles • {stats.totalRequests} pending requests
             </p>
           </div>
           <Button
@@ -476,6 +562,7 @@ const ModerationPage: React.FC = () => {
         <StatCard icon={Link} label="Downloads" value={stats.downloadRequests} color="green" />
         <StatCard icon={ShoppingCart} label="Official" value={stats.officialRequests} color="orange" />
         <StatCard icon={MessageCircle} label="Comments" value={stats.commentRequests} color="pink" />
+        <StatCard icon={Type} label="Fonts" value={stats.fontRequests} color="teal" />
       </div>
 
       {/* Search & Filter */}
@@ -513,17 +600,20 @@ const ModerationPage: React.FC = () => {
               <FilterButton active={activeFilter === 'COMMENT'} onClick={() => setActiveFilter('COMMENT')}>
                 <MessageCircle className="w-4 h-4" /> Comments
               </FilterButton>
+              <FilterButton active={activeFilter === 'FONT'} onClick={() => setActiveFilter('FONT')}>
+                <Type className="w-4 h-4" /> Fonts
+              </FilterButton>
             </div>
           </div>
         </CardContent>
       </Card>
 
       {/* Bulk Action Bar */}
-      {filteredGroups.length > 0 && (
+      {totalSelectableCount > 0 && (
         <BulkActionBar
-          totalCount={filteredGroups.length}
-          selectedCount={selectedArticles.size}
-          isAllSelected={selectedArticles.size === filteredGroups.length && filteredGroups.length > 0}
+          totalCount={totalSelectableCount}
+          selectedCount={selectedCount}
+          isAllSelected={isAllSelected}
           onSelectAll={handleSelectAll}
           onApproveSelected={handleApproveSelected}
           onRejectSelected={handleRejectSelected}
@@ -539,7 +629,7 @@ const ModerationPage: React.FC = () => {
       )}
 
       {/* Empty State */}
-      {!loading && filteredGroups.length === 0 && (
+      {!loading && totalSelectableCount === 0 && (
         <Card className="py-12">
           <CardContent className="flex flex-col items-center justify-center gap-3 text-center">
             <FileText className="h-8 w-8 text-muted-foreground" />
@@ -550,26 +640,58 @@ const ModerationPage: React.FC = () => {
         </Card>
       )}
 
-      {/* Article Groups List */}
-      {!loading && filteredGroups.length > 0 && (
-        <div className="space-y-3">
-          {filteredGroups.map((group) => (
-            <ArticleModerationCard
-              key={group.article.id}
-              group={group}
-              isSelected={selectedArticles.has(group.article.id)}
-              isExpanded={expandedArticle === group.article.id}
-              selectedRequests={selectedRequests}
-              onToggleSelect={toggleArticleSelect}
-              onToggleExpand={toggleExpand}
-              onToggleRequestSelect={toggleRequestSelect}
-              onApproveRequest={handleApproveRequest}
-              onRejectRequest={handleRejectRequest}
-              onApproveAll={handleApproveAll}
-              onRejectAll={handleRejectAll}
-              loading={loading}
-            />
-          ))}
+      {/* Render Lists */}
+      {!loading && totalSelectableCount > 0 && (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">
+              Pending Requests ({totalSelectableCount})
+            </h2>
+          </div>
+          <div className="space-y-4">
+            {filteredGroups.map(group => {
+              const isPlatformGroup = group.article.id < 0;
+              if (isPlatformGroup) {
+                const request = group.requests[0];
+                if (!request) return null;
+                return (
+                  <PlatformRequestCard
+                    key={`platform-${request.id}`}
+                    request={request}
+                    isSelected={selectedPlatformRequests.has(request.id)}
+                    onToggleSelect={togglePlatformRequestSelect}
+                    onApprove={handleApproveRequest}
+                    onReject={handleRejectRequest}
+                    loading={loading}
+                  />
+                );
+              } else {
+                const displayGroup = activeFilter === 'ALL'
+                  ? group
+                  : {
+                      ...group,
+                      requests: group.requests.filter(r => r.entityType === activeFilter)
+                    };
+                return (
+                  <ArticleModerationCard
+                    key={`article-${group.article.id}`}
+                    group={displayGroup}
+                    isSelected={selectedArticles.has(group.article.id)}
+                    isExpanded={expandedArticle === group.article.id}
+                    selectedRequests={selectedRequests}
+                    onToggleSelect={toggleArticleSelect}
+                    onToggleExpand={toggleExpand}
+                    onToggleRequestSelect={toggleRequestSelect}
+                    onApproveRequest={handleApproveRequest}
+                    onRejectRequest={handleRejectRequest}
+                    onApproveAll={handleApproveAll}
+                    onRejectAll={handleRejectAll}
+                    loading={loading}
+                  />
+                );
+              }
+            })}
+          </div>
         </div>
       )}
     </div>

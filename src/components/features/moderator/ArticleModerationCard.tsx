@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Check, X, ChevronDown, ChevronUp, FileText, Link, ShoppingCart, MessageCircle, ExternalLink, UserCheck, Landmark, Globe } from 'lucide-react';
+import { Check, X, ChevronDown, ChevronUp, FileText, Link, ShoppingCart, MessageCircle, ExternalLink, UserCheck, Landmark, Globe, Type } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -13,7 +13,7 @@ import { resolveArticleImageUrl } from '@/lib/articleImageUrl';
 
 // Types matching new backend API
 export type RequestStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'NEEDS_REVISION';
-export type EntityType = 'ARTICLE' | 'DOWNLOAD_LINK' | 'OFFICIAL_DOWNLOAD_SOURCE' | 'COMMENT' | 'DEVELOPER_PROFILE';
+export type EntityType = 'ARTICLE' | 'DOWNLOAD_LINK' | 'OFFICIAL_DOWNLOAD_SOURCE' | 'COMMENT' | 'DEVELOPER_PROFILE' | 'FONT';
 export type EntityStatus = 'DRAFT' | 'PUBLISHED' | 'ARCHIVED' | 'DELETED' | 'PENDING_REVIEW' | 'PENDING' | 'NEEDS_REVISION';
 
 // New API response types
@@ -58,6 +58,18 @@ export interface ModerationRequest {
         swiftCode?: string;
         bankAddress?: string;
         citizenId?: string;
+        // For FONT
+        slug?: string;
+        engine?: string;
+        engineVersion?: string;
+        language?: string;
+        assets?: {
+            id: string;
+            key: string;
+            url: string;
+            bucket: string;
+            createdAt: string;
+        }[];
     } | null;
 }
 
@@ -93,6 +105,8 @@ const EntityIcon = ({ type }: { type: EntityType }) => {
             return <MessageCircle className="w-4 h-4" />;
         case 'DEVELOPER_PROFILE':
             return <UserCheck className="w-4 h-4" />;
+        case 'FONT':
+            return <Type className="w-4 h-4" />;
         default:
             return <FileText className="w-4 h-4" />;
     }
@@ -105,10 +119,11 @@ const EntityTypeBadge = ({ type }: { type: EntityType }) => {
         OFFICIAL_DOWNLOAD_SOURCE: { variant: 'outline', label: 'Official' },
         COMMENT: { variant: 'destructive', label: 'Comment' },
         DEVELOPER_PROFILE: { variant: 'default', label: 'Dev Profile' },
+        FONT: { variant: 'default', label: 'Font' },
     }[type] || { variant: 'secondary', label: type };
 
     return (
-        <Badge variant={config.variant as 'default' | 'secondary' | 'outline' | 'destructive'} className={`gap-1 text-xs ${type === 'DEVELOPER_PROFILE' ? 'bg-indigo-600 hover:bg-indigo-700' : ''}`}>
+        <Badge variant={config.variant as 'default' | 'secondary' | 'outline' | 'destructive'} className={`gap-1 text-xs ${type === 'DEVELOPER_PROFILE' ? 'bg-indigo-600 hover:bg-indigo-700' : type === 'FONT' ? 'bg-teal-600 hover:bg-teal-700' : ''}`}>
             <EntityIcon type={type} />
             {config.label}
         </Badge>
@@ -313,6 +328,9 @@ const RequestRow: React.FC<RequestRowProps> = ({
     loading,
 }) => {
     const getEntityLabel = () => {
+        if (request.entityType === 'FONT') {
+            return `Font: ${request.entityDetails?.name || 'Unnamed Font'} (${request.entityDetails?.engine || ''})`;
+        }
         if (request.entityType === 'ARTICLE') {
             return 'Article Review Request';
         }
@@ -386,6 +404,35 @@ const RequestRow: React.FC<RequestRowProps> = ({
                     {request.entityDetails.bankAddress && (
                         <div className="col-span-full mt-1 border-t pt-1 border-gray-200 dark:border-gray-700">
                             <span className="font-bold">Address:</span> {request.entityDetails.bankAddress}
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {request.entityType === 'FONT' && request.entityDetails && (
+                <div className="ml-7 mt-1 grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 text-xs text-muted-foreground bg-gray-50 dark:bg-gray-900/50 p-2 rounded border border-dashed">
+                    <div>
+                        <span className="font-bold">Slug:</span> {request.entityDetails.slug}
+                    </div>
+                    <div>
+                        <span className="font-bold">Engine:</span> {request.entityDetails.engine} {request.entityDetails.engineVersion ? `(${request.entityDetails.engineVersion})` : ''}
+                    </div>
+                    <div>
+                        <span className="font-bold">Language:</span> {request.entityDetails.language?.toUpperCase()}
+                    </div>
+                    {request.entityDetails.assets && request.entityDetails.assets.length > 0 && (
+                        <div className="col-span-full mt-1 border-t pt-1 border-gray-200 dark:border-gray-700">
+                            <span className="font-bold text-[10px] text-gray-500 uppercase tracking-wide">Files:</span>
+                            <div className="space-y-1 mt-1">
+                                {request.entityDetails.assets.map((asset: any) => (
+                                    <div key={asset.id} className="flex items-center justify-between p-1 bg-white dark:bg-gray-800 rounded border">
+                                        <span className="font-mono truncate max-w-[250px]">{asset.key.split('/').pop()}</span>
+                                        <a href={asset.url} download className="text-blue-500 hover:underline flex items-center gap-0.5 font-semibold">
+                                            Download
+                                        </a>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     )}
                 </div>

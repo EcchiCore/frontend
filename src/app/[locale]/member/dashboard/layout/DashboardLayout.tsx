@@ -1,6 +1,6 @@
 'use client';
 
-import React, { Suspense, useEffect, useCallback } from 'react';
+import React, { Suspense, useEffect, useCallback, useState } from 'react';
 import { SidebarShadcn as Sidebar } from './Sidebar';
 import { TopBarShadcn as TopBar } from './TopBar';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
@@ -43,6 +43,7 @@ export const DashboardLayoutShadcn: React.FC<DashboardLayoutProps> = ({ title })
   const dispatch = useAppDispatch();
   const { currentPage, mobileOpen } = useAppSelector((state) => state.dashboard);
   const { user, loading, error } = useAppSelector((state) => state.auth);
+  const [isMounted, setIsMounted] = useState(false);
 
   const handleMobileOpenChange = useCallback((open: boolean) => {
     dispatch(setMobileOpen(open));
@@ -60,6 +61,11 @@ export const DashboardLayoutShadcn: React.FC<DashboardLayoutProps> = ({ title })
 
     return (navItem.requiredRanks as string[]).some((rank: string) => userRanks.includes(rank.toUpperCase()));
   }, [user]);
+
+  // Mark as mounted (client-only) to avoid hydration mismatch
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   // Sync hash with Redux state on mount and hashchange
   useEffect(() => {
@@ -94,7 +100,19 @@ export const DashboardLayoutShadcn: React.FC<DashboardLayoutProps> = ({ title })
     </div>
   );
 
-  // Loading state
+  // Render a neutral shell until client has mounted (avoids SSR/client hydration mismatch)
+  if (!isMounted) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="mx-auto h-12 w-12 animate-spin text-primary" />
+          <p className="mt-4 text-muted-foreground">Loading dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Loading state (client-only, after mount)
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
