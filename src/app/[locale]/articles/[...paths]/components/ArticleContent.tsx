@@ -37,6 +37,14 @@ import ArticleDownloadSection from "./ArticleDownloadSection";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
+const getYoutubeEmbedUrl = (url: string): string | null => {
+  if (!url) return null;
+  const match = url.match(
+    /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i
+  );
+  return match ? `https://www.youtube.com/embed/${match[1]}?autoplay=0&rel=0` : null;
+};
+
 interface ArticleContentProps {
   article: Article;
   slug: string;
@@ -371,11 +379,13 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
     });
   }
 
-  // Video preview (appended as a secondary slide to prioritize images for LCP optimization)
-  slides.push({
-    type: "video",
-    url: "https://vidoes.chanomhub.com/file/Chanomhub-Vidoes/20-1-26_2.webm?Authorization=4_0051e50adc6bddd0000000001_01c1e6d3_f3aa13_acct_M803cRTXDpM8g_fqY8ZYrBjl__c="
-  });
+  // Video preview (appended if article.videoUrl exists)
+  if (article.videoUrl) {
+    slides.push({
+      type: "video",
+      url: article.videoUrl,
+    });
+  }
 
   const [activeSlideIndex, setActiveSlideIndex] = useState(0);
   const activeSlide = slides[activeSlideIndex] || { type: "image", url: "/placeholder-image.png" };
@@ -622,14 +632,30 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
                   className={`relative w-full aspect-video bg-black/60 border border-border rounded-sm overflow-hidden flex items-center justify-center group/panel`}
                 >
                   {activeSlide.type === "video" ? (
-                    <video
-                      controls
-                      className="w-full h-full object-contain"
-                      preload="metadata"
-                      poster={getImageUrl(article.coverImage || article.mainImage || null, "hero") || undefined}
-                    >
-                      <source src={activeSlide.url} type="video/webm" />
-                    </video>
+                    (() => {
+                      const ytEmbedUrl = getYoutubeEmbedUrl(activeSlide.url);
+                      if (ytEmbedUrl) {
+                        return (
+                          <iframe
+                            src={ytEmbedUrl}
+                            className="w-full h-full border-0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowFullScreen
+                            title={`${article.title} Video Preview`}
+                          />
+                        );
+                      }
+                      return (
+                        <video
+                          controls
+                          className="w-full h-full object-contain"
+                          preload="metadata"
+                          poster={getImageUrl(article.coverImage || article.mainImage || null, "hero") || undefined}
+                        >
+                          <source src={activeSlide.url} />
+                        </video>
+                      );
+                    })()
                   ) : (
                     <div
                       onClick={handleImageClick}

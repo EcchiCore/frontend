@@ -1,7 +1,7 @@
 import { Link } from "@/i18n/navigation";
 import type { Article } from "@/types/article"
 
-import { Heart, Clock } from "lucide-react"
+import { Heart, Clock, Eye } from "lucide-react"
 import Image from "next/image"
 import { Badge } from "@/components/ui/badge"
 import { useFormatter } from "next-intl"
@@ -67,9 +67,15 @@ export default function GameCard({ article }: { article: Article }) {
 
           {/* Footer: hearts + time */}
           <div className="flex items-center justify-between mt-auto pt-2 border-t border-border/30 text-xs text-muted-foreground">
-            <div className="flex items-center gap-1">
-              <Heart className="w-3 h-3" />
-              <span className="font-medium">{article.favoritesCount?.toLocaleString() ?? 0}</span>
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-1" title="Favorites">
+                <Heart className="w-3 h-3" />
+                <span className="font-medium">{article.favoritesCount?.toLocaleString() ?? 0}</span>
+              </div>
+              <div className="flex items-center gap-1" title="Views">
+                <Eye className="w-3.5 h-3.5" />
+                <span className="font-medium">{(article.viewsCount || 0).toLocaleString()}</span>
+              </div>
             </div>
             <div className="flex items-center gap-1">
               <Clock className="w-3 h-3" />

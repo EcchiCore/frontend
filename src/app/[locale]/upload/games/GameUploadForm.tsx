@@ -31,7 +31,8 @@ import {
   Monitor,
   Smartphone,
   Globe,
-  FileCode
+  FileCode,
+  Video as VideoIcon
 } from 'lucide-react';
 
 export default function GameUploadForm({ availableTags, availableCategories }: { availableTags: string[]; availableCategories: string[]; }) {
@@ -230,6 +231,34 @@ export default function GameUploadForm({ availableTags, availableCategories }: {
               <p className="text-[12px] text-[#555] mt-1">3–5 recommended · 16:9 ratio works best</p>
             </div>
             <MediaGallery />
+          </section>
+
+          {/* VIDEO TRAILER */}
+          <section className="py-[32px] border-b border-[#1e1e1e]">
+            <div className="mb-[24px]">
+              <h2 className="text-[16px] font-bold text-white flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-red-500"></span>
+                Video Trailer / Preview <span className="text-[#555] text-[12px] font-normal">(Optional)</span>
+              </h2>
+              <p className="text-[12px] text-[#555] mt-1">Paste a link to your game trailer (YouTube URL, MP4, WebM, or M3U8 stream link)</p>
+            </div>
+            <div className="max-w-xl space-y-3">
+              <div className="relative flex items-center">
+                <VideoIcon className="absolute left-3.5 w-4 h-4 text-[#666]" />
+                <input
+                  type="text"
+                  value={formData.videoUrl || ''}
+                  onChange={(e) => dispatch(updateFormData({ videoUrl: e.target.value }))}
+                  placeholder="https://www.youtube.com/watch?v=... or https://example.com/video.mp4"
+                  className="w-full bg-[#141414] border border-[#333] rounded-[4px] text-white text-[13px] pl-10 pr-4 py-2.5 outline-none focus:border-red-500/50"
+                />
+              </div>
+              {formData.videoUrl && (
+                <p className="text-[11px] text-emerald-400 font-medium flex items-center gap-1.5">
+                  ✓ Video link added (Will be displayed as a trailer slide on the article page)
+                </p>
+              )}
+            </div>
           </section>
 
           {/* GENRE & TAGS */}

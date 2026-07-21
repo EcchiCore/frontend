@@ -15,6 +15,7 @@ export type Article = {
   mainImage: string | null;
   backgroundImage: string | null;
   coverImage: string | null;
+  videoUrl?: string | null;
   images: { url: string }[];
   categories: { name: string }[];
   author: {

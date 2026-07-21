@@ -35,6 +35,7 @@ export interface GameUploadFormData {
     // Step 3: Media
     coverImage?: string; // URL or base64? Usually URL after upload
     otherImages?: string[]; // URLs
+    videoUrl?: string; // External video URL (YouTube, MP4, WebM, etc.)
 
     // Editor
     editorMode?: 'rich-text' | 'block';
