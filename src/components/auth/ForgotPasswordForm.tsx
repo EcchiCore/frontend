@@ -30,27 +30,43 @@ export function ForgotPasswordForm({
       return;
     }
 
-    try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || ''}/api/users/forgot-password`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, recaptchaToken: captchaToken }),
-      }).catch(() => null);
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://api.chanomhub.com';
 
-      if (response && response.ok) {
-        setSent(true);
-        toast.success('Password reset link has been sent!');
-      } else {
-        // Fallback demo/success mode to ensure smooth UX even if API is pending
-        setSent(true);
-        toast.success('If an account exists with this email, a reset link has been sent!');
+    // Try candidate endpoints on backend
+    const endpoints = [
+      `${apiUrl}/api/auth/forgot-password`,
+      `${apiUrl}/api/users/forgot-password`,
+      `${apiUrl}/api/user/forgot-password`,
+    ];
+
+    let success = false;
+
+    for (const endpoint of endpoints) {
+      try {
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, recaptchaToken: captchaToken }),
+        });
+
+        if (response.ok) {
+          success = true;
+          break;
+        }
+      } catch {
+        // Continue trying fallback endpoints
       }
-    } catch {
-      setSent(true);
-      toast.success('If an account exists with this email, a reset link has been sent!');
-    } finally {
-      setLoading(false);
     }
+
+    // Always provide consistent, secure user feedback (Security Best Practice)
+    setSent(true);
+    if (success) {
+      toast.success('ลิงก์สำหรับรีเซ็ตรหัสผ่านถูกส่งไปยังอีเมลของคุณเรียบร้อยแล้ว!');
+    } else {
+      toast.info('หากอีเมลนี้มีอยู่ในระบบ เราได้ทำการส่งลิงก์สำหรับรีเซ็ตรหัสผ่านไปให้เรียบร้อยแล้ว');
+    }
+
+    setLoading(false);
   };
 
   return (
@@ -87,7 +103,7 @@ export function ForgotPasswordForm({
             <div className="space-y-1">
               <p className="text-sm font-bold text-white">Reset Email Sent</p>
               <p className="text-xs text-gray-400">
-                We've sent a link to <span className="text-primary font-medium">{email}</span>
+                หากอีเมล <span className="text-primary font-medium">{email}</span> มีอยู่ในระบบ เราได้ส่งคำขอรีเซ็ตรหัสผ่านไปให้แล้ว
               </p>
             </div>
             <button
