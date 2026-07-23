@@ -1,6 +1,6 @@
 'use client';
 
-import React, { Suspense, useEffect, useCallback, useState } from 'react';
+import React, { useEffect, useCallback, useState } from 'react';
 import { SidebarShadcn as Sidebar } from './Sidebar';
 import { TopBarShadcn as TopBar } from './TopBar';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
@@ -8,40 +8,16 @@ import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Loader2, AlertCircle } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { setCurrentPage, setMobileOpen } from '@/store/features/dashboard/dashboardSlice';
-import { PageType } from '@/types/dashboard';
-import { NAVIGATION_ITEMS } from '@/constants/dashboard';
-
-// Lazy load pages
-const ArticlesPage = React.lazy(() => import('../pages/ArticlesPage').then(module => ({ default: module.ArticlesPage })));
-const ProfilePage = React.lazy(() => import('../profile/page'));
-const SettingsPage = React.lazy(() => import('../settings/page'));
-const ModerationPage = React.lazy(() => import('../pages/ModerationPage'));
-const StudioPage = React.lazy(() => import('../pages/StudioPage').then(module => ({ default: module.StudioPage })));
-
-const WalletPage = React.lazy(() => import('../pages/WalletPage').then(module => ({ default: module.WalletPage })));
-const AdminDashboard = React.lazy(() => import('../admin/page'));
+import { setMobileOpen } from '@/store/features/dashboard/dashboardSlice';
 
 interface DashboardLayoutProps {
-  title: string;
+  title?: string;
   children?: React.ReactNode;
 }
 
-const getPageFromHash = (): PageType => {
-  if (typeof window === 'undefined') {
-    return 'profile';
-  }
-  const hash = window.location.hash.replace('#', '') as PageType;
-  const validPages: PageType[] = ['profile', 'articles', 'wallet', 'moderation', 'settings', 'admin', 'studio'];
-  if (validPages.includes(hash)) {
-    return hash;
-  }
-  return 'profile';
-};
-
-export const DashboardLayoutShadcn: React.FC<DashboardLayoutProps> = ({ title }) => {
+export const DashboardLayoutShadcn: React.FC<DashboardLayoutProps> = ({ title = 'Dashboard', children }) => {
   const dispatch = useAppDispatch();
-  const { currentPage, mobileOpen } = useAppSelector((state) => state.dashboard);
+  const { mobileOpen } = useAppSelector((state) => state.dashboard);
   const { user, loading, error } = useAppSelector((state) => state.auth);
   const [isMounted, setIsMounted] = useState(false);
 
@@ -49,59 +25,12 @@ export const DashboardLayoutShadcn: React.FC<DashboardLayoutProps> = ({ title })
     dispatch(setMobileOpen(open));
   }, [dispatch]);
 
-  const isAuthorized = useCallback((pageId: PageType) => {
-    const navItem = NAVIGATION_ITEMS.find(item => item.id === pageId);
-    if (!navItem || !navItem.requiredRanks) return true;
-    if (!user) return false;
-
-    const userRanks = [
-      ...(user.rank ? [user.rank] : []),
-      ...(user.roles || [])
-    ].map(r => r.toUpperCase());
-
-    return (navItem.requiredRanks as string[]).some((rank: string) => userRanks.includes(rank.toUpperCase()));
-  }, [user]);
-
   // Mark as mounted (client-only) to avoid hydration mismatch
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
-  // Sync hash with Redux state on mount and hashchange
-  useEffect(() => {
-    const handleHashChange = () => {
-      const pageFromHash = getPageFromHash();
-      if (isAuthorized(pageFromHash)) {
-        dispatch(setCurrentPage(pageFromHash));
-      } else {
-        // Fallback to profile if not authorized
-        window.location.hash = 'profile';
-        dispatch(setCurrentPage('profile'));
-      }
-    };
-
-    // Initial load
-    if (!loading && user) {
-      handleHashChange();
-    }
-
-    window.addEventListener('hashchange', handleHashChange);
-    return () => {
-      window.removeEventListener('hashchange', handleHashChange);
-    };
-  }, [dispatch, isAuthorized, loading, user]);
-
-  const LoadingFallback = () => (
-    <div className="min-h-[50vh] flex items-center justify-center">
-      <div className="text-center">
-        <Loader2 className="mx-auto h-12 w-12 animate-spin text-primary" />
-        <p className="mt-4 text-muted-foreground">Loading...</p>
-      </div>
-    </div>
-  );
-
-  // Render a neutral shell until client has mounted (avoids SSR/client hydration mismatch)
-  if (!isMounted) {
+  if (!isMounted || loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
@@ -112,19 +41,6 @@ export const DashboardLayoutShadcn: React.FC<DashboardLayoutProps> = ({ title })
     );
   }
 
-  // Loading state (client-only, after mount)
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="mx-auto h-12 w-12 animate-spin text-primary" />
-          <p className="mt-4 text-muted-foreground">Loading dashboard...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Error state
   if (error) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
@@ -141,28 +57,6 @@ export const DashboardLayoutShadcn: React.FC<DashboardLayoutProps> = ({ title })
       </div>
     );
   }
-
-  // Render page based on currentPage
-  const renderPage = () => {
-    switch (currentPage) {
-      case 'profile':
-        return <ProfilePage />;
-      case 'articles':
-        return <ArticlesPage />;
-      case 'studio':
-        return <StudioPage />;
-      case 'wallet':
-        return <WalletPage />;
-      case 'settings':
-        return <SettingsPage />;
-      case 'moderation':
-        return <ModerationPage />;
-      case 'admin':
-        return <AdminDashboard />;
-      default:
-        return <ProfilePage />;
-    }
-  };
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -193,9 +87,7 @@ export const DashboardLayoutShadcn: React.FC<DashboardLayoutProps> = ({ title })
           <main className="flex-1 relative overflow-y-auto focus:outline-none">
             <div className="py-4 sm:py-6">
               <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
-                <Suspense fallback={<LoadingFallback />}>
-                  {renderPage()}
-                </Suspense>
+                {children}
               </div>
             </div>
           </main>

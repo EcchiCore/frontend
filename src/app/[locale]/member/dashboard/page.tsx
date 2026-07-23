@@ -1,10 +1,10 @@
-'use client';
+import { redirect } from '@/i18n/navigation';
 
-import React from 'react';
-import { DashboardLayoutShadcn as DashboardLayout } from './layout/DashboardLayout';
-
-export default function DashboardPage() {
-  return (
-    <DashboardLayout title="Dashboard" />
-  );
+export default async function DashboardPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  redirect({ href: '/member/dashboard/profile', locale });
 }

@@ -184,7 +184,7 @@ const Navbar = () => {
           {hasToken && isDesktop && <NotificationDropdown />}
 
           {/* User Account / Login Icon */}
-          <Link href={hasToken ? "/member/dashboard" : "/login"}>
+          <Link href={hasToken ? "/member/dashboard/profile" : "/login"}>
             <Button
               variant="ghost"
               size="icon"

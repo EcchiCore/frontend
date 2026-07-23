@@ -7,46 +7,46 @@ export const NAVIGATION_ITEMS: NavigationItem[] = [
     id: 'profile',
     label: 'Profile',
     icon: 'User',
-    path: '#profile'
+    path: '/member/dashboard/profile'
   },
   {
     id: 'studio',
     label: 'Studio',
     icon: 'Activity',
-    path: '#studio'
+    path: '/member/dashboard/studio'
   },
   {
     id: 'articles',
     label: 'Articles',
     icon: 'FileText',
-    path: '#articles'
+    path: '/member/dashboard/articles'
   },
 
   {
     id: 'wallet',
     label: 'Wallet',
     icon: 'Wallet',
-    path: '#wallet'
+    path: '/member/dashboard/wallet'
   },
   {
     id: 'moderation',
     label: 'Moderate Content',
     icon: 'Shield',
     requiredRanks: ['MODERATOR', 'ADMIN'],
-    path: '#moderation'
+    path: '/member/dashboard/moderation'
   },
   {
     id: 'admin',
     label: 'Admin',
-    icon: 'Settings', // You might want to pick a different icon if available
+    icon: 'Settings',
     requiredRanks: ['ADMIN'],
-    path: '#admin'
+    path: '/member/dashboard/admin'
   },
   {
     id: 'settings',
     label: 'Settings',
     icon: 'Settings',
-    path: '#settings'
+    path: '/member/dashboard/settings'
   }
 ];
 

@@ -15,6 +15,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { toggleMobile } from '@/store/features/dashboard/dashboardSlice';
 import { logoutUser } from '@/store/features/auth/authSlice';
+import { useRouter } from '@/i18n/navigation';
 
 interface TopBarProps {
   title: string;
@@ -22,17 +23,14 @@ interface TopBarProps {
 
 export const TopBarShadcn: React.FC<TopBarProps> = ({ title }) => {
   const dispatch = useAppDispatch();
+  const router = useRouter();
   const user = useAppSelector((state) => state.auth.user);
 
   const handleLogout = async () => {
     if (window.confirm('Are you sure you want to logout?')) {
       await dispatch(logoutUser());
-      window.location.href = '/login';
+      router.push('/login');
     }
-  };
-
-  const handleNav = (hash: string) => {
-    window.location.hash = hash;
   };
 
   return (
@@ -85,11 +83,11 @@ export const TopBarShadcn: React.FC<TopBarProps> = ({ title }) => {
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>{user?.username}</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => handleNav('profile')}>
+            <DropdownMenuItem onClick={() => router.push('/member/dashboard/profile')}>
               <UserCircle className="mr-2 h-4 w-4" />
               <span>Profile</span>
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleNav('settings')}>
+            <DropdownMenuItem onClick={() => router.push('/member/dashboard/settings')}>
               <Settings className="mr-2 h-4 w-4" />
               <span>Settings</span>
             </DropdownMenuItem>

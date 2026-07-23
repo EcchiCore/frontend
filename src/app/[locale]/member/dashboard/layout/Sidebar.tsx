@@ -3,11 +3,12 @@
 import React from 'react';
 import { User, FileText, Shield, Settings, Wallet, Activity } from 'lucide-react';
 import { NAVIGATION_ITEMS } from '@/constants/dashboard';
-import { NavigationItem, PageType } from '@/types/dashboard';
+import { NavigationItem } from '@/types/dashboard';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { setCurrentPage, setMobileOpen } from '@/store/features/dashboard/dashboardSlice';
+import { setMobileOpen } from '@/store/features/dashboard/dashboardSlice';
+import { Link, usePathname } from '@/i18n/navigation';
 
 const iconMap = {
   User,
@@ -24,7 +25,7 @@ interface SidebarProps {
 
 export const SidebarShadcn: React.FC<SidebarProps> = ({ className = '' }) => {
   const dispatch = useAppDispatch();
-  const currentPage = useAppSelector((state) => state.dashboard.currentPage);
+  const pathname = usePathname();
   const user = useAppSelector((state) => state.auth.user);
 
   const hasRequiredRank = (item: NavigationItem): boolean => {
@@ -45,12 +46,6 @@ export const SidebarShadcn: React.FC<SidebarProps> = ({ className = '' }) => {
     return IconComponent ? <IconComponent className="h-5 w-5" /> : null;
   };
 
-  const handleNavigation = (pageId: PageType) => {
-    window.location.hash = pageId;
-    dispatch(setCurrentPage(pageId));
-    dispatch(setMobileOpen(false));
-  };
-
   const visibleItems = NAVIGATION_ITEMS.filter(hasRequiredRank);
 
   return (
@@ -68,23 +63,29 @@ export const SidebarShadcn: React.FC<SidebarProps> = ({ className = '' }) => {
       </div>
 
       {/* Navigation Menu */}
-
       <nav className="flex-1 p-2 overflow-y-auto">
         <div className="space-y-1">
-          {visibleItems.map((item) => (
-            <Button
-              key={item.id}
-              variant="ghost"
-              className={`w-full justify-start gap-3 transition-colors ${currentPage === item.id
-                  ? 'bg-sidebar-accent text-sidebar-accent-foreground font-semibold'
-                  : 'text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground'
+          {visibleItems.map((item) => {
+            const isActive = pathname.startsWith(item.path);
+            return (
+              <Button
+                key={item.id}
+                asChild
+                variant="ghost"
+                className={`w-full justify-start gap-3 transition-colors ${
+                  isActive
+                    ? 'bg-sidebar-accent text-sidebar-accent-foreground font-semibold'
+                    : 'text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground'
                 }`}
-              onClick={() => handleNavigation(item.id)}
-            >
-              {getIcon(item.icon as keyof typeof iconMap)}
-              <span className="font-medium">{item.label}</span>
-            </Button>
-          ))}
+                onClick={() => dispatch(setMobileOpen(false))}
+              >
+                <Link href={item.path}>
+                  {getIcon(item.icon as keyof typeof iconMap)}
+                  <span className="font-medium">{item.label}</span>
+                </Link>
+              </Button>
+            );
+          })}
         </div>
       </nav>
 

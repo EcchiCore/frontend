@@ -1,4 +1,7 @@
+'use client';
+
 import React from 'react';
+import { DashboardLayoutShadcn as DashboardLayout } from './layout/DashboardLayout';
 
 export default function DashboardSegmentLayout({
   children,
@@ -6,8 +9,8 @@ export default function DashboardSegmentLayout({
   children: React.ReactNode;
 }) {
   return (
-    <>
+    <DashboardLayout>
       {children}
-    </>
+    </DashboardLayout>
   );
 }
