@@ -4,7 +4,7 @@ FROM oven/bun:latest AS deps
 WORKDIR /app
 
 # คัดลอกไฟล์ dependencies
-COPY package.json bun.lockb* ./
+COPY package.json bun.lock* ./
 RUN bun install --frozen-lockfile
 
 # Stage 2: Build stage
