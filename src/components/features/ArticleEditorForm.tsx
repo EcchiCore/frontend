@@ -348,6 +348,23 @@ const DownloadManager: React.FC<{
     const itemsRef = React.useRef(items);
     const [uploadingId, setUploadingId] = useState<string | null>(null);
     const [uploadProgress, setUploadProgress] = useState(0);
+    const [isVerifiedDev, setIsVerifiedDev] = useState(false);
+
+    useEffect(() => {
+        const checkDevStatus = async () => {
+            try {
+                const sdk = await getSdk();
+                const res = await sdk.developer.getProfile().catch(() => null);
+                const devData = (res as any)?.data || res;
+                if (devData?.isVerified) {
+                    setIsVerifiedDev(true);
+                }
+            } catch {
+                setIsVerifiedDev(false);
+            }
+        };
+        checkDevStatus();
+    }, []);
 
     useEffect(() => {
         itemsRef.current = items;
@@ -363,6 +380,14 @@ const DownloadManager: React.FC<{
 
         if (!targetSlug) {
             toast.error("Please enter a title before uploading files.");
+            return;
+        }
+
+        const maxAllowedBytes = isVerifiedDev ? 5 * 1024 * 1024 * 1024 : 1 * 1024 * 1024 * 1024;
+        if (file.size > maxAllowedBytes) {
+            const fileSizeGB = (file.size / (1024 * 1024 * 1024)).toFixed(2);
+            const limitStr = isVerifiedDev ? '5 GB' : '1 GB';
+            toast.error(`ไฟล์มีขนาด ${fileSizeGB} GB ซึ่งเกินขีดจำกัดอัปโหลด (${limitStr} สำหรับ${isVerifiedDev ? 'Verified Developer' : 'สมาชิกทั่วไป'})`);
             return;
         }
 

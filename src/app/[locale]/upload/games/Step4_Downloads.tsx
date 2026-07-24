@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -49,6 +49,23 @@ export const Step4_Downloads = () => {
   const [isDownloadDialogOpen, setIsDownloadDialogOpen] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [isVerifiedDev, setIsVerifiedDev] = useState(false);
+
+  useEffect(() => {
+    const checkDevStatus = async () => {
+      try {
+        const sdk = await getSdk();
+        const res = await sdk.developer.getProfile().catch(() => null);
+        const devData = (res as any)?.data || res;
+        if (devData?.isVerified) {
+          setIsVerifiedDev(true);
+        }
+      } catch {
+        setIsVerifiedDev(false);
+      }
+    };
+    checkDevStatus();
+  }, []);
 
   const [purchaseName, setPurchaseName] = useState('');
   const [purchaseUrl, setPurchaseUrl] = useState('');
@@ -115,6 +132,15 @@ export const Step4_Downloads = () => {
     // Critical: Ensure slug is reserved before allowing upload
     if (!formData.slug) {
       toast.error("URL reservation required. Please enter a Game Title first.");
+      return;
+    }
+
+    // Validate size limit based on user developer status
+    const maxAllowedBytes = isVerifiedDev ? 5 * 1024 * 1024 * 1024 : 1 * 1024 * 1024 * 1024;
+    if (file.size > maxAllowedBytes) {
+      const fileSizeGB = (file.size / (1024 * 1024 * 1024)).toFixed(2);
+      const limitStr = isVerifiedDev ? '5 GB' : '1 GB';
+      toast.error(`ไฟล์มีขนาด ${fileSizeGB} GB ซึ่งเกินขีดจำกัดอัปโหลด (${limitStr} สำหรับ${isVerifiedDev ? 'Verified Developer' : 'สมาชิกทั่วไป'})`);
       return;
     }
 
@@ -274,6 +300,13 @@ export const Step4_Downloads = () => {
                   </Button>
                 </div>
               </div>
+              <p className={`text-[11px] flex items-center gap-1 mt-1 ${isVerifiedDev ? 'text-emerald-400/90' : 'text-amber-400/90'}`}>
+                {isVerifiedDev ? (
+                  <>✓ สิทธิ์ Verified Developer: อัปโหลดได้สูงสุด 5 GB</>
+                ) : (
+                  <>ℹ สมาชิกทั่วไป: อัปโหลดไฟล์ได้สูงสุด 1 GB (Verified Developer อัปโหลดได้สูงสุด 5 GB)</>
+                )}
+              </p>
               {isUploading && (
                 <div className="space-y-1.5 pt-1">
                   <div className="flex justify-between text-[10px] font-mono">
