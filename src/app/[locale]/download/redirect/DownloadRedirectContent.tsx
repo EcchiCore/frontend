@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useTranslations, useLocale } from 'next-intl';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -59,6 +59,18 @@ export default function DownloadRedirectContent() {
   const [checkboxChecked, setCheckboxChecked] = useState(false);
   const [isHoveringAd, setIsHoveringAd] = useState(false);
   const [adClicked, setAdClicked] = useState(false);
+  const isHoveringAdRef = useRef(false);
+  const adContainerRef = useRef<HTMLDivElement>(null);
+
+  const handleAdHoverStart = () => {
+    isHoveringAdRef.current = true;
+    setIsHoveringAd(true);
+  };
+
+  const handleAdHoverEnd = () => {
+    isHoveringAdRef.current = false;
+    setIsHoveringAd(false);
+  };
 
   // Initialize JuicyAds
   useEffect(() => {
@@ -79,16 +91,36 @@ export default function DownloadRedirectContent() {
     }
   }, []);
 
-  // Iframe click detection helper via blur event
+  // Iframe & Ad click detection helper for both Desktop (hover/click) and Mobile (touch/focus/blur)
   useEffect(() => {
-    const handleBlur = () => {
-      if (isHoveringAd) {
+    const checkAdClicked = () => {
+      const activeEl = document.activeElement;
+      const isIframeActive = activeEl && activeEl.tagName === 'IFRAME';
+      const isInsideAdBox = adContainerRef.current && activeEl && adContainerRef.current.contains(activeEl);
+
+      if (isHoveringAdRef.current || isIframeActive || isInsideAdBox) {
         setAdClicked(true);
       }
     };
+
+    const handleBlur = () => {
+      // Delay slightly so document.activeElement updates when focus shifts to iframe
+      setTimeout(checkAdClicked, 50);
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.hidden && isHoveringAdRef.current) {
+        setAdClicked(true);
+      }
+    };
+
     window.addEventListener('blur', handleBlur);
-    return () => window.removeEventListener('blur', handleBlur);
-  }, [isHoveringAd]);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => {
+      window.removeEventListener('blur', handleBlur);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, []);
 
   const handleAcceptTerms = () => {
     setCookie('chanomhub_download_terms_accepted', 'true', 365);
@@ -584,9 +616,14 @@ export default function DownloadRedirectContent() {
 
         {/* JuicyAds Banner */}
         <div
+          ref={adContainerRef}
           className="flex flex-col items-center justify-center p-4 bg-slate-900/40 border border-slate-800/60 rounded-2xl w-[340px] shadow-inner shrink-0 mt-4 transition-all duration-300"
-          onMouseEnter={() => setIsHoveringAd(true)}
-          onMouseLeave={() => setIsHoveringAd(false)}
+          onMouseEnter={handleAdHoverStart}
+          onMouseLeave={handleAdHoverEnd}
+          onTouchStart={handleAdHoverStart}
+          onTouchMove={handleAdHoverStart}
+          onPointerDown={handleAdHoverStart}
+          onPointerEnter={handleAdHoverStart}
         >
           <span className="text-[9px] uppercase font-bold tracking-wider text-slate-500 mb-2">Advertisement</span>
           <ins
