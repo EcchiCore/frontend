@@ -643,6 +643,12 @@ export default function DownloadRedirectContent() {
         strategy="afterInteractive"
         data-cfasync="false"
       />
+      {/* EffectiveCPMNetwork Script */}
+      <Script
+        type="text/javascript"
+        src="https://pl30536260.effectivecpmnetwork.com/dc/e6/47/dce64777c8ee64454618011854309d97.js"
+        strategy="afterInteractive"
+      />
     </div>
   );
 }

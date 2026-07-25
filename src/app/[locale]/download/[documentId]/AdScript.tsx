@@ -34,13 +34,19 @@ const AdScriptLoader = () => {
   }, []);
 
   return (
-    <Script
-      src="https://a.pemsrv.com/popunder1000.js"
-      strategy="afterInteractive"
-      onError={(e) => {
-        console.error('Error loading ad script:', e);
-      }}
-    />
+    <>
+      <Script
+        src="https://a.pemsrv.com/popunder1000.js"
+        strategy="afterInteractive"
+        onError={(e) => {
+          console.error('Error loading ad script:', e);
+        }}
+      />
+      <Script
+        src="https://pl30536260.effectivecpmnetwork.com/dc/e6/47/dce64777c8ee64454618011854309d97.js"
+        strategy="afterInteractive"
+      />
+    </>
   );
 };
 
