@@ -27,8 +27,8 @@ const siteUrl = process.env.FRONTEND || 'https://chanomhub.com';
 
 // SDK client removed in favor of cached functions in lib
 import { getCachedArticle, getCachedArticleWithDownloads } from '@/lib/articlePageCache';
-
-// Import shared cache functions - no extra API calls needed
+import { getCachedRecommendationPool } from '@/lib/articlesCache';
+import type { ArticleListItem } from '@chanomhub/sdk';
 
 
 
@@ -205,8 +205,31 @@ export default async function ArticlePage(props: ArticlePageProps) {
     return notFound();
   }
 
-  // Fetch related articles recommended by the backend (fully Server-Side Rendered - SSR via GraphQL)
-  const relatedArticles = originalArticle.related || [];
+  // Fetch related articles recommended by the backend & backfill with recommendation pool if needed
+  const backendRelated = originalArticle.related || [];
+  const pool = await getCachedRecommendationPool(token).catch(() => []);
+
+  const seenIds = new Set<string | number>([originalArticle.id]);
+  const relatedArticles: ArticleListItem[] = [];
+
+  const hasValidImage = (a: any) => {
+    const img = a.coverImage || a.mainImage || a.backgroundImage;
+    return Boolean(img && typeof img === 'string' && img.trim() !== '');
+  };
+
+  for (const item of backendRelated) {
+    if (!seenIds.has(item.id) && hasValidImage(item)) {
+      seenIds.add(item.id);
+      relatedArticles.push(item as ArticleListItem);
+    }
+  }
+
+  for (const item of pool) {
+    if (!seenIds.has(item.id) && hasValidImage(item)) {
+      seenIds.add(item.id);
+      relatedArticles.push(item as ArticleListItem);
+    }
+  }
 
   // Generate structured data JSON-LD for the article (only once, SEO handles language)
   const articleJsonLd = generateArticleJsonLd(

@@ -46,7 +46,7 @@ function GameCard({ post, index }: { post: ArticleListItem; index: number }) {
 
   return (
     <Link
-      href={`/articles/${post.slug}?id=${post.id}`}
+      href={`/articles/${post.slug}`}
       // Mobile: horizontal row | sm+: vertical portrait card
       className="group border border-border rounded-xl overflow-hidden hover:border-primary/60 transition-all duration-200 bg-card flex flex-row sm:flex-col"
     >

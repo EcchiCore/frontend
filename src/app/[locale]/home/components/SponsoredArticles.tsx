@@ -29,7 +29,7 @@ export default function SponsoredArticles({ articles }: SponsoredArticlesProps) 
             return (
               <Link
                 key={sponsored.id}
-                href={`/articles/${article.slug}?id=${article.id}`}
+                href={`/articles/${article.slug}`}
                 className="group flex-shrink-0 flex items-center gap-3 pr-6 border-r border-border/20 last:border-r-0 last:pr-0"
               >
                 <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-muted/30 flex-shrink-0">

@@ -5,7 +5,7 @@ import { useTranslations, useLocale } from 'next-intl';
 import { encodeDownloadUrl } from '@/utils/downloadUrl';
 import cn from 'classnames';
 import { Dialog, DialogContent, DialogTitle, Button } from '@/components/ui';
-import { Download, ShieldCheck, LogIn } from 'lucide-react';
+import { Download, ShieldCheck, LogIn, Star } from 'lucide-react';
 import { getFileIcon, getFileSize } from "@/utils/fileUtils";
 import { DownloadFile, TranslationFile } from "./Interfaces";
 import { useDownloadDialog } from './hooks/useDownloadDialog';
@@ -42,6 +42,30 @@ const ArticleDownloadDialog: React.FC<ArticleDownloadDialogProps> = ({
   const {
     filteredDownloads,
   } = useDownloadDialog(downloads, showAlert);
+
+  const [failedImageIds, setFailedImageIds] = React.useState<Set<string | number>>(new Set());
+
+  const handleImageError = (id: string | number) => {
+    setFailedImageIds((prev) => {
+      const next = new Set(prev);
+      next.add(id);
+      return next;
+    });
+  };
+
+  const validRelatedArticles = React.useMemo(() => {
+    if (!relatedArticles || relatedArticles.length === 0) return [];
+    return relatedArticles.filter((rel) => {
+      if (failedImageIds.has(rel.id) || (rel.slug && failedImageIds.has(rel.slug))) {
+        return false;
+      }
+      const rawImage = rel.coverImage || rel.mainImage || (rel as any).backgroundImage;
+      if (!rawImage || typeof rawImage !== 'string' || rawImage.trim() === '') {
+        return false;
+      }
+      return true;
+    });
+  }, [relatedArticles, failedImageIds]);
 
   const handleOpenDownload = async (item: DownloadFile | TranslationFile) => {
     let url = "url" in item ? item.url : item.fileUrl;
@@ -145,8 +169,8 @@ const ArticleDownloadDialog: React.FC<ArticleDownloadDialogProps> = ({
   return (
     <Dialog open={openDownloadDialog} onOpenChange={setOpenDownloadDialog}>
       <DialogContent className={cn(
-        "p-0 overflow-hidden",
-        isMobile ? "max-w-[95vw]" : "max-w-2xl"
+        "p-0 overflow-hidden border border-gray-700/60 shadow-2xl transition-all",
+        isMobile ? "max-w-[95vw]" : "max-w-4xl"
       )}>
         <DialogTitle className="sr-only">{t("downloadsAndTranslations")}</DialogTitle>
 
@@ -166,7 +190,7 @@ const ArticleDownloadDialog: React.FC<ArticleDownloadDialogProps> = ({
             <Button
               size="sm"
               variant="outline"
-              className="border-cyan-600 text-cyan-600 hover:bg-cyan-50 dark:hover:bg-cyan-950"
+              className="border-cyan-600 text-cyan-600 hover:bg-cyan-50 dark:hover:bg-cyan-950 font-bold"
             >
               <Download className="size-4 mr-1.5" />
               {t("openInChanoX2")}
@@ -176,7 +200,7 @@ const ArticleDownloadDialog: React.FC<ArticleDownloadDialogProps> = ({
 
         {/* Download List */}
         <div className={cn(
-          "px-6 pb-4 space-y-2 max-h-[60vh] overflow-y-auto",
+          "px-6 pb-4 space-y-2 max-h-[50vh] overflow-y-auto",
           isDarkMode ? "bg-gray-900" : "bg-white"
         )}>
           {filteredDownloads.length > 0 ? (
@@ -193,50 +217,101 @@ const ArticleDownloadDialog: React.FC<ArticleDownloadDialogProps> = ({
           )}
         </div>
 
-        {/* More you might be interested in (itch.io style) */}
-        {relatedArticles && relatedArticles.length > 0 && (
+        {/* More you might be interested in (itch.io style cards) */}
+        {validRelatedArticles && validRelatedArticles.length > 0 && (
           <div className={cn(
-            "px-6 py-4 border-t",
-            isDarkMode ? "bg-gray-900 border-gray-800 text-[#acb2b8]" : "bg-gray-50 border-gray-200 text-gray-700"
+            "px-6 py-5 border-t",
+            isDarkMode ? "bg-gray-900/95 border-gray-800 text-[#acb2b8]" : "bg-gray-50 border-gray-200 text-gray-700"
           )}>
             <h4 className={cn(
-              "text-xs font-bold uppercase tracking-wider mb-3",
-              isDarkMode ? "text-gray-400" : "text-gray-500"
+              "text-xs font-bold uppercase tracking-wider mb-3.5 flex items-center gap-2",
+              isDarkMode ? "text-gray-300" : "text-gray-700"
             )}>
+              <span className="w-1.5 h-3.5 bg-cyan-500 rounded-full inline-block" />
               {t("relatedArticles")}
             </h4>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[220px] overflow-y-auto pr-1">
-              {relatedArticles.slice(0, 4).map((rel) => {
-                const cover = getImageUrl(rel.coverImage || rel.mainImage || null, "cardThumbnail") || rel.coverImage || rel.mainImage;
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3.5 max-h-[380px] overflow-y-auto pr-1">
+              {validRelatedArticles.slice(0, 8).map((rel) => {
+                const rawImg = rel.coverImage || rel.mainImage || (rel as any).backgroundImage;
+                const cover = getImageUrl(rawImg, "card") || rawImg;
+                const priceText = rel.isPaid && !rel.isUnlocked ? `${rel.price || 0} CC` : 'Free';
+                const ratingVal = (rel as any).ratingsAverage || (rel as any).rating || 5;
+                const votesVal = (rel as any).ratingsCount || (rel as any).favoritesCount || (rel as any).viewsCount || 0;
+
                 return (
                   <Link
                     key={rel.id}
                     href={`/articles/${rel.slug}`}
                     onClick={() => setOpenDownloadDialog(false)}
                     className={cn(
-                      "flex gap-2.5 p-2 rounded-sm border transition-colors duration-150",
+                      "group flex flex-col rounded-lg border overflow-hidden transition-all duration-200 hover:-translate-y-1 hover:shadow-xl",
                       isDarkMode 
-                        ? "bg-gray-800/40 hover:bg-gray-800 border-gray-700/50 hover:border-gray-600" 
-                        : "bg-white hover:bg-gray-55 border-gray-200 hover:border-gray-300"
+                        ? "bg-gray-800/50 hover:bg-gray-800 border-gray-700/60 hover:border-cyan-500/50" 
+                        : "bg-white hover:bg-gray-50 border-gray-200 hover:border-cyan-500/50"
                     )}
                   >
-                    <div className="w-14 aspect-video bg-black/40 rounded-sm overflow-hidden shrink-0 relative border border-gray-700/20">
-                      {cover ? (
-                        <img src={cover} alt={rel.title} className="w-full h-full object-cover" />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-xs">📰</div>
-                      )}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className={cn(
-                        "text-[11px] font-bold truncate transition-colors",
-                        isDarkMode ? "text-white hover:text-cyan-400" : "text-gray-900 hover:text-cyan-600"
+                    {/* Cover Image Container */}
+                    <div className="relative aspect-[16/9] w-full bg-black/50 overflow-hidden">
+                      <img 
+                        src={cover} 
+                        alt={rel.title} 
+                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" 
+                        onError={() => handleImageError(rel.id)}
+                      />
+                      {/* Price / Access Badge */}
+                      <div className={cn(
+                        "absolute top-2 right-2 px-2 py-0.5 rounded text-[10px] font-bold backdrop-blur-md shadow-md border",
+                        rel.isPaid && !rel.isUnlocked
+                          ? "bg-amber-500/90 text-white border-amber-400/30"
+                          : "bg-emerald-600/90 text-white border-emerald-400/30"
                       )}>
-                        {rel.title}
-                      </p>
-                      <p className="text-[9px] text-[#567086] truncate mt-0.5">
-                        By {rel.author?.name || "Admin"}
-                      </p>
+                        {priceText}
+                      </div>
+                    </div>
+
+                    {/* Card Content */}
+                    <div className="p-3 flex-1 flex flex-col justify-between space-y-2">
+                      <div>
+                        {/* Title */}
+                        <h5 className={cn(
+                          "text-xs font-bold truncate group-hover:text-cyan-400 transition-colors leading-snug",
+                          isDarkMode ? "text-gray-100" : "text-gray-900"
+                        )}>
+                          {rel.title}
+                        </h5>
+
+                        {/* Author */}
+                        <p className={cn(
+                          "text-[10px] truncate mt-0.5 font-medium",
+                          isDarkMode ? "text-gray-400" : "text-gray-500"
+                        )}>
+                          By {rel.author?.name || "Admin"}
+                        </p>
+                      </div>
+
+                      {/* Ratings */}
+                      <div className="flex items-center gap-1 text-[10px] text-amber-400 font-semibold">
+                        <Star className="size-3 fill-amber-400 text-amber-400 shrink-0" />
+                        <span>{typeof ratingVal === 'number' ? ratingVal.toFixed(1) : '5.0'}</span>
+                        {votesVal > 0 && (
+                          <span className={cn(
+                            "text-[9px] font-normal ml-0.5",
+                            isDarkMode ? "text-gray-500" : "text-gray-400"
+                          )}>
+                            ({votesVal})
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Short Description */}
+                      {rel.description && (
+                        <p className={cn(
+                          "text-[10px] line-clamp-2 leading-relaxed font-sans mt-0.5",
+                          isDarkMode ? "text-gray-400" : "text-gray-600"
+                        )}>
+                          {rel.description}
+                        </p>
+                      )}
                     </div>
                   </Link>
                 );

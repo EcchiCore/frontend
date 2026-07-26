@@ -118,7 +118,7 @@ export default function HomeCarousel({ articles, loading }: HomeCarouselProps) {
     >
       {/* Slide content */}
       <Link
-        href={`/articles/${article.slug}?id=${article.id}`}
+        href={`/articles/${article.slug}`}
         className="group absolute inset-0 flex items-end"
         aria-current={true}
       >
@@ -131,20 +131,18 @@ export default function HomeCarousel({ articles, loading }: HomeCarouselProps) {
             fill
             priority
             sizes="100vw"
-            className={`object-cover transition-transform duration-700 group-hover:scale-[1.03] ${
-              isAnimating
+            className={`object-cover transition-transform duration-700 group-hover:scale-[1.03] ${isAnimating
                 ? direction === "right"
                   ? "animate-[slideInRight_500ms_ease-out]"
                   : "animate-[slideInLeft_500ms_ease-out]"
                 : ""
-            }`}
+              }`}
             onError={() => handleImageError(article.id)}
           />
         ) : (
           <div
-            className={`absolute inset-0 bg-gradient-to-br ${
-              fallbacks[current % fallbacks.length]
-            }`}
+            className={`absolute inset-0 bg-gradient-to-br ${fallbacks[current % fallbacks.length]
+              }`}
           />
         )}
 
@@ -215,11 +213,10 @@ export default function HomeCarousel({ articles, loading }: HomeCarouselProps) {
                 e.preventDefault();
                 goTo(i, i > current ? "right" : "left");
               }}
-              className={`transition-all duration-300 rounded-full cursor-pointer ${
-                i === current
+              className={`transition-all duration-300 rounded-full cursor-pointer ${i === current
                   ? "w-6 h-1.5 bg-primary"
                   : "w-1.5 h-1.5 bg-white/30 hover:bg-white/50"
-              }`}
+                }`}
               aria-label={`Go to slide ${i + 1}`}
               aria-current={i === current ? "true" : undefined}
             />

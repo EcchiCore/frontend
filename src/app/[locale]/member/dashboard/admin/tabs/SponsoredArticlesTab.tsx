@@ -319,51 +319,51 @@ export function SponsoredArticlesTab() {
                                                 )}
                                             </div>
                                         </TableCell>
-                                    <TableCell className="text-center font-mono">{item.priority}</TableCell>
-                                    <TableCell className="text-center">
-                                        <Switch
-                                            checked={item.isActive}
-                                            onCheckedChange={() => handleToggleActive(item)}
-                                        />
-                                    </TableCell>
-                                    <TableCell className="text-xs">
-                                        {item.startDate ? new Date(item.startDate).toLocaleDateString('th-TH') : '-'}
-                                    </TableCell>
-                                    <TableCell className="text-xs">
-                                        {item.endDate ? new Date(item.endDate).toLocaleDateString('th-TH') : t('notSet')}
-                                    </TableCell>
-                                    <TableCell className="text-right space-x-1">
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            onClick={() => window.open(`/articles/${item.article?.slug}?id=${item.articleId}`, '_blank')}
-                                            title={t('viewArticle')}
-                                        >
-                                            <ExternalLink className="h-4 w-4" />
-                                        </Button>
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            onClick={() => openEditDialog(item)}
-                                            title={t('edit')}
-                                        >
-                                            <Pencil className="h-4 w-4" />
-                                        </Button>
-                                        <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            onClick={() => handleDelete(item.id)}
-                                            disabled={deleting === item.id}
-                                            title={t('delete')}
-                                        >
-                                            {deleting === item.id ? (
-                                                <Loader2 className="h-4 w-4 animate-spin" />
-                                            ) : (
-                                                <Trash2 className="h-4 w-4 text-red-500" />
-                                            )}
-                                        </Button>
-                                    </TableCell>
-                                </TableRow>
+                                        <TableCell className="text-center font-mono">{item.priority}</TableCell>
+                                        <TableCell className="text-center">
+                                            <Switch
+                                                checked={item.isActive}
+                                                onCheckedChange={() => handleToggleActive(item)}
+                                            />
+                                        </TableCell>
+                                        <TableCell className="text-xs">
+                                            {item.startDate ? new Date(item.startDate).toLocaleDateString('th-TH') : '-'}
+                                        </TableCell>
+                                        <TableCell className="text-xs">
+                                            {item.endDate ? new Date(item.endDate).toLocaleDateString('th-TH') : t('notSet')}
+                                        </TableCell>
+                                        <TableCell className="text-right space-x-1">
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                onClick={() => window.open(`/articles/${item.article?.slug}`, '_blank')}
+                                                title={t('viewArticle')}
+                                            >
+                                                <ExternalLink className="h-4 w-4" />
+                                            </Button>
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                onClick={() => openEditDialog(item)}
+                                                title={t('edit')}
+                                            >
+                                                <Pencil className="h-4 w-4" />
+                                            </Button>
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                onClick={() => handleDelete(item.id)}
+                                                disabled={deleting === item.id}
+                                                title={t('delete')}
+                                            >
+                                                {deleting === item.id ? (
+                                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                                ) : (
+                                                    <Trash2 className="h-4 w-4 text-red-500" />
+                                                )}
+                                            </Button>
+                                        </TableCell>
+                                    </TableRow>
                                 );
                             })}
                         </TableBody>

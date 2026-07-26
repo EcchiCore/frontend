@@ -23,13 +23,27 @@ export default function RelatedArticles({
     const scrollRef = useRef<HTMLDivElement>(null);
     const [isPaused, setIsPaused] = useState(false);
     const resumeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const [failedImageIds, setFailedImageIds] = useState<Set<string | number>>(new Set());
+
+    const handleImageError = (id: string | number) => {
+        setFailedImageIds((prev) => {
+            const next = new Set(prev);
+            next.add(id);
+            return next;
+        });
+    };
 
     // Get user's preferred tags from view history
     const { tagScores } = useViewHistory();
 
     // Filter and sort articles by user preference
     const filteredArticles = useMemo(() => {
-        const filtered = articles.filter((a) => a.id !== currentArticleId);
+        const filtered = articles.filter((a) => {
+            if (a.id === currentArticleId) return false;
+            if (failedImageIds.has(a.id) || (a.slug && failedImageIds.has(a.slug))) return false;
+            const img = a.coverImage || a.mainImage || (a as any).backgroundImage;
+            return Boolean(img && typeof img === 'string' && img.trim() !== '');
+        });
 
         // Score each article based on how many tags match user's viewing history
         const scored = filtered.map(article => {
@@ -173,7 +187,7 @@ export default function RelatedArticles({
                                 <Card className="w-[260px] overflow-hidden bg-card/50 backdrop-blur-sm border-border/40 hover:border-primary/40 hover:shadow-lg transition-all duration-300">
                                     {/* Thumbnail */}
                                     <div className="relative aspect-[16/9] overflow-hidden bg-muted/50">
-                                        {imageSrc ? (
+                                        {imageSrc && (
                                             <Image
                                                 src={imageSrc}
                                                 alt={article.title}
@@ -181,14 +195,17 @@ export default function RelatedArticles({
                                                 height={146}
                                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                                                 unoptimized
+                                                onError={() => handleImageError(article.id)}
                                             />
-                                        ) : (
-                                            <div className="w-full h-full bg-gradient-to-br from-primary/5 to-muted/50 flex items-center justify-center">
-                                                <span className="text-3xl font-bold text-muted-foreground/30">
-                                                    {article.title.charAt(0).toUpperCase()}
-                                                </span>
-                                            </div>
                                         )}
+                                        {/* Price / Access Badge */}
+                                        <div className={`absolute top-2 right-2 px-2 py-0.5 rounded text-[10px] font-bold backdrop-blur-md shadow-md border ${
+                                            article.isPaid && !article.isUnlocked
+                                                ? "bg-amber-500/90 text-white border-amber-400/30"
+                                                : "bg-emerald-600/90 text-white border-emerald-400/30"
+                                        }`}>
+                                            {article.isPaid && !article.isUnlocked ? `${article.price || 0} CC` : 'Free'}
+                                        </div>
                                     </div>
 
                                     {/* Content */}

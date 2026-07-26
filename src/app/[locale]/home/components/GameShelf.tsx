@@ -48,7 +48,7 @@ function GameCard({ post, index }: { post: ArticleListItem; index: number }) {
 
   return (
     <Link
-      href={`/articles/${post.slug}?id=${post.id}`}
+      href={`/articles/${post.slug}`}
       // Mobile: fixed 130px wide (scroll row) | Desktop: fills grid cell
       className="group border border-border rounded-xl overflow-hidden bg-card
         hover:border-primary/60 hover:-translate-y-0.5 transition-all duration-200
