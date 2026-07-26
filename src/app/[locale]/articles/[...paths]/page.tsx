@@ -27,7 +27,7 @@ const siteUrl = process.env.FRONTEND || 'https://chanomhub.com';
 
 // SDK client removed in favor of cached functions in lib
 import { getCachedArticle, getCachedArticleWithDownloads } from '@/lib/articlePageCache';
-import { getCachedRecommendationPool } from '@/lib/articlesCache';
+import { getCachedRecommendationPool, isImageAccessible } from '@/lib/articlesCache';
 import type { ArticleListItem } from '@chanomhub/sdk';
 
 
@@ -163,8 +163,14 @@ export default async function ArticlePage(props: ArticlePageProps) {
   const cookieStore = await cookies();
   const token = cookieStore.get('token')?.value;
 
-  // Fetch article and downloads together - no ID needed in URL
-  const { article: originalArticle, downloads } = await getCachedArticleWithDownloads(slug, locale, token);
+  // Fetch article+downloads AND recommendation pool in parallel
+  const poolPromise = getCachedRecommendationPool(token).catch(() => []);
+  const articlePromise = getCachedArticleWithDownloads(slug, locale, token);
+
+  const [{ article: originalArticle, downloads }, pool] = await Promise.all([
+    articlePromise,
+    poolPromise,
+  ]);
 
   let mods: any[] = [];
   if (originalArticle && paths[1] === 'mods') {
@@ -205,27 +211,26 @@ export default async function ArticlePage(props: ArticlePageProps) {
     return notFound();
   }
 
-  // Fetch related articles recommended by the backend & backfill with recommendation pool if needed
+  // Related articles recommended by backend & backfilled with recommendation pool
   const backendRelated = originalArticle.related || [];
-  const pool = await getCachedRecommendationPool(token).catch(() => []);
 
   const seenIds = new Set<string | number>([originalArticle.id]);
   const relatedArticles: ArticleListItem[] = [];
 
-  const hasValidImage = (a: any) => {
-    const img = a.coverImage || a.mainImage || a.backgroundImage;
-    return Boolean(img && typeof img === 'string' && img.trim() !== '');
+  const checkValidImage = (item: any) => {
+    const rawImg = item.coverImage || item.mainImage || item.backgroundImage;
+    return Boolean(rawImg && typeof rawImg === 'string' && rawImg.trim() !== '' && rawImg.trim() !== 'null');
   };
 
   for (const item of backendRelated) {
-    if (!seenIds.has(item.id) && hasValidImage(item)) {
+    if (!seenIds.has(item.id) && checkValidImage(item)) {
       seenIds.add(item.id);
       relatedArticles.push(item as ArticleListItem);
     }
   }
 
   for (const item of pool) {
-    if (!seenIds.has(item.id) && hasValidImage(item)) {
+    if (!seenIds.has(item.id) && checkValidImage(item)) {
       seenIds.add(item.id);
       relatedArticles.push(item as ArticleListItem);
     }

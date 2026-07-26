@@ -216,7 +216,7 @@ const ArticleDownloadDialog: React.FC<ArticleDownloadDialogProps> = ({
 
         {/* Download List */}
         <div className={cn(
-          "px-6 pb-4 space-y-2 max-h-[50vh] overflow-y-auto",
+          "px-6 pb-4 space-y-2 max-h-[30vh] overflow-y-auto",
           isDarkMode ? "bg-gray-900" : "bg-white"
         )}>
           {filteredDownloads.length > 0 ? (
@@ -246,7 +246,7 @@ const ArticleDownloadDialog: React.FC<ArticleDownloadDialogProps> = ({
               <span className="w-1.5 h-3.5 bg-cyan-500 rounded-full inline-block" />
               {t("relatedArticles")}
             </h4>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3.5 max-h-[380px] overflow-y-auto pr-1">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 max-h-[45vh] sm:max-h-none overflow-y-auto sm:overflow-visible pr-1 sm:pr-0">
               {validRelatedArticles.slice(0, 8).map((rel) => {
                 const rawImg = rel.coverImage || rel.mainImage || (rel as any).backgroundImage;
                 const cover = getImageUrl(rawImg, "card") || rawImg;

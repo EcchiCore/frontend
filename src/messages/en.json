@@ -451,6 +451,8 @@
       "learnMore": "Learn more about ChanoX2.",
       "directDownload": "Or download {file} directly in your browser"
     },
+    "openInChanoX2": "Open in ChanoX2",
+    "openInChanoLite": "Open in ChanoLite",
     "previous": "Previous"
   },
   "RelatedArticles": {
