@@ -110,6 +110,7 @@
     "directDownload": "หรือดาวน์โหลดไฟล์ {file} โดยตรงผ่านเบราว์เซอร์"
   },
   "openInChanoX2": "เปิดใน ChanoX2",
+  "openInChanoLite": "เปิดใน ChanoLite",
   "purchasePending": "สร้างใบแจ้งชำระเงินแล้ว กรุณาชำระเงินให้เสร็จสิ้น",
   "purchaseSuccess": "ซื้อบทความสำเร็จแล้ว!",
   "purchaseError": "ซื้อบทความล้มเหลว กรุณาลองใหม่อีกครั้ง",

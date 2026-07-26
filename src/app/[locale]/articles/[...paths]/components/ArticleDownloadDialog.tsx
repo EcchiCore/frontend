@@ -67,6 +67,23 @@ const ArticleDownloadDialog: React.FC<ArticleDownloadDialogProps> = ({
     });
   }, [relatedArticles, failedImageIds]);
 
+  const handleOpenInApp = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const scheme = isMobile ? `chanolite://article/${article.slug}` : `chanox2://article/${article.slug}`;
+    const downloadPageUrl = isMobile ? `/${locale}/chanolite` : `/${locale}/chanox2`;
+
+    const start = Date.now();
+    // Try opening deep link
+    window.location.href = scheme;
+
+    // Fallback: if app is not installed (page stays visible), open app download page
+    setTimeout(() => {
+      if (!document.hidden && Date.now() - start < 2500) {
+        window.open(downloadPageUrl, '_blank');
+      }
+    }, 1500);
+  };
+
   const handleOpenDownload = async (item: DownloadFile | TranslationFile) => {
     let url = "url" in item ? item.url : item.fileUrl;
 
@@ -186,16 +203,15 @@ const ArticleDownloadDialog: React.FC<ArticleDownloadDialogProps> = ({
             <Download className="size-6" />
             Download
           </h3>
-          <a href={`chanox2://article/${article.slug}`}>
-            <Button
-              size="sm"
-              variant="outline"
-              className="border-cyan-600 text-cyan-600 hover:bg-cyan-50 dark:hover:bg-cyan-950 font-bold"
-            >
-              <Download className="size-4 mr-1.5" />
-              {t("openInChanoX2")}
-            </Button>
-          </a>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={handleOpenInApp}
+            className="border-cyan-600 text-cyan-600 hover:bg-cyan-50 dark:hover:bg-cyan-950 font-bold cursor-pointer"
+          >
+            <Download className="size-4 mr-1.5" />
+            {t(isMobile ? "openInChanoLite" : "openInChanoX2")}
+          </Button>
         </div>
 
         {/* Download List */}

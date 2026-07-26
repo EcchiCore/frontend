@@ -110,6 +110,7 @@
     "directDownload": "Or download {file} directly in your browser"
   },
   "openInChanoX2": "Open in ChanoX2",
+  "openInChanoLite": "Open in ChanoLite",
   "purchasePending": "Invoice created. Please complete payment.",
   "purchaseSuccess": "Purchase successful!",
   "purchaseError": "Failed to purchase article. Please try again.",
