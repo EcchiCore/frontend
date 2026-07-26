@@ -184,7 +184,7 @@ export default async function LocaleSegmentLayout({
                   "logo": {
                     "@type": "ImageObject",
                     "@id": `${siteUrl}/#logo`,
-                    "url": `${siteUrl}/chanomhub.ico`,
+                    "url": `${siteUrl}/icon.webp`,
                     "caption": "ChanomHub"
                   },
                   "image": {

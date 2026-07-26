@@ -167,7 +167,7 @@ export function generatePageMetadata(options: {
     keywords = [],
     locale,
     contentPath = '',
-    images = [{ url: '/chanomhub.ico', width: 1200, height: 630, alt: 'ChanomHub Logo' }],
+    images = [{ url: '/icon.webp', width: 1024, height: 1024, alt: 'ChanomHub Logo' }],
     type = 'website',
     publishedTime,
     modifiedTime,
@@ -252,7 +252,7 @@ export function generateArticleStructuredData(options: {
     datePublished,
     dateModified,
     authors = ['ChanomHub'],
-    images = [`${siteUrl}/chanomhub.ico`],
+    images = [`${siteUrl}/icon.webp`],
     locale
   } = options;
 
@@ -432,7 +432,7 @@ export function generateVideoStructuredData(article: Article, locale: Locale) {
     thumbnailUrl = article.images[0].url;
   }
   if (!thumbnailUrl) {
-    thumbnailUrl = `${siteUrl}/chanomhub.ico`;
+    thumbnailUrl = `${siteUrl}/icon.webp`;
   }
 
   const articleUrl = locale === defaultLocale 

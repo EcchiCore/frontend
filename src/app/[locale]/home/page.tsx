@@ -28,7 +28,7 @@ export async function generateMetadata({ params }: { params: { locale?: string }
     title: t('title'),
     description: t('description'),
     keywords: t('keywords').split(','),
-    contentPath: 'home',
+    contentPath: '',
   });
 }
 

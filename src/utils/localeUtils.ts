@@ -51,20 +51,20 @@ export interface MetaDict {
 
 export const defaultMetadataContent: Record<Locale, MetaDict> = {
   en: {
-    title: 'ChanomHub - Adult Gaming Hub, Downloads & Community',
+    title: 'Free H-Games & Adult Games Download (18+) | ChanomHub',
     description:
-      'ChanomHub - Your ultimate destination for free adult games and h-games. Download free adult games, translations, mods, and join our community.',
+      'Download free adult games and H-games for PC, Android & browser. Daily updates on adult game downloads, translations, mods, and 18+ gaming community.',
     keywords: [
-      'Adult games',
-      'Free game downloads',
+      'Free adult games',
+      'H-games download',
+      'Adult game downloads',
+      'NSFW games',
+      '18+ games',
+      'Adult gaming community',
       'Game translations',
       'Game mods',
-      'Erotic games',
-      'Indie games',
-      'Mature gaming',
-      'Gaming community',
       'Visual novels',
-      'NSFW games',
+      'Erotic games',
     ],
     logo_alt: 'ChanomHub Logo',
   },

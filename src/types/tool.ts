@@ -11,11 +11,15 @@ export interface Tool {
   _id: string;
   name: string;
   description: string;
-  icon: "Globe" | "Download" | "Smartphone";
+  icon: string;
   os?: string[];
   pricing?: string | string[];
   author?: string;
   publisher?: string;
   isOfficial?: boolean;
+  githubUrl?: string;
+  websiteUrl?: string;
+  detailUrl?: string;
+  tags?: string[];
   versions?: ToolVersion[];
 }
