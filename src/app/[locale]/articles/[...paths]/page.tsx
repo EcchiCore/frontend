@@ -27,7 +27,6 @@ const siteUrl = process.env.FRONTEND || 'https://chanomhub.com';
 
 // SDK client removed in favor of cached functions in lib
 import { getCachedArticle, getCachedArticleWithDownloads } from '@/lib/articlePageCache';
-import { getCachedRecommendationPool, isImageAccessible } from '@/lib/articlesCache';
 import type { ArticleListItem } from '@chanomhub/sdk';
 
 
@@ -163,14 +162,8 @@ export default async function ArticlePage(props: ArticlePageProps) {
   const cookieStore = await cookies();
   const token = cookieStore.get('token')?.value;
 
-  // Fetch article+downloads AND recommendation pool in parallel
-  const poolPromise = getCachedRecommendationPool(token).catch(() => []);
-  const articlePromise = getCachedArticleWithDownloads(slug, locale, token);
-
-  const [{ article: originalArticle, downloads }, pool] = await Promise.all([
-    articlePromise,
-    poolPromise,
-  ]);
+  // Fetch article and downloads together directly from backend
+  const { article: originalArticle, downloads } = await getCachedArticleWithDownloads(slug, locale, token);
 
   let mods: any[] = [];
   if (originalArticle && paths[1] === 'mods') {
@@ -211,30 +204,25 @@ export default async function ArticlePage(props: ArticlePageProps) {
     return notFound();
   }
 
-  // Related articles recommended by backend & backfilled with recommendation pool
+  // Related articles returned directly from backend API
   const backendRelated = originalArticle.related || [];
-
   const seenIds = new Set<string | number>([originalArticle.id]);
   const relatedArticles: ArticleListItem[] = [];
 
-  const checkValidImage = (item: any) => {
-    const rawImg = item.coverImage || item.mainImage || item.backgroundImage;
-    return Boolean(rawImg && typeof rawImg === 'string' && rawImg.trim() !== '' && rawImg.trim() !== 'null');
-  };
-
   for (const item of backendRelated) {
-    if (!seenIds.has(item.id) && checkValidImage(item)) {
+    const rawImg = item.coverImage || item.mainImage || (item as any).backgroundImage;
+    if (!seenIds.has(item.id) && rawImg && typeof rawImg === 'string' && rawImg.trim() !== '' && rawImg.trim() !== 'null') {
       seenIds.add(item.id);
       relatedArticles.push(item as ArticleListItem);
     }
   }
 
-  for (const item of pool) {
-    if (!seenIds.has(item.id) && checkValidImage(item)) {
-      seenIds.add(item.id);
-      relatedArticles.push(item as ArticleListItem);
-    }
-  }
+  // Sort related articles descending by view count (most viewed first)
+  relatedArticles.sort((a, b) => {
+    const viewsA = Number(a.viewsCount || (a as any).views || (a as any).favoritesCount || 0);
+    const viewsB = Number(b.viewsCount || (b as any).views || (b as any).favoritesCount || 0);
+    return viewsB - viewsA;
+  });
 
   // Generate structured data JSON-LD for the article (only once, SEO handles language)
   const articleJsonLd = generateArticleJsonLd(
