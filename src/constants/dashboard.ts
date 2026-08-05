@@ -4,49 +4,63 @@ export const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:3000
 
 export const NAVIGATION_ITEMS: NavigationItem[] = [
   {
+    id: 'overview',
+    label: 'Overview',
+    icon: 'LayoutDashboard',
+    path: '/member/dashboard',
+    category: 'general',
+    exact: true
+  },
+  {
     id: 'profile',
     label: 'Profile',
     icon: 'User',
-    path: '/member/dashboard/profile'
-  },
-  {
-    id: 'studio',
-    label: 'Studio',
-    icon: 'Activity',
-    path: '/member/dashboard/studio'
-  },
-  {
-    id: 'articles',
-    label: 'Articles',
-    icon: 'FileText',
-    path: '/member/dashboard/articles'
-  },
-
-  {
-    id: 'wallet',
-    label: 'Wallet',
-    icon: 'Wallet',
-    path: '/member/dashboard/wallet'
-  },
-  {
-    id: 'moderation',
-    label: 'Moderate Content',
-    icon: 'Shield',
-    requiredRanks: ['MODERATOR', 'ADMIN'],
-    path: '/member/dashboard/moderation'
-  },
-  {
-    id: 'admin',
-    label: 'Admin',
-    icon: 'Settings',
-    requiredRanks: ['ADMIN'],
-    path: '/member/dashboard/admin'
+    path: '/member/dashboard/profile',
+    category: 'general'
   },
   {
     id: 'settings',
     label: 'Settings',
     icon: 'Settings',
-    path: '/member/dashboard/settings'
+    path: '/member/dashboard/settings',
+    category: 'general'
+  },
+  {
+    id: 'studio',
+    label: 'Studio',
+    icon: 'Activity',
+    path: '/member/dashboard/studio',
+    category: 'creator'
+  },
+  {
+    id: 'articles',
+    label: 'Articles',
+    icon: 'FileText',
+    path: '/member/dashboard/articles',
+    category: 'creator'
+  },
+  {
+    id: 'wallet',
+    label: 'Wallet & Points',
+    icon: 'Wallet',
+    path: '/member/dashboard/wallet',
+    category: 'creator'
+  },
+  {
+    id: 'moderation',
+    label: 'Moderate Content',
+    icon: 'Shield',
+    category: 'management',
+    requiredRanks: ['MODERATOR', 'ADMIN'],
+    path: '/member/dashboard/moderation'
+  },
+  {
+    id: 'admin',
+    label: 'Admin Console',
+    icon: 'ShieldAlert',
+    category: 'management',
+    requiredRanks: ['ADMIN'],
+    path: '/member/dashboard/admin'
   }
 ];
 

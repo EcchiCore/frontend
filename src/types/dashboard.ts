@@ -58,14 +58,16 @@ export interface ArticlesResponse {
   articlesCount: number;
 }
 
-export type PageType = 'profile' | 'articles' | 'moderation' | 'settings' | 'wallet' | 'admin' | 'studio';
+export type PageType = 'overview' | 'profile' | 'articles' | 'moderation' | 'settings' | 'wallet' | 'admin' | 'studio';
 
 export interface NavigationItem {
   id: PageType;
   label: string;
   icon: string;
   path: string;
+  category?: 'general' | 'creator' | 'management';
   requiredRanks?: string[];
+  exact?: boolean;
 }
 
 export interface DashboardContextType {

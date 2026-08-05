@@ -9,6 +9,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Loader2, AlertCircle } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { setMobileOpen } from '@/store/features/dashboard/dashboardSlice';
+import { usePathname } from '@/i18n/navigation';
 
 interface DashboardLayoutProps {
   title?: string;
@@ -17,6 +18,7 @@ interface DashboardLayoutProps {
 
 export const DashboardLayoutShadcn: React.FC<DashboardLayoutProps> = ({ title = 'Dashboard', children }) => {
   const dispatch = useAppDispatch();
+  const pathname = usePathname();
   const { mobileOpen } = useAppSelector((state) => state.dashboard);
   const { user, loading, error } = useAppSelector((state) => state.auth);
   const [isMounted, setIsMounted] = useState(false);
@@ -30,18 +32,18 @@ export const DashboardLayoutShadcn: React.FC<DashboardLayoutProps> = ({ title = 
     setIsMounted(true);
   }, []);
 
-  if (!isMounted || loading) {
+  if (!isMounted || (loading && !user)) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="mx-auto h-12 w-12 animate-spin text-primary" />
-          <p className="mt-4 text-muted-foreground">Loading dashboard...</p>
+          <Loader2 className="mx-auto h-10 w-10 animate-spin text-primary" />
+          <p className="mt-4 text-sm text-muted-foreground">Loading dashboard...</p>
         </div>
       </div>
     );
   }
 
-  if (error) {
+  if (error && !user) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <div className="text-center max-w-md w-full">
@@ -83,10 +85,10 @@ export const DashboardLayoutShadcn: React.FC<DashboardLayoutProps> = ({ title = 
           {/* Top Bar */}
           <TopBar title={title} />
 
-          {/* Page Content */}
+          {/* Page Content with smooth transition */}
           <main className="flex-1 relative overflow-y-auto focus:outline-none">
             <div className="py-4 sm:py-6">
-              <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
+              <div key={pathname} className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 animate-in fade-in-50 duration-150">
                 {children}
               </div>
             </div>
