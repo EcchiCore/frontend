@@ -27,7 +27,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { resolveArticleImageUrl } from '@/lib/articleImageUrl';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import {
   Table,
@@ -313,6 +314,11 @@ const SettingsPage: React.FC = () => {
               <CardContent className="p-4">
                 <div className="flex flex-col items-center text-center mb-6 pt-4">
                   <Avatar className="h-24 w-24 border-2 border-primary shadow-lg mb-4">
+                    <AvatarImage
+                      src={user?.image ? (resolveArticleImageUrl(user.image) || user.image) : ""}
+                      alt={user?.username || 'User'}
+                      className="object-cover"
+                    />
                     <AvatarFallback className="bg-primary/10 text-primary text-2xl font-bold">
                       {user?.username?.charAt(0).toUpperCase()}
                     </AvatarFallback>
@@ -382,8 +388,10 @@ const SettingsPage: React.FC = () => {
                         id="email"
                         type="email"
                         value={profileForm.email}
-                        onChange={(e) => setProfileForm({ ...profileForm, email: e.target.value })}
+                        disabled
+                        className="bg-muted/50 cursor-not-allowed text-muted-foreground"
                       />
+                      <p className="text-[11px] text-muted-foreground">Email address cannot be modified.</p>
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="bio">Bio</Label>

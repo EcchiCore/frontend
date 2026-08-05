@@ -44,7 +44,8 @@ const ProfilePage: React.FC = () => {
     username: user?.username || '',
     email: user?.email || '',
     bio: user?.bio || '',
-    image: user?.image || ''
+    image: user?.image || '',
+    backgroundImage: user?.backgroundImage || ''
   });
 
   const hasDeveloperRole = user?.roles?.some(role => role === 'DEVELOPER') || false;
@@ -74,6 +75,7 @@ const ProfilePage: React.FC = () => {
       dispatch(updateUserLocal(formData));
       setSuccess('Profile updated successfully!');
       setIsEditing(false);
+      setCoverError(false);
     } catch (err) {
       const errorMessage = err instanceof ApiError
         ? err.message
@@ -89,7 +91,8 @@ const ProfilePage: React.FC = () => {
       username: user?.username || '',
       email: user?.email || '',
       bio: user?.bio || '',
-      image: user?.image || ''
+      image: user?.image || '',
+      backgroundImage: user?.backgroundImage || ''
     });
     setIsEditing(false);
     setError(null);
@@ -294,7 +297,8 @@ const ProfilePage: React.FC = () => {
                     name="email"
                     type="email"
                     value={formData.email}
-                    onChange={handleInputChange}
+                    disabled
+                    className="bg-muted/50 cursor-not-allowed text-muted-foreground"
                   />
                 ) : (
                   <div className="p-3 bg-muted/50 rounded-lg text-foreground font-medium">
@@ -313,6 +317,7 @@ const ProfilePage: React.FC = () => {
                   value={formData.bio}
                   onChange={handleInputChange}
                   className="min-h-[100px]"
+                  placeholder="Tell the world about yourself..."
                 />
               ) : (
                 <div className="p-3 bg-muted/50 rounded-lg min-h-[5rem] text-foreground leading-relaxed">
@@ -320,6 +325,31 @@ const ProfilePage: React.FC = () => {
                 </div>
               )}
             </div>
+
+            {isEditing && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+                <div className="space-y-2">
+                  <Label htmlFor="image" className="text-xs uppercase text-muted-foreground font-semibold">Profile Image URL</Label>
+                  <Input
+                    id="image"
+                    name="image"
+                    value={formData.image}
+                    onChange={handleInputChange}
+                    placeholder="https://example.com/avatar.png or filename"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="backgroundImage" className="text-xs uppercase text-muted-foreground font-semibold">Cover Background Image URL</Label>
+                  <Input
+                    id="backgroundImage"
+                    name="backgroundImage"
+                    value={formData.backgroundImage}
+                    onChange={handleInputChange}
+                    placeholder="https://example.com/cover.png or filename"
+                  />
+                </div>
+              </div>
+            )}
 
             {/* Social Media & Joined Metadata */}
             <div className="pt-4 border-t border-border grid grid-cols-1 md:grid-cols-2 gap-6">

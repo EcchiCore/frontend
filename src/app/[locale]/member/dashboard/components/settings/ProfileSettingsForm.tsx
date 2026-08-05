@@ -70,7 +70,8 @@ const ProfileSettingsForm: React.FC<ProfileSettingsFormProps> = ({
           name="email"
           type="email"
           value={formData.email}
-          onChange={handleChange}
+          disabled
+          className="bg-muted/50 cursor-not-allowed text-muted-foreground"
         />
       </div>
       <div>
