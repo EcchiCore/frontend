@@ -54,8 +54,8 @@ export const TopBarShadcn: React.FC<TopBarProps> = ({ title }) => {
             {title}
           </h1>
           {user && (
-            <span className="text-xs sm:text-sm text-muted-foreground">
-              {user.rank || 'No rank'}
+            <span className="text-xs sm:text-sm text-muted-foreground font-medium">
+              {user.rank || user.roles?.[0] || 'USER'}
             </span>
           )}
         </div>

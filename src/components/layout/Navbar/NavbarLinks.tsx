@@ -123,12 +123,6 @@ const NavbarLinks = ({ section, onCloseMenu = () => { }, isMobile = false }: Nav
             link: getLocalizedHref("/member/dashboard")
           },
           {
-            id: "member-profile",
-            name: t("profile"),
-            transKey: "profile",
-            link: getLocalizedHref("/member/profile")
-          },
-          {
             id: "member-settings",
             name: t("settings"),
             transKey: "settings",

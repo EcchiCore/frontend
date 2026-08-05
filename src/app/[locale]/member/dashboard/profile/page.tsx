@@ -25,6 +25,9 @@ import { toast } from 'react-toastify';
 import Cookies from 'js-cookie';
 import { getSdk } from '@/lib/sdk';
 
+import { resolveArticleImageUrl } from '@/lib/articleImageUrl';
+import { Link } from '@/i18n/navigation';
+
 const ProfilePage: React.FC = () => {
   const router = useRouter();
   const dispatch = useAppDispatch();
@@ -35,6 +38,7 @@ const ProfilePage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [applying, setApplying] = useState(false);
+  const [coverError, setCoverError] = useState(false);
 
   const [formData, setFormData] = useState({
     username: user?.username || '',
@@ -45,6 +49,9 @@ const ProfilePage: React.FC = () => {
 
   const hasDeveloperRole = user?.roles?.some(role => role === 'DEVELOPER') || false;
   const isAdminOrMod = user?.roles?.some(role => ['ADMIN', 'MODERATOR'].includes(role || '')) || false;
+  const userRoles = (user?.roles && user.roles.length > 0) ? user.roles : [user?.rank || 'USER'];
+  const resolvedCover = user?.backgroundImage ? resolveArticleImageUrl(user.backgroundImage) : null;
+  const resolvedAvatar = user?.image ? resolveArticleImageUrl(user.image) : null;
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -125,11 +132,12 @@ const ProfilePage: React.FC = () => {
       <div className="relative rounded-2xl overflow-hidden border border-border bg-card shadow-lg">
         {/* Cover Background Image */}
         <div className="h-44 sm:h-52 w-full bg-gradient-to-r from-primary/30 via-primary/10 to-background relative overflow-hidden">
-          {user.backgroundImage ? (
+          {resolvedCover && !coverError ? (
             <img
-              src={user.backgroundImage}
+              src={resolvedCover}
               alt="Cover"
               className="w-full h-full object-cover opacity-80"
+              onError={() => setCoverError(true)}
             />
           ) : (
             <div className="absolute inset-0 bg-gradient-to-r from-[#8b7bf5]/20 via-[#6a5cd4]/20 to-background flex items-center justify-center">
@@ -143,28 +151,31 @@ const ProfilePage: React.FC = () => {
         <div className="px-6 pb-6 pt-0 relative flex flex-col sm:flex-row items-center sm:items-end justify-between gap-4 -mt-16 sm:-mt-20">
           <div className="flex flex-col sm:flex-row items-center sm:items-end gap-4 text-center sm:text-left">
             <Avatar className="h-28 w-28 sm:h-32 sm:w-32 border-4 border-card shadow-2xl rounded-2xl bg-card">
-              <AvatarImage src={user.image || ""} alt={user.username || 'User'} className="object-cover rounded-2xl" />
+              <AvatarImage src={resolvedAvatar || ""} alt={user.username || 'User'} className="object-cover rounded-2xl" />
               <AvatarFallback className="text-3xl font-bold bg-primary/10 text-primary rounded-2xl">
                 {user.username?.substring(0, 2).toUpperCase() || 'CH'}
               </AvatarFallback>
             </Avatar>
 
             <div className="space-y-1 mb-2">
-              <div className="flex items-center justify-center sm:justify-start gap-2">
+              <div className="flex items-center justify-center sm:justify-start gap-2 flex-wrap">
                 <h1 className="text-2xl font-bold text-foreground">{user.username}</h1>
-                <Badge
-                  variant={
-                    user.rank === 'ADMIN' ? 'destructive' :
-                      user.rank === 'MODERATOR' ? 'secondary' :
-                        user.rank === 'DEVELOPER' ? 'outline' :
-                          'default'
-                  }
-                  className={user.rank === 'DEVELOPER' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' : ''}
-                >
-                  {user.rank || 'USER'}
-                </Badge>
+                {userRoles.map((role) => (
+                  <Badge
+                    key={role}
+                    variant={
+                      role === 'ADMIN' ? 'destructive' :
+                        role === 'MODERATOR' ? 'secondary' :
+                          role === 'DEVELOPER' ? 'outline' :
+                            'default'
+                    }
+                    className={role === 'DEVELOPER' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20 font-semibold' : 'font-semibold'}
+                  >
+                    {role}
+                  </Badge>
+                ))}
                 {hasDeveloperRole && (
-                  <Badge variant="outline" className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 gap-1">
+                  <Badge variant="outline" className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 gap-1 font-semibold">
                     <CheckCircle2 className="h-3.5 w-3.5" /> Verified
                   </Badge>
                 )}
@@ -331,7 +342,12 @@ const ProfilePage: React.FC = () => {
                     ))}
                   </div>
                 ) : (
-                  <p className="text-xs text-muted-foreground italic">No social links added</p>
+                  <p className="text-xs text-muted-foreground italic">
+                    No social links added yet.
+                    <Link href="/member/dashboard/settings?tab=profile" className="text-primary hover:underline font-medium ml-1">
+                      Add in Settings
+                    </Link>
+                  </p>
                 )}
               </div>
 

@@ -57,7 +57,7 @@ export const SidebarShadcn: React.FC<SidebarProps> = ({ className = '' }) => {
         </h2>
         {user && (
           <p className="text-sm text-sidebar-foreground/70 mt-1 truncate">
-            {user.username} ({user.rank || 'No rank'})
+            {user.username} ({user.rank || user.roles?.[0] || 'USER'})
           </p>
         )}
       </div>
