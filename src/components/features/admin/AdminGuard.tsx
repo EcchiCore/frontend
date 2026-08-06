@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useRouter } from "@/i18n/navigation";
 import { useAppSelector } from '@/store/hooks';
 import { Loader2 } from 'lucide-react';
+import { hasRole } from '@/lib/permissions';
 
 interface AdminGuardProps {
     children: React.ReactNode;
@@ -16,12 +17,7 @@ export function AdminGuard({ children }: AdminGuardProps) {
 
     useEffect(() => {
         if (!loading) {
-            const hasAdminRank = user?.rank === 'ADMIN';
-            const hasAdminRole = Array.isArray(user?.roles) && user.roles.some((r: any) =>
-                r === 'ADMIN' || r?.name === 'ADMIN'
-            );
-
-            if (!user || (!hasAdminRank && !hasAdminRole)) {
+            if (!user || !hasRole(user, ['ADMIN', 'SUPERADMIN'])) {
                 router.push('/member/dashboard');
             } else {
                 setIsAuthorized(true);

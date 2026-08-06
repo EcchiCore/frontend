@@ -9,6 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { setMobileOpen } from '@/store/features/dashboard/dashboardSlice';
 import { Link, usePathname } from '@/i18n/navigation';
+import { hasRole } from '@/lib/permissions';
 
 const iconMap = {
   LayoutDashboard,
@@ -37,16 +38,9 @@ export const SidebarShadcn: React.FC<SidebarProps> = ({ className = '' }) => {
   const user = useAppSelector((state) => state.auth.user);
 
   const hasRequiredRank = (item: NavigationItem): boolean => {
-    if (!item.requiredRanks || !user) return true;
-
-    const userRanks = [
-      ...(user.rank ? [user.rank] : []),
-      ...(user.roles || [])
-    ].map(r => r.toUpperCase());
-
-    return item.requiredRanks.some(requiredRank =>
-      userRanks.includes(requiredRank.toUpperCase())
-    );
+    const required = item.requiredRoles || item.requiredRanks;
+    if (!required || !user) return true;
+    return hasRole(user, required);
   };
 
   const getIcon = (iconName: keyof typeof iconMap) => {

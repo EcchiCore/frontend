@@ -51,7 +51,7 @@ export const NAVIGATION_ITEMS: NavigationItem[] = [
     label: 'Moderate Content',
     icon: 'Shield',
     category: 'management',
-    requiredRanks: ['MODERATOR', 'ADMIN'],
+    requiredRoles: ['MODERATOR', 'ADMIN'],
     path: '/member/dashboard/moderation'
   },
   {
@@ -59,7 +59,7 @@ export const NAVIGATION_ITEMS: NavigationItem[] = [
     label: 'Admin Console',
     icon: 'ShieldAlert',
     category: 'management',
-    requiredRanks: ['ADMIN'],
+    requiredRoles: ['ADMIN'],
     path: '/member/dashboard/admin'
   }
 ];
@@ -74,11 +74,16 @@ export const ARTICLE_STATUS = {
   DELETED: 'DELETED'
 } as const;
 
-export const USER_RANKS = {
+export const USER_ROLES = {
   USER: 'USER',
   MODERATOR: 'MODERATOR',
-  ADMIN: 'ADMIN'
+  ADMIN: 'ADMIN',
+  DEVELOPER: 'DEVELOPER',
+  SUPERADMIN: 'SUPERADMIN'
 } as const;
+
+/** @deprecated Use USER_ROLES */
+export const USER_RANKS = USER_ROLES;
 
 export const BREAKPOINTS = {
   MOBILE: 768,

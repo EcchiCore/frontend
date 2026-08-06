@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   User,
   Lock,
@@ -25,6 +25,7 @@ import { userApi, ApiError } from '@/lib/api/dashboardApi';
 import { SocialMediaLink, Token } from '@/types/dashboard';
 import { useSearchParams } from 'next/navigation';
 import { useRouter } from '@/i18n/navigation';
+import { hasRole, getPrimaryRole, sortRolesByHierarchy } from '@/lib/permissions';
 
 // UI Components
 import { Button } from '@/components/ui/button';
@@ -102,6 +103,24 @@ export default function SettingsPage() {
   const [isCreatingToken, setIsCreatingToken] = useState(false);
   const [newTokenDuration, setNewTokenDuration] = useState('7d');
   const [newTokenRank, setNewTokenRank] = useState('USER');
+  const isAdmin = user?.roles?.includes('ADMIN') || user?.rank === 'ADMIN';
+
+  const availableRoles = useMemo(() => {
+    if (isAdmin) {
+      return sortRolesByHierarchy(['SUPERADMIN', 'ADMIN', 'MODERATOR', 'DEVELOPER', 'VIP', 'PREMIUM', 'USER']);
+    }
+    return sortRolesByHierarchy(Array.from(new Set([
+      'USER',
+      ...(user?.roles || []),
+      ...(user?.rank ? [user.rank] : [])
+    ])));
+  }, [user, isAdmin]);
+
+  useEffect(() => {
+    if (availableRoles.length > 0 && !availableRoles.includes(newTokenRank)) {
+      setNewTokenRank(availableRoles[0]);
+    }
+  }, [availableRoles, newTokenRank]);
   const [newCreatedToken, setNewCreatedToken] = useState<string | null>(null);
   const [profileSavedSuccess, setProfileSavedSuccess] = useState(false);
   const [passwordSavedSuccess, setPasswordSavedSuccess] = useState(false);
@@ -232,15 +251,16 @@ export default function SettingsPage() {
       setLoading(true);
       const response = await userApi.createToken({
         duration: newTokenDuration,
+        roles: [newTokenRank],
         ranks: [newTokenRank]
       });
       setNewCreatedToken(response.token);
       setIsCreatingToken(false);
       fetchTokens();
-      showMessage('success', 'Token created successfully');
+      toast.success('Token created successfully!');
     } catch (error) {
       const errorMessage = error instanceof ApiError ? error.message : 'Failed to create token';
-      showMessage('error', errorMessage);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -263,7 +283,7 @@ export default function SettingsPage() {
   };
 
   const hasTokenAccess = () => {
-    return user?.roles?.some((role) => ['ADMIN', 'MODERATOR'].includes(role || '')) || false;
+    return hasRole(user, ['ADMIN', 'MODERATOR', 'DEVELOPER', 'SUPERADMIN']);
   };
 
   const handleDeleteAccount = async () => {
@@ -334,7 +354,7 @@ export default function SettingsPage() {
 
           <div className="flex items-center gap-2">
             <Badge variant="outline" className="border-indigo-400/30 text-indigo-300 bg-indigo-500/10 px-3 py-1 text-xs">
-              {user?.rank || 'USER'}
+              Role: {getPrimaryRole(user)}
             </Badge>
           </div>
         </div>
@@ -672,17 +692,17 @@ export default function SettingsPage() {
                           </Select>
                         </div>
                         <div className="space-y-2">
-                          <Label className="text-xs">Initial Rank Permission</Label>
+                          <Label className="text-xs">Assigned Role (บทบาท)</Label>
                           <Select value={newTokenRank} onValueChange={setNewTokenRank}>
                             <SelectTrigger className="h-10 bg-background">
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="USER">User</SelectItem>
-                              <SelectItem value="PREMIUM">Premium</SelectItem>
-                              <SelectItem value="VIP">VIP</SelectItem>
-                              <SelectItem value="DEVELOPER">Developer</SelectItem>
-                              <SelectItem value="ADMIN">Admin</SelectItem>
+                              {availableRoles.map((r) => (
+                                <SelectItem key={r} value={r}>
+                                  {r}
+                                </SelectItem>
+                              ))}
                             </SelectContent>
                           </Select>
                         </div>
@@ -722,7 +742,7 @@ export default function SettingsPage() {
                     <TableHeader className="bg-muted/40">
                       <TableRow>
                         <TableHead className="w-20">ID</TableHead>
-                        <TableHead>Assigned Ranks</TableHead>
+                        <TableHead>Assigned Roles</TableHead>
                         <TableHead>Expires On</TableHead>
                         <TableHead className="text-right">Actions</TableHead>
                       </TableRow>

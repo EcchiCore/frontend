@@ -16,6 +16,7 @@ import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { toggleMobile } from '@/store/features/dashboard/dashboardSlice';
 import { logoutUser } from '@/store/features/auth/authSlice';
 import { useRouter } from '@/i18n/navigation';
+import { getUserRoles } from '@/lib/permissions';
 
 interface TopBarProps {
   title: string;
@@ -55,7 +56,7 @@ export const TopBarShadcn: React.FC<TopBarProps> = ({ title }) => {
           </h1>
           {user && (
             <span className="text-xs sm:text-sm text-muted-foreground font-medium">
-              {user.rank || user.roles?.[0] || 'USER'}
+              {getUserRoles(user)[0] || 'USER'}
             </span>
           )}
         </div>

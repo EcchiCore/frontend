@@ -159,8 +159,10 @@ export const apiRequest = async <T>(endpoint: string, options: RequestInit = {})
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
+      const rawMsg = errorData.message || errorData.error?.message || errorData.error || `HTTP error! status: ${response.status}`;
+      const formattedMsg = Array.isArray(rawMsg) ? rawMsg.join(' • ') : typeof rawMsg === 'object' ? JSON.stringify(rawMsg) : String(rawMsg);
       throw new ApiError(
-        errorData.message || `HTTP error! status: ${response.status}`,
+        formattedMsg,
         response.status,
         errorData
       );
@@ -193,11 +195,17 @@ export const userApi = {
       body: JSON.stringify(data),
     }),
   getTokens: () => apiRequest<{ tokens: Token[] }>('/api/user/tokens').then((data) => data.tokens),
-  createToken: (data: { duration: string; ranks: string[] }) =>
-    apiRequest<{ token: string }>('/api/user/tokens', {
+  createToken: (data: { duration: string; roles?: string[]; ranks?: string[] }) => {
+    const roles = data.roles || data.ranks || ['USER'];
+    return apiRequest<{ token: string }>('/api/user/tokens', {
       method: 'POST',
-      body: JSON.stringify(data),
-    }),
+      body: JSON.stringify({
+        duration: data.duration,
+        roles,
+        ranks: roles,
+      }),
+    });
+  },
   deleteToken: (id: number) =>
     apiRequest<void>(`/api/user/tokens/${id}`, {
       method: 'DELETE',

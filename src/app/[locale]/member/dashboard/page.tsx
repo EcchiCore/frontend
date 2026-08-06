@@ -3,6 +3,7 @@
 import React from 'react';
 import { useAppSelector } from '@/store/hooks';
 import { Link } from '@/i18n/navigation';
+import { hasRole, getUserRoles } from '@/lib/permissions';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -25,9 +26,8 @@ import {
 export default function DashboardOverviewPage() {
   const { user } = useAppSelector((state) => state.auth);
 
-  const isStaff = user?.roles?.some(role => ['ADMIN', 'MODERATOR'].includes(role || '')) ||
-                  ['ADMIN', 'MODERATOR'].includes(user?.rank || '');
-  const isAdmin = user?.roles?.includes('ADMIN') || user?.rank === 'ADMIN';
+  const isStaff = hasRole(user, ['ADMIN', 'MODERATOR']);
+  const isAdmin = hasRole(user, ['ADMIN', 'SUPERADMIN']);
 
   return (
     <div className="space-y-8">
@@ -55,12 +55,9 @@ export default function DashboardOverviewPage() {
                 Here is what is happening with your account today.
               </p>
               <div className="flex flex-wrap gap-2 mt-3">
-                <Badge variant="secondary" className="bg-white/20 hover:bg-white/30 text-white border-0 backdrop-blur-sm">
-                  Rank: {user?.rank || 'USER'}
-                </Badge>
-                {user?.roles?.map((role) => (
-                  <Badge key={role} className="bg-amber-400/20 text-amber-200 border-amber-400/30">
-                    {role}
+                {getUserRoles(user).map((role) => (
+                  <Badge key={role} className="bg-white/20 text-white border-0 backdrop-blur-sm font-semibold">
+                    Role: {role}
                   </Badge>
                 ))}
               </div>

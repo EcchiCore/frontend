@@ -66,6 +66,8 @@ export interface NavigationItem {
   icon: string;
   path: string;
   category?: 'general' | 'creator' | 'management';
+  requiredRoles?: string[];
+  /** @deprecated Use requiredRoles */
   requiredRanks?: string[];
   exact?: boolean;
 }
