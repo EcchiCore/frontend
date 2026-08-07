@@ -1,31 +1,31 @@
 {
   "author": {
-    "noBio": "No history yet",
-    "follow": "Following author",
-    "following": "Following"
+    "noBio": "Sin historial aún",
+    "follow": "Siguiendo autor",
+    "following": "Siguiendo"
   },
   "bookmark": {
-    "bookmark": "Bookmarked article",
-    "bookmarked": "Bookmarked"
+    "bookmark": "Artículo guardado",
+    "bookmarked": "Guardado"
   },
   "status": {
-    "published": "Published",
-    "draft": "Draft",
-    "archived": "Archived"
+    "published": "Publicado",
+    "draft": "Borrador",
+    "archived": "Archivado"
   },
   "articleInfo": {
-    "title": "Article information",
-    "published": "Published",
-    "updated": "Updated",
-    "creator": "Creator / Studio",
+    "title": "Información del artículo",
+    "published": "Publicado",
+    "updated": "Actualizado",
+    "creator": "Creador / Estudio",
     "engine": "Motor",
-    "status": "Status",
-    "version": "Edited"
+    "status": "Estado",
+    "version": "Editado"
   },
   "downloads": {
-    "title": "Downloads and translations",
-    "viewFiles": "View files ({count})",
-    "viewAll": "View All"
+    "title": "Descargas y traducciones",
+    "viewFiles": "Ver archivos ({count})",
+    "viewAll": "Ver todo"
   },
   "platforms": {
     "title": "Plataformas"
@@ -34,10 +34,10 @@
     "title": "Etiquetas"
   },
   "categories": {
-    "title": "Categories"
+    "title": "Categorías"
   },
   "relatedGames": {
-    "title": "Related Games",
-    "view": "View Related Games"
+    "title": "Juegos relacionados",
+    "view": "Ver juegos relacionados"
   }
 }

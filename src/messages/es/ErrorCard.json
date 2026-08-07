@@ -1,5 +1,5 @@
 {
-  "title": "Error Occurred",
-  "loadingError": "An error occurred while loading the article. Please try again later.",
-  "tryAgain": "Try Again"
+  "title": "Error al cargar contenido",
+  "loadingError": "Ocurrió un error al cargar el artículo. Por favor, vuelva a intentarlo más tarde.",
+  "tryAgain": "Intentar de nuevo"
 }

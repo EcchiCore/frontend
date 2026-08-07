@@ -1,7 +1,7 @@
 {
-  "title": "Game Code Detected!",
-  "description": "\"{code}\" looks like a game code (Sequential Code). Would you like to search by game code?",
-  "searchByCode": "Search by Game Code",
-  "searchByText": "Search as Text",
+  "title": "¡Código de juego detectado!",
+  "description": "\"{code}\" parece un código de juego (Código secuencial). ¿Deseas buscar por código de juego?",
+  "searchByCode": "Buscar por código de juego",
+  "searchByText": "Buscar como texto",
   "cancel": "Cancelar"
 }

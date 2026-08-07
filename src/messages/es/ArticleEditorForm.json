@@ -1,8 +1,8 @@
 {
-  "paymentGateway": "Payment Gateway (Stripe 3.65% + 10฿ + 7% VAT):",
-  "estimatedRevenue": "Estimated revenue you will receive:",
-  "priceWarning": "We are concerned that the price might be too low for your effort. We recommend 79, 99 or more.",
-  "fileSizeExceedsLimit": "File size is {size} GB which exceeds the upload limit ({limit} for {role})",
-  "verifiedDevRole": "Verified Developer",
-  "generalMemberRole": "General Member"
+  "paymentGateway": "Pasarela de pago (Stripe 3.65% + 10฿ + 7% IVA):",
+  "estimatedRevenue": "Ingresos estimados que recibirás:",
+  "priceWarning": "Nos preocupa que el precio sea demasiado bajo para tu esfuerzo. Recomendamos 79, 99 o más.",
+  "fileSizeExceedsLimit": "El tamaño del archivo es {size} GB, lo cual excede el límite de carga ({limit} para {role})",
+  "verifiedDevRole": "Desarrollador verificado",
+  "generalMemberRole": "Miembro general"
 }

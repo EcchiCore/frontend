@@ -1,8 +1,8 @@
 {
   "loading": "Cargando...",
-  "welcome": "Welcome, {username}!",
-  "email": "Email:",
-  "accountCreated": "Account Created:",
-  "lastUpdated": "Last Updated:",
-  "notComplete": "The membership system is not yet complete. Please check back later."
+  "welcome": "¡Bienvenido, {username}!",
+  "email": "Correo electrónico:",
+  "accountCreated": "Cuenta creada:",
+  "lastUpdated": "Última actualización:",
+  "notComplete": "El sistema de membresía aún no está completo. Por favor, vuelve más tarde."
 }

@@ -1,9 +1,9 @@
 {
-  "foundItems": "Found <items>{total}</items> items",
-  "noItems": "No items found",
-  "noItemsDesc": "No items match your search criteria. Try adjusting the filters or searching again.",
-  "sortLatest": "Más recientes",
-  "sortPopular": "Most Viewed",
-  "sortViewsAsc": "Least Viewed",
-  "sortBy": "Sort by"
+  "foundItems": "Se encontraron <items>{total}</items> elementos",
+  "noItems": "No se encontraron elementos",
+  "noItemsDesc": "Ningún elemento coincide con tus criterios de búsqueda. Intenta ajustar los filtros o buscar de nuevo.",
+  "sortLatest": "Últimos",
+  "sortPopular": "Más vistos",
+  "sortViewsAsc": "Menos vistos",
+  "sortBy": "Ordenar por"
 }

@@ -1,68 +1,68 @@
 {
-  "otherTagsYouMayLike": "Other tags you may like",
-  "tagMixes": "Tag mixes",
-  "mixRpgFantasy": "RPG + Fantasy",
-  "mixRpgAdventure": "RPG + Adventure",
-  "mixRpgStoryRich": "RPG + Story Rich",
-  "welcomeTo": "Welcome to Chanom",
+  "otherTagsYouMayLike": "Otras etiquetas que te pueden gustar",
+  "tagMixes": "Combinaciones de etiquetas",
+  "mixRpgFantasy": "RPG + Fantasía",
+  "mixRpgAdventure": "RPG + Aventura",
+  "mixRpgStoryRich": "RPG + Historia Rica",
+  "welcomeTo": "Bienvenido a Chanom",
   "hub": "Hub",
-  "heroDescription": "Join a rapidly growing community of H-game developers and creators, sharing ideas and crafting thrilling experiences together!",
-  "seasonalMessage": "Celebrate Halloween with special content hunts all October long!",
+  "heroDescription": "¡Únete a una comunidad de rápido crecimiento de desarrolladores y creadores de juegos H, compartiendo ideas y creando experiencias emocionantes juntos!",
+  "seasonalMessage": "¡Celebra Halloween con cacerías de contenido especial durante todo octubre!",
   "forumStats": {
-    "activeMembers": "Active Members",
-    "totalPosts": "Total Posts",
-    "categories": "Categories",
-    "onlineNow": "Online Now"
+    "activeMembers": "Miembros activos",
+    "totalPosts": "Publicaciones totales",
+    "categories": "Categorías",
+    "onlineNow": "En línea ahora"
   },
-  "liveActivity": "Live Activity",
-  "quickNavigation": "Quick Navigation",
-  "communityGuidelines": "Community Guidelines",
-  "communityGuidelinesDescription": "Join our thriving community of passionate developers. Follow our guidelines to keep discussions productive and welcoming for everyone.",
-  "readGuidelines": "Read Guidelines",
+  "liveActivity": "Actividad en vivo",
+  "quickNavigation": "Navegación rápida",
+  "communityGuidelines": "Directrices de la comunidad",
+  "communityGuidelinesDescription": "Únete a nuestra próspera comunidad de apasionados desarrolladores. Sigue nuestras normas para mantener debates productivos y acogedores para todos.",
+  "readGuidelines": "Leer directrices",
   "recentActivity": {
-    "repliedTo": "replied to",
-    "created": "created",
-    "liked": "liked",
-    "pinned": "pinned",
-    "answered": "answered"
+    "repliedTo": "respondió a",
+    "created": "creó",
+    "liked": "le gustó",
+    "pinned": "fijó",
+    "answered": "respondió"
   },
   "quickLinks": {
-    "latestPosts": "Latest Posts",
-    "popularTopics": "Popular Topics",
-    "allCategories": "All Categories",
-    "memberDirectory": "Member Directory",
-    "communityGuidelinesLink": "Community Guidelines",
-    "helpSupport": "Help & Support"
+    "latestPosts": "Últimas publicaciones",
+    "popularTopics": "Temas populares",
+    "allCategories": "Todas las categorías",
+    "memberDirectory": "Directorio de miembros",
+    "communityGuidelinesLink": "Directrices de la comunidad",
+    "helpSupport": "Ayuda y soporte"
   },
-  "forumCategoriesTitle": "Forum Categories",
-  "lockedCategoryMessage": "This category is locked",
-  "lockedCategoryTooltip": "Locked category - cannot be accessed",
-  "lockedCategoryAriaLabel": "This category is locked",
-  "externalLinkMessage": "External links open in a new tab | Locked categories cannot be accessed",
+  "forumCategoriesTitle": "Categorías del foro",
+  "lockedCategoryMessage": "Esta categoría está bloqueada",
+  "lockedCategoryTooltip": "Categoría bloqueada - no se puede acceder",
+  "lockedCategoryAriaLabel": "Esta categoría está bloqueada",
+  "externalLinkMessage": "Los enlaces externos se abren en una pestaña nueva | No se puede acceder a categorías bloqueadas",
   "categories": {
     "announcements": {
-      "name": "Announcements",
-      "description": "News and important announcements from admins"
+      "name": "Anuncios",
+      "description": "Noticias y anuncios importantes de los administradores"
     },
     "generalDiscussion": {
-      "name": "General Discussion",
-      "description": "For discussing general topics that don’t fit other categories"
+      "name": "Discusión general",
+      "description": "Para discutir temas generales que no encajan en otras categorías"
     },
     "hGames": {
-      "name": "H-Games",
-      "description": "Collection of adult games and visual novels"
+      "name": "Juegos H",
+      "description": "Colección de juegos para adultos y novelas visuales"
     },
     "tools": {
       "name": "Herramientas",
-      "description": "Tools created by the community"
+      "description": "Herramientas creadas por la comunidad"
     },
     "videos": {
       "name": "Videos",
-      "description": "H-Videos"
+      "description": "Videos H"
     },
     "vipRoom": {
-      "name": "VIP Room",
-      "description": "For VIP members"
+      "name": "Sala VIP",
+      "description": "Para miembros VIP"
     }
   },
   "CategoriesCard": {
@@ -71,54 +71,54 @@
   },
   "CategoryGrid": {
     "platforms": "Plataformas",
-    "genres": "Genres",
-    "popularTags": "Popular Tags",
-    "content": "Content",
+    "genres": "Géneros",
+    "popularTags": "Etiquetas populares",
+    "content": "Contenido",
     "games": "Juegos",
     "mods": "Mods",
-    "patches": "Patches",
-    "saveFiles": "Save Files",
-    "guides": "Guides",
-    "reviews": "Reviews"
+    "patches": "Parches",
+    "saveFiles": "Archivos guardados",
+    "guides": "Guías",
+    "reviews": "Reseñas"
   },
   "PromotionsWidget": {
-    "recommendedByStaff": "Recommended by Staff",
-    "chanox2Desc": "H-Game manager for Linux, macOS, Windows",
-    "chanoliteDesc": "H-Game manager for iOS, Android",
-    "nstDesc": "All-in-one game translator by Chanomhub"
+    "recommendedByStaff": "Recomendado por el equipo",
+    "chanox2Desc": "Gestor de juegos H para Linux, macOS, Windows",
+    "chanoliteDesc": "Gestor de juegos H para iOS, Android",
+    "nstDesc": "Traductor de juegos todo en uno por Chanomhub"
   },
   "HomeCarousel": {
-    "featuredPostsToday": "Featured Posts Today"
+    "featuredPostsToday": "Publicaciones destacadas hoy"
   },
   "ToolsShelf": {
-    "toolsFromStaff": "Tools from Staff",
-    "chanox2Desc": "H-Game manager for Linux, macOS, Windows",
-    "chanoliteDesc": "H-Game manager for iOS, Android",
-    "nstDesc": "All-in-one game translator by Chanomhub"
+    "toolsFromStaff": "Herramientas del equipo",
+    "chanox2Desc": "Gestor de juegos H para Linux, macOS, Windows",
+    "chanoliteDesc": "Gestor de juegos H para iOS, Android",
+    "nstDesc": "Traductor de juegos todo en uno por Chanomhub"
   },
   "Shelf": {
-    "viewAll": "View all"
+    "viewAll": "Ver todo"
   },
   "CategoryPills": {
     "all": "Todos"
   },
   "ChristmasCountdown": {
-    "days": "Days",
-    "hours": "Hrs",
+    "days": "Días",
+    "hours": "Horas",
     "minutes": "Min",
-    "seconds": "Sec"
+    "seconds": "Seg"
   },
   "FeaturedPosts": {
-    "noPosts": "No posts"
+    "noPosts": "No hay publicaciones"
   },
   "HomePage": {
-    "statsMembers": "Members",
-    "statsOnline": "Online",
-    "statsPosts": "Posts",
-    "statsToday": "Today",
-    "recommendedForYou": "Recommended for you",
-    "latestPosts": "Latest Posts",
-    "popularWindows": "🪟 Popular on Windows",
-    "popularAndroid": "📱 Popular on Android"
+    "statsMembers": "Miembros",
+    "statsOnline": "En línea",
+    "statsPosts": "Publicaciones",
+    "statsToday": "Hoy",
+    "recommendedForYou": "Recomendado para ti",
+    "latestPosts": "Últimas publicaciones",
+    "popularWindows": "🪟 Popular en Windows",
+    "popularAndroid": "📱 Popular en Android"
   }
 }

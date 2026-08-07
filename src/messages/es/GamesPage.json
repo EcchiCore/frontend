@@ -1,41 +1,41 @@
 {
-  "title": "Games - ChanomHub",
-  "description": "Browse our collection of adult games and visual novels. Download free games, mods, and translations.",
+  "title": "Juegos - ChanomHub",
+  "description": "Explora nuestra colección de juegos para adultos y novelas visuales. Descarga juegos gratis, mods y traducciones.",
   "discovery": {
-    "title": "Games Discovery",
-    "description": "Find and explore amazing games and articles"
+    "title": "Descubrimiento de juegos",
+    "description": "Encuentra y explora juegos y artículos increíbles"
   },
   "error": {
-    "title": "Unable to Load Games",
-    "description": "There was an error loading the games page. Please try again later.",
-    "retry": "Retry"
+    "title": "No se pudieron cargar los juegos",
+    "description": "Ocurrió un error al cargar la página de juegos. Inténtelo de nuevo más tarde.",
+    "retry": "Reintentar"
   },
   "metadata": {
-    "title": "Games - ChanomHub",
-    "description": "Browse our collection of adult games and visual novels. Download free games, mods, and translations."
+    "title": "Juegos - ChanomHub",
+    "description": "Explora nuestra colección de juegos para adultos y novelas visuales. Descarga juegos gratis, mods y traducciones."
   },
-  "clubTitle": "Club de juegos",
-  "clubDescription": "Find and explore your favorite games",
-  "clubH1": "Games Club - Find and explore your favorite games",
+  "clubTitle": "Club de Juegos",
+  "clubDescription": "Encuentra y explora tus juegos favoritos",
+  "clubH1": "Club de Juegos - Encuentra y explora tus juegos favoritos",
   "debug": {
-    "title": "🐛 Debug Info (Page {0}) - CLIENT SIDE",
-    "urlParams": "URL Search Params",
-    "pageParam": "Page Param",
-    "parsedPage": "Parsed Page",
-    "expectedOffset": "Expected MeiliSearch Offset",
-    "actualOffset": "Actual Offset from Response",
-    "searchQuery": "Search Query",
-    "sequentialCode": "Sequential Code",
-    "pageSize": "Page Size",
-    "totalResults": "Total Results",
-    "resultsCount": "Results Count",
-    "processingTime": "Processing Time",
-    "filters": "Filters",
-    "firstResultId": "First Result ID"
+    "title": "🐛 Info de depuración (Página {0}) - LADO DEL CLIENTE",
+    "urlParams": "Parámetros de URL",
+    "pageParam": "Parámetro de página",
+    "parsedPage": "Página analizada",
+    "expectedOffset": "Offset esperado de MeiliSearch",
+    "actualOffset": "Offset real de la respuesta",
+    "searchQuery": "Consulta de búsqueda",
+    "sequentialCode": "Código secuencial",
+    "pageSize": "Tamaño de página",
+    "totalResults": "Resultados totales",
+    "resultsCount": "Conteo de resultados",
+    "processingTime": "Tiempo de procesamiento",
+    "filters": "Filtros",
+    "firstResultId": "ID del primer resultado"
   },
-  "verifiedDevUploadHint": "✓ Verified Developer status: Upload limit up to 5 GB",
-  "generalMemberUploadHint": "ℹ General members: Upload limit up to 1 GB (Verified Developer up to 5 GB)",
-  "unsupportedFileError": "Unsupported file: {name} — Supports .ttf .otf .woff .woff2 .zip and Unity AssetBundle",
-  "fileTooLargeError": "File too large: {name} — Max 20MB per file",
-  "acceptsAssetBundleHint": "Supports Unity AssetBundle as well"
+  "verifiedDevUploadHint": "✓ Estado de Desarrollador Verificado: Límite de carga de hasta 5 GB",
+  "generalMemberUploadHint": "ℹ Miembros generales: Límite de carga de hasta 1 GB (Desarrollador Verificado hasta 5 GB)",
+  "unsupportedFileError": "Archivo no compatible: {name} — Soporta .ttf .otf .woff .woff2 .zip y Unity AssetBundle",
+  "fileTooLargeError": "Archivo demasiado grande: {name} — Máximo 20MB por archivo",
+  "acceptsAssetBundleHint": "También soporta Unity AssetBundle"
 }

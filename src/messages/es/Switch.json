@@ -1,7 +1,7 @@
 {
-  "loggedInAccount": "You already have a logged-in account",
-  "switchWarning": "If you log in/register again, it will switch accounts",
-  "switchAccount": "Switch Account",
+  "loggedInAccount": "Ya tienes una cuenta con sesión iniciada",
+  "switchWarning": "Si inicias sesión/te registras de nuevo, se cambiará de cuenta",
+  "switchAccount": "Cambiar cuenta",
   "cancel": "Cancelar",
-  "disconnectWarning": "If you click Switch Account, we will disconnect your current account"
+  "disconnectWarning": "Si haces clic en Cambiar cuenta, desconectaremos tu cuenta actual"
 }

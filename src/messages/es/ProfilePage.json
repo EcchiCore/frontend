@@ -1,10 +1,10 @@
 {
   "error": "Error",
-  "userNotFound": "User not found",
-  "cannotFetch": "Cannot fetch user data",
-  "errorFetching": "Error fetching user data",
-  "aboutMe": "About Me",
-  "noBio": "No bio yet. Tell us something about yourself!",
+  "userNotFound": "Usuario no encontrado",
+  "cannotFetch": "No se pudieron obtener los datos del usuario",
+  "errorFetching": "Error al obtener los datos del usuario",
+  "aboutMe": "Sobre mí",
+  "noBio": "¡Aún no hay biografía. ¡Cuéntanos algo sobre ti!",
   "roles": "Roles",
-  "connections": "Connections"
+  "connections": "Conexiones"
 }

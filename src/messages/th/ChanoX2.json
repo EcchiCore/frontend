@@ -13,7 +13,7 @@
   "manageDesc": "ChanoX2 สามารถระบุประเภทของเกมได้โดยอัตโนมัติ และจัดเรียงคอลเลกชันของคุณตามเทคโนโลยี ขนาด หรือเวลาที่เล่น ChanoX2 ให้คุณควบคุมได้อย่างละเอียดที่คุณต้องการ",
   "featureAutoDetect": "ระบุประเภทของเกมได้โดยอัตโนมัติ",
   "featureAutoDetectDesc": "รองรับ Unity, Unreal, Godot, Ren'Py และอื่นๆ",
-  "featureSmartLibrary": "Smart Library",
+  "featureSmartLibrary": "คลังเกมอัจฉริยะ",
   "featureSmartLibraryDesc": "นำเข้าเกมอัตโนมัติและจัดระเบียบด้วยแท็ก",
   "featurePerformance": "โหมดประสิทธิภาพ",
   "featurePerformanceDesc": "ตัว Launcher ที่ไม่กินทรัพยากรเครื่อง ปิดตัวเองเมื่อเกมเริ่มทำงาน",

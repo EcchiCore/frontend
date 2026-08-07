@@ -1,7 +1,7 @@
 {
-  "title": "We use cookies",
-  "description": "We use cookies to enhance your browsing experience, serve personalized ads or content, and analyze our traffic. By clicking \"Accept\", you consent to our use of cookies.",
-  "accept": "Accept",
-  "decline": "Decline",
+  "title": "Usamos cookies",
+  "description": "Utilizamos cookies para mejorar su experiencia de navegación, ofrecer anuncios o contenido personalizados y analizar nuestro tráfico. Al hacer clic en \"Aceptar\", acepta nuestro uso de cookies.",
+  "accept": "Aceptar",
+  "decline": "Rechazar",
   "settings": "Configuración"
 }

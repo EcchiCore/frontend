@@ -1,15 +1,15 @@
 {
   "username": "Nombre de usuario",
-  "usernamePlaceholder": "Name you want others to see",
+  "usernamePlaceholder": "Nombre que quieres que otros vean",
   "email": "Correo electrónico",
-  "emailPlaceholder": "email@example.com",
-  "bio": "Bio",
-  "bioPlaceholder": "Tell us about yourself...",
-  "avatarUrl": "Profile Image URL",
-  "avatarUrlPlaceholder": "https://example.com/your-image.jpg",
-  "previewProfile": "Preview Profile",
+  "emailPlaceholder": "correo@ejemplo.com",
+  "bio": "Biografía",
+  "bioPlaceholder": "Cuéntanos sobre ti...",
+  "avatarUrl": "URL de la imagen de perfil",
+  "avatarUrlPlaceholder": "https://ejemplo.com/tu-imagen.jpg",
+  "previewProfile": "Vista previa del perfil",
   "defaultUsername": "Nombre de usuario",
   "defaultEmail": "Correo electrónico",
-  "defaultBio": "No bio yet",
-  "assignedRole": "Assigned Role"
+  "defaultBio": "Sin biografía aún",
+  "assignedRole": "Rol asignado"
 }

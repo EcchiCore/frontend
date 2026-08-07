@@ -1,5 +1,5 @@
 {
-  "title": "Error Occurred",
-  "defaultMessage": "Cannot load data at this time",
-  "tryAgain": "Try Again"
+  "title": "Página no encontrada (404)",
+  "defaultMessage": "No se pueden cargar los datos en este momento",
+  "tryAgain": "Intentar de nuevo"
 }

@@ -1,16 +1,16 @@
 {
-  "gameSearch": "Game Search",
-  "searchGame": "Search for your favorite games...",
-  "search": "Search term",
-  "sequentialCode": "Game Sequential Code",
-  "activeFilters": "Active Filters",
-  "clearAll": "Clear All",
-  "allCategories": "All Categories",
-  "allTags": "All Tags",
-  "allPlatforms": "All Platforms",
-  "filters": "Filters",
+  "gameSearch": "Búsqueda de juegos",
+  "searchGame": "Busca tus juegos favoritos...",
+  "search": "Buscar",
+  "sequentialCode": "Código secuencial del juego",
+  "activeFilters": "Filtros activos",
+  "clearAll": "Limpiar todo",
+  "allCategories": "Todas las categorías",
+  "allTags": "Todas las etiquetas",
+  "allPlatforms": "Todas las plataformas",
+  "filters": "Filtros",
   "all": "Todos",
   "category": "Categoría",
-  "tag": "Tag",
-  "platform": "Platform"
+  "tag": "Etiqueta",
+  "platform": "Plataforma"
 }

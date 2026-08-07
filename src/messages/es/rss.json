@@ -1,16 +1,16 @@
 {
   "tag": {
-    "channel_title": "Articles tagged \"{tag}\" | Chanomhub",
-    "channel_description": "Latest articles tagged with \"{tag}\"",
-    "error": "Failed to generate RSS feed"
+    "channel_title": "Artículos etiquetados con \"{tag}\" | Chanomhub",
+    "channel_description": "Últimos artículos etiquetados con \"{tag}\"",
+    "error": "Error al generar canal RSS"
   },
   "platforms": {
-    "channel_title": "{platform} Articles | Chanomhub",
-    "channel_description": "Latest articles about {platform}",
-    "error": "Failed to generate RSS feed"
+    "channel_title": "Artículos de {platform} | Chanomhub",
+    "channel_description": "Últimos artículos sobre {platform}",
+    "error": "Error al generar canal RSS"
   },
-  "tagFeedTitle": "Articles tagged \"{tagName}\" | Chanomhub",
-  "tagFeedDescription": "Latest articles tagged with \"{tagName}\"",
-  "platformFeedTitle": "{platformName} Articles | Chanomhub",
-  "platformFeedDescription": "Latest articles about {platformName}"
+  "tagFeedTitle": "Artículos etiquetados con \"{tagName}\" | Chanomhub",
+  "tagFeedDescription": "Últimos artículos etiquetados con \"{tagName}\"",
+  "platformFeedTitle": "Artículos de {platformName} | Chanomhub",
+  "platformFeedDescription": "Últimos artículos sobre {platformName}"
 }
