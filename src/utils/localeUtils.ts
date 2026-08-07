@@ -1,7 +1,7 @@
 // src/utils/localeUtils.ts
 import { getSiteUrl } from './siteUtils';
 
-export const supportedLocales = ['en', 'th'] as const;
+export const supportedLocales = ['en', 'th', 'es'] as const;
 export type Locale = (typeof supportedLocales)[number];
 export const defaultLocale: Locale = 'en';
 
@@ -85,6 +85,24 @@ export const defaultMetadataContent: Record<Locale, MetaDict> = {
       'เกม NSFW',
     ],
     logo_alt: 'โลโก้ ChanomHub',
+  },
+  es: {
+    title: 'Descarga gratuita de juegos para adultos y H-Games (18+) | ChanomHub',
+    description:
+      'Descarga juegos para adultos y H-Games gratuitos para PC, Android y navegador. Actualizaciones diarias sobre descargas de juegos, traducciones, mods y comunidad de juegos 18+.',
+    keywords: [
+      'Juegos gratis para adultos',
+      'Descargar H-games',
+      'Descargas de juegos para adultos',
+      'Juegos NSFW',
+      'Juegos 18+',
+      'Comunidad de juegos para adultos',
+      'Traducciones de juegos',
+      'Mods de juegos',
+      'Novelas visuales',
+      'Juegos eróticos',
+    ],
+    logo_alt: 'Logo de ChanomHub',
   },
 };
 // -----------------------------------------

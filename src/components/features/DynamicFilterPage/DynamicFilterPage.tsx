@@ -107,6 +107,7 @@ export async function generateMetadata({ params, filterType }: {
       languages: {
         'en': `${siteUrl}/${contentPath}`,
         'th': `${siteUrl}/th/${contentPath}`,
+        'es': `${siteUrl}/es/${contentPath}`,
         'x-default': `${siteUrl}/${contentPath}`,
       },
     },
@@ -456,7 +457,7 @@ export default async function DynamicFilterPage({ params, filterType, hasRss = t
                           </h4>
                           <div className="flex items-center gap-2 mt-1">
                             <div className="text-xs text-muted-foreground">
-                              {new Date(article.createdAt).toLocaleDateString(locale === 'th' ? 'th-TH' : 'en-US')}
+                              {new Date(article.createdAt).toLocaleDateString(locale === 'th' ? 'th-TH' : locale === 'es' ? 'es-ES' : 'en-US')}
                             </div>
                             <Badge variant="secondary" className="text-xs">
                               {typeof article.engine === 'object' ? article.engine?.name : article.engine}

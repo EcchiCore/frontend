@@ -38,6 +38,7 @@ const LANGUAGES = [
   { value: 'all', label: 'All Languages' },
   { value: 'th', label: 'Thai (th)' },
   { value: 'en', label: 'English (en)' },
+  { value: 'es', label: 'Spanish (es)' },
   { value: 'ja', label: 'Japanese (ja)' },
   { value: 'ko', label: 'Korean (ko)' },
   { value: 'zh', label: 'Chinese (zh)' },

@@ -1,0 +1,16 @@
+{
+  "tag": {
+    "channel_title": "Articles tagged \"{tag}\" | Chanomhub",
+    "channel_description": "Latest articles tagged with \"{tag}\"",
+    "error": "Failed to generate RSS feed"
+  },
+  "platforms": {
+    "channel_title": "{platform} Articles | Chanomhub",
+    "channel_description": "Latest articles about {platform}",
+    "error": "Failed to generate RSS feed"
+  },
+  "tagFeedTitle": "Articles tagged \"{tagName}\" | Chanomhub",
+  "tagFeedDescription": "Latest articles tagged with \"{tagName}\"",
+  "platformFeedTitle": "{platformName} Articles | Chanomhub",
+  "platformFeedDescription": "Latest articles about {platformName}"
+}

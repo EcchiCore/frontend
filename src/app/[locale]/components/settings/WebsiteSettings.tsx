@@ -125,6 +125,7 @@ const WebsiteSettings: React.FC<WebsiteSettingsProps> = ({
             >
               <option value="th">{t('thai')}</option>
               <option value="en">English</option>
+              <option value="es">Español</option>
               <option value="zh">中文</option>
               <option value="ja">日本語</option>
               <option value="ko">한국어</option>

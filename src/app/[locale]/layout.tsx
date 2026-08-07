@@ -54,6 +54,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
       languages: {
         'en': siteUrl,
         'th': `${siteUrl}/th`,
+        'es': `${siteUrl}/es`,
         'x-default': siteUrl,
       },
     },
@@ -172,7 +173,7 @@ export default async function LocaleSegmentLayout({
                   "inLanguage": supportedLocales,
                   "availableLanguage": supportedLocales.map(lang => ({
                     "@type": "Language",
-                    "name": lang === 'en' ? 'English' : 'Thai',
+                    "name": lang === 'en' ? 'English' : lang === 'es' ? 'Spanish' : 'Thai',
                     "alternateName": lang
                   }))
                 },

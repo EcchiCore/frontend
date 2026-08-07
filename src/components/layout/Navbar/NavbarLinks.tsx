@@ -106,6 +106,12 @@ const NavbarLinks = ({ section, onCloseMenu = () => { }, isMobile = false }: Nav
             transKey: "thai",
             link: "#"
           },
+          {
+            id: "lang-es",
+            name: t("spanish"),
+            transKey: "spanish",
+            link: "#"
+          },
         ],
       },
     ];
@@ -185,7 +191,7 @@ const NavbarLinks = ({ section, onCloseMenu = () => { }, isMobile = false }: Nav
                     <DropdownMenuItem
                       key={sub.id}
                       className="text-sm cursor-pointer hover:bg-accent/50 transition-colors duration-200"
-                      onClick={() => changeLanguage(sub.id === "lang-en" ? "en" : "th")}
+                      onClick={() => changeLanguage(sub.id.replace("lang-", ""))}
                     >
                       {sub.name}
                     </DropdownMenuItem>

@@ -66,7 +66,7 @@ export default function LanguageSettingsForm({ setError, setSuccessMessage }: La
           <SelectContent>
             <SelectItem value="en">English</SelectItem>
             <SelectItem value="th">Thai</SelectItem>
-            {/* Add more languages as needed */}
+            <SelectItem value="es">Español</SelectItem>
           </SelectContent>
         </Select>
       </div>

@@ -2,7 +2,7 @@
 import { createNavigation } from 'next-intl/navigation';
 
 // กำหนดภาษาที่รองรับ
-export const locales = ['en', 'th'] as const;
+export const locales = ['en', 'th', 'es'] as const;
 
 // กำหนดภาษาเริ่มต้น
 export const defaultLocale = 'en';

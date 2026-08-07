@@ -29,6 +29,7 @@ export async function generateMetadata({ params, searchParams }: { params: Promi
       languages: {
         'en': `${siteUrl}/games`,
         'th': `${siteUrl}/th/games`,
+        'es': `${siteUrl}/es/games`,
         'x-default': `${siteUrl}/games`,
       },
     },

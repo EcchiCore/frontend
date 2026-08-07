@@ -83,6 +83,7 @@ export const buildArticleFields = (articles: Article[], generatedAt: string) => 
     alternates: {
       en: getArticleUrl(article.slug, 'en'),
       th: getArticleUrl(article.slug, 'th'),
+      es: getArticleUrl(article.slug, 'es'),
       'x-default': getArticleUrl(article.slug, 'en'),
     },
   }));
@@ -113,6 +114,7 @@ export const buildStaticFields = (generatedAt: string) => {
       alternates: {
         en: `${siteUrl}${path}`,
         th: `${siteUrl}/th${path || ''}`,
+        es: `${siteUrl}/es${path || ''}`,
         'x-default': `${siteUrl}${path}`,
       },
     };

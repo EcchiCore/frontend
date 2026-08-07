@@ -1,0 +1,10 @@
+{
+  "error": "Error",
+  "userNotFound": "User not found",
+  "cannotFetch": "Cannot fetch user data",
+  "errorFetching": "Error fetching user data",
+  "aboutMe": "About Me",
+  "noBio": "No bio yet. Tell us something about yourself!",
+  "roles": "Roles",
+  "connections": "Connections"
+}

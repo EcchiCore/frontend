@@ -1,0 +1,21 @@
+{
+  "title": "Register",
+  "username": "Nombre de usuario",
+  "email": "Correo electrónico",
+  "password": "Contraseña",
+  "confirmPassword": "Confirmar contraseña",
+  "usernamePlaceholder": "Enter your username",
+  "emailPlaceholder": "Enter your email",
+  "passwordPlaceholder": "Enter your password",
+  "confirmPasswordPlaceholder": "Confirm your password",
+  "registerButton": "Register",
+  "loginLink": "Already have an account?",
+  "loginLinkText": "Login here",
+  "successMessage": "Registration successful! Redirecting...",
+  "fillAllFieldsMessage": "Please fill in all fields",
+  "passwordsDoNotMatchMessage": "Passwords do not match",
+  "invalidResponseMessage": "Registration failed: Invalid response",
+  "registrationFailedMessage": "Registration failed",
+  "unexpectedErrorMessage": "Registration failed due to an unexpected error",
+  "signInWithGoogle": "Sign in with Google"
+}

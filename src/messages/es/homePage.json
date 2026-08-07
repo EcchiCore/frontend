@@ -1,0 +1,124 @@
+{
+  "otherTagsYouMayLike": "Other tags you may like",
+  "tagMixes": "Tag mixes",
+  "mixRpgFantasy": "RPG + Fantasy",
+  "mixRpgAdventure": "RPG + Adventure",
+  "mixRpgStoryRich": "RPG + Story Rich",
+  "welcomeTo": "Welcome to Chanom",
+  "hub": "Hub",
+  "heroDescription": "Join a rapidly growing community of H-game developers and creators, sharing ideas and crafting thrilling experiences together!",
+  "seasonalMessage": "Celebrate Halloween with special content hunts all October long!",
+  "forumStats": {
+    "activeMembers": "Active Members",
+    "totalPosts": "Total Posts",
+    "categories": "Categories",
+    "onlineNow": "Online Now"
+  },
+  "liveActivity": "Live Activity",
+  "quickNavigation": "Quick Navigation",
+  "communityGuidelines": "Community Guidelines",
+  "communityGuidelinesDescription": "Join our thriving community of passionate developers. Follow our guidelines to keep discussions productive and welcoming for everyone.",
+  "readGuidelines": "Read Guidelines",
+  "recentActivity": {
+    "repliedTo": "replied to",
+    "created": "created",
+    "liked": "liked",
+    "pinned": "pinned",
+    "answered": "answered"
+  },
+  "quickLinks": {
+    "latestPosts": "Latest Posts",
+    "popularTopics": "Popular Topics",
+    "allCategories": "All Categories",
+    "memberDirectory": "Member Directory",
+    "communityGuidelinesLink": "Community Guidelines",
+    "helpSupport": "Help & Support"
+  },
+  "forumCategoriesTitle": "Forum Categories",
+  "lockedCategoryMessage": "This category is locked",
+  "lockedCategoryTooltip": "Locked category - cannot be accessed",
+  "lockedCategoryAriaLabel": "This category is locked",
+  "externalLinkMessage": "External links open in a new tab | Locked categories cannot be accessed",
+  "categories": {
+    "announcements": {
+      "name": "Announcements",
+      "description": "News and important announcements from admins"
+    },
+    "generalDiscussion": {
+      "name": "General Discussion",
+      "description": "For discussing general topics that don’t fit other categories"
+    },
+    "hGames": {
+      "name": "H-Games",
+      "description": "Collection of adult games and visual novels"
+    },
+    "tools": {
+      "name": "Herramientas",
+      "description": "Tools created by the community"
+    },
+    "videos": {
+      "name": "Videos",
+      "description": "H-Videos"
+    },
+    "vipRoom": {
+      "name": "VIP Room",
+      "description": "For VIP members"
+    }
+  },
+  "CategoriesCard": {
+    "platforms": "Plataformas",
+    "loading": "Cargando..."
+  },
+  "CategoryGrid": {
+    "platforms": "Plataformas",
+    "genres": "Genres",
+    "popularTags": "Popular Tags",
+    "content": "Content",
+    "games": "Juegos",
+    "mods": "Mods",
+    "patches": "Patches",
+    "saveFiles": "Save Files",
+    "guides": "Guides",
+    "reviews": "Reviews"
+  },
+  "PromotionsWidget": {
+    "recommendedByStaff": "Recommended by Staff",
+    "chanox2Desc": "H-Game manager for Linux, macOS, Windows",
+    "chanoliteDesc": "H-Game manager for iOS, Android",
+    "nstDesc": "All-in-one game translator by Chanomhub"
+  },
+  "HomeCarousel": {
+    "featuredPostsToday": "Featured Posts Today"
+  },
+  "ToolsShelf": {
+    "toolsFromStaff": "Tools from Staff",
+    "chanox2Desc": "H-Game manager for Linux, macOS, Windows",
+    "chanoliteDesc": "H-Game manager for iOS, Android",
+    "nstDesc": "All-in-one game translator by Chanomhub"
+  },
+  "Shelf": {
+    "viewAll": "View all"
+  },
+  "CategoryPills": {
+    "all": "Todos"
+  },
+  "ChristmasCountdown": {
+    "days": "Days",
+    "hours": "Hrs",
+    "minutes": "Min",
+    "seconds": "Sec"
+  },
+  "FeaturedPosts": {
+    "noPosts": "No posts"
+  },
+  "HomePage": {
+    "statsMembers": "Members",
+    "statsOnline": "Online",
+    "statsPosts": "Posts",
+    "statsToday": "Today",
+    "recommendedForYou": "Recommended for you",
+    "latestPosts": "Latest Posts",
+    "popularWindows": "🪟 Popular on Windows",
+    "popularAndroid": "📱 Popular on Android"
+  }
+}
