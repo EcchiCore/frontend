@@ -16,5 +16,6 @@
   "passwordsDoNotMatchMessage": "รหัสผ่านไม่ตรงกัน",
   "invalidResponseMessage": "การสมัครสมาชิกล้มเหลว: การตอบสนองไม่ถูกต้อง",
   "registrationFailedMessage": "การสมัครสมาชิกล้มเหลว",
-  "unexpectedErrorMessage": "การสมัครสมาชิกล้มเหลวเนื่องจากข้อผิดพลาดที่ไม่คาดคิด"
+  "unexpectedErrorMessage": "การสมัครสมาชิกล้มเหลวเนื่องจากข้อผิดพลาดที่ไม่คาดคิด",
+  "signInWithGoogle": "ลงชื่อเข้าใช้ด้วย Google"
 }

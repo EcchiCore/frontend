@@ -11,5 +11,11 @@
   "invalidResponseMessage": "Login failed: Invalid response",
   "invalidCredentialsMessage": "Invalid credentials",
   "unexpectedErrorMessage": "Login failed due to an unexpected error",
-  "loading": "Logging in..."
+  "loading": "Logging in...",
+  "signInWithGoogle": "Sign in with Google",
+  "logoutSuccess": "Logged out successfully",
+  "redirectingToLogin": "Redirecting to login page...",
+  "resetLinkSent": "Password reset link has been sent to your email!",
+  "emailResetNotice": "If this email exists in our system, we have sent instructions to reset your password.",
+  "emailResetNoticeTarget": "If the email {email} exists in our system, we have sent instructions to reset your password."
 }

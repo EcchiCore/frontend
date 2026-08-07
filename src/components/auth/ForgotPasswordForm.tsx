@@ -5,6 +5,7 @@ import { toast, ToastContainer } from "react-toastify";
 import { Loader2, ChevronLeft, Mail, CheckCircle2 } from "lucide-react";
 import HCaptcha from '@hcaptcha/react-hcaptcha';
 import { Link } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 
 interface ForgotPasswordFormProps {
   backToLoginText?: string;
@@ -13,6 +14,7 @@ interface ForgotPasswordFormProps {
 export function ForgotPasswordForm({
   backToLoginText = "Back to login",
 }: ForgotPasswordFormProps) {
+  const t = useTranslations('Login');
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
@@ -61,9 +63,9 @@ export function ForgotPasswordForm({
     // Always provide consistent, secure user feedback (Security Best Practice)
     setSent(true);
     if (success) {
-      toast.success('ลิงก์สำหรับรีเซ็ตรหัสผ่านถูกส่งไปยังอีเมลของคุณเรียบร้อยแล้ว!');
+      toast.success(t('resetLinkSent'));
     } else {
-      toast.info('หากอีเมลนี้มีอยู่ในระบบ เราได้ทำการส่งลิงก์สำหรับรีเซ็ตรหัสผ่านไปให้เรียบร้อยแล้ว');
+      toast.info(t('emailResetNotice'));
     }
 
     setLoading(false);
@@ -103,7 +105,7 @@ export function ForgotPasswordForm({
             <div className="space-y-1">
               <p className="text-sm font-bold text-white">Reset Email Sent</p>
               <p className="text-xs text-gray-400">
-                หากอีเมล <span className="text-primary font-medium">{email}</span> มีอยู่ในระบบ เราได้ส่งคำขอรีเซ็ตรหัสผ่านไปให้แล้ว
+                {t('emailResetNoticeTarget', { email })}
               </p>
             </div>
             <button

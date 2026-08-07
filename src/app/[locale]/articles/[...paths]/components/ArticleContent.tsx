@@ -1165,7 +1165,6 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border/40">
-                    {/* ทางการ (Official) */}
                     <tr className="bg-muted/30">
                       <td colSpan={3} className="py-1 px-2 font-bold text-foreground text-[9px] uppercase tracking-wider">
                         {t("official")}
@@ -1177,7 +1176,6 @@ const ArticleContent: React.FC<ArticleContentProps> = ({
                       <td className="py-2 text-center text-primary">✔</td>
                     </tr>
 
-                    {/* จากม็อดชุมชน (Community Mod) */}
                     <tr className="bg-muted/30">
                       <td colSpan={3} className="py-1 px-2 font-bold text-foreground text-[9px] uppercase tracking-wider">
                         {t("communityMod")}

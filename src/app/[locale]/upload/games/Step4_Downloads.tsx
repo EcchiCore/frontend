@@ -36,8 +36,11 @@ import {
   FileCode
 } from 'lucide-react';
 import { getSdk } from '@/lib/sdk';
+import { useTranslations } from 'next-intl';
 
 export const Step4_Downloads = () => {
+  const t = useTranslations('GamesPage');
+  const tEditor = useTranslations('ArticleEditorForm');
   const dispatch = useAppDispatch();
   const formData = useAppSelector((state) => state.upload.formData);
 
@@ -140,7 +143,8 @@ export const Step4_Downloads = () => {
     if (file.size > maxAllowedBytes) {
       const fileSizeGB = (file.size / (1024 * 1024 * 1024)).toFixed(2);
       const limitStr = isVerifiedDev ? '5 GB' : '1 GB';
-      toast.error(`ไฟล์มีขนาด ${fileSizeGB} GB ซึ่งเกินขีดจำกัดอัปโหลด (${limitStr} สำหรับ${isVerifiedDev ? 'Verified Developer' : 'สมาชิกทั่วไป'})`);
+      const roleStr = isVerifiedDev ? tEditor('verifiedDevRole') : tEditor('generalMemberRole');
+      toast.error(tEditor('fileSizeExceedsLimit', { size: fileSizeGB, limit: limitStr, role: roleStr }));
       return;
     }
 
@@ -301,11 +305,7 @@ export const Step4_Downloads = () => {
                 </div>
               </div>
               <p className={`text-[11px] flex items-center gap-1 mt-1 ${isVerifiedDev ? 'text-emerald-400/90' : 'text-amber-400/90'}`}>
-                {isVerifiedDev ? (
-                  <>✓ สิทธิ์ Verified Developer: อัปโหลดได้สูงสุด 5 GB</>
-                ) : (
-                  <>ℹ สมาชิกทั่วไป: อัปโหลดไฟล์ได้สูงสุด 1 GB (Verified Developer อัปโหลดได้สูงสุด 5 GB)</>
-                )}
+                {isVerifiedDev ? t('verifiedDevUploadHint') : t('generalMemberUploadHint')}
               </p>
               {isUploading && (
                 <div className="space-y-1.5 pt-1">

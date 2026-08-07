@@ -10,5 +10,6 @@
   "previewProfile": "Preview Profile",
   "defaultUsername": "Username",
   "defaultEmail": "Email",
-  "defaultBio": "No bio yet"
+  "defaultBio": "No bio yet",
+  "assignedRole": "Assigned Role"
 }

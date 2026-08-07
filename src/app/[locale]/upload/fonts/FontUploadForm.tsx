@@ -15,6 +15,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 import {
   Upload,
   Type,
@@ -96,6 +97,7 @@ const LANGUAGES = [
 ];
 
 export default function FontUploadForm() {
+  const t = useTranslations('GamesPage');
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -148,10 +150,10 @@ export default function FontUploadForm() {
       const isValidSize = file.size <= 20 * 1024 * 1024; // 20MB limit
 
       if (!isValidExt) {
-        toast.error(`ไม่รองรับไฟล์: ${file.name} — รองรับ .ttf .otf .woff .woff2 .zip และ Unity AssetBundle`);
+        toast.error(t('unsupportedFileError', { name: file.name }));
       }
       if (!isValidSize) {
-        toast.error(`ไฟล์ใหญ่เกินไป: ${file.name} — สูงสุด 20MB ต่อไฟล์`);
+        toast.error(t('fileTooLargeError', { name: file.name }));
       }
 
       return isValidExt && isValidSize;
@@ -462,7 +464,7 @@ export default function FontUploadForm() {
               <div className="space-y-1">
                 <p className="text-sm font-semibold text-slate-200">Click or drag files here to upload</p>
                 <p className="text-xs text-slate-500">
-                  Accepts <span className="font-mono text-slate-400">.ttf .otf .woff .woff2 .zip</span> — รองรับ Unity AssetBundle ด้วย
+                  Accepts <span className="font-mono text-slate-400">.ttf .otf .woff .woff2 .zip</span> — {t('acceptsAssetBundleHint')}
                 </p>
               </div>
             </div>

@@ -18,6 +18,7 @@ import {
   ShieldAlert
 } from 'lucide-react';
 import { parseCookies } from 'nookies';
+import { useTranslations } from 'next-intl';
 
 // UI Components
 import { Button } from '@/components/ui/button';
@@ -51,6 +52,7 @@ interface SpamLog {
 }
 
 export default function DashboardDiscordPage() {
+  const t = useTranslations('Discord');
   // Auth state
   const [token, setToken] = useState<string | null>(null);
 
@@ -125,7 +127,7 @@ export default function DashboardDiscordPage() {
       setBotStatus(data);
     } catch (err: any) {
       setBotStatus(null);
-      setError(`ไม่สามารถเชื่อมต่อบอตได้: ${err.message}`);
+      setError(t('botConnectionError', { error: err.message }));
     } finally {
       setStatusLoading(false);
     }
@@ -140,7 +142,7 @@ export default function DashboardDiscordPage() {
         setSelectedGuild(data[0].id);
       }
     } catch (err: any) {
-      setError(`ไม่สามารถดึงข้อมูลเซิร์ฟเวอร์ได้: ${err.message}`);
+      setError(t('fetchGuildsError', { error: err.message }));
     }
   }, [apiFetch, selectedGuild]);
 
@@ -155,7 +157,7 @@ export default function DashboardDiscordPage() {
       const data = await apiFetch(path);
       setMembers(data || []);
     } catch (err: any) {
-      setError(`ไม่สามารถดึงรายชื่อสมาชิกได้: ${err.message}`);
+      setError(t('fetchMembersError', { error: err.message }));
     } finally {
       setLoading(false);
     }
@@ -213,7 +215,7 @@ export default function DashboardDiscordPage() {
   const handleCleanSpam = async () => {
     if (!selectedMember || !selectedGuild) return;
     
-    const confirmMsg = `🚨 ยืนยันการจัดการสแปมสำหรับ: ${selectedMember.nickname} (${selectedMember.username})?\n\nบอตจะทำการลบข้อความทั้งหมดของผู้ใช้รายนี้ใน 24 ชั่วโมงที่ผ่านมาในทุกห้องแชท และสั่งใบ้คำ (Timeout) เป็นเวลา 1 สัปดาห์ พร้อมเก็บบันทึกประวัติ!`;
+    const confirmMsg = t('spamCleanConfirm', { nickname: selectedMember.nickname, username: selectedMember.username });
     if (!window.confirm(confirmMsg)) return;
 
     try {
@@ -229,7 +231,7 @@ export default function DashboardDiscordPage() {
       });
 
       if (result) {
-        setSuccess(`✅ ลบ ${result.deleted_count} ข้อความสแปมของ ${selectedMember.nickname} และสั่ง Timeout เรียบร้อยแล้ว!`);
+        setSuccess(t('spamCleanSuccess', { count: result.deleted_count, nickname: selectedMember.nickname }));
         
         // Add operation to recent logs
         const newLog: SpamLog = {
@@ -246,7 +248,7 @@ export default function DashboardDiscordPage() {
         setSelectedMember(null);
       }
     } catch (err: any) {
-      setError(`การจัดการสแปมล้มเหลว: ${err.message}`);
+      setError(t('spamCleanError', { error: err.message }));
     } finally {
       setSpamLoading(false);
     }
@@ -260,7 +262,7 @@ export default function DashboardDiscordPage() {
       const data = await apiFetch(`/api/discord/logs?path=${encodeURIComponent(logPath)}`);
       setActiveLogContent(data || 'Log file is empty.');
     } catch (err: any) {
-      setError(`ไม่สามารถอ่าน Log ได้: ${err.message}`);
+      setError(t('readLogError', { error: err.message }));
     } finally {
       setLogLoading(false);
     }
@@ -277,7 +279,7 @@ export default function DashboardDiscordPage() {
               Discord Command Center
             </h1>
             <p className="text-muted-foreground mt-1">
-              แผงควบคุมระบบจัดการและตรวจจับสแปมบอต Discord แบบเรียลไทม์ 24/7
+              {t('subtitle')}
             </p>
           </div>
           
@@ -305,7 +307,7 @@ export default function DashboardDiscordPage() {
               size="icon"
               onClick={handleRefresh}
               disabled={refreshing || statusLoading}
-              title="รีเฟรชข้อมูลทั้งหมด"
+              title={t('refreshTooltip')}
             >
               <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
             </Button>
@@ -317,7 +319,7 @@ export default function DashboardDiscordPage() {
       {error && (
         <Alert variant="destructive" className="border-red-500/20 bg-red-500/5">
           <AlertCircle className="w-4 h-4 text-red-500" />
-          <AlertTitle className="text-red-500">เกิดข้อผิดพลาด</AlertTitle>
+          <AlertTitle className="text-red-500">{t('errorTitle')}</AlertTitle>
           <AlertDescription className="text-red-400">{error}</AlertDescription>
         </Alert>
       )}
@@ -325,7 +327,7 @@ export default function DashboardDiscordPage() {
       {success && (
         <Alert className="border-emerald-500/20 bg-emerald-500/5">
           <Check className="w-4 h-4 text-emerald-500" />
-          <AlertTitle className="text-emerald-500">ทำรายการสำเร็จ</AlertTitle>
+          <AlertTitle className="text-emerald-500">{t('successTitle')}</AlertTitle>
           <AlertDescription className="text-emerald-400">{success}</AlertDescription>
         </Alert>
       )}
@@ -339,10 +341,10 @@ export default function DashboardDiscordPage() {
             <CardHeader className="pb-3">
               <CardTitle className="text-lg flex items-center gap-2">
                 <Users className="w-5 h-5 text-indigo-500" />
-                เซิร์ฟเวอร์และรายชื่อสมาชิก
+                {t('serversAndMembers')}
               </CardTitle>
               <CardDescription>
-                กรุณาเลือกเซิร์ฟเวอร์เพื่อดูและจัดการรายชื่อสมาชิก
+                {t('selectServerDesc')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -360,7 +362,7 @@ export default function DashboardDiscordPage() {
                     </option>
                   ))}
                   {guilds.length === 0 && (
-                    <option value="">-- ไม่พบกิลด์ที่บอตสังกัด --</option>
+                    <option value="">{t('noGuildFound')}</option>
                   )}
                 </select>
               </div>
@@ -370,14 +372,14 @@ export default function DashboardDiscordPage() {
                 <div className="relative flex-1">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
-                    placeholder="ค้นหาชื่อหรือ Discord ID..."
+                    placeholder={t('searchPlaceholder')}
                     className="pl-9 bg-background/50"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
                 </div>
                 <Button type="submit" size="sm" className="bg-indigo-600 hover:bg-indigo-700">
-                  ค้นหา
+                  {t('search')}
                 </Button>
               </form>
 
@@ -387,11 +389,11 @@ export default function DashboardDiscordPage() {
                   {loading ? (
                     <div className="flex flex-col items-center justify-center py-12 gap-2">
                       <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
-                      <p className="text-xs text-muted-foreground">กำลังโหลดรายชื่อสมาชิก...</p>
+                      <p className="text-xs text-muted-foreground">{t('loadingMembers')}</p>
                     </div>
                   ) : members.length === 0 ? (
                     <div className="py-12 text-center text-muted-foreground text-sm">
-                      ❌ ไม่พบรายชื่อสมาชิกในเซิร์ฟเวอร์นี้
+                      {t('noMembersFound')}
                     </div>
                   ) : (
                     members.map((member) => (
@@ -436,10 +438,10 @@ export default function DashboardDiscordPage() {
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
                 <UserCheck className="w-5 h-5 text-indigo-500" />
-                การจัดการสมาชิก
+                {t('memberManagement')}
               </CardTitle>
               <CardDescription>
-                เลือกสมาชิกในแถบซ้ายเพื่อจัดการสิทธิ์และข้อความสแปม
+                {t('selectMemberDesc')}
               </CardDescription>
             </CardHeader>
             <CardContent className="flex-1 flex flex-col justify-center">
@@ -469,9 +471,9 @@ export default function DashboardDiscordPage() {
                     <div className="flex items-start gap-3">
                       <ShieldAlert className="w-8 h-8 text-red-500 flex-shrink-0 mt-0.5" />
                       <div>
-                        <h4 className="font-bold text-red-500 text-sm">Zone ความปลอดภัยระดับสูง: การควบคุมสแปมบอต</h4>
+                        <h4 className="font-bold text-red-500 text-sm">{t('highSecurityZoneTitle')}</h4>
                         <p className="text-xs text-red-400/80 mt-1 leading-relaxed">
-                          คำสั่งนี้จะสแกนและ**กวาดล้างข้อความทั้งหมดของผู้ใช้คนนี้จากทุกห้องแชท**ย้อนหลัง 24 ชั่วโมงในคราวเดียว เพื่อเคลียร์แชทที่ถูกยิงถล่มสแปมลิงก์ พร้อมปิดปาก Timeout สัญญานิเทศก์ 1 สัปดาห์โดยอัตโนมัติ
+                          {t('highSecurityZoneDesc')}
                         </p>
                       </div>
                     </div>
@@ -485,12 +487,12 @@ export default function DashboardDiscordPage() {
                         {spamLoading ? (
                           <>
                             <Loader2 className="w-4 h-4 animate-spin" />
-                            กำลังเคลียร์ห้องแชท...
+                            {t('clearingChat')}
                           </>
                         ) : (
                           <>
                             <Trash2 className="w-4 h-4" />
-                            Purge Spam & Mute (Timeout 7 วัน)
+                            {t('purgeSpamAndMute')}
                           </>
                         )}
                       </Button>
@@ -501,17 +503,17 @@ export default function DashboardDiscordPage() {
                   {recentSpamLogs.length > 0 && (
                     <div className="space-y-2">
                       <h4 className="text-sm font-bold text-muted-foreground flex items-center gap-2">
-                        <FileText className="w-4 h-4" /> ประวัติการกวาดล้างสแปมล่าสุด
+                        <FileText className="w-4 h-4" /> {t('recentSpamLogs')}
                       </h4>
                       <div className="border border-border rounded-lg overflow-hidden divide-y divide-border">
                         {recentSpamLogs.map((logItem, idx) => (
                           <div key={idx} className="p-3 bg-card hover:bg-accent/30 flex items-center justify-between">
                             <div>
                               <div className="text-sm font-semibold">
-                                กวาดล้าง {logItem.username} ({logItem.deletedCount} ข้อความ)
+                                {t('purgedUserMsg', { username: logItem.username, count: logItem.deletedCount })}
                               </div>
                               <div className="text-xs text-muted-foreground">
-                                เวลา: {logItem.timestamp}
+                                {t('time', { time: logItem.timestamp })}
                               </div>
                             </div>
                             <Button
@@ -520,7 +522,7 @@ export default function DashboardDiscordPage() {
                               className="text-xs text-indigo-500 hover:text-indigo-400 gap-1"
                               onClick={() => handleViewLog(logItem.logPath)}
                             >
-                              เปิดดูล็อก <ExternalLink className="w-3.5 h-3.5" />
+                              {t('openLog')} <ExternalLink className="w-3.5 h-3.5" />
                             </Button>
                           </div>
                         ))}
@@ -533,8 +535,8 @@ export default function DashboardDiscordPage() {
                 <div className="py-20 flex flex-col items-center justify-center text-center text-muted-foreground gap-3">
                   <Shield className="w-12 h-12 text-muted-foreground/50" />
                   <div>
-                    <p className="font-semibold text-sm">ยังไม่ได้เลือกสมาชิกกิลด์</p>
-                    <p className="text-xs max-w-sm mt-1">กรุณาเลือกสมาชิกจากแผงรายชื่อด้านซ้ายเพื่อเปิดเมนูจัดการความปลอดภัยสแปมและบทบาทหน้าที่</p>
+                    <p className="font-semibold text-sm">{t('noMemberSelectedTitle')}</p>
+                    <p className="text-xs max-w-sm mt-1">{t('noMemberSelectedDesc')}</p>
                   </div>
                 </div>
               )}
@@ -552,10 +554,10 @@ export default function DashboardDiscordPage() {
               <div>
                 <h3 className="font-bold text-lg flex items-center gap-2">
                   <FileText className="w-5 h-5 text-indigo-500" />
-                  สลักประวัติบันทึกการกวาดล้างสแปม
+                  {t('logModalTitle')}
                 </h3>
                 <p className="text-xs text-muted-foreground truncate max-w-lg mt-0.5">
-                  ไฟล์บันทึก: {viewingLogPath}
+                  {t('logFilePath', { path: viewingLogPath || '' })}
                 </p>
               </div>
               <Button
@@ -574,7 +576,7 @@ export default function DashboardDiscordPage() {
               {logLoading ? (
                 <div className="flex items-center justify-center py-20 gap-2 text-muted-foreground">
                   <Loader2 className="w-6 h-6 animate-spin" />
-                  กำลังดึงไฟล์บันทึก...
+                  {t('fetchingLog')}
                 </div>
               ) : (
                 <pre className="whitespace-pre-wrap leading-relaxed">

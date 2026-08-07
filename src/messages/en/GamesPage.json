@@ -32,5 +32,10 @@
     "processingTime": "Processing Time",
     "filters": "Filters",
     "firstResultId": "First Result ID"
-  }
+  },
+  "verifiedDevUploadHint": "✓ Verified Developer status: Upload limit up to 5 GB",
+  "generalMemberUploadHint": "ℹ General members: Upload limit up to 1 GB (Verified Developer up to 5 GB)",
+  "unsupportedFileError": "Unsupported file: {name} — Supports .ttf .otf .woff .woff2 .zip and Unity AssetBundle",
+  "fileTooLargeError": "File too large: {name} — Max 20MB per file",
+  "acceptsAssetBundleHint": "Supports Unity AssetBundle as well"
 }

@@ -1,5 +1,8 @@
 {
   "paymentGateway": "Payment Gateway (Stripe 3.65% + 10฿ + 7% VAT):",
   "estimatedRevenue": "รายได้ที่คุณจะได้รับ (โดยประมาณ):",
-  "priceWarning": "เรารู้สึกเป็นห่วงกับราคาที่อาจจะน้อยไปกับความพยายามของคุณ เราแนะนำเป็น 79, 99 หรือมากกว่านั้น"
+  "priceWarning": "เรารู้สึกเป็นห่วงกับราคาที่อาจจะน้อยไปกับความพยายามของคุณ เราแนะนำเป็น 79, 99 หรือมากกว่านั้น",
+  "fileSizeExceedsLimit": "ไฟล์มีขนาด {size} GB ซึ่งเกินขีดจำกัดอัปโหลด ({limit} สำหรับ{role})",
+  "verifiedDevRole": "Verified Developer",
+  "generalMemberRole": "สมาชิกทั่วไป"
 }

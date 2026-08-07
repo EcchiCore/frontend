@@ -43,7 +43,7 @@ import {
 } from 'lucide-react';
 import { Tool } from '@/types/tool';
 import { Button } from '@/components/ui/button';
-import { useTranslations, useLocale } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import {
   Dialog,
   DialogContent,
@@ -248,9 +248,8 @@ const getIconElement = (iconName?: string) => {
   }
 };
 
-// Safe translation hook with robust fallback strings
+// Safe translation hook with robust fallback
 function useSafeToolsTranslation() {
-  const locale = useLocale();
   let rawT: any = null;
   try {
     rawT = useTranslations('Tools');
@@ -267,82 +266,7 @@ function useSafeToolsTranslation() {
         // Ignore fallback
       }
     }
-
-    const isEn = locale === 'en';
-    switch (key) {
-      case 'showcaseTitle':
-        return isEn ? 'Featured ChanomHub Applications' : 'แอปพลิเคชันไฮไลท์ของ ChanomHub';
-      case 'downloadApp':
-        return isEn ? `Download ${values?.name || ''}` : `ดาวน์โหลด ${values?.name || ''}`;
-      case 'openFullPage':
-        return isEn ? `Open Full ${values?.name || ''} Page` : `เปิดดูหน้าเต็ม ${values?.name || ''}`;
-      case 'chanoliteFeature1':
-        return isEn ? 'Clean, distraction-free interface ready for instant launch' : 'ดีไซน์คลีน สะอาดตา เปิดใช้งานได้ทันที';
-      case 'chanoliteFeature2':
-        return isEn ? 'Significantly reduced system memory usage' : 'ลดการใช้ทรัพยากรเครื่องอย่างเห็นได้ชัด';
-      case 'noSearchResultsDesc':
-        return isEn ? 'Try adjusting your search query or resetting filters' : 'ลองปรับเปลี่ยนคำค้นหา หรือรีเซ็ตตัวกรอง';
-      case 'defaultToolDesc':
-        return isEn ? 'Versatile utility tool for game management, translation, and system workflows' : 'เครื่องมืออเนกประสงค์สำหรับจัดการเกม แปลภาษา และใช้งานระบบ';
-      case 'chanox2Desc':
-        return isEn ? 'High-performance desktop launcher & library manager. Automatically catalog Unity, Unreal, Ren\'Py, and Godot games.' : 'แพลตฟอร์มเดสก์ท็อปและตัวจัดการคลังเกมประสิทธิภาพสูง จัดหมวดหมู่เกม Unity, Unreal, Ren\'Py, Godot อัตโนมัติ';
-      case 'chanoliteDesc':
-        return isEn ? 'Lightweight, distraction-free game launcher designed for efficiency on budget systems.' : 'ตัวจัดการเกมเวอร์ชันน้ำหนักเบา (Lightweight) รวดเร็ว ไม่กินทรัพยากร เหมาะสำหรับเครื่องสเปกประหยัด';
-      case 'nstDesc':
-        return isEn ? 'Real-time game translator engine and language mod manager for indie games.' : 'เครื่องมือช่วยแปลภาษาเกมอัตโนมัติ และจัดการไฟล์ภาษา ม็อดเสริมสำหรับเกมอินดี้';
-      case 'title':
-        return isEn ? 'Our Awesome Tools' : 'เครื่องมือสุดเจ๋งของเรา';
-      case 'description':
-        return isEn ? 'Discover tools to help you manage games, translate, and use on any platform!' : 'ค้นพบเครื่องมือที่ช่วยให้คุณจัดการเกม แปลภาษา และใช้งานได้ทุกแพลตฟอร์ม!';
-      case 'searchPlaceholder':
-        return isEn ? 'Search tool name, tags, or description...' : 'ค้นหาชื่อเครื่องมือ, แท็ก, หรือคำอธิบาย...';
-      case 'filterAll':
-        return isEn ? 'All Tools' : 'เครื่องมือทั้งหมด';
-      case 'filterComputer':
-        return isEn ? 'Desktop / PC' : 'เดสก์ท็อป / PC';
-      case 'filterMobile':
-        return isEn ? 'Mobile' : 'มือถือ';
-      case 'filterOfficial':
-        return isEn ? 'Official Apps' : 'แอปอย่างเป็นทางการ';
-      case 'sortBy':
-        return isEn ? 'Sort by' : 'จัดเรียงตาม';
-      case 'sortLatest':
-        return isEn ? 'Latest Updated' : 'อัปเดตล่าสุด';
-      case 'sortName':
-        return isEn ? 'Name (A-Z)' : 'ชื่อ (A-Z)';
-      case 'sortOfficial':
-        return isEn ? 'Official First' : 'ของ ChanomHub ก่อน';
-      case 'viewGrid':
-        return isEn ? 'Grid' : 'ตาราง';
-      case 'viewList':
-        return isEn ? 'List' : 'รายการ';
-      case 'noSearchResults':
-        return isEn ? 'No tools matched your search query' : 'ไม่พบเครื่องมือที่ตรงกับคำค้นหา';
-      case 'resetFilters':
-        return isEn ? 'Reset all filters' : 'ล้างตัวกรองทั้งหมด';
-      case 'copyLink':
-        return isEn ? 'Copy Link' : 'คัดลอกลิงก์';
-      case 'copiedLink':
-        return isEn ? 'Copied!' : 'คัดลอกแล้ว!';
-      case 'githubReleases':
-        return 'GitHub Releases';
-      case 'watchPreview':
-        return isEn ? 'Watch preview' : 'ดูคลิปตัวอย่าง';
-      case 'download':
-        return isEn ? 'Download' : 'ดาวน์โหลด';
-      case 'ours':
-        return isEn ? 'Ours' : 'ของเรา';
-      case 'viewDetailsPage':
-        return isEn ? 'View App Page' : 'ดูหน้าแนะนำแอป';
-      case 'updateDetails':
-        return isEn ? 'Update Details' : 'รายละเอียดการอัปเดต';
-      case 'newestSuffix':
-        return isEn ? ' (Newest)' : ' (ใหม่ล่าสุด)';
-      case 'previewVideoTitle':
-        return isEn ? 'Preview & Tutorial Video' : 'วิดีโอตัวอย่างการใช้งาน';
-      default:
-        return key;
-    }
+    return key;
   };
 }
 

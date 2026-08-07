@@ -51,6 +51,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { updateUserLocal, fetchUser } from '@/store/features/auth/authSlice';
 import { DeveloperSettingsTab } from './DeveloperSettingsTab';
+import { useTranslations } from 'next-intl';
 
 interface SettingsFormData {
   username: string;
@@ -66,6 +67,7 @@ interface SettingsFormData {
 }
 
 export default function SettingsPage() {
+  const t = useTranslations('ProfileSettings');
   const dispatch = useAppDispatch();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -692,7 +694,7 @@ export default function SettingsPage() {
                           </Select>
                         </div>
                         <div className="space-y-2">
-                          <Label className="text-xs">Assigned Role (บทบาท)</Label>
+                          <Label className="text-xs">{t('assignedRole')}</Label>
                           <Select value={newTokenRank} onValueChange={setNewTokenRank}>
                             <SelectTrigger className="h-10 bg-background">
                               <SelectValue />

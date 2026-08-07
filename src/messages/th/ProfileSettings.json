@@ -10,5 +10,6 @@
   "previewProfile": "ดูตัวอย่างโปรไฟล์",
   "defaultUsername": "ชื่อผู้ใช้",
   "defaultEmail": "อีเมล",
-  "defaultBio": "ยังไม่มีประวัติโดยย่อ"
+  "defaultBio": "ยังไม่มีประวัติโดยย่อ",
+  "assignedRole": "Assigned Role (บทบาท)"
 }

@@ -7,6 +7,7 @@ import ChanoX2 from './ChanoX2.json';
 import ContactPage from './ContactPage.json';
 import CookieConsent from './CookieConsent.json';
 import DeveloperSettingsTab from './DeveloperSettingsTab.json';
+import Discord from './Discord.json';
 import DonationCTA from './DonationCTA.json';
 import DonationSidebarWidget from './DonationSidebarWidget.json';
 import DonationsPage from './DonationsPage.json';
@@ -56,6 +57,7 @@ export default {
   "ContactPage": ContactPage,
   "CookieConsent": CookieConsent,
   "DeveloperSettingsTab": DeveloperSettingsTab,
+  "Discord": Discord,
   "DonationCTA": DonationCTA,
   "DonationSidebarWidget": DonationSidebarWidget,
   "DonationsPage": DonationsPage,

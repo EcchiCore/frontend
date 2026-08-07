@@ -32,5 +32,10 @@
     "processingTime": "เวลาการประมวลผล",
     "filters": "ตัวกรอง",
     "firstResultId": "ID ผลลัพธ์แรก"
-  }
+  },
+  "verifiedDevUploadHint": "✓ สิทธิ์ Verified Developer: อัปโหลดได้สูงสุด 5 GB",
+  "generalMemberUploadHint": "ℹ สมาชิกทั่วไป: อัปโหลดไฟล์ได้สูงสุด 1 GB (Verified Developer อัปโหลดได้สูงสุด 5 GB)",
+  "unsupportedFileError": "ไม่รองรับไฟล์: {name} — รองรับ .ttf .otf .woff .woff2 .zip และ Unity AssetBundle",
+  "fileTooLargeError": "ไฟล์ใหญ่เกินไป: {name} — สูงสุด 20MB ต่อไฟล์",
+  "acceptsAssetBundleHint": "รองรับ Unity AssetBundle ด้วย"
 }

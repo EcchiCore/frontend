@@ -16,5 +16,6 @@
   "passwordsDoNotMatchMessage": "Passwords do not match",
   "invalidResponseMessage": "Registration failed: Invalid response",
   "registrationFailedMessage": "Registration failed",
-  "unexpectedErrorMessage": "Registration failed due to an unexpected error"
+  "unexpectedErrorMessage": "Registration failed due to an unexpected error",
+  "signInWithGoogle": "Sign in with Google"
 }

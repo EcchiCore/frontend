@@ -7,6 +7,7 @@ import Cookies from 'js-cookie';
 import { createChanomhubClient, type LoginResponse } from '@chanomhub/sdk';
 import { Loader2, ChevronLeft, Eye, EyeOff } from "lucide-react";
 import { Link } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 
 interface LoginFormProps {
   onSwitch: () => void;
@@ -31,6 +32,7 @@ export function LoginForm({
   loginButtonText,
   registerLinkText,
 }: LoginFormProps) {
+  const t = useTranslations('Login');
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get('redirect') || '/';
   const [email, setEmail] = useState("");
@@ -221,7 +223,7 @@ export function LoginForm({
             onClick={handleGoogleLogin}
             className="w-full h-10 bg-white hover:bg-gray-100 text-gray-900 font-semibold text-xs rounded-lg flex items-center justify-center gap-2 transition-colors cursor-pointer"
           >
-            <GoogleIcon className="w-4 h-4" /> ลงชื่อเข้าใช้ด้วย Google
+            <GoogleIcon className="w-4 h-4" /> {t('signInWithGoogle')}
           </button>
         </form>
 

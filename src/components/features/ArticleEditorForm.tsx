@@ -345,6 +345,7 @@ const DownloadManager: React.FC<{
     title: string;
     defaultVersion?: string;
 }> = ({ articleId, gameSlug, items, setItems, isPaid, title, defaultVersion }) => {
+    const t = useTranslations('ArticleEditorForm');
     const itemsRef = React.useRef(items);
     const [uploadingId, setUploadingId] = useState<string | null>(null);
     const [uploadProgress, setUploadProgress] = useState(0);
@@ -387,7 +388,8 @@ const DownloadManager: React.FC<{
         if (file.size > maxAllowedBytes) {
             const fileSizeGB = (file.size / (1024 * 1024 * 1024)).toFixed(2);
             const limitStr = isVerifiedDev ? '5 GB' : '1 GB';
-            toast.error(`ไฟล์มีขนาด ${fileSizeGB} GB ซึ่งเกินขีดจำกัดอัปโหลด (${limitStr} สำหรับ${isVerifiedDev ? 'Verified Developer' : 'สมาชิกทั่วไป'})`);
+            const roleStr = isVerifiedDev ? t('verifiedDevRole') : t('generalMemberRole');
+            toast.error(t('fileSizeExceedsLimit', { size: fileSizeGB, limit: limitStr, role: roleStr }));
             return;
         }
 

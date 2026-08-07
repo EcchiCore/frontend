@@ -137,7 +137,7 @@ const ArticleDiscussionsPage: React.FC<ArticleDiscussionsPageProps> = ({
             {alert.open && (
                 <div className="fixed bottom-4 right-4 z-50 max-w-sm">
                     <CustomAlert
-                        title={alert.severity === "success" ? t("success") || "สำเร็จ" : t("error") || "เกิดข้อผิดพลาด"}
+                        title={alert.severity === "success" ? t("success") : t("error")}
                         message={alert.message}
                         variant={alert.severity === "success" ? "default" : "destructive"}
                     />

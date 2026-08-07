@@ -32,10 +32,10 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({
 
   const commentCount = comments?.length || 0;
   const reviewSentiment = commentCount > 5 
-    ? "เป็นบวกอย่างยิ่ง (Very Positive)" 
+    ? t('reviewSentimentVeryPositive') 
     : commentCount > 0 
-      ? "เป็นบวก (Positive)" 
-      : "ยังไม่มีรีวิว (No Reviews)";
+      ? t('reviewSentimentPositive') 
+      : t('reviewSentimentNoReviews');
 
   return (
     <div className="mt-12 border-t border-border pt-8 text-muted-foreground">
@@ -46,10 +46,10 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({
         </div>
         <div>
           <h2 className="text-xl font-bold uppercase tracking-wider text-foreground">
-            {t('commentsTitle') || "Customer Reviews (บทวิจารณ์จากลูกค้า)"}
+            {t('customerReviews')}
           </h2>
           <p className="text-xs text-muted-foreground mt-0.5">
-            บทวิจารณ์ทั้งหมด: <span className="text-foreground font-semibold">{commentCount} รายการ</span> | ความเห็นโดยรวม: <span className="text-primary font-semibold">{reviewSentiment}</span>
+            {t('totalReviews')} <span className="text-foreground font-semibold">{commentCount} {t('items')}</span> | {t('overallSentiment')} <span className="text-primary font-semibold">{reviewSentiment}</span>
           </p>
         </div>
       </div>
@@ -57,7 +57,7 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({
       {isLoading ? (
         <div className="text-center py-12 text-muted-foreground animate-pulse">
           <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-          {t('loadingComments') || "กำลังโหลดบทวิจารณ์..."}
+          {t('loadingComments')}
         </div>
       ) : (
         <>
@@ -65,10 +65,10 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({
           {isAuthenticated ? (
             <div className="mb-10 bg-card border border-border rounded-lg p-5 shadow-lg">
               <h3 className="text-sm font-bold text-foreground mb-2 uppercase tracking-wide">
-                เขียนบทวิจารณ์สำหรับบทความนี้
+                {t('writeReviewTitle')}
               </h3>
               <p className="text-xs text-muted-foreground mb-4">
-                โปรดอธิบายถึงสิ่งที่คุณชอบหรือไม่ชอบเกี่ยวกับเกม/บทความนี้ และข้อมูลที่เป็นประโยชน์ต่อสมาชิกคนอื่น
+                {t('writeReviewDesc')}
               </p>
               
               <div className="space-y-4">
@@ -78,27 +78,27 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({
                   rows={4}
                   value={newComment}
                   onChange={(e) => setNewComment(e.target.value)}
-                  placeholder="เขียนความคิดเห็นหรือคำวิจารณ์ของคุณที่นี่..."
+                  placeholder={t('writeReviewPlaceholder')}
                 />
                 
                 <div className="flex justify-between items-center pt-2">
                   <div className="flex items-center gap-2 text-xs text-muted-foreground">
                     <span className="inline-block w-2 h-2 rounded-full bg-primary animate-ping" />
-                    <span>รีวิวของคุณจะแสดงแบบสาธารณะในหมวดหมู่คอมเมนต์</span>
+                    <span>{t('publicReviewNotice')}</span>
                   </div>
                   <Button
                     onClick={handleAddComment}
                     disabled={!newComment.trim()}
                     className="bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-md px-6 h-10 shadow-lg transition-all duration-200"
                   >
-                    {t('submitComment') || "โพสต์บทวิจารณ์"}
+                    {t('postReview')}
                   </Button>
                 </div>
               </div>
             </div>
           ) : (
             <div className="mb-8 p-4 bg-muted/40 border border-border rounded-lg text-center text-sm text-muted-foreground font-medium">
-              {t('loginToComment') || "โปรด login ก่อนเพื่อแสดงความคิดเห็น"}
+              {t('loginToComment')}
             </div>
           )}
 
@@ -139,8 +139,8 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({
                         </span>
                         <span className="text-[10px] text-muted-foreground block font-medium mt-0.5">
                           {comment.author.username === "admin" || comment.author.username === "AdminChanom" 
-                            ? "ผู้ดูแลระบบ (Admin)" 
-                            : "สมาชิกชุมชน (Member)"}
+                            ? t('adminBadge') 
+                            : t('memberBadge')}
                         </span>
                       </div>
                     </div>
@@ -169,10 +169,10 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({
                         </div>
                         <div>
                           <span className="text-sm font-bold text-foreground tracking-wide">
-                            แนะนำ (Recommended)
+                            {t('recommended')}
                           </span>
                           <span className="text-[10px] text-muted-foreground block mt-0.5" suppressHydrationWarning>
-                            โพสต์เมื่อ: {formatDate(comment.createdAt)}
+                            {t('postedAt', { date: formatDate(comment.createdAt) })}
                           </span>
                         </div>
                       </div>
@@ -184,13 +184,13 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({
 
                       {/* Review Helpfulness Bar */}
                       <div className="flex flex-wrap items-center gap-2 mt-5 pt-3 border-t border-border/30 text-[11px] text-muted-foreground">
-                        <span>ข้อมูลนี้มีประโยชน์กับคุณหรือไม่?</span>
+                        <span>{t('wasHelpful')}</span>
                         <div className="flex gap-1.5 ml-1">
                           <button className="bg-muted border border-border text-foreground hover:bg-accent hover:text-accent-foreground transition-colors px-3 py-0.5 rounded-sm font-medium">
-                            ใช่
+                            {t('yes')}
                           </button>
                           <button className="bg-muted border border-border text-foreground hover:bg-accent hover:text-accent-foreground transition-colors px-3 py-0.5 rounded-sm font-medium">
-                            ไม่
+                            {t('no')}
                           </button>
                         </div>
                       </div>
@@ -201,8 +201,8 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({
               })
             ) : (
               <div className="text-center text-muted-foreground py-12 border border-dashed border-border rounded-lg bg-card/30">
-                <p className="text-sm font-medium mb-1">ยังไม่มีบทวิจารณ์สำหรับบทความนี้</p>
-                <p className="text-xs">ร่วมเขียนความเห็นของคุณเป็นคนแรกเพื่อช่วยแบ่งปันข้อมูลให้กับผู้เล่นคนอื่น!</p>
+                <p className="text-sm font-medium mb-1">{t('noReviewsYet')}</p>
+                <p className="text-xs">{t('beFirstReview')}</p>
               </div>
             )}
           </div>

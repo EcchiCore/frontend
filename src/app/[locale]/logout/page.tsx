@@ -9,12 +9,14 @@ import { logout } from "@/store/features/auth/authSlice";
 import { AuthLayout } from "@/components/layout/AuthLayout";
 import { CheckCircle2 } from "lucide-react";
 import { Link } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 
 const sdk = createChanomhubClient({
   apiUrl: process.env.NEXT_PUBLIC_API_URL || 'https://api.chanomhub.com',
 });
 
 export default function LogoutPage() {
+  const t = useTranslations('Login');
   const dispatch = useAppDispatch();
   const logoutPerformed = useRef(false);
   const [completed, setCompleted] = useState(false);
@@ -75,10 +77,10 @@ export default function LogoutPage() {
 
             <div className="space-y-1.5">
               <p className="text-sm font-bold text-white">
-                ออกจากระบบสำเร็จเรียบร้อยแล้ว
+                {t('logoutSuccess')}
               </p>
               <p className="text-xs text-gray-400 leading-relaxed">
-                กำลังนำคุณไปยังหน้าเข้าสู่ระบบ...
+                {t('redirectingToLogin')}
               </p>
             </div>
           </div>
