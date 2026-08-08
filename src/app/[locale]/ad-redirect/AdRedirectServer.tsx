@@ -1,4 +1,4 @@
-// File: app/ad-redirect/AdRedirectServer.tsx
+// File: app/[locale]/ad-redirect/AdRedirectServer.tsx
 import React from 'react';
 import AdRedirectContent from "./AdRedirectContent";
 import crypto from 'crypto';

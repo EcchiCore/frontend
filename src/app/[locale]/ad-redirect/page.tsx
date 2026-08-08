@@ -1,8 +1,9 @@
-// File: app/ad-redirect/page.tsx
+// File: app/[locale]/ad-redirect/page.tsx
 import React, { Suspense } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, Sparkles } from 'lucide-react';
 import type { Metadata } from 'next';
+import AdRedirectServer from './AdRedirectServer';
 
 export const metadata: Metadata = {
   title: "Redirecting - Chanomhub",
@@ -36,9 +37,6 @@ function LoadingFallback() {
     </div>
   );
 }
-
-// Dynamic import of the actual content to defer runtime data access
-import AdRedirectServer from './AdRedirectServer';
 
 export default function Page({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
   return (

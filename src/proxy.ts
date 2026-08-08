@@ -30,7 +30,7 @@ export const config = {
     // Match all pathnames except for
     // - … if they start with `/api`, `/_next`, `/studio`, or `/_vercel`
     // - … the ones containing a dot (e.g. `chanomhub.ico`)
-    '/((?!api|_next|studio|_vercel|ad-redirect|health|.*\\..*).*)'
+    '/((?!api|_next|studio|_vercel|health|.*\\..*).*)'
   ]
 };
 
